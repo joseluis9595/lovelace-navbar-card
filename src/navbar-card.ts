@@ -32,6 +32,9 @@ export class NavbarCard extends LitElement {
   @state()
   private screenWidth?: number;
 
+  @state()
+  private inEditMode?: boolean;
+
   constructor() {
     super();
     console.info(
@@ -54,6 +57,10 @@ export class NavbarCard extends LitElement {
     // Initialize screen size listener
     window.addEventListener('resize', this._onResize);
     this.screenWidth = window.innerWidth;
+
+    // Check if dashboard is in edit mode
+    this.inEditMode =
+      this.parentElement?.closest('hui-card-edit-mode') !== null;
   }
 
   disconnectedCallback() {
@@ -80,14 +87,10 @@ export class NavbarCard extends LitElement {
 
     const { routes } = this._config;
 
-    // TODO this check does not update instantly when changing to edit mode in HA
-    const inEditMode =
-      this.parentElement?.closest('hui-card-edit-mode') !== null;
-
     // TODO use HA ripple effect for icon button
     return html`
       <ha-card
-        class="navbar ${inEditMode ? 'edit-mode' : ''} ${isDesktopMode
+        class="navbar ${this.inEditMode ? 'edit-mode' : ''} ${isDesktopMode
           ? 'desktop'
           : 'mobile'}">
         ${routes?.map((route, index) => {
