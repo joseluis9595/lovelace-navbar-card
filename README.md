@@ -15,9 +15,36 @@ Navbar Card is a custom Lovelace card that simplifies navigation within your Hom
 3. Click Install!
 
 
-### Adding the Card to Your Dashboard
-To get started, edit your dashboard, click on "New card", and add the following configuration:
+## ⚙️ Configuration
+| Name              | Type              | Default    | Description                                                                |
+| ----------------- | ----------------- | ---------- | -------------------------------------------------------------------------- |
+| `routes`          | [Routes](#routes) | `Required` | Defines the array of routes to be shown in the navbar                      |
+| `desktopMinWidth` | number            | `768`      | Screen size from which the navbar will be displayed as its desktop variant |
 
+### Routes
+Routes represents an array of clickable icons that redirects to a given path. Each item in the array should contain the following configuration:
+
+| Name            	| Type            	| Default    	| Description                                                     	|
+|-----------------	|-----------------	|------------	|-----------------------------------------------------------------	|
+| `url`           	| string          	| `Required` 	| The path to a lovelace view                                     	|
+| `icon`          	| string          	| `Required` 	| Material icon to display as this entry icon                     	|
+| `icon_selected` 	| string          	| -          	| Icon to be displayed when `url` matches the current browser url 	|
+| `badge`         	| [Badge](#badge) 	| -          	| Badge configuration                                             	|
+
+### Badge
+
+Configuration to display a small badge on any of the navbar items.
+
+![navbar-card-badge](https://github.com/user-attachments/assets/5f548ce3-82b5-422f-a084-715bc73846b0)
+
+
+| Name       	| Type        	| Default 	| Description                                                     	|
+|------------	|-------------	|---------	|-----------------------------------------------------------------	|
+| `template` 	| JS template 	| -       	| Boolean template indicating whether to display the badge or not 	|
+| `color`    	| string      	| red     	| Background color of the badge                                   	|
+
+
+### Example Configuration
 ```yaml
 type: custom:navbar-card
 routes:
@@ -32,29 +59,9 @@ routes:
     icon: mdi:creation-outline
     icon_selected: mdi:creation
   - url: /lovelace/system
-    icon: mdi:cog-outline
-    icon_selected: mdi:cog
-```
-
-## ⚙️ Configuration
-- routes: Define your navigation items.
-  - url: The path to a Lovelace view.
-  - icon: The default icon.
-  - icon_selected: (Optional) The icon displayed when the view is active.
- 
-![navbar-card-badge](https://github.com/user-attachments/assets/5f548ce3-82b5-422f-a084-715bc73846b0)
-
-
-#### Example Configuration
-```yaml
-type: custom:navbar-card
-routes:
-  - url: /lovelace/home
-    icon: mdi:home-outline
-    icon_selected: mdi:home-assistant
-  - url: /lovelace/devices
-    icon: mdi:devices
-  - url: /lovelace/system
-    icon: mdi:cog-outline
-    icon_selected: mdi:cog
+    icon: mdi:information-outline
+    icon_selected: mdi:information
+    badge:
+      template: states['binary_sensor.docker_hub_update_available'].state === 'on'
+      color: var(--primary-color)
 ```
