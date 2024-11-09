@@ -5,7 +5,7 @@
 # Navbar Card
 ![navbar-card](https://github.com/user-attachments/assets/df2a9a5d-51ec-4786-8f54-36ece2aa6f9a)
 
-Navbar Card is a custom Lovelace card that simplifies navigation within your Home Assistant dashboard. This card provides a sleek, responsive navigation bar that appears at the bottom of the screen on mobile devices and on the side for desktop users.
+Navbar Card is a custom Lovelace card designed to simplify navigation within your Home Assistant dashboard. It provides a sleek, responsive navigation bar that displays as a full-width bar at the bottom on mobile devices. On desktop, it adapts into a flexible container that can be positioned on any side of the screen (top, bottom, left, or right) adjusting its orientation to fit seamlessly.
 
 ## 🚀 Installation
 ### Via HACS (recommended)
@@ -29,10 +29,12 @@ Navbar Card is a custom Lovelace card that simplifies navigation within your Hom
 
 ### Main options
 
-| Name              | Type              | Default    | Description                                                                |
-| ----------------- | ----------------- | ---------- | -------------------------------------------------------------------------- |
-| `routes`          | [Routes](#routes) | `Required` | Defines the array of routes to be shown in the navbar                      |
-| `desktopMinWidth` | number            | `768`      | Screen size from which the navbar will be displayed as its desktop variant |
+| Name                | Type                                   | Default    | Description                                                                |
+|---------------------|----------------------------------------|------------|----------------------------------------------------------------------------|
+| `routes`            | [Routes](#routes)                      | `Required` | Defines the array of routes to be shown in the navbar                      |
+| `desktop_min_width` | number                                 | `768`      | Screen size from which the navbar will be displayed as its desktop variant |
+| `desktop_position`  | `top` \| `bottom` \| `left` \| `right` | `bottom`   | Position of the navbar on desktop devices                                  |
+
 
 ### Routes
 
@@ -60,8 +62,11 @@ Configuration to display a small badge on any of the navbar items.
 
 ---
 ## Example Configuration
+Base example:
 ```yaml
 type: custom:navbar-card
+desktop_position: bottom
+desktop_min_width: 768
 routes:
   - url: /lovelace/home
     icon: mdi:home-outline

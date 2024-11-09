@@ -2,6 +2,8 @@ import { css, CSSResultGroup, html, LitElement } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { version } from '../package.json';
 import { HomeAssistant } from 'custom-card-helpers';
+import { DesktopPosition } from './types';
+import { mapStringToEnum } from './utils';
 
 // TODO add proper typing to window
 // @ts-ignore
@@ -12,7 +14,7 @@ window.customCards.push({
   name: 'Navbar card',
   preview: true,
   description:
-    'Card that displays a bottom nav in mobile devices, and a side nav in desktop devices',
+    'Card with a full-width bottom nav on mobile and a flexible nav on desktop that can be placed on any side of the screen.',
 });
 
 type NavbarCardConfig = {
@@ -26,6 +28,7 @@ type NavbarCardConfig = {
     };
   }[];
   desktop_min_width?: number;
+  desktop_position?: DesktopPosition;
 };
 
 @customElement('navbar-card')
@@ -33,8 +36,9 @@ export class NavbarCard extends LitElement {
   @state() private hass?: HomeAssistant;
   @state() private _config?: NavbarCardConfig;
   @state() private screenWidth?: number;
-  @state() private inEditMode?: boolean;
-  @state() private lastRender?: number;
+  @state() private _inEditMode?: boolean;
+  @state() private _inPreviewMode?: boolean;
+  @state() private _lastRender?: number;
 
   // Badge visibility evaluator
   private evaluateBadge(template?: string): boolean {
@@ -63,8 +67,17 @@ export class NavbarCard extends LitElement {
     this.screenWidth = window.innerWidth;
 
     // Check if Home Assistant dashboard is in edit mode
-    this.inEditMode =
-      this.parentElement?.closest('hui-card-edit-mode') !== null;
+    this._inEditMode =
+      this.parentElement?.closest('hui-card-edit-mode') != null;
+
+    // Check if the card is in preview mode
+    this._inPreviewMode =
+      document
+        .querySelector('body > home-assistant')
+        ?.shadowRoot?.querySelector('hui-dialog-edit-card')
+        ?.shadowRoot?.querySelector(
+          'ha-dialog > div.content > div.element-preview',
+        ) != null;
   }
 
   disconnectedCallback() {
@@ -86,11 +99,15 @@ export class NavbarCard extends LitElement {
   shouldUpdate(changedProperties) {
     let shouldUpdate = false;
     changedProperties.forEach((_, propName) => {
-      if (['_config', 'screenWidth', 'inEditMode'].includes(propName)) {
+      if (
+        ['_config', 'screenWidth', '_inEditMode', '_inPrewviewMode'].includes(
+          propName,
+        )
+      ) {
         shouldUpdate = true;
       } else if (propName == 'hass') {
         // Render card when hass object changes, but debounced every 1s
-        if (new Date().getTime() - (this.lastRender ?? 0) > 1000) {
+        if (new Date().getTime() - (this._lastRender ?? 0) > 1000) {
           shouldUpdate = true;
         }
       }
@@ -106,21 +123,26 @@ export class NavbarCard extends LitElement {
       return html``;
     }
 
-    const { routes } = this._config;
+    const { routes, desktop_position, desktop_min_width } = this._config;
 
     // Keep last render timestamp for debounced state updates
-    this.lastRender = new Date().getTime();
+    this._lastRender = new Date().getTime();
 
     // Check desktop mode
-    const isDesktopMode =
-      (this.screenWidth ?? 0) >= (this._config.desktop_min_width ?? 768);
+    const isDesktopMode = (this.screenWidth ?? 0) >= (desktop_min_width ?? 768);
+
+    // Choose css classnames
+    const desktopPositionClassname =
+      mapStringToEnum(DesktopPosition, desktop_position as string) ??
+      DesktopPosition.bottom;
+    const desktopModeClassname = isDesktopMode ? 'desktop' : 'mobile';
+    const editModeClassname =
+      this._inEditMode || this._inPreviewMode ? 'edit-mode' : '';
 
     // TODO use HA ripple effect for icon button
     return html`
       <ha-card
-        class="navbar ${this.inEditMode ? 'edit-mode' : ''} ${isDesktopMode
-          ? 'desktop'
-          : 'mobile'}">
+        class="navbar ${editModeClassname} ${desktopModeClassname} ${desktopPositionClassname}">
         ${routes?.map((route, index) => {
           const isActive = window.location.pathname == route.url;
           const showBadge = this.evaluateBadge(route.badge?.template);
@@ -190,7 +212,11 @@ export class NavbarCard extends LitElement {
         position: relative !important;
         flex-direction: row !important;
         left: unset !important;
+        right: unset !important;
+        bottom: unset !important;
+        top: unset !important;
         width: auto !important;
+        transform: none !important;
       }
 
       /* Desktop mode styles */
@@ -198,13 +224,39 @@ export class NavbarCard extends LitElement {
         border-radius: var(--ha-card-border-radius, 12px);
         box-shadow: var(--material-shadow-elevation-2dp) !important;
         width: auto;
+        justify-content: space-evenly;
+      }
+      .desktop.navbar.bottom {
+        flex-direction: row;
+        top: unset;
+        right: unset;
+        bottom: 16px;
+        left: 50%;
+        transform: translate(-50%, 0);
+      }
+      .desktop.navbar.top {
+        flex-direction: row;
+        bottom: unset;
+        right: unset;
+        top: 16px;
+        left: 50%;
+        transform: translate(-50%, 0);
+      }
+      .desktop.navbar.left {
+        flex-direction: column;
         left: calc(var(--mdc-drawer-width, 0px) + 16px);
         right: unset;
         bottom: unset;
         top: 50%;
         transform: translate(0, -50%);
-        justify-content: space-evenly;
+      }
+      .desktop.navbar.right {
         flex-direction: column;
+        right: 16px;
+        left: unset;
+        bottom: unset;
+        top: 50%;
+        transform: translate(0, -50%);
       }
       .desktop .icon-button {
         flex: unset;
