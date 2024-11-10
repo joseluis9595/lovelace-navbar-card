@@ -22,13 +22,20 @@ type NavbarCardConfig = {
     url: string;
     icon: string;
     icon_selected?: string;
+    label?: string;
     badge?: {
       template?: string;
       color?: string;
     };
   }[];
-  desktop_min_width?: number;
-  desktop_position?: DesktopPosition;
+  desktop?: {
+    show_labels?: boolean;
+    min_width?: number;
+    position?: DesktopPosition;
+  };
+  mobile?: {
+    show_labels?: boolean;
+  };
 };
 
 @customElement('navbar-card')
@@ -39,6 +46,7 @@ export class NavbarCard extends LitElement {
   @state() private _inEditMode?: boolean;
   @state() private _inPreviewMode?: boolean;
   @state() private _lastRender?: number;
+  @state() private _location?: string;
 
   // Badge visibility evaluator
   private evaluateBadge(template?: string): boolean {
@@ -62,6 +70,10 @@ export class NavbarCard extends LitElement {
 
   connectedCallback(): void {
     super.connectedCallback();
+
+    // Initialize location
+    this._location = window.location.pathname;
+
     // Initialize screen size listener
     window.addEventListener('resize', this._onResize);
     this.screenWidth = window.innerWidth;
@@ -100,9 +112,13 @@ export class NavbarCard extends LitElement {
     let shouldUpdate = false;
     changedProperties.forEach((_, propName) => {
       if (
-        ['_config', 'screenWidth', '_inEditMode', '_inPrewviewMode'].includes(
-          propName,
-        )
+        [
+          '_config',
+          'screenWidth',
+          '_inEditMode',
+          '_inPreviewMode',
+          '_location',
+        ].includes(propName)
       ) {
         shouldUpdate = true;
       } else if (propName == 'hass') {
@@ -123,17 +139,23 @@ export class NavbarCard extends LitElement {
       return html``;
     }
 
-    const { routes, desktop_position, desktop_min_width } = this._config;
+    const { routes, desktop, mobile } = this._config;
+    const {
+      position: desktopPosition,
+      show_labels: desktopShowLabels,
+      min_width: desktopMinWidth,
+    } = desktop ?? {};
+    const { show_labels: mobileShowLabels } = mobile ?? {};
 
     // Keep last render timestamp for debounced state updates
     this._lastRender = new Date().getTime();
 
     // Check desktop mode
-    const isDesktopMode = (this.screenWidth ?? 0) >= (desktop_min_width ?? 768);
+    const isDesktopMode = (this.screenWidth ?? 0) >= (desktopMinWidth ?? 768);
 
     // Choose css classnames
     const desktopPositionClassname =
-      mapStringToEnum(DesktopPosition, desktop_position as string) ??
+      mapStringToEnum(DesktopPosition, desktopPosition as string) ??
       DesktopPosition.bottom;
     const desktopModeClassname = isDesktopMode ? 'desktop' : 'mobile';
     const editModeClassname =
@@ -144,24 +166,34 @@ export class NavbarCard extends LitElement {
       <ha-card
         class="navbar ${editModeClassname} ${desktopModeClassname} ${desktopPositionClassname}">
         ${routes?.map((route, index) => {
-          const isActive = window.location.pathname == route.url;
+          const isActive = this._location == route.url;
           const showBadge = this.evaluateBadge(route.badge?.template);
 
           return html`
             <a
               key="navbar_item_${index}"
-              class="icon-button ${isActive ? 'active' : ''}"
+              class="route ${isActive ? 'active' : ''}"
               href="${route.url}">
               ${showBadge
                 ? html`<div
-                    class="badge"
+                    class="badge ${isActive ? 'active' : ''}"
                     style="background-color: ${route.badge?.color ||
                     'red'};"></div>`
                 : html``}
-              <ha-icon
-                icon="${isActive && route.icon_selected
-                  ? route.icon_selected
-                  : route.icon}"></ha-icon>
+
+              <div class="button ${isActive ? 'active' : ''}">
+                <ha-icon
+                  class="icon ${isActive ? 'active' : ''}"
+                  icon="${isActive && route.icon_selected
+                    ? route.icon_selected
+                    : route.icon}"></ha-icon>
+              </div>
+              ${(isDesktopMode && desktopShowLabels) ||
+              (!isDesktopMode && mobileShowLabels)
+                ? html`<div class="label ${isActive ? 'active' : ''}">
+                    ${route.label ?? ' '}
+                  </div>`
+                : html``}
             </a>
           `;
         })}
@@ -190,21 +222,66 @@ export class NavbarCard extends LitElement {
         bottom: 0;
         top: unset;
         z-index: 2; /* TODO check if needed */
+
+        --navbar-route-icon-size: 24px;
+        --navbar-primary-color: var(--primary-color);
       }
-      .icon-button {
+      .route {
+        max-width: 60px;
+        width: 100%;
         position: relative;
         text-decoration: none;
+        color: var(--primary-text-color);
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
-        flex: 1;
-        height: 50px;
-        border-radius: 16px;
         --icon-primary-color: var(--state-inactive-color);
       }
-      .icon-button.active {
-        background: color-mix(in srgb, var(--primary-color) 30%, transparent);
-        --icon-primary-color: var(--primary-color);
+
+      /* Button styling */
+      .button {
+        height: 36px;
+        width: 100%;
+        border-radius: 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .button.active {
+        background: color-mix(
+          in srgb,
+          var(--navbar-primary-color) 30%,
+          transparent
+        );
+        --icon-primary-color: var(--navbar-primary-color);
+      }
+
+      /* Icon styling */
+      .icon {
+        --mdc-icon-size: var(--navbar-route-icon-size);
+      }
+
+      /* Label styling */
+      .label {
+        flex: 1;
+        width: 100%;
+        /* TODO fix ellipsis*/
+        text-align: center;
+        font-size: var(--paper-font-caption_-_font-size);
+        font-weight: 500;
+        font-family: var(--paper-font-caption_-_font-size);
+      }
+
+      /* Badge styling */
+      .badge {
+        border-radius: 999px;
+        width: 12px;
+        height: 12px;
+        position: absolute;
+        top: 0;
+        right: 0;
       }
 
       /* Edit mode styles */
@@ -220,13 +297,15 @@ export class NavbarCard extends LitElement {
       }
 
       /* Desktop mode styles */
-      .desktop.navbar {
+      .navbar.desktop {
         border-radius: var(--ha-card-border-radius, 12px);
         box-shadow: var(--material-shadow-elevation-2dp) !important;
         width: auto;
         justify-content: space-evenly;
+
+        --navbar-route-icon-size: 28px;
       }
-      .desktop.navbar.bottom {
+      .navbar.desktop.bottom {
         flex-direction: row;
         top: unset;
         right: unset;
@@ -234,7 +313,7 @@ export class NavbarCard extends LitElement {
         left: 50%;
         transform: translate(-50%, 0);
       }
-      .desktop.navbar.top {
+      .navbar.desktop.top {
         flex-direction: row;
         bottom: unset;
         right: unset;
@@ -242,7 +321,7 @@ export class NavbarCard extends LitElement {
         left: 50%;
         transform: translate(-50%, 0);
       }
-      .desktop.navbar.left {
+      .navbar.desktop.left {
         flex-direction: column;
         left: calc(var(--mdc-drawer-width, 0px) + 16px);
         right: unset;
@@ -250,7 +329,7 @@ export class NavbarCard extends LitElement {
         top: 50%;
         transform: translate(0, -50%);
       }
-      .desktop.navbar.right {
+      .navbar.desktop.right {
         flex-direction: column;
         right: 16px;
         left: unset;
@@ -258,18 +337,13 @@ export class NavbarCard extends LitElement {
         top: 50%;
         transform: translate(0, -50%);
       }
-      .desktop .icon-button {
-        flex: unset;
-        width: 60px;
+      .navbar.desktop .route {
         height: 60px;
+        width: 60px;
       }
-      .badge {
-        border-radius: 999px;
-        width: 12px;
-        height: 12px;
-        position: absolute;
-        top: 0;
-        right: 0;
+      .navbar.desktop .button {
+        flex: unset;
+        height: 100%;
       }
     `;
   }
