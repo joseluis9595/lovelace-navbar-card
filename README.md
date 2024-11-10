@@ -29,11 +29,11 @@ Navbar Card is a custom Lovelace card designed to simplify navigation within you
 
 ### Main options
 
-| Name                | Type                                   | Default    | Description                                                                |
-|---------------------|----------------------------------------|------------|----------------------------------------------------------------------------|
-| `routes`            | [Routes](#routes)                      | `Required` | Defines the array of routes to be shown in the navbar                      |
-| `desktop_min_width` | number                                 | `768`      | Screen size from which the navbar will be displayed as its desktop variant |
-| `desktop_position`  | `top` \| `bottom` \| `left` \| `right` | `bottom`   | Position of the navbar on desktop devices                                  |
+| Name      | Type                | Default    | Description                                           |
+|-----------|---------------------|------------|-------------------------------------------------------|
+| `routes`  | [Routes](#routes)   | `Required` | Defines the array of routes to be shown in the navbar |
+| `desktop` | [Desktop](#desktop) | -          | Configuration options specific to desktop mode        |
+| `mobile`  | [Mobile](#mobile)   | -          | Configuration options specific to mobile mode         |
 
 
 ### Routes
@@ -46,8 +46,9 @@ Routes represents an array of clickable icons that redirects to a given path. Ea
 | `icon`          	| string          	| `Required` 	| Material icon to display as this entry icon                     	|
 | `icon_selected` 	| string          	| -          	| Icon to be displayed when `url` matches the current browser url 	|
 | `badge`         	| [Badge](#badge) 	| -          	| Badge configuration                                             	|
+| `label`         	| string           	| -          	| Label to be displayed under the given route if `show_labels` is true                                    |
 
-### Badge
+#### Badge
 
 Configuration to display a small badge on any of the navbar items.
 
@@ -60,25 +61,52 @@ Configuration to display a small badge on any of the navbar items.
 | `color`    	| string      	| red     	| Background color of the badge                                   	|
 
 
+### Desktop
+
+Specific configuration for desktop mode.
+
+| Name          | Type                                   | Default  | Description                                                                |
+|---------------|----------------------------------------|----------|----------------------------------------------------------------------------|
+| `show_labels` | boolean                                | `false`  | Whether or not to display labels under each route                          |
+| `min_width`   | number                                 | `768`    | Screen size from which the navbar will be displayed as its desktop variant |
+| `position`    | `top` \| `bottom` \| `left` \| `right` | `bottom` | Position of the navbar on desktop devices                                  |
+
+
+### Mobile
+
+Specific configuration for mobile mode.
+
+| Name          | Type    | Default | Description                                       |
+|---------------|---------|---------|---------------------------------------------------|
+| `show_labels` | boolean | `false` | Whether or not to display labels under each route |
+
 ---
 ## Example Configuration
-Base example:
+Basic example:
 ```yaml
 type: custom:navbar-card
-desktop_position: bottom
-desktop_min_width: 768
+desktop:
+  position: left
+  min_width: 768
+mobile:
+  show_labels: true
 routes:
   - url: /lovelace/home
+    label: Home
     icon: mdi:home-outline
     icon_selected: mdi:home-assistant
   - url: /lovelace/devices
+    label: Devices
     icon: mdi:devices
-  - url: /lovelace/temperature
+  - url: /lovelace/weather
+    label: Weather
     icon: mdi:thermometer
   - url: /lovelace/control
+    label: Control
     icon: mdi:creation-outline
     icon_selected: mdi:creation
   - url: /lovelace/system
+    label: System
     icon: mdi:information-outline
     icon_selected: mdi:information
     badge:
