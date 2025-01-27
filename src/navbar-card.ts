@@ -1,14 +1,18 @@
 import { css, CSSResultGroup, html, LitElement, unsafeCSS } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { version } from '../package.json';
-import { HomeAssistant } from 'custom-card-helpers';
+import { HomeAssistant, ActionConfig, navigate } from 'custom-card-helpers';
 import { DesktopPosition } from './types';
 import { mapStringToEnum } from './utils';
 
-// TODO add proper typing to window
-// @ts-ignore
+declare global {
+  interface Window {
+    customCards: Array<Object>;
+  }
+}
+
+// Register our new custom card
 window.customCards = window.customCards || [];
-// @ts-ignore
 window.customCards.push({
   type: 'navbar-card',
   name: 'Navbar card',
@@ -17,17 +21,20 @@ window.customCards.push({
     'Card with a full-width bottom nav on mobile and a flexible nav on desktop that can be placed on any side of the screen.',
 });
 
+type RouteItem = {
+  url: string;
+  icon: string;
+  icon_selected?: string;
+  label?: string;
+  badge?: {
+    template?: string;
+    color?: string;
+  };
+  tap_action?: ActionConfig;
+};
+
 type NavbarCardConfig = {
-  routes: {
-    url: string;
-    icon: string;
-    icon_selected?: string;
-    label?: string;
-    badge?: {
-      template?: string;
-      color?: string;
-    };
-  }[];
+  routes: RouteItem[];
   desktop?: {
     show_labels?: boolean;
     min_width?: number;
@@ -41,7 +48,7 @@ type NavbarCardConfig = {
 
 @customElement('navbar-card')
 export class NavbarCard extends LitElement {
-  @state() private hass?: HomeAssistant;
+  @state() private hass!: HomeAssistant;
   @state() private _config?: NavbarCardConfig;
   @state() private screenWidth?: number;
   @state() private _inEditMode?: boolean;
@@ -69,6 +76,23 @@ export class NavbarCard extends LitElement {
     this.screenWidth = window.innerWidth;
   };
 
+  private _handleClick = (route: RouteItem) => {
+    if (route.tap_action != null) {
+      const event = new Event('hass-action', { bubbles: true, composed: true });
+      // @ts-ignore
+      event.detail = {
+        action: 'tap',
+        config: {
+          tap_action: route.tap_action,
+        },
+      };
+
+      this.dispatchEvent(event);
+    } else {
+      navigate(this, route.url);
+    }
+  };
+
   connectedCallback(): void {
     super.connectedCallback();
 
@@ -84,6 +108,7 @@ export class NavbarCard extends LitElement {
       this.parentElement?.closest('hui-card-edit-mode') != null;
 
     // Check if the card is in preview mode
+    // TODO improve this detection
     this._inPreviewMode =
       document
         .querySelector('body > home-assistant')
@@ -174,10 +199,10 @@ export class NavbarCard extends LitElement {
           const showBadge = this.evaluateBadge(route.badge?.template);
 
           return html`
-            <a
+            <div
               key="navbar_item_${index}"
               class="route ${isActive ? 'active' : ''}"
-              href="${route.url}">
+              @click=${() => this._handleClick(route)}>
               ${showBadge
                 ? html`<div
                     class="badge ${isActive ? 'active' : ''}"
@@ -198,7 +223,7 @@ export class NavbarCard extends LitElement {
                     ${route.label ?? ' '}
                   </div>`
                 : html``}
-            </a>
+            </div>
           `;
         })}
       </ha-card>
@@ -249,6 +274,7 @@ export class NavbarCard extends LitElement {
         z-index: 2; /* TODO check if needed */
       }
       .route {
+        cursor: pointer;
         max-width: 60px;
         width: 100%;
         position: relative;
@@ -258,7 +284,11 @@ export class NavbarCard extends LitElement {
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        transition: filter 0.2s ease;
         --icon-primary-color: var(--state-inactive-color);
+      }
+      .route:hover {
+        filter: brightness(1.2);
       }
 
       /* Button styling */
