@@ -128,6 +128,19 @@ export class NavbarCard extends LitElement {
    * Set config
    */
   setConfig(config) {
+    if (!config.routes) {
+      throw new Error('"routes" param is required for navbar card');
+    }
+    config.routes.forEach(route => {
+      if (route.icon == null) {
+        throw new Error('Each route must have an "icon" property configured');
+      }
+      if (route.tap_action == null && route.url == null) {
+        throw new Error(
+          'Each route must either have a "url" or a "tap_action" param',
+        );
+      }
+    });
     this._config = config;
   }
 

@@ -30,10 +30,10 @@ Navbar Card is a custom Lovelace card designed to simplify navigation within you
 2. Move this file to home assistant's `<config>/www` folder.
 3. In home assistant, go to `Settings > Dashboards`.
 4. On the top right corner, click `Resources`.
-5. Click `Add resource`.
-6. Fill URL with: `/local/navbar-card.js`.
-7. Select `JavaScript module` and `Create`.
-8. Go to your dashboard, refresh your page and add your new navbar-card!
+5. Add a new resource with the following:
+   - **URL**: `/local/navbar-card.js`
+   - **Resource type**: JavaScript module
+6. Go to your dashboard, refresh your page and add your new navbar-card!
 
 
 <br>
@@ -49,8 +49,8 @@ Navbar Card is a custom Lovelace card designed to simplify navigation within you
 | Name      | Type                | Default    | Description                                           |
 |-----------|---------------------|------------|-------------------------------------------------------|
 | `routes`  | [Routes](#routes)   | `Required` | Defines the array of routes to be shown in the navbar |
-| `desktop` | [Desktop](#desktop) | -          | Configuration options specific to desktop mode        |
-| `mobile`  | [Mobile](#mobile)   | -          | Configuration options specific to mobile mode         |
+| `desktop` | [Desktop](#desktop) | -          | Options specific to desktop mode                      |
+| `mobile`  | [Mobile](#mobile)   | -          | Options specific to mobile mode                       |
 | `styles`  | [Styles](#styles)   | -          | Custom CSS styles for the card                        |
 
 
@@ -58,13 +58,16 @@ Navbar Card is a custom Lovelace card designed to simplify navigation within you
 
 Routes represents an array of clickable icons that redirects to a given path. Each item in the array should contain the following configuration:
 
-| Name            	| Type            	| Default    	| Description                                                     	   |
-|-----------------	|-----------------	|------------	|--------------------------------------------------------------------- |
-| `url`           	| string          	| `Required` 	| The path to a lovelace view                                     	   |
-| `icon`          	| string          	| `Required` 	| Material icon to display as this entry icon                     	   |
-| `icon_selected` 	| string          	| -          	| Icon to be displayed when `url` matches the current browser url 	   |
-| `badge`         	| [Badge](#badge) 	| -          	| Badge configuration                                             	   |
-| `label`         	| string           	| -          	| Label to be displayed under the given route if `show_labels` is true |
+| Name            	| Type            	| Default    	| Description                                                     	                                         |
+|-----------------	|-----------------	|------------	|----------------------------------------------------------------------------------------------------------  |
+| `url`           	| string          	| `Required*` | The path to a Lovelace view. Ignored if `tap_action` is defined.                                           |
+| `icon`          	| string          	| `Required` 	| Material icon to display as this entry icon                     	                                         |
+| `icon_selected` 	| string          	| -          	| Icon to be displayed when `url` matches the current browser URL 	                                         |
+| `badge`         	| [Badge](#badge) 	| -          	| Badge configuration                                             	                                         |
+| `label`         	| string          	| -          	| Label to be displayed under the given route if `show_labels` is true                                       |
+| `tap_action`   	  | [tap_action](https://www.home-assistant.io/dashboards/actions/#tap_action) | -     | Custom tap action configuration. This setting disables the default navigate action.                   |
+
+> **Note**: `url` is required unless `tap_action` is present. If `tap_action` is defined, `url` is ignored.
 
 #### Badge
 
@@ -199,24 +202,27 @@ desktop:
 mobile:
   show_labels: true
 routes:
-  - url: /lovelace/home
-    label: Home
-    icon: mdi:home-outline
+  - icon: mdi:home-outline
     icon_selected: mdi:home-assistant
-  - url: /lovelace/devices
+    url: /lovelace/home
+    label: Home
+  - icon: mdi:devices
+    url: /lovelace/devices
     label: Devices
-    icon: mdi:devices
-  - url: /lovelace/weather
+  - icon: mdi:thermometer
+    url: /lovelace/weather
     label: Weather
-    icon: mdi:thermometer
-  - url: /lovelace/control
-    label: Control
-    icon: mdi:creation-outline
+  - icon: mdi:creation-outline
     icon_selected: mdi:creation
-  - url: /lovelace/system
-    label: System
-    icon: mdi:information-outline
+    url: /lovelace/control
+    label: Control
+  - icon: mdi:information-outline
     icon_selected: mdi:information
+    url: /lovelace/system
+    label: System
+    tap_action:
+      action: navigate
+      navigation_path: /config/dashboard
     badge:
       template: states['binary_sensor.docker_hub_update_available'].state === 'on'
       color: var(--primary-color)
