@@ -13,7 +13,7 @@ export const getNavbarTemplates = (): Record<
   if (lovelacePanel) {
     // TODO add proper typing
     // @ts-ignore
-    return lovelacePanel.lovelace.config['navbar-card'];
+    return lovelacePanel.lovelace.config['navbar-templates'];
   }
   return null;
 };
