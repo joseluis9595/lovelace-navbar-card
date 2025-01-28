@@ -44,14 +44,14 @@ Navbar Card is a custom Lovelace card designed to simplify navigation within you
 
 ## ⚙️ Configuration
 
-### Main options
 
-| Name      | Type                | Default    | Description                                           |
-|-----------|---------------------|------------|-------------------------------------------------------|
-| `routes`  | [Routes](#routes)   | `Required` | Defines the array of routes to be shown in the navbar |
-| `desktop` | [Desktop](#desktop) | -          | Options specific to desktop mode                      |
-| `mobile`  | [Mobile](#mobile)   | -          | Options specific to mobile mode                       |
-| `styles`  | [Styles](#styles)   | -          | Custom CSS styles for the card                        |
+| Name      | Type                   | Default    | Description                                           |
+|-----------|------------------------|------------|-------------------------------------------------------|
+| `routes`  | [Routes](#routes)      | `Required` | Defines the array of routes to be shown in the navbar |
+| `template`| [Template](#templates) | -          | Template name                                         |
+| `desktop` | [Desktop](#desktop)    | -          | Options specific to desktop mode                      |
+| `mobile`  | [Mobile](#mobile)      | -          | Options specific to mobile mode                       |
+| `styles`  | [Styles](#styles)      | -          | Custom CSS styles for the card                        |
 
 
 ### Routes
@@ -80,6 +80,59 @@ Configuration to display a small badge on any of the navbar items.
 |------------	|-------------	|---------	|-----------------------------------------------------------------	|
 | `template` 	| JS template 	| -       	| Boolean template indicating whether to display the badge or not 	|
 | `color`    	| string      	| red     	| Background color of the badge                                   	|
+
+### Templates
+
+Templates allow you to predefine a custom configuration for `navbar-card` and reuse it across multiple dashboards. This approach saves time and simplifies maintenance — any change to the template will automatically apply to all cards using it. 
+
+#### Defining Templates
+
+To define custom templates, add them under `navbar-templates` in your main Lovelace YAML configuration like this:
+
+```yaml
+navbar-templates:
+   your_template_name:
+      # Your navbar config
+      routes:
+         - label: Home
+           icon: mdi:home
+           url: /lovelace/home
+         ...
+# Your normal lovelace configuration
+views:
+...
+```
+
+#### Referencing Templates
+You can reference a template from your `navbar-card` using the template property:
+
+```yaml
+type: custom:navbar-card
+template: your_template_name
+```
+
+#### Overriding props
+
+Card properties defined directly in the card will take priority over those inherited from the template.
+
+For example, if you want to use a template called `your_template_name` but have one specific dashboard with a different primary color, your configurations might look like this:
+
+- Default Navbar for Most Views:
+```yaml
+type: custom:navbar-card
+template: your_template_name
+```
+
+- Customized Navbar for a Specific View:
+
+```yaml
+type: custom:navbar-card
+template: your_template_name
+styles: |
+  .navbar {
+    --navbar-primary-color: red;
+  }
+```
 
 
 ### Desktop
