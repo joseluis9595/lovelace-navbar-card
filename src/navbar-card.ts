@@ -1,9 +1,10 @@
 import { css, CSSResultGroup, html, LitElement, unsafeCSS } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { version } from '../package.json';
-import { HomeAssistant, ActionConfig, navigate } from 'custom-card-helpers';
-import { DesktopPosition } from './types';
+import { HomeAssistant, navigate } from 'custom-card-helpers';
+import { DesktopPosition, NavbarCardConfig, RouteItem } from './types';
 import { mapStringToEnum } from './utils';
+import { getNavbarTemplates } from './dom-utils';
 
 declare global {
   interface Window {
@@ -20,31 +21,6 @@ window.customCards.push({
   description:
     'Card with a full-width bottom nav on mobile and a flexible nav on desktop that can be placed on any side of the screen.',
 });
-
-type RouteItem = {
-  url: string;
-  icon: string;
-  icon_selected?: string;
-  label?: string;
-  badge?: {
-    template?: string;
-    color?: string;
-  };
-  tap_action?: ActionConfig;
-};
-
-type NavbarCardConfig = {
-  routes: RouteItem[];
-  desktop?: {
-    show_labels?: boolean;
-    min_width?: number;
-    position?: DesktopPosition;
-  };
-  mobile?: {
-    show_labels?: boolean;
-  };
-  styles?: string;
-};
 
 @customElement('navbar-card')
 export class NavbarCard extends LitElement {
@@ -116,6 +92,30 @@ export class NavbarCard extends LitElement {
         ?.shadowRoot?.querySelector(
           'ha-dialog > div.content > div.element-preview',
         ) != null;
+
+    // Check for template configuration
+    if (this._config?.template) {
+      // Get templates from the DOM
+      const templates = getNavbarTemplates();
+
+      // If no templates are found, but the card is configured to use a template, warn and use the default configuration.
+      if (!templates) {
+        console.warn(
+          '[navbar-card] No templates configured in this dashboard. Please refer to "templates" documentation for more information.' +
+            '\n\n' +
+            'https://github.com/joseluis9595/lovelace-navbar-card?tab=readme-ov-file#templates\n',
+        );
+      } else {
+        // Merge template configuration with the card configuration, giving priority to the card
+        const templateConfig = templates[this._config.template];
+        if (templateConfig) {
+          this._config = {
+            ...templateConfig,
+            ...this._config,
+          };
+        }
+      }
+    }
   }
 
   disconnectedCallback() {
