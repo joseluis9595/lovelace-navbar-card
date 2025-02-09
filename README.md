@@ -59,14 +59,14 @@ Navbar Card is a custom Lovelace card designed to simplify navigation within you
 
 Routes represents an array of clickable icons that redirects to a given path. Each item in the array should contain the following configuration:
 
-| Name            	| Type            	| Default    	| Description                                                     	                                         |
+| Name            	| Type            	| Default    	| Description                                                     	                                        |
 |-----------------	|-----------------	|------------	|----------------------------------------------------------------------------------------------------------  |
-| `url`           	| string          	| `Required*` | The path to a Lovelace view. Ignored if `tap_action` is defined.                                           |
-| `icon`          	| string          	| `Required` 	| Material icon to display as this entry icon                     	                                         |
-| `icon_selected` 	| string          	| -          	| Icon to be displayed when `url` matches the current browser URL 	                                         |
-| `badge`         	| [Badge](#badge) 	| -          	| Badge configuration                                             	                                         |
+| `url`           	| string          	| `Required*`  | The path to a Lovelace view. Ignored if `tap_action` is defined.                                           |
+| `icon`          	| string          	| `Required` 	| Material icon to display as this entry icon                     	                                        |
+| `icon_selected` 	| string          	| -          	| Icon to be displayed when `url` matches the current browser URL 	                                        |
+| `badge`         	| [Badge](#badge) 	| -          	| Badge configuration                                             	                                        |
 | `label`         	| string          	| -          	| Label to be displayed under the given route if `show_labels` is true                                       |
-| `tap_action`   	  | [tap_action](https://www.home-assistant.io/dashboards/actions/#tap_action) | -     | Custom tap action configuration. This setting disables the default navigate action.                   |
+| `tap_action`   	   | [tap_action](https://www.home-assistant.io/dashboards/actions/#tap_action) | -     | Custom tap action configuration. This setting disables the default navigate action.                   |
 
 > **Note**: `url` is required unless `tap_action` is present. If `tap_action` is defined, `url` is ignored.
 
@@ -145,6 +145,7 @@ Specific configuration for desktop mode.
 | `show_labels` | boolean                                | `false`  | Whether or not to display labels under each route                          |
 | `min_width`   | number                                 | `768`    | Screen size from which the navbar will be displayed as its desktop variant |
 | `position`    | `top` \| `bottom` \| `left` \| `right` | `bottom` | Position of the navbar on desktop devices                                  |
+| `hidden`      | boolean                                | `false`  | Set to true to hide the navbar on desktop devices                          |
 
 
 ### Mobile
@@ -154,6 +155,7 @@ Specific configuration for mobile mode.
 | Name          | Type    | Default | Description                                       |
 |---------------|---------|---------|---------------------------------------------------|
 | `show_labels` | boolean | `false` | Whether or not to display labels under each route |
+| `hidden`      | boolean | `false` | Set to true to hide the navbar on mobile devices  |
 
 ### Styles
 
