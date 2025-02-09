@@ -242,24 +242,33 @@ export class NavbarCard extends LitElement {
       position: desktopPosition,
       show_labels: desktopShowLabels,
       min_width: desktopMinWidth,
+      hidden: desktopHidden,
     } = desktop ?? {};
-    const { show_labels: mobileShowLabels } = mobile ?? {};
+    const { show_labels: mobileShowLabels, hidden: mobileHidden } =
+      mobile ?? {};
 
     // Keep last render timestamp for debounced state updates
     this._lastRender = new Date().getTime();
 
-    // Check desktop mode
+    // Check visualization modes
     const isDesktopMode = (this.screenWidth ?? 0) >= (desktopMinWidth ?? 768);
+    const isEditMode =
+      this._inEditDashboardMode || this._inPreviewMode || this._inEditCardMode;
 
     // Choose css classnames
     const desktopPositionClassname =
       mapStringToEnum(DesktopPosition, desktopPosition as string) ??
       DesktopPosition.bottom;
     const deviceModeClassName = isDesktopMode ? 'desktop' : 'mobile';
-    const editModeClassname =
-      this._inEditDashboardMode || this._inPreviewMode || this._inEditCardMode
-        ? 'edit-mode'
-        : '';
+    const editModeClassname = isEditMode ? 'edit-mode' : '';
+
+    // Handle hidden props
+    if (
+      !isEditMode &&
+      ((isDesktopMode && desktopHidden) || (!isDesktopMode && mobileHidden))
+    ) {
+      return html``;
+    }
 
     // TODO use HA ripple effect for icon button
     return html`

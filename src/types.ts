@@ -26,9 +26,11 @@ export type NavbarCardConfig = {
     show_labels?: boolean;
     min_width?: number;
     position?: DesktopPosition;
+    hidden?: boolean;
   };
   mobile?: {
     show_labels?: boolean;
+    hidden?: boolean;
   };
   styles?: string;
 };
