@@ -23,9 +23,9 @@ window.customCards.push({
 });
 
 const PROPS_TO_FORCE_UPDATE = [
-  // TODO replace this with proper keys instead of hardcoded strings
+  // TODO JLAQ replace this with proper keys instead of hardcoded strings
   '_config',
-  'screenWidth',
+  '_isDesktop',
   '_inEditDashboardMode',
   '_inEditCardMode',
   '_inPreviewMode',
@@ -37,7 +37,7 @@ const PROPS_TO_FORCE_UPDATE = [
 export class NavbarCard extends LitElement {
   @state() private hass!: HomeAssistant;
   @state() private _config?: NavbarCardConfig;
-  @state() private screenWidth?: number;
+  @state() private _isDesktop?: boolean;
   @state() private _inEditDashboardMode?: boolean;
   @state() private _inEditCardMode?: boolean;
   @state() private _inPreviewMode?: boolean;
@@ -56,8 +56,8 @@ export class NavbarCard extends LitElement {
     this._location = window.location.pathname;
 
     // Initialize screen size listener
-    window.addEventListener('resize', this._onResize);
-    this.screenWidth = window.innerWidth;
+    window.addEventListener('resize', this._checkDesktop);
+    this._checkDesktop();
 
     const homeAssistantRoot = document.querySelector('body > home-assistant');
 
@@ -79,7 +79,7 @@ export class NavbarCard extends LitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
     // Remove event listeners
-    window.removeEventListener('resize', this._onResize);
+    window.removeEventListener('resize', this._checkDesktop);
   }
 
   /**
@@ -198,11 +198,11 @@ export class NavbarCard extends LitElement {
     }
   }
 
-  /**
-   * Private resize callback to update screenWidth
-   */
-  private _onResize = () => {
-    this.screenWidth = window.innerWidth;
+  private _checkDesktop = () => {
+    this._isDesktop =
+      (window.innerWidth ?? 0) >= (this._config?.desktop?.min_width ?? 768);
+  };
+
   };
 
   /**
@@ -238,20 +238,13 @@ export class NavbarCard extends LitElement {
     }
 
     const { routes, desktop, mobile } = this._config;
-    const {
-      position: desktopPosition,
-      show_labels: desktopShowLabels,
-      min_width: desktopMinWidth,
-      hidden: desktopHidden,
-    } = desktop ?? {};
-    const { show_labels: mobileShowLabels, hidden: mobileHidden } =
-      mobile ?? {};
+    const { position: desktopPosition, hidden: desktopHidden } = desktop ?? {};
+    const { hidden: mobileHidden } = mobile ?? {};
 
     // Keep last render timestamp for debounced state updates
     this._lastRender = new Date().getTime();
 
     // Check visualization modes
-    const isDesktopMode = (this.screenWidth ?? 0) >= (desktopMinWidth ?? 768);
     const isEditMode =
       this._inEditDashboardMode || this._inPreviewMode || this._inEditCardMode;
 
@@ -259,13 +252,13 @@ export class NavbarCard extends LitElement {
     const desktopPositionClassname =
       mapStringToEnum(DesktopPosition, desktopPosition as string) ??
       DesktopPosition.bottom;
-    const deviceModeClassName = isDesktopMode ? 'desktop' : 'mobile';
+    const deviceModeClassName = this._isDesktop ? 'desktop' : 'mobile';
     const editModeClassname = isEditMode ? 'edit-mode' : '';
 
     // Handle hidden props
     if (
       !isEditMode &&
-      ((isDesktopMode && desktopHidden) || (!isDesktopMode && mobileHidden))
+      ((this._isDesktop && desktopHidden) || (!this._isDesktop && mobileHidden))
     ) {
       return html``;
     }
