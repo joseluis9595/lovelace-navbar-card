@@ -174,6 +174,29 @@ export class NavbarCard extends LitElement {
   }
 
   /**
+   * Stub configuration to be properly displayed in the "new card"
+   * dialog in home assistant
+   */
+  static getStubConfig(): NavbarCardConfig {
+    return {
+      routes: [
+        { url: window.location.pathname, icon: 'mdi:home', label: 'Home' },
+        {
+          url: `${window.location.pathname}/devices`,
+          icon: 'mdi:devices',
+          label: 'Devices',
+        },
+        {
+          url: '/config/automation/dashboard',
+          icon: 'mdi:creation',
+          label: 'Automations',
+        },
+        { url: '/config/dashboard', icon: 'mdi:cog', label: 'Settings' },
+      ],
+    };
+  }
+
+  /**
    * Default render function
    */
   protected render() {
