@@ -22,52 +22,32 @@ window.customCards.push({
     'Card with a full-width bottom nav on mobile and a flexible nav on desktop that can be placed on any side of the screen.',
 });
 
+const PROPS_TO_FORCE_UPDATE = [
+  // TODO replace this with proper keys instead of hardcoded strings
+  '_config',
+  'screenWidth',
+  '_inEditDashboardMode',
+  '_inEditCardMode',
+  '_inPreviewMode',
+  '_location',
+  '_renderUuid',
+];
+
 @customElement('navbar-card')
 export class NavbarCard extends LitElement {
   @state() private hass!: HomeAssistant;
   @state() private _config?: NavbarCardConfig;
   @state() private screenWidth?: number;
-  @state() private _inEditMode?: boolean;
+  @state() private _inEditDashboardMode?: boolean;
+  @state() private _inEditCardMode?: boolean;
   @state() private _inPreviewMode?: boolean;
   @state() private _lastRender?: number;
   @state() private _location?: string;
+  @state() private _renderUuid?: number;
 
-  // Badge visibility evaluator
-  private evaluateBadge(template?: string): boolean {
-    if (!template || !this.hass) return false;
-    try {
-      // Dynamically evaluate template with current Home Assistant context
-      const func = new Function('states', `return ${template}`);
-      return func(this.hass.states) as boolean;
-    } catch (e) {
-      console.warn(`NavbarCard: Error evaluating badge template: ${e}`);
-      return false;
-    }
-  }
-
-  /**
-   * Private resize callback to update screenWidth
-   */
-  private _onResize = () => {
-    this.screenWidth = window.innerWidth;
-  };
-
-  private _handleClick = (route: RouteItem) => {
-    if (route.tap_action != null) {
-      const event = new Event('hass-action', { bubbles: true, composed: true });
-      // @ts-ignore
-      event.detail = {
-        action: 'tap',
-        config: {
-          tap_action: route.tap_action,
-        },
-      };
-
-      this.dispatchEvent(event);
-    } else {
-      navigate(this, route.url);
-    }
-  };
+  /**********************************************************************/
+  /* Lit native callbacks */
+  /**********************************************************************/
 
   connectedCallback(): void {
     super.connectedCallback();
@@ -79,19 +59,21 @@ export class NavbarCard extends LitElement {
     window.addEventListener('resize', this._onResize);
     this.screenWidth = window.innerWidth;
 
+    const homeAssistantRoot = document.querySelector('body > home-assistant');
+
     // Check if Home Assistant dashboard is in edit mode
-    this._inEditMode =
+    this._inEditDashboardMode =
       this.parentElement?.closest('hui-card-edit-mode') != null;
 
-    // Check if the card is in preview mode
-    // TODO improve this detection
+    // Check if card is in edit mode
+    this._inEditCardMode =
+      homeAssistantRoot?.shadowRoot
+        ?.querySelector('hui-dialog-edit-card')
+        ?.shadowRoot?.querySelector('ha-dialog') != null;
+
+    // Check if the card is in preview mode (new cards list)
     this._inPreviewMode =
-      document
-        .querySelector('body > home-assistant')
-        ?.shadowRoot?.querySelector('hui-dialog-edit-card')
-        ?.shadowRoot?.querySelector(
-          'ha-dialog > div.content > div.element-preview',
-        ) != null;
+      this.parentElement?.closest('.card > .preview') != null;
   }
 
   disconnectedCallback() {
@@ -152,16 +134,10 @@ export class NavbarCard extends LitElement {
    */
   shouldUpdate(changedProperties) {
     let shouldUpdate = false;
+    // TODO do not loop over all properties after finding the first one
+    // that forces to re-render the card
     changedProperties.forEach((_, propName) => {
-      if (
-        [
-          '_config',
-          'screenWidth',
-          '_inEditMode',
-          '_inPreviewMode',
-          '_location',
-        ].includes(propName)
-      ) {
+      if (PROPS_TO_FORCE_UPDATE.includes(propName)) {
         shouldUpdate = true;
       } else if (propName == 'hass') {
         // Render card when hass object changes, but debounced every 1s
@@ -196,6 +172,63 @@ export class NavbarCard extends LitElement {
     };
   }
 
+  /**********************************************************************/
+  /* Navbar callbacks */
+  /**********************************************************************/
+
+  /**
+   * Forces re-render of the card
+   */
+  private _forceReRender() {
+    this._renderUuid = Math.random();
+  }
+
+  /**
+   *  Badge visibility evaluator
+   */
+  private _evaluateBadge(template?: string): boolean {
+    if (!template || !this.hass) return false;
+    try {
+      // Dynamically evaluate template with current Home Assistant context
+      const func = new Function('states', `return ${template}`);
+      return func(this.hass.states) as boolean;
+    } catch (e) {
+      console.warn(`NavbarCard: Error evaluating badge template: ${e}`);
+      return false;
+    }
+  }
+
+  /**
+   * Private resize callback to update screenWidth
+   */
+  private _onResize = () => {
+    this.screenWidth = window.innerWidth;
+  };
+
+  /**
+   * Private click callback to handle navigation or tap actions
+   */
+  private _handleClick = (route: RouteItem) => {
+    if (route.tap_action != null) {
+      const event = new Event('hass-action', { bubbles: true, composed: true });
+      // @ts-ignore
+      event.detail = {
+        action: 'tap',
+        config: {
+          tap_action: route.tap_action,
+        },
+      };
+
+      this.dispatchEvent(event);
+    } else {
+      navigate(this, route.url);
+    }
+  };
+
+  /**********************************************************************/
+  /* Render function */
+  /**********************************************************************/
+
   /**
    * Default render function
    */
@@ -224,7 +257,9 @@ export class NavbarCard extends LitElement {
       DesktopPosition.bottom;
     const deviceModeClassName = isDesktopMode ? 'desktop' : 'mobile';
     const editModeClassname =
-      this._inEditMode || this._inPreviewMode ? 'edit-mode' : '';
+      this._inEditDashboardMode || this._inPreviewMode || this._inEditCardMode
+        ? 'edit-mode'
+        : '';
 
     // TODO use HA ripple effect for icon button
     return html`
@@ -235,7 +270,7 @@ export class NavbarCard extends LitElement {
         class="navbar ${editModeClassname} ${deviceModeClassName} ${desktopPositionClassname}">
         ${routes?.map((route, index) => {
           const isActive = this._location == route.url;
-          const showBadge = this.evaluateBadge(route.badge?.template);
+          const showBadge = this._evaluateBadge(route.badge?.template);
 
           return html`
             <div
@@ -268,6 +303,10 @@ export class NavbarCard extends LitElement {
       </ha-card>
     `;
   }
+
+  /**********************************************************************/
+  /* Styles */
+  /**********************************************************************/
 
   /**
    * Dynamically apply user-provided styles
