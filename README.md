@@ -59,16 +59,17 @@ Navbar Card is a custom Lovelace card designed to simplify navigation within you
 
 Routes represents an array of clickable icons that redirects to a given path. Each item in the array should contain the following configuration:
 
-| Name            	| Type            	| Default    	| Description                                                     	                                         |
-|-----------------	|-----------------	|------------	|----------------------------------------------------------------------------------------------------------  |
-| `url`           	| string          	| `Required*` | The path to a Lovelace view. Ignored if `tap_action` is defined.                                           |
-| `icon`          	| string          	| `Required` 	| Material icon to display as this entry icon                     	                                         |
-| `icon_selected` 	| string          	| -          	| Icon to be displayed when `url` matches the current browser URL 	                                         |
-| `badge`         	| [Badge](#badge) 	| -          	| Badge configuration                                             	                                         |
-| `label`         	| string          	| -          	| Label to be displayed under the given route if `show_labels` is true                                       |
-| `tap_action`   	  | [tap_action](https://www.home-assistant.io/dashboards/actions/#tap_action) | -     | Custom tap action configuration. This setting disables the default navigate action.                   |
+| Name            	| Type            	 | Default    	| Description                                                     	                                        |
+|-----------------	|-----------------	 |------------	|----------------------------------------------------------------------------------------------------------  |
+| `url`           	| string          	 | `Required*`  | The path to a Lovelace view. Ignored if `tap_action` is defined.                                           |
+| `icon`          	| string          	 | `Required` 	| Material icon to display as this entry icon                     	                                        |
+| `icon_selected` 	| string          	 | -          	| Icon to be displayed when `url` matches the current browser URL 	                                        |
+| `badge`         	| [Badge](#badge) 	 | -          	| Badge configuration                                             	                                        |
+| `label`         	| string          	 | -          	| Label to be displayed under the given route if `show_labels` is true                                       |
+| `tap_action`   	   | [tap_action](https://www.home-assistant.io/dashboards/actions/#tap_action) | -     | Custom tap action configuration. This setting disables the default navigate action.                   |
+| `submenu`         	| [Submenu](#submenu) | -          	| List of routes to display in a popup submenu                                                               |
 
-> **Note**: `url` is required unless `tap_action` is present. If `tap_action` is defined, `url` is ignored.
+> **Note**: `url` is required unless `tap_action` or `submenu` is present. If `tap_action` is defined, `url` is ignored. And if `submenu` is present, both `tap_action` and `url` are ignored.
 
 #### Badge
 
@@ -81,6 +82,22 @@ Configuration to display a small badge on any of the navbar items.
 |------------	|-------------	|---------	|-----------------------------------------------------------------	|
 | `template` 	| JS template 	| -       	| Boolean template indicating whether to display the badge or not 	|
 | `color`    	| string      	| red     	| Background color of the badge                                   	|
+
+#### Submenu
+
+For each route, a submenu can be configured, to display a popup when clicked. This action will have precedence over both `tap_action` and `url` when present.
+
+| Name            	| Type            	 | Default    	| Description                                                     	                                        |
+|-----------------	|-----------------	 |------------	|----------------------------------------------------------------------------------------------------------  |
+| `url`           	| string          	 | `Required*`  | The path to a Lovelace view. Ignored if `tap_action` is defined.                                           |
+| `icon`          	| string          	 | `Required` 	| Material icon to display as this entry icon                     	                                        |
+| `badge`         	| [Badge](#badge) 	 | -          	| Badge configuration                                             	                                        |
+| `label`         	| string          	 | -          	| Label to be displayed under the given route if `show_labels` is true                                       |
+| `tap_action`   	   | [tap_action](https://www.home-assistant.io/dashboards/actions/#tap_action) | -     | Custom tap action configuration. This setting disables the default navigate action.                   |
+
+> **Note**: `url` is required unless `tap_action` is present. If `tap_action` is defined, `url` is ignored.
+
+---
 
 ### Templates
 
@@ -135,6 +152,7 @@ styles: |
   }
 ```
 
+---
 
 ### Desktop
 
@@ -145,7 +163,9 @@ Specific configuration for desktop mode.
 | `show_labels` | boolean                                | `false`  | Whether or not to display labels under each route                          |
 | `min_width`   | number                                 | `768`    | Screen size from which the navbar will be displayed as its desktop variant |
 | `position`    | `top` \| `bottom` \| `left` \| `right` | `bottom` | Position of the navbar on desktop devices                                  |
+| `hidden`      | boolean                                | `false`  | Set to true to hide the navbar on desktop devices                          |
 
+---
 
 ### Mobile
 
@@ -154,6 +174,9 @@ Specific configuration for mobile mode.
 | Name          | Type    | Default | Description                                       |
 |---------------|---------|---------|---------------------------------------------------|
 | `show_labels` | boolean | `false` | Whether or not to display labels under each route |
+| `hidden`      | boolean | `false` | Set to true to hide the navbar on mobile devices  |
+
+---
 
 ### Styles
 
@@ -255,8 +278,9 @@ type: custom:navbar-card
 desktop:
   position: left
   min_width: 768
-mobile:
   show_labels: true
+mobile:
+  show_labels: false
 routes:
   - icon: mdi:home-outline
     icon_selected: mdi:home-assistant
@@ -272,13 +296,20 @@ routes:
     icon_selected: mdi:creation
     url: /lovelace/control
     label: Control
-  - icon: mdi:information-outline
-    icon_selected: mdi:information
-    url: /lovelace/system
-    label: System
-    tap_action:
-      action: navigate
-      navigation_path: /config/dashboard
+  - icon: mdi:dots-horizontal
+    label: More
+    submenu:
+      - icon: mdi:cog
+        url: /config/dashboard
+      - icon: mdi:hammer
+        url: /developer-tools/yaml
+      - icon: mdi:power
+        tap_action:
+          action: call-service
+          service: homeassistant.restart
+          service_data: {}
+          confirmation:
+            text: Are you sure you want to restart Home Assistant?
     badge:
       template: states['binary_sensor.docker_hub_update_available'].state === 'on'
       color: var(--primary-color)

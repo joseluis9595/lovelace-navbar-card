@@ -17,7 +17,10 @@ export type RouteItem = {
     color?: string;
   };
   tap_action?: ActionConfig;
+  submenu?: PopupItem[];
 };
+
+export type PopupItem = Omit<RouteItem, 'submenu' | 'icon_selected'>;
 
 export type NavbarCardConfig = {
   routes: RouteItem[];
@@ -26,9 +29,11 @@ export type NavbarCardConfig = {
     show_labels?: boolean;
     min_width?: number;
     position?: DesktopPosition;
+    hidden?: boolean;
   };
   mobile?: {
     show_labels?: boolean;
+    hidden?: boolean;
   };
   styles?: string;
 };

@@ -1,10 +1,18 @@
-import { css, CSSResultGroup, html, LitElement, unsafeCSS } from 'lit';
+import {
+  css,
+  CSSResult,
+  CSSResultGroup,
+  html,
+  LitElement,
+  unsafeCSS,
+} from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { version } from '../package.json';
 import { HomeAssistant, navigate } from 'custom-card-helpers';
 import { DesktopPosition, NavbarCardConfig, RouteItem } from './types';
 import { mapStringToEnum } from './utils';
 import { getNavbarTemplates } from './dom-utils';
+import { getDefaultStyles } from './styles';
 
 declare global {
   interface Window {
@@ -22,52 +30,34 @@ window.customCards.push({
     'Card with a full-width bottom nav on mobile and a flexible nav on desktop that can be placed on any side of the screen.',
 });
 
+const PROPS_TO_FORCE_UPDATE = [
+  // TODO JLAQ replace this with proper keys instead of hardcoded strings
+  '_config',
+  '_isDesktop',
+  '_inEditDashboardMode',
+  '_inEditCardMode',
+  '_inPreviewMode',
+  '_location',
+  '_popup',
+];
+
+const DEFAULT_DESKTOP_POSITION = DesktopPosition.bottom;
+
 @customElement('navbar-card')
 export class NavbarCard extends LitElement {
   @state() private hass!: HomeAssistant;
   @state() private _config?: NavbarCardConfig;
-  @state() private screenWidth?: number;
-  @state() private _inEditMode?: boolean;
+  @state() private _isDesktop?: boolean;
+  @state() private _inEditDashboardMode?: boolean;
+  @state() private _inEditCardMode?: boolean;
   @state() private _inPreviewMode?: boolean;
   @state() private _lastRender?: number;
   @state() private _location?: string;
+  @state() private _popup?: any;
 
-  // Badge visibility evaluator
-  private evaluateBadge(template?: string): boolean {
-    if (!template || !this.hass) return false;
-    try {
-      // Dynamically evaluate template with current Home Assistant context
-      const func = new Function('states', `return ${template}`);
-      return func(this.hass.states) as boolean;
-    } catch (e) {
-      console.warn(`NavbarCard: Error evaluating badge template: ${e}`);
-      return false;
-    }
-  }
-
-  /**
-   * Private resize callback to update screenWidth
-   */
-  private _onResize = () => {
-    this.screenWidth = window.innerWidth;
-  };
-
-  private _handleClick = (route: RouteItem) => {
-    if (route.tap_action != null) {
-      const event = new Event('hass-action', { bubbles: true, composed: true });
-      // @ts-ignore
-      event.detail = {
-        action: 'tap',
-        config: {
-          tap_action: route.tap_action,
-        },
-      };
-
-      this.dispatchEvent(event);
-    } else {
-      navigate(this, route.url);
-    }
-  };
+  /**********************************************************************/
+  /* Lit native callbacks */
+  /**********************************************************************/
 
   connectedCallback(): void {
     super.connectedCallback();
@@ -76,33 +66,32 @@ export class NavbarCard extends LitElement {
     this._location = window.location.pathname;
 
     // Initialize screen size listener
-    window.addEventListener('resize', this._onResize);
-    this.screenWidth = window.innerWidth;
+    window.addEventListener('resize', this._checkDesktop);
+    this._checkDesktop();
+
+    const homeAssistantRoot = document.querySelector('body > home-assistant');
 
     // Check if Home Assistant dashboard is in edit mode
-    this._inEditMode =
+    this._inEditDashboardMode =
       this.parentElement?.closest('hui-card-edit-mode') != null;
 
-    // Check if the card is in preview mode
-    // TODO improve this detection
+    // Check if card is in edit mode
+    this._inEditCardMode =
+      homeAssistantRoot?.shadowRoot
+        ?.querySelector('hui-dialog-edit-card')
+        ?.shadowRoot?.querySelector('ha-dialog') != null;
+
+    // Check if the card is in preview mode (new cards list)
     this._inPreviewMode =
-      document
-        .querySelector('body > home-assistant')
-        ?.shadowRoot?.querySelector('hui-dialog-edit-card')
-        ?.shadowRoot?.querySelector(
-          'ha-dialog > div.content > div.element-preview',
-        ) != null;
+      this.parentElement?.closest('.card > .preview') != null;
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     // Remove event listeners
-    window.removeEventListener('resize', this._onResize);
+    window.removeEventListener('resize', this._checkDesktop);
   }
 
-  /**
-   * Set config
-   */
   setConfig(config) {
     // Check for template configuration
     if (config?.template) {
@@ -136,9 +125,9 @@ export class NavbarCard extends LitElement {
       if (route.icon == null) {
         throw new Error('Each route must have an "icon" property configured');
       }
-      if (route.tap_action == null && route.url == null) {
+      if (route.submenu == null && route.tap_action == null && route.url == null) {
         throw new Error(
-          'Each route must either have a "url" or a "tap_action" param',
+          'Each route must either have a "url", "submenu" or a "tap_action" param',
         );
       }
     });
@@ -150,28 +139,310 @@ export class NavbarCard extends LitElement {
   /**
    * Manually control whether to re-render or not the card
    */
-  shouldUpdate(changedProperties) {
-    let shouldUpdate = false;
-    changedProperties.forEach((_, propName) => {
+  shouldUpdate(changedProperties: Map<string, unknown>) {
+    for (const propName of changedProperties.keys()) {
+      if (PROPS_TO_FORCE_UPDATE.includes(propName)) {
+        return true;
+      }
       if (
-        [
-          '_config',
-          'screenWidth',
-          '_inEditMode',
-          '_inPreviewMode',
-          '_location',
-        ].includes(propName)
+        propName === 'hass' &&
+        new Date().getTime() - (this._lastRender ?? 0) > 1000
       ) {
-        shouldUpdate = true;
-      } else if (propName == 'hass') {
-        // Render card when hass object changes, but debounced every 1s
-        if (new Date().getTime() - (this._lastRender ?? 0) > 1000) {
-          shouldUpdate = true;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Stub configuration to be properly displayed in the "new card"
+   * dialog in home assistant
+   */
+  static getStubConfig(): NavbarCardConfig {
+    return {
+      routes: [
+        { url: window.location.pathname, icon: 'mdi:home', label: 'Home' },
+        {
+          url: `${window.location.pathname}/devices`,
+          icon: 'mdi:devices',
+          label: 'Devices',
+        },
+        {
+          url: '/config/automation/dashboard',
+          icon: 'mdi:creation',
+          label: 'Automations',
+        },
+        { url: '/config/dashboard', icon: 'mdi:cog', label: 'Settings' },
+      ],
+    };
+  }
+
+  /**********************************************************************/
+  /* Navbar callbacks */
+  /**********************************************************************/
+
+  /**
+   * Label visibility evaluator
+   */
+  private _shouldShowLabels = () => {
+    const { show_labels: desktopShowLabels } = this._config?.desktop ?? {};
+    const { show_labels: mobileShowLabels } = this._config?.mobile ?? {};
+
+    return (
+      (this._isDesktop && desktopShowLabels) ||
+      (!this._isDesktop && mobileShowLabels)
+    );
+  };
+
+  /**
+   *  Badge visibility evaluator
+   */
+  private _evaluateBadge(template?: string): boolean {
+    if (!template || !this.hass) return false;
+    try {
+      // Dynamically evaluate template with current Home Assistant context
+      const func = new Function('states', `return ${template}`);
+      return func(this.hass.states) as boolean;
+    } catch (e) {
+      console.warn(`NavbarCard: Error evaluating badge template: ${e}`);
+      return false;
+    }
+  }
+
+  /**
+   * Check if we are on a desktop device
+   */
+  private _checkDesktop = () => {
+    this._isDesktop =
+      (window.innerWidth ?? 0) >= (this._config?.desktop?.min_width ?? 768);
+  };
+
+  /**
+   * Render route item
+   */
+  private _renderRoute = (route: RouteItem) => {
+    const isActive = this._location == route.url;
+    const showBadge = this._evaluateBadge(route.badge?.template);
+
+    return html`
+      <div
+        class="route ${isActive ? 'active' : ''}"
+        @click=${(e: MouseEvent) => this._handleClick(e, route)}>
+        ${showBadge
+          ? html`<div
+              class="badge ${isActive ? 'active' : ''}"
+              style="background-color: ${route.badge?.color || 'red'};"></div>`
+          : html``}
+
+        <div class="button ${isActive ? 'active' : ''}">
+          <ha-icon
+            class="icon ${isActive ? 'active' : ''}"
+            icon="${isActive && route.icon_selected
+              ? route.icon_selected
+              : route.icon}"></ha-icon>
+        </div>
+        ${this._shouldShowLabels()
+          ? html`<div class="label ${isActive ? 'active' : ''}">
+              ${route.label ?? ' '}
+            </div>`
+          : html``}
+      </div>
+    `;
+  };
+
+  /**
+   * Handle gracefully closing the popup
+   */
+  private _closePopup = () => {
+    const popup = this.shadowRoot?.querySelector('.navbar-popup');
+    const backdrop = this.shadowRoot?.querySelector('.navbar-popup-backdrop');
+
+    if (popup && backdrop) {
+      popup.classList.remove('visible');
+      backdrop.classList.remove('visible');
+
+      // Wait for transitions to complete before removing
+      setTimeout(() => {
+        this._popup = null;
+      }, 200);
+    } else {
+      this._popup = null;
+    }
+  };
+
+  /**
+   * Get the styles for the popup based on its position relative to the anchor element.
+   */
+  private _getPopupStyles(
+    anchorRect: DOMRect,
+    position: 'top' | 'left' | 'bottom' | 'right' | 'mobile',
+  ): {
+    style: CSSResult;
+    labelPositionClassName: string;
+    popupDirectionClassName: string;
+  } {
+    const windowWidth = window.innerWidth;
+
+    switch (position) {
+      case 'top':
+        return {
+          style: css`
+            top: ${anchorRect.top + anchorRect.height}px;
+            left: ${anchorRect.x}px;
+          `,
+          labelPositionClassName: 'label-right',
+          popupDirectionClassName: 'open-bottom',
+        };
+      case 'left':
+        return {
+          style: css`
+            top: ${anchorRect.top}px;
+            left: ${anchorRect.x + anchorRect.width}px;
+          `,
+          labelPositionClassName: 'label-bottom',
+          popupDirectionClassName: 'open-right',
+        };
+      case 'right':
+        return {
+          style: css`
+            top: ${anchorRect.top}px;
+            right: ${windowWidth - anchorRect.x}px;
+          `,
+          labelPositionClassName: 'label-bottom',
+          popupDirectionClassName: 'open-left',
+        };
+      case 'bottom':
+      case 'mobile':
+      default:
+        if (anchorRect.x > windowWidth / 2) {
+          return {
+            style: css`
+              top: ${anchorRect.top}px;
+              right: ${windowWidth - anchorRect.x - anchorRect.width}px;
+            `,
+            labelPositionClassName: 'label-left',
+            popupDirectionClassName: 'open-up',
+          };
+        } else {
+          return {
+            style: css`
+              top: ${anchorRect.top}px;
+              left: ${anchorRect.left}px;
+            `,
+            labelPositionClassName: 'label-right',
+            popupDirectionClassName: 'open-up',
+          };
         }
+    }
+  }
+
+  /**
+   * Open the popup menu for a given popupConfig and anchor element.
+   */
+  private _openPopup = (
+    popupConfig: RouteItem['submenu'],
+    target: HTMLElement,
+  ) => {
+    const anchorRect = target.getBoundingClientRect();
+
+    const { style, labelPositionClassName, popupDirectionClassName } =
+      this._getPopupStyles(
+        anchorRect,
+        !this._isDesktop
+          ? 'mobile'
+          : (this._config?.desktop?.position ?? DEFAULT_DESKTOP_POSITION),
+      );
+
+    this._popup = html`
+      <div
+        class="navbar-popup-backdrop"
+        @click=${() => this._closePopup()}></div>
+      <div
+        class="
+          navbar-popup
+          ${popupDirectionClassName}
+          ${labelPositionClassName}
+          ${this._isDesktop ? 'desktop' : ''}
+        "
+        style="${style}">
+        ${popupConfig!.map((popupItem, index) => {
+          const showBadge = this._evaluateBadge(popupItem.badge?.template);
+          return html`<div
+            class="
+              popup-item 
+              ${popupDirectionClassName}
+              ${labelPositionClassName}
+            "
+            style="--index: ${index}"
+            @click=${(e: MouseEvent) => this._handleClick(e, popupItem, true)}>
+            ${showBadge
+              ? html`<div
+                  class="badge"
+                  style="background-color: ${popupItem.badge?.color ||
+                  'red'};"></div>`
+              : html``}
+
+            <div class="button">
+              <ha-icon class="icon" icon="${popupItem.icon}"></ha-icon>
+            </div>
+            ${this._shouldShowLabels()
+              ? html`<div class="label">${popupItem.label ?? ' '}</div>`
+              : html``}
+          </div>`;
+        })}
+      </div>
+    `;
+
+    // Trigger animations after element is rendered
+    requestAnimationFrame(() => {
+      const popup = this.shadowRoot?.querySelector('.navbar-popup');
+      const backdrop = this.shadowRoot?.querySelector('.navbar-popup-backdrop');
+      if (popup && backdrop) {
+        popup.classList.add('visible');
+        backdrop.classList.add('visible');
       }
     });
-    return shouldUpdate;
-  }
+  };
+
+  /**
+   * Private click callback to handle navigation or tap actions
+   */
+  private _handleClick = (e: MouseEvent, route: RouteItem, isPopup = false) => {
+    // Prevent default
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Handle click event
+    if (!isPopup && route.submenu) {
+      // Get the position of the clicked element
+      const target = e.currentTarget as HTMLElement;
+
+      this._openPopup(route.submenu, target);
+    } else if (route.tap_action != null) {
+      const event = new Event('hass-action', { bubbles: true, composed: true });
+      // @ts-ignore
+      event.detail = {
+        action: 'tap',
+        config: {
+          tap_action: route.tap_action,
+        },
+      };
+
+      this.dispatchEvent(event);
+
+      // Close popup
+      this._closePopup();
+    } else {
+      navigate(this, route.url);
+
+      // Close popup
+      this._closePopup();
+    }
+  };
+
+  /**********************************************************************/
+  /* Render function */
+  /**********************************************************************/
 
   /**
    * Default render function
@@ -182,26 +453,30 @@ export class NavbarCard extends LitElement {
     }
 
     const { routes, desktop, mobile } = this._config;
-    const {
-      position: desktopPosition,
-      show_labels: desktopShowLabels,
-      min_width: desktopMinWidth,
-    } = desktop ?? {};
-    const { show_labels: mobileShowLabels } = mobile ?? {};
+    const { position: desktopPosition, hidden: desktopHidden } = desktop ?? {};
+    const { hidden: mobileHidden } = mobile ?? {};
 
     // Keep last render timestamp for debounced state updates
     this._lastRender = new Date().getTime();
 
-    // Check desktop mode
-    const isDesktopMode = (this.screenWidth ?? 0) >= (desktopMinWidth ?? 768);
+    // Check visualization modes
+    const isEditMode =
+      this._inEditDashboardMode || this._inPreviewMode || this._inEditCardMode;
 
     // Choose css classnames
     const desktopPositionClassname =
       mapStringToEnum(DesktopPosition, desktopPosition as string) ??
-      DesktopPosition.bottom;
-    const deviceModeClassName = isDesktopMode ? 'desktop' : 'mobile';
-    const editModeClassname =
-      this._inEditMode || this._inPreviewMode ? 'edit-mode' : '';
+      DEFAULT_DESKTOP_POSITION;
+    const deviceModeClassName = this._isDesktop ? 'desktop' : 'mobile';
+    const editModeClassname = isEditMode ? 'edit-mode' : '';
+
+    // Handle hidden props
+    if (
+      !isEditMode &&
+      ((this._isDesktop && desktopHidden) || (!this._isDesktop && mobileHidden))
+    ) {
+      return html``;
+    }
 
     // TODO use HA ripple effect for icon button
     return html`
@@ -210,41 +485,15 @@ export class NavbarCard extends LitElement {
       </style>
       <ha-card
         class="navbar ${editModeClassname} ${deviceModeClassName} ${desktopPositionClassname}">
-        ${routes?.map((route, index) => {
-          const isActive = this._location == route.url;
-          const showBadge = this.evaluateBadge(route.badge?.template);
-
-          return html`
-            <div
-              key="navbar_item_${index}"
-              class="route ${isActive ? 'active' : ''}"
-              @click=${() => this._handleClick(route)}>
-              ${showBadge
-                ? html`<div
-                    class="badge ${isActive ? 'active' : ''}"
-                    style="background-color: ${route.badge?.color ||
-                    'red'};"></div>`
-                : html``}
-
-              <div class="button ${isActive ? 'active' : ''}">
-                <ha-icon
-                  class="icon ${isActive ? 'active' : ''}"
-                  icon="${isActive && route.icon_selected
-                    ? route.icon_selected
-                    : route.icon}"></ha-icon>
-              </div>
-              ${(isDesktopMode && desktopShowLabels) ||
-              (!isDesktopMode && mobileShowLabels)
-                ? html`<div class="label ${isActive ? 'active' : ''}">
-                    ${route.label ?? ' '}
-                  </div>`
-                : html``}
-            </div>
-          `;
-        })}
+        ${routes?.map(this._renderRoute)}
       </ha-card>
+      ${this._popup}
     `;
   }
+
+  /**********************************************************************/
+  /* Styles */
+  /**********************************************************************/
 
   /**
    * Dynamically apply user-provided styles
@@ -255,165 +504,7 @@ export class NavbarCard extends LitElement {
       : css``;
 
     // Combine default styles and user styles
-    return [this.defaultStyles, userStyles];
-  }
-
-  /**
-   * Custom function to apply default styles instead of using lit's static
-   * styles(), so that we can prioritize user custom styles over the default
-   * ones defined in this card
-   */
-  private get defaultStyles(): CSSResultGroup {
-    // Mobile-first css styling
-    return css`
-      .navbar {
-        --navbar-background-color: var(--card-background-color);
-        --navbar-route-icon-size: 24px;
-        --navbar-primary-color: var(--primary-color);
-
-        background: var(--navbar-background-color);
-        border-radius: 0px;
-        /* TODO harcoded box shadow? */
-        box-shadow: 0px -1px 4px 0px rgba(0, 0, 0, 0.14);
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-        padding: 12px;
-        gap: 10px;
-        width: 100vw;
-        position: fixed;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        top: unset;
-        z-index: 2; /* TODO check if needed */
-      }
-      .route {
-        cursor: pointer;
-        max-width: 60px;
-        width: 100%;
-        position: relative;
-        text-decoration: none;
-        color: var(--primary-text-color);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        transition: filter 0.2s ease;
-        --icon-primary-color: var(--state-inactive-color);
-      }
-      .route:hover {
-        filter: brightness(1.2);
-      }
-
-      /* Button styling */
-      .button {
-        height: 36px;
-        width: 100%;
-        border-radius: 16px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-      }
-      .button.active {
-        background: color-mix(
-          in srgb,
-          var(--navbar-primary-color) 30%,
-          transparent
-        );
-        --icon-primary-color: var(--navbar-primary-color);
-      }
-
-      /* Icon styling */
-      .icon {
-        --mdc-icon-size: var(--navbar-route-icon-size);
-      }
-
-      /* Label styling */
-      .label {
-        flex: 1;
-        width: 100%;
-        /* TODO fix ellipsis*/
-        text-align: center;
-        font-size: var(--paper-font-caption_-_font-size);
-        font-weight: 500;
-        font-family: var(--paper-font-caption_-_font-size);
-      }
-
-      /* Badge styling */
-      .badge {
-        border-radius: 999px;
-        width: 12px;
-        height: 12px;
-        position: absolute;
-        top: 0;
-        right: 0;
-      }
-
-      /* Edit mode styles */
-      .navbar.edit-mode {
-        position: relative !important;
-        flex-direction: row !important;
-        left: unset !important;
-        right: unset !important;
-        bottom: unset !important;
-        top: unset !important;
-        width: auto !important;
-        transform: none !important;
-      }
-
-      /* Desktop mode styles */
-      .navbar.desktop {
-        border-radius: var(--ha-card-border-radius, 12px);
-        box-shadow: var(--material-shadow-elevation-2dp);
-        width: auto;
-        justify-content: space-evenly;
-
-        --navbar-route-icon-size: 28px;
-      }
-      .navbar.desktop.bottom {
-        flex-direction: row;
-        top: unset;
-        right: unset;
-        bottom: 16px;
-        left: 50%;
-        transform: translate(-50%, 0);
-      }
-      .navbar.desktop.top {
-        flex-direction: row;
-        bottom: unset;
-        right: unset;
-        top: 16px;
-        left: 50%;
-        transform: translate(-50%, 0);
-      }
-      .navbar.desktop.left {
-        flex-direction: column;
-        left: calc(var(--mdc-drawer-width, 0px) + 16px);
-        right: unset;
-        bottom: unset;
-        top: 50%;
-        transform: translate(0, -50%);
-      }
-      .navbar.desktop.right {
-        flex-direction: column;
-        right: 16px;
-        left: unset;
-        bottom: unset;
-        top: 50%;
-        transform: translate(0, -50%);
-      }
-      .navbar.desktop .route {
-        height: 60px;
-        width: 60px;
-      }
-      .navbar.desktop .button {
-        flex: unset;
-        height: 100%;
-      }
-    `;
+    return [getDefaultStyles(), userStyles];
   }
 }
 
