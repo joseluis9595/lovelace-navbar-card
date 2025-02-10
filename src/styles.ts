@@ -188,6 +188,7 @@ const POPUP_STYLES = css`
   /* Main popup container */
   /****************************************/
   .navbar-popup {
+    pointer-events: none;
     position: fixed;
     opacity: 0;
     padding: 6px;
@@ -239,6 +240,7 @@ const POPUP_STYLES = css`
   /****************************************/
 
   .popup-item {
+    pointer-events: auto;
     cursor: pointer;
     color: var(--primary-text-color);
     display: flex;
@@ -246,7 +248,8 @@ const POPUP_STYLES = css`
     --icon-primary-color: var(--primary-text-color);
     display: flex;
     flex-direction: row-reverse;
-    width: auto;
+    width: fit-content;
+    height: fit-content;
     gap: 6px;
     align-items: center;
 
