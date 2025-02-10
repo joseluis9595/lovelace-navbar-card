@@ -125,9 +125,9 @@ export class NavbarCard extends LitElement {
       if (route.icon == null) {
         throw new Error('Each route must have an "icon" property configured');
       }
-      if (route.tap_action == null && route.url == null) {
+      if (route.submenu == null && route.tap_action == null && route.url == null) {
         throw new Error(
-          'Each route must either have a "url" or a "tap_action" param',
+          'Each route must either have a "url", "submenu" or a "tap_action" param',
         );
       }
     });
