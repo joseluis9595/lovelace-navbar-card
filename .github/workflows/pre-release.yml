@@ -1,0 +1,64 @@
+name: Create Pre-release on Merge
+
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  build-release:
+    # Run only on Pull requests merged to main
+    if: github.event.pull_request.merged == true && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Extract version from package.json
+      - name: Extract version
+        id: get_version
+        run: echo "version=v$(jq -r .version package.json)" >> $GITHUB_OUTPUT
+
+      # Check if there's already a tag with the current version
+      - name: Check if tag already exists
+        id: check_tag
+        run: |
+          if git ls-remote --tags origin | grep -q "refs/tags/${{ steps.get_version.outputs.version }}$"; then
+            echo "Version ${{ steps.get_version.outputs.version }} already exists in this repo, please change package.json version before releasing"
+            exit 1
+          fi
+
+      # Set up Bun
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+      # Install dependencies and build
+      - name: Install and build
+        run: |
+          bun install
+          bun run build
+
+      # Create tag with this release version
+      - name: Create tag
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{ steps.get_version.outputs.version }}',
+              sha: context.sha
+            })
+
+      # Create the draft release
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./dist/navbar-card.js
+          name: 'NavbarCard ${{ steps.get_version.outputs.version }}'
+          body: '${{ github.event.pull_request.body }}'
+          tag_name: '${{ steps.get_version.outputs.version }}'
+          draft: true
+          generate_release_notes: true
