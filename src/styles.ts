@@ -60,7 +60,7 @@ const NAVBAR_STYLES = css`
     top: unset;
     right: unset;
     bottom: 16px;
-    left: 50%;
+    left: calc((100% + var(--mdc-drawer-width)) / 2);
     transform: translate(-50%, 0);
   }
   .navbar.desktop.top {
@@ -68,7 +68,7 @@ const NAVBAR_STYLES = css`
     bottom: unset;
     right: unset;
     top: 16px;
-    left: 50%;
+    left: calc((100% + var(--mdc-drawer-width)) / 2);
     transform: translate(-50%, 0);
   }
   .navbar.desktop.left {
