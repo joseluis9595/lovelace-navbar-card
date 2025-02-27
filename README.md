@@ -49,9 +49,9 @@ Navbar Card is a custom Lovelace card designed to simplify navigation within you
 | Name      | Type                   | Default    | Description                                           |
 |-----------|------------------------|------------|-------------------------------------------------------|
 | `routes`  | [Routes](#routes)      | `Required` | Defines the array of routes to be shown in the navbar |
-| `template`| [Template](#templates) | -          | Template name                                         |
 | `desktop` | [Desktop](#desktop)    | -          | Options specific to desktop mode                      |
 | `mobile`  | [Mobile](#mobile)      | -          | Options specific to mobile mode                       |
+| `template`| [Template](#template) | -          | Template name                                         |
 | `styles`  | [Styles](#styles)      | -          | Custom CSS styles for the card                        |
 
 
@@ -59,15 +59,16 @@ Navbar Card is a custom Lovelace card designed to simplify navigation within you
 
 Routes represents an array of clickable icons that redirects to a given path. Each item in the array should contain the following configuration:
 
-| Name            	| Type            	 | Default    	| Description                                                     	                                        |
-|-----------------	|-----------------	 |------------	|----------------------------------------------------------------------------------------------------------  |
-| `url`           	| string          	 | `Required*`  | The path to a Lovelace view. Ignored if `tap_action` is defined.                                           |
-| `icon`          	| string          	 | `Required` 	| Material icon to display as this entry icon                     	                                        |
-| `icon_selected` 	| string          	 | -          	| Icon to be displayed when `url` matches the current browser URL 	                                        |
-| `badge`         	| [Badge](#badge) 	 | -          	| Badge configuration                                             	                                        |
-| `label`         	| string          	 | -          	| Label to be displayed under the given route if `show_labels` is true                                       |
+| Name            	| Type            	                   | Default    	| Description                                                     	                                        |
+|-----------------	|------------------------------------	 |------------	|----------------------------------------------------------------------------------------------------------  |
+| `url`           	| string          	                   | `Required*`  | The path to a Lovelace view. Ignored if `tap_action` is defined.                                          |
+| `icon`          	| string          	                   | `Required` 	| Material icon to display as this entry icon                     	                                        |
+| `icon_selected` 	| string          	                   | -          	| Icon to be displayed when `url` matches the current browser URL 	                                        |
+| `badge`         	| [Badge](#badge) 	                   | -          	| Badge configuration                                             	                                        |
+| `label`         	| string \| [JSTemplate](#jstemplate)   | -          	| Label to be displayed under the given route if `show_labels` is true                                       |
 | `tap_action`   	   | [tap_action](https://www.home-assistant.io/dashboards/actions/#tap_action) | -     | Custom tap action configuration. This setting disables the default navigate action.                   |
-| `submenu`         	| [Submenu](#submenu) | -          	| List of routes to display in a popup submenu                                                               |
+| `submenu`         	| [Submenu](#submenu)                   | -          	| List of routes to display in a popup submenu                                                               |
+| `hidden`         	| boolean \| [JSTemplate](#jstemplate)  | -          	| Controls whether to render this route or not                                                               |
 
 > **Note**: `url` is required unless `tap_action` or `submenu` is present. If `tap_action` is defined, `url` is ignored. And if `submenu` is present, both `tap_action` and `url` are ignored.
 
@@ -78,28 +79,92 @@ Configuration to display a small badge on any of the navbar items.
 ![navbar-card-badge](https://github.com/user-attachments/assets/5f548ce3-82b5-422f-a084-715bc73846b0)
 
 
-| Name       	| Type        	| Default 	| Description                                                     	|
-|------------	|-------------	|---------	|-----------------------------------------------------------------	|
-| `template` 	| JS template 	| -       	| Boolean template indicating whether to display the badge or not 	|
-| `color`    	| string      	| red     	| Background color of the badge                                   	|
+| Name       	| Type        	                           | Default 	| Description                                                     	|
+|------------	|--------------------------------------	|---------	|-----------------------------------------------------------------	|
+| `show` 	   | boolean \| [JSTemplate](#jstemplate) 	| false    	| Boolean template indicating whether to display the badge or not 	|
+| `color`    	| string      	                           | red     	| Background color of the badge                                   	|
 
 #### Submenu
 
 For each route, a submenu can be configured, to display a popup when clicked. This action will have precedence over both `tap_action` and `url` when present.
 
-| Name            	| Type            	 | Default    	| Description                                                     	                                        |
-|-----------------	|-----------------	 |------------	|----------------------------------------------------------------------------------------------------------  |
-| `url`           	| string          	 | `Required*`  | The path to a Lovelace view. Ignored if `tap_action` is defined.                                           |
-| `icon`          	| string          	 | `Required` 	| Material icon to display as this entry icon                     	                                        |
-| `badge`         	| [Badge](#badge) 	 | -          	| Badge configuration                                             	                                        |
-| `label`         	| string          	 | -          	| Label to be displayed under the given route if `show_labels` is true                                       |
+| Name            	| Type            	                   | Default    	| Description                                                     	                                        |
+|-----------------	|-----------------------------------	 |------------	|----------------------------------------------------------------------------------------------------------  |
+| `url`           	| string          	                   | `Required*`  | The path to a Lovelace view. Ignored if `tap_action` is defined.                                           |
+| `icon`          	| string          	                   | `Required` 	| Material icon to display as this entry icon                     	                                        |
+| `badge`         	| [Badge](#badge) 	                   | -          	| Badge configuration                                             	                                        |
+| `label`         	| string \| [JSTemplate](#jstemplate)   | -          	| Label to be displayed under the given route if `show_labels` is true                                       |
 | `tap_action`   	   | [tap_action](https://www.home-assistant.io/dashboards/actions/#tap_action) | -     | Custom tap action configuration. This setting disables the default navigate action.                   |
 
 > **Note**: `url` is required unless `tap_action` is present. If `tap_action` is defined, `url` is ignored.
 
+
+#### JSTemplate
+
+You can easily customize some properties of the navbar-card by writing your own JavaScript rules. To do this, you simply wrap the value of the field that supports JSTemplates in `[[[` and `]]]`, then write the JavaScript code that determines the property's value.
+
+
+Apart from using plain javascript, you can access some predefined variables:
+- `states` -> Contains the global state of all entities in HomeAssistant. To get the state of a specific entity, use: `states['entity_type.your_entity'].state`.
+- `user` -> Information about the current logged user.
+- `hass` -> Complete hass object.
+
+> **Tip**: You can use `console.log` in your JSTemplate to help debug your HomeAssistant states.
+
+Below is an example using JSTemplates for displaying a route only for one user, and a label indicating the number of lights currently on:
+
+```yaml
+type: custom:navbar-card
+desktop:
+  position: bottom
+  show_labels: true
+routes:
+  - url: /lovelace/lights
+    label: |
+      [[[ 
+        const lightsOn = Object.entries(hass.states)
+          .filter(([entityId, value]) => {
+            return entityId.startsWith('light.') && value.state == 'on';
+          })
+          .length;
+        return `Lights (${lightsOn})` 
+      ]]]
+    icon: mdi:lightbulb-outline
+    icon_selected: mdi:lightbulb
+  - url: /lovelace/devices
+    label: Devices
+    icon: mdi:devices
+    hidden: |
+      [[[ return user.name != "jose"; ]]]  
+```
+
 ---
 
-### Templates
+### Desktop
+
+Specific configuration for desktop mode.
+
+| Name          | Type                                   | Default  | Description                                                                |
+|---------------|----------------------------------------|----------|----------------------------------------------------------------------------|
+| `show_labels` | boolean                                | `false`  | Whether or not to display labels under each route                          |
+| `min_width`   | number                                 | `768`    | Screen size from which the navbar will be displayed as its desktop variant |
+| `position`    | `top` \| `bottom` \| `left` \| `right` | `bottom` | Position of the navbar on desktop devices                                  |
+| `hidden`      | boolean \| [JSTemplate](#jstemplate)   | `false`  | Set to true to hide the navbar on desktop devices                          |
+
+---
+
+### Mobile
+
+Specific configuration for mobile mode.
+
+| Name          | Type                                 | Default | Description                                       |
+|---------------|------------------------------------  |---------|---------------------------------------------------|
+| `show_labels` | boolean                              | `false` | Whether or not to display labels under each route |
+| `hidden`      | boolean \| [JSTemplate](#jstemplate) | `false` | Set to true to hide the navbar on mobile devices  |
+
+---
+
+### Template
 
 Templates allow you to predefine a custom configuration for `navbar-card` and reuse it across multiple dashboards. This approach saves time and simplifies maintenance — any change to the template will automatically apply to all cards using it. 
 
@@ -151,30 +216,6 @@ styles: |
     --navbar-primary-color: red;
   }
 ```
-
----
-
-### Desktop
-
-Specific configuration for desktop mode.
-
-| Name          | Type                                   | Default  | Description                                                                |
-|---------------|----------------------------------------|----------|----------------------------------------------------------------------------|
-| `show_labels` | boolean                                | `false`  | Whether or not to display labels under each route                          |
-| `min_width`   | number                                 | `768`    | Screen size from which the navbar will be displayed as its desktop variant |
-| `position`    | `top` \| `bottom` \| `left` \| `right` | `bottom` | Position of the navbar on desktop devices                                  |
-| `hidden`      | boolean                                | `false`  | Set to true to hide the navbar on desktop devices                          |
-
----
-
-### Mobile
-
-Specific configuration for mobile mode.
-
-| Name          | Type    | Default | Description                                       |
-|---------------|---------|---------|---------------------------------------------------|
-| `show_labels` | boolean | `false` | Whether or not to display labels under each route |
-| `hidden`      | boolean | `false` | Set to true to hide the navbar on mobile devices  |
 
 ---
 
