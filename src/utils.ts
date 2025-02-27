@@ -51,13 +51,12 @@ export const processTemplate = (hass: HomeAssistant, template?: any) => {
   if (!(template.trim().startsWith('[[[') && template.trim().endsWith(']]]'))) {
     return template;
   }
-  console.log(template);
 
   // Run template against home assistant states
   try {
     const cleanTemplate = template.replace(/\[\[\[|\]\]\]/g, '');
-    const func = new Function('states', cleanTemplate);
-    return func(hass.states);
+    const func = new Function('states', 'user', 'hass', cleanTemplate);
+    return func(hass.states, hass.user, hass);
   } catch (e) {
     console.warn(`NavbarCard: Error evaluating template: ${e}`);
     return template;
