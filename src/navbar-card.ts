@@ -10,7 +10,11 @@ import { customElement, state } from 'lit/decorators.js';
 import { version } from '../package.json';
 import { HomeAssistant, navigate } from 'custom-card-helpers';
 import { DesktopPosition, NavbarCardConfig, RouteItem } from './types';
-import { mapStringToEnum } from './utils';
+import {
+  mapStringToEnum,
+  processBadgeTemplate,
+  processTemplate,
+} from './utils';
 import { getNavbarTemplates } from './dom-utils';
 import { getDefaultStyles } from './styles';
 
@@ -125,7 +129,11 @@ export class NavbarCard extends LitElement {
       if (route.icon == null) {
         throw new Error('Each route must have an "icon" property configured');
       }
-      if (route.submenu == null && route.tap_action == null && route.url == null) {
+      if (
+        route.submenu == null &&
+        route.tap_action == null &&
+        route.url == null
+      ) {
         throw new Error(
           'Each route must either have a "url", "submenu" or a "tap_action" param',
         );
@@ -145,8 +153,8 @@ export class NavbarCard extends LitElement {
         return true;
       }
       if (
-        propName === 'hass' &&
-        new Date().getTime() - (this._lastRender ?? 0) > 1000
+        propName === 'hass'
+        // && new Date().getTime() - (this._lastRender ?? 0) > 1000
       ) {
         return true;
       }
@@ -195,21 +203,6 @@ export class NavbarCard extends LitElement {
   };
 
   /**
-   *  Badge visibility evaluator
-   */
-  private _evaluateBadge(template?: string): boolean {
-    if (!template || !this.hass) return false;
-    try {
-      // Dynamically evaluate template with current Home Assistant context
-      const func = new Function('states', `return ${template}`);
-      return func(this.hass.states) as boolean;
-    } catch (e) {
-      console.warn(`NavbarCard: Error evaluating badge template: ${e}`);
-      return false;
-    }
-  }
-
-  /**
    * Check if we are on a desktop device
    */
   private _checkDesktop = () => {
@@ -222,7 +215,16 @@ export class NavbarCard extends LitElement {
    */
   private _renderRoute = (route: RouteItem) => {
     const isActive = this._location == route.url;
-    const showBadge = this._evaluateBadge(route.badge?.template);
+    let showBadge = false;
+    if (route.badge?.show) {
+      showBadge = processTemplate(this.hass, route.badge?.show);
+    } else if (route.badge?.template) {
+      showBadge = processBadgeTemplate(this.hass, route.badge?.template);
+    }
+
+    if (processTemplate(this.hass, route.hidden)) {
+      return null;
+    }
 
     return html`
       <div
@@ -243,7 +245,7 @@ export class NavbarCard extends LitElement {
         </div>
         ${this._shouldShowLabels()
           ? html`<div class="label ${isActive ? 'active' : ''}">
-              ${route.label ?? ' '}
+              ${processTemplate(this.hass, route.label) ?? ' '}
             </div>`
           : html``}
       </div>
@@ -365,31 +367,44 @@ export class NavbarCard extends LitElement {
           ${this._isDesktop ? 'desktop' : ''}
         "
         style="${style}">
-        ${popupConfig!.map((popupItem, index) => {
-          const showBadge = this._evaluateBadge(popupItem.badge?.template);
-          return html`<div
-            class="
+        ${popupConfig!
+          .map((popupItem, index) => {
+            const showBadge = processBadgeTemplate(
+              this.hass,
+              popupItem.badge?.template,
+            );
+
+            if (processTemplate(this.hass, popupItem.hidden)) {
+              return null;
+            }
+
+            return html`<div
+              class="
               popup-item 
               ${popupDirectionClassName}
               ${labelPositionClassName}
             "
-            style="--index: ${index}"
-            @click=${(e: MouseEvent) => this._handleClick(e, popupItem, true)}>
-            ${showBadge
-              ? html`<div
-                  class="badge"
-                  style="background-color: ${popupItem.badge?.color ||
-                  'red'};"></div>`
-              : html``}
+              style="--index: ${index}"
+              @click=${(e: MouseEvent) =>
+                this._handleClick(e, popupItem, true)}>
+              ${showBadge
+                ? html`<div
+                    class="badge"
+                    style="background-color: ${popupItem.badge?.color ||
+                    'red'};"></div>`
+                : html``}
 
-            <div class="button">
-              <ha-icon class="icon" icon="${popupItem.icon}"></ha-icon>
-            </div>
-            ${this._shouldShowLabels()
-              ? html`<div class="label">${popupItem.label ?? ' '}</div>`
-              : html``}
-          </div>`;
-        })}
+              <div class="button">
+                <ha-icon class="icon" icon="${popupItem.icon}"></ha-icon>
+              </div>
+              ${this._shouldShowLabels()
+                ? html`<div class="label">
+                    ${processTemplate(this.hass, popupItem.label) ?? ' '}
+                  </div>`
+                : html``}
+            </div>`;
+          })
+          .filter(x => x != null)}
       </div>
     `;
 
@@ -473,7 +488,8 @@ export class NavbarCard extends LitElement {
     // Handle hidden props
     if (
       !isEditMode &&
-      ((this._isDesktop && desktopHidden) || (!this._isDesktop && mobileHidden))
+      ((this._isDesktop && !!processTemplate(this.hass, desktopHidden)) ||
+        (!this._isDesktop && !!processTemplate(this.hass, mobileHidden)))
     ) {
       return html``;
     }
@@ -485,7 +501,7 @@ export class NavbarCard extends LitElement {
       </style>
       <ha-card
         class="navbar ${editModeClassname} ${deviceModeClassName} ${desktopPositionClassname}">
-        ${routes?.map(this._renderRoute)}
+        ${routes?.map(this._renderRoute).filter(x => x != null)}
       </ha-card>
       ${this._popup}
     `;

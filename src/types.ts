@@ -7,17 +7,21 @@ export enum DesktopPosition {
   right = 'right',
 }
 
+type JSTemplate = string;
+
 export type RouteItem = {
   url: string;
   icon: string;
   icon_selected?: string;
-  label?: string;
+  label?: string | JSTemplate;
   badge?: {
-    template?: string;
+    template?: string; // TODO deprecate
     color?: string;
+    show?: boolean | JSTemplate;
   };
   tap_action?: ActionConfig;
   submenu?: PopupItem[];
+  hidden?: boolean | JSTemplate;
 };
 
 export type PopupItem = Omit<RouteItem, 'submenu' | 'icon_selected'>;
@@ -29,11 +33,11 @@ export type NavbarCardConfig = {
     show_labels?: boolean;
     min_width?: number;
     position?: DesktopPosition;
-    hidden?: boolean;
+    hidden?: boolean | JSTemplate;
   };
   mobile?: {
     show_labels?: boolean;
-    hidden?: boolean;
+    hidden?: boolean | JSTemplate;
   };
   styles?: string;
 };
