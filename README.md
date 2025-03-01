@@ -107,7 +107,6 @@ You can easily customize some properties of the navbar-card by writing your own 
 Apart from using plain javascript, you can access some predefined variables:
 - `states` -> Contains the global state of all entities in HomeAssistant. To get the state of a specific entity, use: `states['entity_type.your_entity'].state`.
 - `user` -> Information about the current logged user.
-- `hass` -> Complete hass object.
 
 > **Tip**: You can use `console.log` in your JSTemplate to help debug your HomeAssistant states.
 
@@ -122,7 +121,7 @@ routes:
   - url: /lovelace/lights
     label: |
       [[[ 
-        const lightsOn = Object.entries(hass.states)
+        const lightsOn = Object.entries(states)
           .filter(([entityId, value]) => {
             return entityId.startsWith('light.') && value.state == 'on';
           })
