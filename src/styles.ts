@@ -1,4 +1,4 @@
-import { css, CSSResultGroup } from 'lit';
+import { css, CSSResult } from 'lit';
 
 const HOST_STYLES = css`
   :host {
@@ -305,7 +305,7 @@ const POPUP_STYLES = css`
  * styles(), so that we can prioritize user custom styles over the default
  * ones defined in this card
  */
-export const getDefaultStyles = (): CSSResultGroup => {
+export const getDefaultStyles = (): CSSResult => {
   // Mobile-first css styling
   return css`
     ${HOST_STYLES}

@@ -1,11 +1,4 @@
-import {
-  css,
-  CSSResult,
-  CSSResultGroup,
-  html,
-  LitElement,
-  unsafeCSS,
-} from 'lit';
+import { css, CSSResult, html, LitElement, unsafeCSS } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { version } from '../package.json';
 import { HomeAssistant, navigate } from 'custom-card-helpers';
@@ -88,6 +81,11 @@ export class NavbarCard extends LitElement {
     // Check if the card is in preview mode (new cards list)
     this._inPreviewMode =
       this.parentElement?.closest('.card > .preview') != null;
+
+    // Manually append styles to the card to prevent unnecessary style re-rendering
+    const style = document.createElement('style');
+    style.textContent = this.generateCustomStyles().cssText;
+    this.shadowRoot?.appendChild(style);
   }
 
   disconnectedCallback() {
@@ -135,7 +133,7 @@ export class NavbarCard extends LitElement {
         route.url == null
       ) {
         throw new Error(
-          'Each route must either have a "url", "submenu" or a "tap_action" param',
+          'Each route must have either "url", "submenu" or "tap_action" property configured',
         );
       }
     });
@@ -496,9 +494,6 @@ export class NavbarCard extends LitElement {
 
     // TODO use HA ripple effect for icon button
     return html`
-      <style>
-        ${this.customStyles}
-      </style>
       <ha-card
         class="navbar ${editModeClassname} ${deviceModeClassName} ${desktopPositionClassname}">
         ${routes?.map(this._renderRoute).filter(x => x != null)}
@@ -514,13 +509,16 @@ export class NavbarCard extends LitElement {
   /**
    * Dynamically apply user-provided styles
    */
-  private get customStyles(): CSSResultGroup {
+  private generateCustomStyles(): CSSResult {
     const userStyles = this._config?.styles
       ? unsafeCSS(this._config.styles)
       : css``;
 
     // Combine default styles and user styles
-    return [getDefaultStyles(), userStyles];
+    return css`
+      ${getDefaultStyles()}
+      ${userStyles}
+    `;
   }
 }
 

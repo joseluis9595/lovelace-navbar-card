@@ -245,6 +245,13 @@ Here is a breakdown of the CSS classes available for customization:
 
 * `.badge`: Small indicator or badge that appears over the icon (if configured).
 
+* `.navbar-popup-backdrop`: Backdrop styles for the popup.
+
+* `.popup-item`: Styles applied to the container of each popup-item. This object contains both the "button" with the icon, and the label.
+  * `.popup-item.label-[top | bottom | left | right]`: Specific styles for different positions of the label.
+  * `.popup-item .label`: Styles applied to the label of each popup item.
+  * `.popup-item .button`: Button for each popup item, containing just the icon.
+
 
 <br>
 
