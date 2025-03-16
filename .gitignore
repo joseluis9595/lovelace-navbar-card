@@ -1,7 +1,10 @@
+# JS output files
 /node_modules/
 /dist
-*.log
 
+# Misc
+*.log
 TODO.txt
 
-navbar-card.js
+# OS specifics
+.DS_Store
