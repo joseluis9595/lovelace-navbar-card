@@ -20,6 +20,7 @@ export type RouteItem = {
     show?: boolean | JSTemplate;
   };
   tap_action?: ActionConfig;
+  hold_action?: ActionConfig;
   submenu?: PopupItem[];
   hidden?: boolean | JSTemplate;
 };

@@ -62,3 +62,19 @@ export const processTemplate = (hass: HomeAssistant, template?: any) => {
     return template;
   }
 };
+
+export const fireDOMEvent = (
+  node: HTMLElement | Window,
+  type: Event['type'],
+  options?: { bubbles?: boolean; composed?: boolean },
+  detail?: any,
+) => {
+  const event = new Event(type, options ?? {});
+  (event as any).detail = detail;
+  node.dispatchEvent(event);
+  return event;
+};
+
+export const hapticFeedback = (hapticType: string = 'selection') => {
+  return fireDOMEvent(window, 'haptic', undefined, hapticType);
+};

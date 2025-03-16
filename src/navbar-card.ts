@@ -4,6 +4,8 @@ import { version } from '../package.json';
 import { HomeAssistant, navigate } from 'custom-card-helpers';
 import { DesktopPosition, NavbarCardConfig, RouteItem } from './types';
 import {
+  fireDOMEvent,
+  hapticFeedback,
   mapStringToEnum,
   processBadgeTemplate,
   processTemplate,
@@ -17,7 +19,7 @@ declare global {
   }
 }
 
-// Register our new custom card
+// Register navbar-card
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: 'navbar-card',
@@ -51,6 +53,10 @@ export class NavbarCard extends LitElement {
   @state() private _lastRender?: number;
   @state() private _location?: string;
   @state() private _popup?: any;
+
+  // hold_action state variables
+  private holdTimeoutId: number | null = null;
+  private holdTriggered: boolean = false;
 
   /**********************************************************************/
   /* Lit native callbacks */
@@ -90,7 +96,6 @@ export class NavbarCard extends LitElement {
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    // Remove event listeners
     window.removeEventListener('resize', this._checkDesktop);
   }
 
@@ -193,7 +198,6 @@ export class NavbarCard extends LitElement {
   private _shouldShowLabels = () => {
     const { show_labels: desktopShowLabels } = this._config?.desktop ?? {};
     const { show_labels: mobileShowLabels } = this._config?.mobile ?? {};
-
     return (
       (this._isDesktop && desktopShowLabels) ||
       (!this._isDesktop && mobileShowLabels)
@@ -227,7 +231,11 @@ export class NavbarCard extends LitElement {
     return html`
       <div
         class="route ${isActive ? 'active' : ''}"
-        @click=${(e: MouseEvent) => this._handleClick(e, route)}>
+        @pointerdown=${(e: PointerEvent) => this._handlePointerDown(e, route)}
+        @pointermove=${(e: PointerEvent) => this._handlePointerMove(e, route)}
+        @pointerup=${(e: PointerEvent) => this._handlePointerUp(e, route)}
+        @pointercancel=${(e: PointerEvent) =>
+          this._handlePointerMove(e, route)}>
         ${showBadge
           ? html`<div
               class="badge ${isActive ? 'active' : ''}"
@@ -251,7 +259,7 @@ export class NavbarCard extends LitElement {
   };
 
   /**
-   * Handle gracefully closing the popup
+   * Handle gracefully closing the popup.
    */
   private _closePopup = () => {
     const popup = this.shadowRoot?.querySelector('.navbar-popup');
@@ -417,38 +425,78 @@ export class NavbarCard extends LitElement {
     });
   };
 
-  /**
-   * Private click callback to handle navigation or tap actions
-   */
+  /**********************************************************************/
+  /* Pointer event listenrs */
+  /**********************************************************************/
+  private _handlePointerDown = (e: PointerEvent, route: RouteItem) => {
+    if (route.hold_action) {
+      this.holdTriggered = false;
+      this.holdTimeoutId = window.setTimeout(() => {
+        hapticFeedback();
+        this.holdTriggered = true;
+      }, 500);
+    }
+  };
+
+  private _handlePointerMove = (e: PointerEvent, route: RouteItem) => {
+    if (this.holdTimeoutId !== null) {
+      clearTimeout(this.holdTimeoutId);
+      this.holdTimeoutId = null;
+    }
+  };
+
+  private _handlePointerUp = (e: PointerEvent, route: RouteItem) => {
+    if (this.holdTimeoutId !== null) {
+      clearTimeout(this.holdTimeoutId);
+      this.holdTimeoutId = null;
+    }
+    if (this.holdTriggered && route.hold_action) {
+      fireDOMEvent(
+        this,
+        'hass-action',
+        { bubbles: true, composed: true },
+        {
+          action: 'hold',
+          config: {
+            hold_action: route.hold_action,
+          },
+        },
+      );
+      this.holdTriggered = false;
+    } else {
+      this._handleClick(e as unknown as MouseEvent, route);
+    }
+  };
+
   private _handleClick = (e: MouseEvent, route: RouteItem, isPopup = false) => {
     // Prevent default
     e.preventDefault();
     e.stopPropagation();
 
-    // Handle click event
     if (!isPopup && route.submenu) {
-      // Get the position of the clicked element
+      hapticFeedback();
       const target = e.currentTarget as HTMLElement;
 
-      this._openPopup(route.submenu, target);
+      // Delay opening the popup to allow the current event to finish
+      setTimeout(() => {
+        this._openPopup(route.submenu, target);
+      }, 10);
     } else if (route.tap_action != null) {
-      const event = new Event('hass-action', { bubbles: true, composed: true });
-      // @ts-ignore
-      event.detail = {
-        action: 'tap',
-        config: {
-          tap_action: route.tap_action,
+      hapticFeedback();
+      fireDOMEvent(
+        this,
+        'hass-action',
+        { bubbles: true, composed: true },
+        {
+          action: 'tap',
+          config: {
+            tap_action: route.tap_action,
+          },
         },
-      };
-
-      this.dispatchEvent(event);
-
-      // Close popup
+      );
       this._closePopup();
     } else {
       navigate(this, route.url);
-
-      // Close popup
       this._closePopup();
     }
   };
@@ -457,9 +505,6 @@ export class NavbarCard extends LitElement {
   /* Render function */
   /**********************************************************************/
 
-  /**
-   * Default render function
-   */
   protected render() {
     if (!this._config) {
       return html``;
