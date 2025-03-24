@@ -216,7 +216,11 @@ export class NavbarCard extends LitElement {
    * Render route item
    */
   private _renderRoute = (route: RouteItem) => {
-    const isActive = this._location == route.url;
+    const isActive =
+      route.selected != null
+        ? processTemplate(this.hass, route.selected)
+        : this._location == route.url;
+
     let showBadge = false;
     if (route.badge?.show) {
       showBadge = processTemplate(this.hass, route.badge?.show);

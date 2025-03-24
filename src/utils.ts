@@ -30,7 +30,7 @@ export const processBadgeTemplate = (
     const func = new Function('states', `return ${template}`);
     return func(hass.states) as boolean;
   } catch (e) {
-    console.warn(`NavbarCard: Error evaluating badge template: ${e}`);
+    console.error(`NavbarCard: Error evaluating badge template: ${e}`);
     return false;
   }
 };
@@ -58,7 +58,7 @@ export const processTemplate = (hass: HomeAssistant, template?: any) => {
     const func = new Function('states', 'user', 'hass', cleanTemplate);
     return func(hass.states, hass.user, hass);
   } catch (e) {
-    console.warn(`NavbarCard: Error evaluating template: ${e}`);
+    console.error(`NavbarCard: Error evaluating template: ${e}`);
     return template;
   }
 };

@@ -23,6 +23,7 @@ export type RouteItem = {
   hold_action?: ActionConfig;
   submenu?: PopupItem[];
   hidden?: boolean | JSTemplate;
+  selected?: boolean | JSTemplate;
 };
 
 export type PopupItem = Omit<RouteItem, 'submenu' | 'icon_selected'>;
