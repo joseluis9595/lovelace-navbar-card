@@ -70,6 +70,7 @@ Routes represents an array of clickable icons that redirects to a given path. Ea
 | `hold_action`	    | [hold_action](https://www.home-assistant.io/dashboards/actions/#hold_action) | -     | Custom hold action configuration.                                        |
 | `submenu`        	| [Submenu](#submenu)                   | -          	| List of routes to display in a popup submenu                                                              |
 | `hidden`         	| boolean \| [JSTemplate](#jstemplate)  | -          	| Controls whether to render this route or not                                                              |
+| `selected`         | boolean \| [JSTemplate](#jstemplate)  | -          	| Controls whether to display this route as selected or not. If not defined, the selected status will be computed as `route.url == window.location.pathname`|
 
 > **Note**: `url` is required unless `tap_action` or `submenu` is present. If `tap_action` is defined, `url` is ignored. And if `submenu` is present, both `tap_action` and `url` are ignored.
 
