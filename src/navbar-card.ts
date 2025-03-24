@@ -177,6 +177,10 @@ export class NavbarCard extends LitElement {
           url: `${window.location.pathname}/devices`,
           icon: 'mdi:devices',
           label: 'Devices',
+          hold_action: {
+            action: 'navigate',
+            navigation_path: '/config/devices/dashboard',
+          },
         },
         {
           url: '/config/automation/dashboard',
@@ -184,6 +188,28 @@ export class NavbarCard extends LitElement {
           label: 'Automations',
         },
         { url: '/config/dashboard', icon: 'mdi:cog', label: 'Settings' },
+        {
+          icon: 'mdi:dots-horizontal',
+          label: 'More',
+          submenu: [
+            { icon: 'mdi:cog', url: '/config/dashboard' },
+            {
+              icon: 'mdi:hammer',
+              url: '/developer-tools/yaml',
+            },
+            {
+              icon: 'mdi:power',
+              tap_action: {
+                action: 'call-service',
+                service: 'homeassistant.restart',
+                service_data: {},
+                confirmation: {
+                  text: 'Are you sure you want to restart Home Assistant?',
+                },
+              },
+            },
+          ],
+        },
       ],
     };
   }
@@ -484,7 +510,7 @@ export class NavbarCard extends LitElement {
       // Delay opening the popup to allow the current event to finish
       setTimeout(() => {
         this._openPopup(route.submenu, target);
-      }, 10);
+      }, 100);
     } else if (route.tap_action != null) {
       hapticFeedback();
       fireDOMEvent(
