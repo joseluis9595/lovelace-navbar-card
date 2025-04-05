@@ -60,7 +60,6 @@ export class NavbarCard extends LitElement {
   private pointerStartX: number = 0;
   private pointerStartY: number = 0;
 
-
   /**********************************************************************/
   /* Lit native callbacks */
   /**********************************************************************/
@@ -100,7 +99,7 @@ export class NavbarCard extends LitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
     window.removeEventListener('resize', this._checkDesktop);
-    
+
     // Force popup closure without animation to prevent memory leaks
     this._popup = null;
   }
@@ -147,11 +146,6 @@ export class NavbarCard extends LitElement {
         throw new Error(
           'Each route must have either "url", "popup" or "tap_action" property configured',
         );
-      }
-      
-      // Move submenu to popup for backward compatibility
-      if (route.submenu && !route.popup) {
-        route.popup = route.submenu;
       }
     });
 
@@ -400,7 +394,7 @@ export class NavbarCard extends LitElement {
       console.warn('No popup items provided');
       return;
     }
-    
+
     const anchorRect = target.getBoundingClientRect();
 
     const { style, labelPositionClassName, popupDirectionClassName } =
@@ -482,7 +476,7 @@ export class NavbarCard extends LitElement {
     // Store the starting position for movement detection
     this.pointerStartX = e.clientX;
     this.pointerStartY = e.clientY;
-    
+
     if (route.hold_action) {
       this.holdTriggered = false;
       this.holdTimeoutId = window.setTimeout(() => {
@@ -496,7 +490,7 @@ export class NavbarCard extends LitElement {
     // Calculate movement distance to prevent accidental hold triggers
     const moveX = Math.abs(e.clientX - this.pointerStartX);
     const moveY = Math.abs(e.clientY - this.pointerStartY);
-    
+
     // If moved more than 10px in any direction, cancel the hold action
     if (moveX > 10 || moveY > 10) {
       if (this.holdTimeoutId !== null) {
@@ -511,10 +505,10 @@ export class NavbarCard extends LitElement {
       clearTimeout(this.holdTimeoutId);
       this.holdTimeoutId = null;
     }
-    
+
     if (this.holdTriggered && route.hold_action) {
       if (route.hold_action.action === 'open-popup') {
-        const popupItems = route.popup || route.submenu;
+        const popupItems = route.popup ?? route.submenu;
         if (!popupItems) {
           console.error('No popup items found for route:', route);
         } else {
@@ -540,13 +534,17 @@ export class NavbarCard extends LitElement {
     }
   };
 
-  private _handleClick = (e: MouseEvent, route: RouteItem, isPopupItem = false) => {
+  private _handleClick = (
+    e: MouseEvent,
+    route: RouteItem,
+    isPopupItem = false,
+  ) => {
     // Prevent default
     e.preventDefault();
     e.stopPropagation();
 
     if (!isPopupItem && route.tap_action?.action === 'open-popup') {
-      const popupItems = route.popup || route.submenu;
+      const popupItems = route.popup ?? route.submenu;
       if (!popupItems) {
         console.error('No popup items found for route:', route);
       } else {
