@@ -57,6 +57,9 @@ export class NavbarCard extends LitElement {
   // hold_action state variables
   private holdTimeoutId: number | null = null;
   private holdTriggered: boolean = false;
+  private pointerStartX: number = 0;
+  private pointerStartY: number = 0;
+
 
   /**********************************************************************/
   /* Lit native callbacks */
@@ -97,6 +100,9 @@ export class NavbarCard extends LitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
     window.removeEventListener('resize', this._checkDesktop);
+    
+    // Force popup closure without animation to prevent memory leaks
+    this._popup = null;
   }
 
   setConfig(config) {
@@ -473,6 +479,10 @@ export class NavbarCard extends LitElement {
   /* Pointer event listenrs */
   /**********************************************************************/
   private _handlePointerDown = (e: PointerEvent, route: RouteItem) => {
+    // Store the starting position for movement detection
+    this.pointerStartX = e.clientX;
+    this.pointerStartY = e.clientY;
+    
     if (route.hold_action) {
       this.holdTriggered = false;
       this.holdTimeoutId = window.setTimeout(() => {
@@ -483,9 +493,16 @@ export class NavbarCard extends LitElement {
   };
 
   private _handlePointerMove = (e: PointerEvent, route: RouteItem) => {
-    if (this.holdTimeoutId !== null) {
-      clearTimeout(this.holdTimeoutId);
-      this.holdTimeoutId = null;
+    // Calculate movement distance to prevent accidental hold triggers
+    const moveX = Math.abs(e.clientX - this.pointerStartX);
+    const moveY = Math.abs(e.clientY - this.pointerStartY);
+    
+    // If moved more than 10px in any direction, cancel the hold action
+    if (moveX > 10 || moveY > 10) {
+      if (this.holdTimeoutId !== null) {
+        clearTimeout(this.holdTimeoutId);
+        this.holdTimeoutId = null;
+      }
     }
   };
 
