@@ -260,6 +260,7 @@ export class NavbarCard extends LitElement {
     if (route.badge?.show) {
       showBadge = processTemplate(this.hass, route.badge?.show);
     } else if (route.badge?.template) {
+      // TODO deprecate this
       showBadge = processBadgeTemplate(this.hass, route.badge?.template);
     }
 
