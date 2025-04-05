@@ -66,13 +66,78 @@ Routes represents an array of clickable icons that redirects to a given path. Ea
 | `icon_selected` 	| string          	                    | -          	| Icon to be displayed when `url` matches the current browser URL 	                                        |
 | `badge`         	| [Badge](#badge) 	                    | -          	| Badge configuration                                             	                                        |
 | `label`         	| string \| [JSTemplate](#jstemplate)   | -          	| Label to be displayed under the given route if `show_labels` is true                                      |
-| `tap_action`   	  | [tap_action](https://www.home-assistant.io/dashboards/actions/#tap_action) | -     | Custom tap action configuration. This setting disables the default navigate action.                   |
-| `hold_action`	    | [hold_action](https://www.home-assistant.io/dashboards/actions/#hold_action) | -     | Custom hold action configuration.                                        |
-| `submenu`        	| [Submenu](#submenu)                   | -          	| List of routes to display in a popup submenu                                                              |
+| `tap_action`   	  | [tap_action](#actions) | -     | Custom tap action configuration, including 'open-popup' to display a popup menu.                           |
+| `hold_action`	    | [hold_action](#actions) | -     | Custom hold action configuration, including 'open-popup' to display a popup menu.                          |
+| `popup`        	| [Popup items](#popup-items)           | -          	| List of routes to display in a popup menu                                                                 |
 | `hidden`         	| boolean \| [JSTemplate](#jstemplate)  | -          	| Controls whether to render this route or not                                                              |
 | `selected`         | boolean \| [JSTemplate](#jstemplate)  | -          	| Controls whether to display this route as selected or not. If not defined, the selected status will be computed as `route.url == window.location.pathname`|
 
-> **Note**: `url` is required unless `tap_action` or `submenu` is present. If `tap_action` is defined, `url` is ignored. And if `submenu` is present, both `tap_action` and `url` are ignored.
+> **Note**: `url` is required unless `tap_action` or `popup` is present. If `tap_action` is defined, `url` is ignored.
+
+#### Actions
+
+Apart from the [standard Home Assistant actions](https://www.home-assistant.io/dashboards/actions/) (navigate, call-service, etc.), `navbar-card` supports a custom action to open popup menus:
+
+| Action       | Description                                       | Required Parameters |
+|--------------|---------------------------------------------------|---------------------|
+| `open-popup` | Opens the popup menu defined in the route         | None                |
+
+Example:
+```yaml
+tap_action:
+  action: open-popup  # Will open the popup menu defined for this route
+```
+
+Or:
+```yaml
+hold_action:
+  action: open-popup  # Will open the popup menu when the route is held
+```
+
+### Example with Open-Popup Action
+
+```yaml
+type: custom:navbar-card
+desktop:
+  position: bottom
+  show_labels: true
+mobile:
+  show_labels: true
+routes:
+  - url: /lovelace/home
+    icon: mdi:home
+    icon_selected: mdi:home-variant
+    label: Home
+  - icon: mdi:cog
+    label: Settings
+    # Open settings page on tap
+    url: /config/dashboard
+    # But show a popup menu on hold
+    hold_action:
+      action: open-popup
+    popup:
+      - icon: mdi:account
+        url: /config/person
+        label: Users
+      - icon: mdi:hammer
+        url: /developer-tools/yaml
+        label: Developer
+      - icon: mdi:power
+        url: /config/server_control
+        label: Server
+  - icon: mdi:dots-horizontal
+    label: More
+    # Open popup menu on tap
+    tap_action:
+      action: open-popup
+    popup:
+      - icon: mdi:cast
+        url: /lovelace/media
+        label: Media
+      - icon: mdi:lightbulb
+        url: /lovelace/lights
+        label: Lights
+```
 
 #### Badge
 
@@ -86,9 +151,9 @@ Configuration to display a small badge on any of the navbar items.
 | `show` 	   | boolean \| [JSTemplate](#jstemplate) 	| false    	| Boolean template indicating whether to display the badge or not 	|
 | `color`    	| string      	                           | red     	| Background color of the badge                                   	|
 
-#### Submenu
+#### Popup Items
 
-For each route, a submenu can be configured, to display a popup when clicked. This action will have precedence over both `tap_action` and `url` when present.
+For each route, a popup menu can be configured, to display a popup when clicked. This is activated using the `open-popup` action in either `tap_action` or `hold_action`.
 
 | Name            	| Type            	                   | Default    	| Description                                                     	                                        |
 |-----------------	|-----------------------------------	 |------------	|----------------------------------------------------------------------------------------------------------  |
@@ -96,8 +161,8 @@ For each route, a submenu can be configured, to display a popup when clicked. Th
 | `icon`          	| string          	                   | `Required` 	| Material icon to display as this entry icon                     	                                        |
 | `badge`         	| [Badge](#badge) 	                   | -          	| Badge configuration                                             	                                        |
 | `label`         	| string \| [JSTemplate](#jstemplate)   | -          	| Label to be displayed under the given route if `show_labels` is true                                       |
-| `tap_action`   	  | [tap_action](https://www.home-assistant.io/dashboards/actions/#tap_action) | -     | Custom tap action configuration. This setting disables the default navigate action.                   |
-| `hold_action`	    | [hold_action](https://www.home-assistant.io/dashboards/actions/#hold_action) | -     | Custom hold action configuration.                                        |
+| `tap_action`   	  | [tap_action](#actions) | -     | Custom tap action configuration, including 'open-popup' to display a popup menu.                            |
+| `hold_action`	    | [hold_action](#actions) | -     | Custom hold action configuration, including 'open-popup' to display a popup menu.                           |
 
 > **Note**: `url` is required unless `tap_action` is present. If `tap_action` is defined, `url` is ignored.
 
@@ -223,7 +288,7 @@ styles: |
 
 ### Styles
 
-Custom CSS styles can be applied to the Navbar Card to personalize its appearance and adapt it to your dashboard’s design. Simply provide a CSS string targeting the relevant classes to style the navbar to your liking. 
+Custom CSS styles can be applied to the Navbar Card to personalize its appearance and adapt it to your dashboard's design. Simply provide a CSS string targeting the relevant classes to style the navbar to your liking. 
 
 You can check out some examples [here](#examples-with-custom-styles) for inspiration.
 
@@ -265,9 +330,9 @@ Here is a breakdown of the CSS classes available for customization:
 
 ### Padding 
 
-If you’re using the Navbar Card, you might notice it could collide with other cards on your dashboard. A simple way to fix this is by adding some padding to your Home Assistant views. The easiest way to do that is by using [card-mod](https://github.com/thomasloven/lovelace-card-mod) with a [custom theme](https://www.home-assistant.io/integrations/frontend/#themes).
+If you're using the Navbar Card, you might notice it could collide with other cards on your dashboard. A simple way to fix this is by adding some padding to your Home Assistant views. The easiest way to do that is by using [card-mod](https://github.com/thomasloven/lovelace-card-mod) with a [custom theme](https://www.home-assistant.io/integrations/frontend/#themes).
 
-Here’s an example of how you can tweak your theme to adjust the layout for both desktop and mobile:
+Here's an example of how you can tweak your theme to adjust the layout for both desktop and mobile:
 
 
 ```yaml
@@ -351,7 +416,9 @@ routes:
     label: Control
   - icon: mdi:dots-horizontal
     label: More
-    submenu:
+    tap_action:
+      action: open-popup
+    popup:
       - icon: mdi:cog
         url: /config/dashboard
       - icon: mdi:hammer

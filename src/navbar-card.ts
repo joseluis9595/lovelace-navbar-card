@@ -133,13 +133,19 @@ export class NavbarCard extends LitElement {
         throw new Error('Each route must have an "icon" property configured');
       }
       if (
+        route.popup == null &&
         route.submenu == null &&
         route.tap_action == null &&
         route.url == null
       ) {
         throw new Error(
-          'Each route must have either "url", "submenu" or "tap_action" property configured',
+          'Each route must have either "url", "popup" or "tap_action" property configured',
         );
+      }
+      
+      // Move submenu to popup for backward compatibility
+      if (route.submenu && !route.popup) {
+        route.popup = route.submenu;
       }
     });
 
@@ -191,7 +197,10 @@ export class NavbarCard extends LitElement {
         {
           icon: 'mdi:dots-horizontal',
           label: 'More',
-          submenu: [
+          tap_action: {
+            action: 'open-popup',
+          },
+          popup: [
             { icon: 'mdi:cog', url: '/config/dashboard' },
             {
               icon: 'mdi:hammer',
@@ -378,9 +387,14 @@ export class NavbarCard extends LitElement {
    * Open the popup menu for a given popupConfig and anchor element.
    */
   private _openPopup = (
-    popupConfig: RouteItem['submenu'],
+    popupItems: RouteItem['popup'],
     target: HTMLElement,
   ) => {
+    if (!popupItems || popupItems.length === 0) {
+      console.warn('No popup items provided');
+      return;
+    }
+    
     const anchorRect = target.getBoundingClientRect();
 
     const { style, labelPositionClassName, popupDirectionClassName } =
@@ -403,7 +417,7 @@ export class NavbarCard extends LitElement {
           ${this._isDesktop ? 'desktop' : ''}
         "
         style="${style}">
-        ${popupConfig!
+        ${popupItems
           .map((popupItem, index) => {
             const showBadge = processBadgeTemplate(
               this.hass,
@@ -480,37 +494,51 @@ export class NavbarCard extends LitElement {
       clearTimeout(this.holdTimeoutId);
       this.holdTimeoutId = null;
     }
+    
     if (this.holdTriggered && route.hold_action) {
-      fireDOMEvent(
-        this,
-        'hass-action',
-        { bubbles: true, composed: true },
-        {
-          action: 'hold',
-          config: {
-            hold_action: route.hold_action,
+      if (route.hold_action.action === 'open-popup') {
+        const popupItems = route.popup || route.submenu;
+        if (!popupItems) {
+          console.error('No popup items found for route:', route);
+        } else {
+          const target = e.currentTarget as HTMLElement;
+          this._openPopup(popupItems, target);
+        }
+      } else {
+        fireDOMEvent(
+          this,
+          'hass-action',
+          { bubbles: true, composed: true },
+          {
+            action: 'hold',
+            config: {
+              hold_action: route.hold_action,
+            },
           },
-        },
-      );
+        );
+      }
       this.holdTriggered = false;
     } else {
       this._handleClick(e as unknown as MouseEvent, route);
     }
   };
 
-  private _handleClick = (e: MouseEvent, route: RouteItem, isPopup = false) => {
+  private _handleClick = (e: MouseEvent, route: RouteItem, isPopupItem = false) => {
     // Prevent default
     e.preventDefault();
     e.stopPropagation();
 
-    if (!isPopup && route.submenu) {
-      hapticFeedback();
-      const target = e.currentTarget as HTMLElement;
-
-      // Delay opening the popup to allow the current event to finish
-      setTimeout(() => {
-        this._openPopup(route.submenu, target);
-      }, 100);
+    if (!isPopupItem && route.tap_action?.action === 'open-popup') {
+      const popupItems = route.popup || route.submenu;
+      if (!popupItems) {
+        console.error('No popup items found for route:', route);
+      } else {
+        hapticFeedback();
+        const target = e.currentTarget as HTMLElement;
+        setTimeout(() => {
+          this._openPopup(popupItems, target);
+        }, 100);
+      }
     } else if (route.tap_action != null) {
       hapticFeedback();
       fireDOMEvent(
@@ -525,7 +553,7 @@ export class NavbarCard extends LitElement {
         },
       );
       this._closePopup();
-    } else {
+    } else if (route.url) {
       navigate(this, route.url);
       this._closePopup();
     }
