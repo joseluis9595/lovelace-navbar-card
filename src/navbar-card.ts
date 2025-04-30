@@ -57,6 +57,8 @@ export class NavbarCard extends LitElement {
   // hold_action state variables
   private holdTimeoutId: number | null = null;
   private holdTriggered: boolean = false;
+  private pointerStartX: number = 0;
+  private pointerStartY: number = 0;
 
   /**********************************************************************/
   /* Lit native callbacks */
@@ -97,6 +99,9 @@ export class NavbarCard extends LitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
     window.removeEventListener('resize', this._checkDesktop);
+
+    // Force popup closure without animation to prevent memory leaks
+    this._popup = null;
   }
 
   setConfig(config) {
@@ -133,12 +138,13 @@ export class NavbarCard extends LitElement {
         throw new Error('Each route must have an "icon" property configured');
       }
       if (
+        route.popup == null &&
         route.submenu == null &&
         route.tap_action == null &&
         route.url == null
       ) {
         throw new Error(
-          'Each route must have either "url", "submenu" or "tap_action" property configured',
+          'Each route must have either "url", "popup" or "tap_action" property configured',
         );
       }
     });
@@ -177,6 +183,10 @@ export class NavbarCard extends LitElement {
           url: `${window.location.pathname}/devices`,
           icon: 'mdi:devices',
           label: 'Devices',
+          hold_action: {
+            action: 'navigate',
+            navigation_path: '/config/devices/dashboard',
+          },
         },
         {
           url: '/config/automation/dashboard',
@@ -184,6 +194,31 @@ export class NavbarCard extends LitElement {
           label: 'Automations',
         },
         { url: '/config/dashboard', icon: 'mdi:cog', label: 'Settings' },
+        {
+          icon: 'mdi:dots-horizontal',
+          label: 'More',
+          tap_action: {
+            action: 'open-popup',
+          },
+          popup: [
+            { icon: 'mdi:cog', url: '/config/dashboard' },
+            {
+              icon: 'mdi:hammer',
+              url: '/developer-tools/yaml',
+            },
+            {
+              icon: 'mdi:power',
+              tap_action: {
+                action: 'call-service',
+                service: 'homeassistant.restart',
+                service_data: {},
+                confirmation: {
+                  text: 'Are you sure you want to restart Home Assistant?',
+                },
+              },
+            },
+          ],
+        },
       ],
     };
   }
@@ -216,11 +251,16 @@ export class NavbarCard extends LitElement {
    * Render route item
    */
   private _renderRoute = (route: RouteItem) => {
-    const isActive = this._location == route.url;
+    const isActive =
+      route.selected != null
+        ? processTemplate(this.hass, route.selected)
+        : this._location == route.url;
+
     let showBadge = false;
     if (route.badge?.show) {
       showBadge = processTemplate(this.hass, route.badge?.show);
     } else if (route.badge?.template) {
+      // TODO deprecate this
       showBadge = processBadgeTemplate(this.hass, route.badge?.template);
     }
 
@@ -348,9 +388,14 @@ export class NavbarCard extends LitElement {
    * Open the popup menu for a given popupConfig and anchor element.
    */
   private _openPopup = (
-    popupConfig: RouteItem['submenu'],
+    popupItems: RouteItem['popup'],
     target: HTMLElement,
   ) => {
+    if (!popupItems || popupItems.length === 0) {
+      console.warn('No popup items provided');
+      return;
+    }
+
     const anchorRect = target.getBoundingClientRect();
 
     const { style, labelPositionClassName, popupDirectionClassName } =
@@ -373,7 +418,7 @@ export class NavbarCard extends LitElement {
           ${this._isDesktop ? 'desktop' : ''}
         "
         style="${style}">
-        ${popupConfig!
+        ${popupItems
           .map((popupItem, index) => {
             const showBadge = processBadgeTemplate(
               this.hass,
@@ -429,6 +474,10 @@ export class NavbarCard extends LitElement {
   /* Pointer event listenrs */
   /**********************************************************************/
   private _handlePointerDown = (e: PointerEvent, route: RouteItem) => {
+    // Store the starting position for movement detection
+    this.pointerStartX = e.clientX;
+    this.pointerStartY = e.clientY;
+
     if (route.hold_action) {
       this.holdTriggered = false;
       this.holdTimeoutId = window.setTimeout(() => {
@@ -439,9 +488,16 @@ export class NavbarCard extends LitElement {
   };
 
   private _handlePointerMove = (e: PointerEvent, route: RouteItem) => {
-    if (this.holdTimeoutId !== null) {
-      clearTimeout(this.holdTimeoutId);
-      this.holdTimeoutId = null;
+    // Calculate movement distance to prevent accidental hold triggers
+    const moveX = Math.abs(e.clientX - this.pointerStartX);
+    const moveY = Math.abs(e.clientY - this.pointerStartY);
+
+    // If moved more than 10px in any direction, cancel the hold action
+    if (moveX > 10 || moveY > 10) {
+      if (this.holdTimeoutId !== null) {
+        clearTimeout(this.holdTimeoutId);
+        this.holdTimeoutId = null;
+      }
     }
   };
 
@@ -450,37 +506,55 @@ export class NavbarCard extends LitElement {
       clearTimeout(this.holdTimeoutId);
       this.holdTimeoutId = null;
     }
+
     if (this.holdTriggered && route.hold_action) {
-      fireDOMEvent(
-        this,
-        'hass-action',
-        { bubbles: true, composed: true },
-        {
-          action: 'hold',
-          config: {
-            hold_action: route.hold_action,
+      if (route.hold_action.action === 'open-popup') {
+        const popupItems = route.popup ?? route.submenu;
+        if (!popupItems) {
+          console.error('No popup items found for route:', route);
+        } else {
+          const target = e.currentTarget as HTMLElement;
+          this._openPopup(popupItems, target);
+        }
+      } else {
+        fireDOMEvent(
+          this,
+          'hass-action',
+          { bubbles: true, composed: true },
+          {
+            action: 'hold',
+            config: {
+              hold_action: route.hold_action,
+            },
           },
-        },
-      );
+        );
+      }
       this.holdTriggered = false;
     } else {
       this._handleClick(e as unknown as MouseEvent, route);
     }
   };
 
-  private _handleClick = (e: MouseEvent, route: RouteItem, isPopup = false) => {
+  private _handleClick = (
+    e: MouseEvent,
+    route: RouteItem,
+    isPopupItem = false,
+  ) => {
     // Prevent default
     e.preventDefault();
     e.stopPropagation();
 
-    if (!isPopup && route.submenu) {
-      hapticFeedback();
-      const target = e.currentTarget as HTMLElement;
-
-      // Delay opening the popup to allow the current event to finish
-      setTimeout(() => {
-        this._openPopup(route.submenu, target);
-      }, 10);
+    if (!isPopupItem && route.tap_action?.action === 'open-popup') {
+      const popupItems = route.popup ?? route.submenu;
+      if (!popupItems) {
+        console.error('No popup items found for route:', route);
+      } else {
+        hapticFeedback();
+        const target = e.currentTarget as HTMLElement;
+        setTimeout(() => {
+          this._openPopup(popupItems, target);
+        }, 100);
+      }
     } else if (route.tap_action != null) {
       hapticFeedback();
       fireDOMEvent(
@@ -495,7 +569,7 @@ export class NavbarCard extends LitElement {
         },
       );
       this._closePopup();
-    } else {
+    } else if (route.url) {
       navigate(this, route.url);
       this._closePopup();
     }

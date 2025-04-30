@@ -1,5 +1,7 @@
 name: Create Pre-release on Merge
 
+permissions: write-all
+
 on:
   pull_request:
     types:
@@ -12,9 +14,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the code
+      # Checkout the code with full history
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       # Extract version from package.json
       - name: Extract version
@@ -40,17 +44,13 @@ jobs:
           bun install
           bun run build
 
-      # Create tag with this release version
-      - name: Create tag
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'refs/tags/${{ steps.get_version.outputs.version }}',
-              sha: context.sha
-            })
+      # Create and push tag
+      - name: Create and push tag
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git tag -a ${{ steps.get_version.outputs.version }} -m "Release ${{ steps.get_version.outputs.version }}"
+          git push origin ${{ steps.get_version.outputs.version }}
 
       # Create the draft release
       - name: Release

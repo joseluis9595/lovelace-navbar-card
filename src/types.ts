@@ -7,10 +7,18 @@ export enum DesktopPosition {
   right = 'right',
 }
 
+// Define the popup action specific to this card
+export interface PopupActionConfig {
+  action: 'open-popup';
+}
+
+// Extend ActionConfig to include our custom popup action
+export type ExtendedActionConfig = ActionConfig | PopupActionConfig;
+
 type JSTemplate = string;
 
-export type RouteItem = {
-  url: string;
+// Base properties shared by all route items
+interface RouteItemBase {
   icon: string;
   icon_selected?: string;
   label?: string | JSTemplate;
@@ -19,13 +27,26 @@ export type RouteItem = {
     color?: string;
     show?: boolean | JSTemplate;
   };
-  tap_action?: ActionConfig;
-  hold_action?: ActionConfig;
-  submenu?: PopupItem[];
   hidden?: boolean | JSTemplate;
-};
+  selected?: boolean | JSTemplate;
+}
 
-export type PopupItem = Omit<RouteItem, 'submenu' | 'icon_selected'>;
+// Type for popup menu items (don't include popup property to avoid circular references)
+export type PopupItem = RouteItemBase & {
+  url?: string;
+  tap_action?: ExtendedActionConfig;
+  hold_action?: ExtendedActionConfig;
+}
+
+// Main route item type
+export type RouteItem = RouteItemBase & {
+  url?: string;
+  tap_action?: ExtendedActionConfig;
+  hold_action?: ExtendedActionConfig;
+  popup?: PopupItem[];
+  // Alias for backward compatibility
+  submenu?: PopupItem[];
+}
 
 export type NavbarCardConfig = {
   routes: RouteItem[];
