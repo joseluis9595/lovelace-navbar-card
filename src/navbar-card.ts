@@ -420,10 +420,15 @@ export class NavbarCard extends LitElement {
         style="${style}">
         ${popupItems
           .map((popupItem, index) => {
-            const showBadge = processBadgeTemplate(
-              this.hass,
-              popupItem.badge?.template,
-            );
+            let showBadge = false;
+            if (popupItem.badge?.show) {
+              showBadge = processTemplate(this.hass, popupItem.badge?.show);
+            } else if (popupItem.badge?.template) {
+              showBadge = processBadgeTemplate(
+                this.hass,
+                popupItem.badge?.template,
+              );
+            }
 
             if (processTemplate(this.hass, popupItem.hidden)) {
               return null;
