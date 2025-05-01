@@ -2,7 +2,12 @@ import { css, CSSResult, html, LitElement, unsafeCSS } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { version } from '../package.json';
 import { HomeAssistant, navigate } from 'custom-card-helpers';
-import { DesktopPosition, NavbarCardConfig, RouteItem } from './types';
+import {
+  DesktopPosition,
+  NavbarCardConfig,
+  PopupItem,
+  RouteItem,
+} from './types';
 import {
   fireDOMEvent,
   hapticFeedback,
@@ -134,8 +139,10 @@ export class NavbarCard extends LitElement {
       throw new Error('"routes" param is required for navbar card');
     }
     config.routes.forEach(route => {
-      if (route.icon == null) {
-        throw new Error('Each route must have an "icon" property configured');
+      if (route.icon == null && route.image == null) {
+        throw new Error(
+          'Each route must have either an "icon" or "image" property configured',
+        );
       }
       if (
         route.popup == null &&
@@ -224,6 +231,24 @@ export class NavbarCard extends LitElement {
   }
 
   /**********************************************************************/
+  /* Subcomponents */
+  /**********************************************************************/
+  private _getRouteIcon(route: RouteItem | PopupItem, isActive: boolean) {
+    return route.image
+      ? html`<img
+          class="image ${isActive ? 'active' : ''}"
+          src="${isActive && route.image_selected
+            ? route.image_selected
+            : route.image}"
+          alt="${route.label || ''}" />`
+      : html`<ha-icon
+          class="icon ${isActive ? 'active' : ''}"
+          icon="${isActive && route.icon_selected
+            ? route.icon_selected
+            : route.icon}"></ha-icon>`;
+  }
+
+  /**********************************************************************/
   /* Navbar callbacks */
   /**********************************************************************/
 
@@ -231,12 +256,10 @@ export class NavbarCard extends LitElement {
    * Label visibility evaluator
    */
   private _shouldShowLabels = () => {
-    const { show_labels: desktopShowLabels } = this._config?.desktop ?? {};
-    const { show_labels: mobileShowLabels } = this._config?.mobile ?? {};
-    return (
-      (this._isDesktop && desktopShowLabels) ||
-      (!this._isDesktop && mobileShowLabels)
-    );
+    if (this._isDesktop) {
+      return this._config?.desktop?.show_labels ?? false;
+    }
+    return this._config?.mobile?.show_labels ?? false;
   };
 
   /**
@@ -283,11 +306,7 @@ export class NavbarCard extends LitElement {
           : html``}
 
         <div class="button ${isActive ? 'active' : ''}">
-          <ha-icon
-            class="icon ${isActive ? 'active' : ''}"
-            icon="${isActive && route.icon_selected
-              ? route.icon_selected
-              : route.icon}"></ha-icon>
+          ${this._getRouteIcon(route, isActive)}
         </div>
         ${this._shouldShowLabels()
           ? html`<div class="label ${isActive ? 'active' : ''}">
@@ -450,9 +469,7 @@ export class NavbarCard extends LitElement {
                     'red'};"></div>`
                 : html``}
 
-              <div class="button">
-                <ha-icon class="icon" icon="${popupItem.icon}"></ha-icon>
-              </div>
+              <div class="button">${this._getRouteIcon(popupItem, false)}</div>
               ${this._shouldShowLabels()
                 ? html`<div class="label">
                     ${processTemplate(this.hass, popupItem.label) ?? ' '}

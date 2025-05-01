@@ -4,6 +4,7 @@ const HOST_STYLES = css`
   :host {
     --navbar-background-color: var(--card-background-color);
     --navbar-route-icon-size: 24px;
+    --navbar-route-image-size: 32px;
     --navbar-primary-color: var(--primary-color);
     --navbar-box-shadow: 0px -1px 4px 0px rgba(0, 0, 0, 0.14);
     --navbar-box-shadow-desktop: var(--material-shadow-elevation-2dp);
@@ -127,9 +128,18 @@ const ROUTE_STYLES = css`
     --icon-primary-color: var(--navbar-primary-color);
   }
 
-  /* Icon styling */
+  /* Icon and Image styling */
   .icon {
     --mdc-icon-size: var(--navbar-route-icon-size);
+  }
+
+  .image {
+    width: var(--navbar-route-image-size);
+    height: var(--navbar-route-image-size);
+    object-fit: contain;
+  }
+
+  .image.active {
   }
 
   /* Label styling */
@@ -138,9 +148,8 @@ const ROUTE_STYLES = css`
     width: 100%;
     /* TODO fix ellipsis*/
     text-align: center;
-    font-size: var(--paper-font-caption_-_font-size);
+    font-size: var(--paper-font-caption_-_font-size, 12px);
     font-weight: 500;
-    font-family: var(--paper-font-caption_-_font-size);
   }
 
   /* Badge styling */

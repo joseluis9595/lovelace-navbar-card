@@ -19,8 +19,10 @@ type JSTemplate = string;
 
 // Base properties shared by all route items
 interface RouteItemBase {
-  icon: string;
+  icon?: string;
+  image?: string;
   icon_selected?: string;
+  image_selected?: string;
   label?: string | JSTemplate;
   badge?: {
     template?: string; // TODO deprecate
@@ -36,7 +38,7 @@ export type PopupItem = RouteItemBase & {
   url?: string;
   tap_action?: ExtendedActionConfig;
   hold_action?: ExtendedActionConfig;
-}
+};
 
 // Main route item type
 export type RouteItem = RouteItemBase & {
@@ -46,7 +48,7 @@ export type RouteItem = RouteItemBase & {
   popup?: PopupItem[];
   // Alias for backward compatibility
   submenu?: PopupItem[];
-}
+};
 
 export type NavbarCardConfig = {
   routes: RouteItem[];
