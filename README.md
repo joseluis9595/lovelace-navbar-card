@@ -85,69 +85,26 @@ Routes represents an array of clickable icons that redirects to a given path. Ea
 
 #### Actions
 
-Apart from the [standard Home Assistant actions](https://www.home-assistant.io/dashboards/actions/) (navigate, call-service, etc.), `navbar-card` supports a custom action to open popup menus:
+Apart from the [standard Home Assistant actions](https://www.home-assistant.io/dashboards/actions/) (navigate, call-service, etc.), `navbar-card` supports some additional custom actions:
 
-| Action       | Description                               | Required Parameters |
-| ------------ | ----------------------------------------- | ------------------- |
-| `open-popup` | Opens the popup menu defined in the route | None                |
+| Action        | Description                               | Required Parameters |
+| ------------- | ----------------------------------------- | ------------------- |
+| `open-popup`  | Opens the popup menu defined in the route | None                |
+| `toggle-menu` | Opens the native HA side menu             | None                |
 
 Example:
 
 ```yaml
-tap_action:
-  action: open-popup # Will open the popup menu defined for this route
-```
-
-Or:
-
-```yaml
-hold_action:
-  action: open-popup # Will open the popup menu when the route is held
-```
-
-### Example with Open-Popup Action
-
-```yaml
 type: custom:navbar-card
-desktop:
-  position: bottom
-  show_labels: true
-mobile:
-  show_labels: true
+...
 routes:
-  - url: /lovelace/home
-    icon: mdi:home
-    icon_selected: mdi:home-variant
-    label: Home
-  - icon: mdi:cog
-    label: Settings
-    # Open settings page on tap
-    url: /config/dashboard
-    # But show a popup menu on hold
-    hold_action:
-      action: open-popup
-    popup:
-      - icon: mdi:account
-        url: /config/person
-        label: Users
-      - icon: mdi:hammer
-        url: /developer-tools/yaml
-        label: Developer
-      - icon: mdi:power
-        url: /config/server_control
-        label: Server
-  - icon: mdi:dots-horizontal
-    label: More
-    # Open popup menu on tap
+  ...
+  - url: /lovelace/lights
+    icon: mdi:lightbulb-outline
     tap_action:
-      action: open-popup
-    popup:
-      - icon: mdi:cast
-        url: /lovelace/media
-        label: Media
-      - icon: mdi:lightbulb
-        url: /lovelace/lights
-        label: Lights
+      action: open-popup # Will open the popup menu defined for this route
+    hold_action:
+      action: toggle-menu # Will open the native HA side menu
 ```
 
 #### Badge
