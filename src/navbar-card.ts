@@ -1,4 +1,11 @@
-import { css, CSSResult, html, LitElement, unsafeCSS } from 'lit';
+import {
+  css,
+  CSSResult,
+  html,
+  LitElement,
+  TemplateResult,
+  unsafeCSS,
+} from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { version } from '../package.json';
 import { HomeAssistant, navigate } from 'custom-card-helpers';
@@ -20,7 +27,7 @@ import { getDefaultStyles } from './styles';
 
 declare global {
   interface Window {
-    customCards: Array<Object>;
+    customCards: Array<object>;
   }
 }
 
@@ -57,7 +64,7 @@ export class NavbarCard extends LitElement {
   @state() private _inPreviewMode?: boolean;
   @state() private _lastRender?: number;
   @state() private _location?: string;
-  @state() private _popup?: any;
+  @state() private _popup?: TemplateResult | null;
 
   // hold_action state variables
   private holdTimeoutId: number | null = null;
@@ -255,11 +262,17 @@ export class NavbarCard extends LitElement {
   /**
    * Label visibility evaluator
    */
-  private _shouldShowLabels = () => {
-    if (this._isDesktop) {
-      return this._config?.desktop?.show_labels ?? false;
-    }
-    return this._config?.mobile?.show_labels ?? false;
+  private _shouldShowLabels = (isSubmenu: boolean): boolean => {
+    const config = this._isDesktop
+      ? this._config?.desktop?.show_labels
+      : this._config?.mobile?.show_labels;
+
+    if (typeof config === 'boolean') return config;
+
+    return (
+      (config === 'popup_only' && isSubmenu) ||
+      (config === 'routes_only' && !isSubmenu)
+    );
   };
 
   /**
@@ -308,7 +321,7 @@ export class NavbarCard extends LitElement {
         <div class="button ${isActive ? 'active' : ''}">
           ${this._getRouteIcon(route, isActive)}
         </div>
-        ${this._shouldShowLabels()
+        ${this._shouldShowLabels(false)
           ? html`<div class="label ${isActive ? 'active' : ''}">
               ${processTemplate(this.hass, route.label) ?? ' '}
             </div>`
@@ -470,7 +483,7 @@ export class NavbarCard extends LitElement {
                 : html``}
 
               <div class="button">${this._getRouteIcon(popupItem, false)}</div>
-              ${this._shouldShowLabels()
+              ${this._shouldShowLabels(true)
                 ? html`<div class="label">
                     ${processTemplate(this.hass, popupItem.label) ?? ' '}
                   </div>`
@@ -509,7 +522,7 @@ export class NavbarCard extends LitElement {
     }
   };
 
-  private _handlePointerMove = (e: PointerEvent, route: RouteItem) => {
+  private _handlePointerMove = (e: PointerEvent, _route: RouteItem) => {
     // Calculate movement distance to prevent accidental hold triggers
     const moveX = Math.abs(e.clientX - this.pointerStartX);
     const moveY = Math.abs(e.clientY - this.pointerStartY);

@@ -220,12 +220,12 @@ routes:
 
 Specific configuration for desktop mode.
 
-| Name          | Type                                   | Default  | Description                                                                |
-| ------------- | -------------------------------------- | -------- | -------------------------------------------------------------------------- |
-| `show_labels` | boolean                                | `false`  | Whether or not to display labels under each route                          |
-| `min_width`   | number                                 | `768`    | Screen size from which the navbar will be displayed as its desktop variant |
-| `position`    | `top` \| `bottom` \| `left` \| `right` | `bottom` | Position of the navbar on desktop devices                                  |
-| `hidden`      | boolean \| [JSTemplate](#jstemplate)   | `false`  | Set to true to hide the navbar on desktop devices                          |
+| Name          | Type                                    | Default  | Description                                                                |
+| ------------- | --------------------------------------  | -------- | -------------------------------------------------------------------------- |
+| `show_labels` | boolean \| `popup_only` \| `routes_only`| `false`  | Whether or not to display labels under each route                          |
+| `min_width`   | number                                  | `768`    | Screen size from which the navbar will be displayed as its desktop variant |
+| `position`    | `top` \| `bottom` \| `left` \| `right`  | `bottom` | Position of the navbar on desktop devices                                  |
+| `hidden`      | boolean \| [JSTemplate](#jstemplate)    | `false`  | Set to true to hide the navbar on desktop devices                          |
 
 ---
 
@@ -233,10 +233,10 @@ Specific configuration for desktop mode.
 
 Specific configuration for mobile mode.
 
-| Name          | Type                                 | Default | Description                                       |
-| ------------- | ------------------------------------ | ------- | ------------------------------------------------- |
-| `show_labels` | boolean                              | `false` | Whether or not to display labels under each route |
-| `hidden`      | boolean \| [JSTemplate](#jstemplate) | `false` | Set to true to hide the navbar on mobile devices  |
+| Name          | Type                                    | Default | Description                                       |
+| ------------- | ------------------------------------    | ------- | ------------------------------------------------- |
+| `show_labels` | boolean \| `popup_only` \| `routes_only`| `false` | Whether or not to display labels under each route |
+| `hidden`      | boolean \| [JSTemplate](#jstemplate)    | `false` | Set to true to hide the navbar on mobile devices  |
 
 ---
 

@@ -7,7 +7,7 @@ import { HomeAssistant } from 'custom-card-helpers';
  * @param value Value to map
  * @returns Enum value or undefined if not found
  */
-export const mapStringToEnum = <T extends Record<string, any>>(
+export const mapStringToEnum = <T extends Record<string, unknown>>(
   enumType: T,
   value: string,
 ): T[keyof T] | undefined => {
@@ -41,7 +41,7 @@ export const processBadgeTemplate = (
  *  @param hass Home Assistant instance
  *  @param template Template string to be processed
  */
-export const processTemplate = (hass: HomeAssistant, template?: any) => {
+export const processTemplate = (hass: HomeAssistant, template?: unknown) => {
   if (!template || !hass) return template;
 
   // Check if template is of type string
@@ -67,9 +67,10 @@ export const fireDOMEvent = (
   node: HTMLElement | Window,
   type: Event['type'],
   options?: { bubbles?: boolean; composed?: boolean },
-  detail?: any,
+  detail?: unknown,
 ) => {
   const event = new Event(type, options ?? {});
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (event as any).detail = detail;
   node.dispatchEvent(event);
   return event;

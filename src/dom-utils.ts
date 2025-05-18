@@ -12,7 +12,7 @@ export const getNavbarTemplates = (): Record<
     );
   if (lovelacePanel) {
     // TODO add proper typing
-    // @ts-ignore
+    // @ts-expect-error lovelacePanel does not have "lovelace" property type
     return lovelacePanel.lovelace.config['navbar-templates'];
   }
   return null;

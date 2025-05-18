@@ -16,6 +16,8 @@ export interface PopupActionConfig {
 export type ExtendedActionConfig = ActionConfig | PopupActionConfig;
 
 type JSTemplate = string;
+type TemplatableBoolean = JSTemplate | boolean;
+type TemplatableString = JSTemplate | boolean;
 
 // Base properties shared by all route items
 interface RouteItemBase {
@@ -23,14 +25,14 @@ interface RouteItemBase {
   image?: string;
   icon_selected?: string;
   image_selected?: string;
-  label?: string | JSTemplate;
+  label?: TemplatableString;
   badge?: {
     template?: string; // TODO deprecate
     color?: string;
-    show?: boolean | JSTemplate;
+    show?: TemplatableBoolean;
   };
-  hidden?: boolean | JSTemplate;
-  selected?: boolean | JSTemplate;
+  hidden?: TemplatableBoolean;
+  selected?: TemplatableBoolean;
 }
 
 // Type for popup menu items (don't include popup property to avoid circular references)
@@ -50,18 +52,22 @@ export type RouteItem = RouteItemBase & {
   submenu?: PopupItem[];
 };
 
+// Labels visibility granular configuration
+type LabelVisibilityConfig = boolean | 'popup_only' | 'routes_only';
+
+// Main card configuration
 export type NavbarCardConfig = {
   routes: RouteItem[];
   template?: string;
   desktop?: {
-    show_labels?: boolean;
+    show_labels?: LabelVisibilityConfig;
     min_width?: number;
     position?: DesktopPosition;
-    hidden?: boolean | JSTemplate;
+    hidden?: TemplatableBoolean;
   };
   mobile?: {
-    show_labels?: boolean;
-    hidden?: boolean | JSTemplate;
+    show_labels?: LabelVisibilityConfig;
+    hidden?: TemplatableBoolean;
   };
   styles?: string;
 };
