@@ -30,5 +30,8 @@ jobs:
         run: |
           bun install
 
+      - name: lint
+        run: bun lint:check
+
       - name: Build Project
         run: bun run build

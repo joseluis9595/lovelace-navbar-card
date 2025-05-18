@@ -1,4 +1,11 @@
-import { css, CSSResult, html, LitElement, unsafeCSS } from 'lit';
+import {
+  css,
+  CSSResult,
+  html,
+  LitElement,
+  TemplateResult,
+  unsafeCSS,
+} from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { version } from '../package.json';
 import { HomeAssistant, navigate } from 'custom-card-helpers';
@@ -20,7 +27,7 @@ import { getDefaultStyles } from './styles';
 
 declare global {
   interface Window {
-    customCards: Array<Object>;
+    customCards: Array<object>;
   }
 }
 
@@ -57,7 +64,7 @@ export class NavbarCard extends LitElement {
   @state() private _inPreviewMode?: boolean;
   @state() private _lastRender?: number;
   @state() private _location?: string;
-  @state() private _popup?: any;
+  @state() private _popup?: TemplateResult | null;
 
   // hold_action state variables
   private holdTimeoutId: number | null = null;
@@ -515,7 +522,7 @@ export class NavbarCard extends LitElement {
     }
   };
 
-  private _handlePointerMove = (e: PointerEvent, route: RouteItem) => {
+  private _handlePointerMove = (e: PointerEvent, _route: RouteItem) => {
     // Calculate movement distance to prevent accidental hold triggers
     const moveX = Math.abs(e.clientX - this.pointerStartX);
     const moveY = Math.abs(e.clientY - this.pointerStartY);
