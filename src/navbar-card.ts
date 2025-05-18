@@ -590,6 +590,12 @@ export class NavbarCard extends LitElement {
           this._openPopup(popupItems, target);
         }, 100);
       }
+    } else if (route.tap_action?.action === 'toggle-menu'){
+      fireDOMEvent(
+        this,
+        'hass-toggle-menu', 
+        { bubbles: true, composed: true}
+      );
     } else if (route.tap_action != null) {
       hapticFeedback();
       fireDOMEvent(
