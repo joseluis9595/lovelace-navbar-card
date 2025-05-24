@@ -155,10 +155,11 @@ export class NavbarCard extends LitElement {
         route.popup == null &&
         route.submenu == null &&
         route.tap_action == null &&
+        route.hold_action == null &&
         route.url == null
       ) {
         throw new Error(
-          'Each route must have either "url", "popup" or "tap_action" property configured',
+          'Each route must have either "url", "popup", "tap_action" or "hold_action" property configured',
         );
       }
     });
@@ -474,7 +475,7 @@ export class NavbarCard extends LitElement {
             "
               style="--index: ${index}"
               @click=${(e: MouseEvent) =>
-                this._handleClick(e, popupItem, true)}>
+                this._handleTapAction(e, popupItem, true)}>
               ${showBadge
                 ? html`<div
                     class="badge"
@@ -523,6 +524,10 @@ export class NavbarCard extends LitElement {
   };
 
   private _handlePointerMove = (e: PointerEvent, _route: RouteItem) => {
+    if (!this.holdTimeoutId) {
+      return;
+    }
+
     // Calculate movement distance to prevent accidental hold triggers
     const moveX = Math.abs(e.clientX - this.pointerStartX);
     const moveY = Math.abs(e.clientY - this.pointerStartY);
@@ -543,34 +548,19 @@ export class NavbarCard extends LitElement {
     }
 
     if (this.holdTriggered && route.hold_action) {
-      if (route.hold_action.action === 'open-popup') {
-        const popupItems = route.popup ?? route.submenu;
-        if (!popupItems) {
-          console.error('No popup items found for route:', route);
-        } else {
-          const target = e.currentTarget as HTMLElement;
-          this._openPopup(popupItems, target);
-        }
-      } else {
-        fireDOMEvent(
-          this,
-          'hass-action',
-          { bubbles: true, composed: true },
-          {
-            action: 'hold',
-            config: {
-              hold_action: route.hold_action,
-            },
-          },
-        );
-      }
-      this.holdTriggered = false;
+      this._handleHoldAction(e, route);
     } else {
-      this._handleClick(e as unknown as MouseEvent, route);
+      this._handleTapAction(e, route);
     }
+
+    this.holdTriggered = false;
   };
 
-  private _handleClick = (
+  private _handleHoldAction = (e: PointerEvent, route: RouteItem) => {
+    this._executeAction(e, route, route.hold_action, 'hold');
+  };
+
+  private _handleTapAction = (
     e: MouseEvent,
     route: RouteItem,
     isPopupItem = false,
@@ -578,39 +568,62 @@ export class NavbarCard extends LitElement {
     // Prevent default
     e.preventDefault();
     e.stopPropagation();
+    this._executeAction(e, route, route.tap_action, 'tap', isPopupItem);
+  };
 
-    if (!isPopupItem && route.tap_action?.action === 'open-popup') {
+  /**
+   * Generic handler for tap and hold actions.
+   */
+  private _executeAction = (
+    e: MouseEvent | PointerEvent,
+    route: RouteItem,
+    action: RouteItem['tap_action'] | RouteItem['hold_action'],
+    actionType: 'tap' | 'hold',
+    isPopupItem = false,
+  ) => {
+    if (!isPopupItem && action?.action === 'open-popup') {
       const popupItems = route.popup ?? route.submenu;
       if (!popupItems) {
         console.error('No popup items found for route:', route);
       } else {
-        hapticFeedback();
+        if (actionType === 'tap') {
+          hapticFeedback();
+        }
         const target = e.currentTarget as HTMLElement;
-        setTimeout(() => {
+        if (actionType === 'tap') {
+          // Quick fix to prevent the popup from closing inmediately after
+          // opening it on iOS devices.
+          setTimeout(() => {
+            this._openPopup(popupItems, target);
+          }, 100);
+        } else {
           this._openPopup(popupItems, target);
-        }, 100);
+        }
       }
-    } else if (route.tap_action?.action === 'toggle-menu'){
-      fireDOMEvent(
-        this,
-        'hass-toggle-menu', 
-        { bubbles: true, composed: true}
-      );
-    } else if (route.tap_action != null) {
-      hapticFeedback();
+    } else if (action?.action === 'toggle-menu') {
+      if (actionType === 'tap') {
+        hapticFeedback();
+      }
+      fireDOMEvent(this, 'hass-toggle-menu', { bubbles: true, composed: true });
+      this._closePopup(); // Close popup after toggling menu
+    } else if (action != null) {
+      if (actionType === 'tap') {
+        hapticFeedback();
+      }
       fireDOMEvent(
         this,
         'hass-action',
         { bubbles: true, composed: true },
         {
-          action: 'tap',
+          action: actionType,
           config: {
-            tap_action: route.tap_action,
+            [`${actionType}_action`]: action,
           },
         },
       );
       this._closePopup();
-    } else if (route.url) {
+    } else if (actionType === 'tap' && route.url) {
+      // Handle default navigation for tap action if no specific action is defined
       navigate(this, route.url);
       this._closePopup();
     }
