@@ -60,24 +60,29 @@ Navbar Card is a custom Lovelace card designed to simplify navigation within you
 
 Routes represents an array of clickable icons that redirects to a given path. Each item in the array should contain the following configuration:
 
-| Name             | Type                                 | Default     | Description                                                                                                                                                |
-| ---------------- | ------------------------------------ | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `url`            | string                               | `Required*` | The path to a Lovelace view. Ignored if `tap_action` is defined.                                                                                           |
-| `icon`           | string                               | -           | Material icon to display as this entry icon. Either `icon` or `image` is required.                                                                         |
-| `icon_selected`  | string                               | -           | Icon to be displayed when `url` matches the current browser URL                                                                                            |
-| `image`          | string                               | -           | URL of an image to display as this entry icon. Either `icon` or `image` is required.                                                                       |
-| `image_selected` | string                               | -           | Image to be displayed when `url` matches the current browser URL                                                                                           |
-| `badge`          | [Badge](#badge)                      | -           | Badge configuration                                                                                                                                        |
-| `label`          | string \| [JSTemplate](#jstemplate)  | -           | Label to be displayed under the given route if `show_labels` is true                                                                                       |
-| `tap_action`     | [tap_action](#actions)               | -           | Custom tap action configuration, including 'open-popup' to display a popup menu.                                                                           |
-| `hold_action`    | [hold_action](#actions)              | -           | Custom hold action configuration, including 'open-popup' to display a popup menu.                                                                          |
-| `popup`          | [Popup items](#popup-items)          | -           | List of routes to display in a popup menu                                                                                                                  |
-| `hidden`         | boolean \| [JSTemplate](#jstemplate) | -           | Controls whether to render this route or not                                                                                                               |
-| `selected`       | boolean \| [JSTemplate](#jstemplate) | -           | Controls whether to display this route as selected or not. If not defined, the selected status will be computed as `route.url == window.location.pathname` |
+| Name                | Type                                 | Default     | Description                                                                                                                                                |
+| ------------------- | ------------------------------------ | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `url`               | string                               | `Required*` | The path to a Lovelace view. Ignored if `tap_action` is defined.                                                                                           |
+| `icon`              | string                               | -           | Material icon to display as this entry icon. Either `icon` or `image` is required.                                                                         |
+| `icon_selected`     | string                               | -           | Icon to be displayed when `url` matches the current browser URL                                                                                            |
+| `image`             | string                               | -           | URL of an image to display as this entry icon. Either `icon` or `image` is required.                                                                       |
+| `image_selected`    | string                               | -           | Image to be displayed when `url` matches the current browser URL                                                                                           |
+| `badge`             | [Badge](#badge)                      | -           | Badge configuration                                                                                                                                        |
+| `label`             | string \| [JSTemplate](#jstemplate)  | -           | Label to be displayed under the given route if `show_labels` is true                                                                                       |
+| `tap_action`        | [tap_action](#actions)               | -           | Custom tap action configuration.                                                                                                                           |
+| `hold_action`       | [hold_action](#actions)              | -           | Custom hold action configuration.                                                                                                                          |
+| `double_tap_action` | [double_tap_action](#actions)        | -           | Custom double_tap action configuration.                                                                                                                    |
+| `popup`             | [Popup items](#popup-items)          | -           | List of routes to display in a popup menu                                                                                                                  |
+| `hidden`            | boolean \| [JSTemplate](#jstemplate) | -           | Controls whether to render this route or not                                                                                                               |
+| `selected`          | boolean \| [JSTemplate](#jstemplate) | -           | Controls whether to display this route as selected or not. If not defined, the selected status will be computed as `route.url == window.location.pathname` |
 
-> **Note**: `url` is required unless `tap_action` or `popup` is present. If `tap_action` is defined, `url` is ignored.
+> **Note**: `url` is required unless `tap_action`, `hold_action`, `double_tap_action` or `popup` is present.
 
-> **Note**: Some suggestions when using the `image` property:
+> **Note**: If `tap_action` is defined, `url` is ignored.
+
+<br>
+
+> **Tip**: Some suggestions when using the `image` property:
 >
 > 1. Place your custom images in the `<ha-config-folder>/www` directory
 > 2. Use images with a transparent background for best results
