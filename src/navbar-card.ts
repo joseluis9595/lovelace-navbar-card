@@ -369,6 +369,8 @@ export class NavbarCard extends LitElement {
     } else {
       this._popup = null;
     }
+    // Remove Escape key listener when popup is closed
+    window.removeEventListener('keydown', this._handleClosePopupListener);
   };
 
   /**
@@ -524,6 +526,18 @@ export class NavbarCard extends LitElement {
         backdrop.classList.add('visible');
       }
     });
+    // Add Escape key listener when popup is opened
+    window.addEventListener('keydown', this._handleClosePopupListener);
+  };
+
+  /**********************************************************************/
+  /* Pointer event listenrs */
+  /**********************************************************************/
+  private _handleClosePopupListener = (e: KeyboardEvent) => {
+    if (e.key === 'Escape' && this._popup) {
+      e.preventDefault();
+      this._closePopup();
+    }
   };
 
   /**********************************************************************/
