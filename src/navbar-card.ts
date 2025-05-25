@@ -53,6 +53,7 @@ const PROPS_TO_FORCE_UPDATE = [
 ];
 
 const DEFAULT_DESKTOP_POSITION = DesktopPosition.bottom;
+const DOUBLE_TAP_DELAY = 250;
 const HOLD_ACTION_DELAY = 500;
 
 @customElement('navbar-card')
@@ -72,6 +73,13 @@ export class NavbarCard extends LitElement {
   private holdTriggered: boolean = false;
   private pointerStartX: number = 0;
   private pointerStartY: number = 0;
+
+  // double_tap_action state variables
+  private lastTapTime: number = 0;
+  private lastTapTarget: EventTarget | null = null;
+
+  // tap_action state variables
+  private tapTimeoutId: number | null = null;
 
   /**********************************************************************/
   /* Lit native callbacks */
@@ -157,11 +165,22 @@ export class NavbarCard extends LitElement {
         route.submenu == null &&
         route.tap_action == null &&
         route.hold_action == null &&
-        route.url == null
+        route.url == null &&
+        route.double_tap_action == null
       ) {
         throw new Error(
-          'Each route must have either "url", "popup", "tap_action" or "hold_action" property configured',
+          'Each route must have either "url", "popup", "tap_action", "hold_action" or "double_tap_action" property configured',
         );
+      }
+      // Validate specific action types if defined
+      if (route.tap_action && route.tap_action.action == null) {
+        throw new Error('"tap_action" must have an "action" property');
+      }
+      if (route.hold_action && route.hold_action.action == null) {
+        throw new Error('"hold_action" must have an "action" property');
+      }
+      if (route.double_tap_action && route.double_tap_action.action == null) {
+        throw new Error('"double_tap_action" must have an "action" property');
       }
     });
 
@@ -476,7 +495,7 @@ export class NavbarCard extends LitElement {
             "
               style="--index: ${index}"
               @click=${(e: MouseEvent) =>
-                this._handleTapAction(e, popupItem, true)}>
+                this._handlePointerUp(e as PointerEvent, popupItem, true)}>
               ${showBadge
                 ? html`<div
                     class="badge"
@@ -542,46 +561,111 @@ export class NavbarCard extends LitElement {
     }
   };
 
-  private _handlePointerUp = (e: PointerEvent, route: RouteItem) => {
+  private _handlePointerUp = (
+    e: PointerEvent,
+    route: RouteItem,
+    isPopup = false,
+  ) => {
     if (this.holdTimeoutId !== null) {
       clearTimeout(this.holdTimeoutId);
       this.holdTimeoutId = null;
     }
 
-    if (this.holdTriggered && route.hold_action) {
-      this._handleHoldAction(e, route);
+    // Capture current target from the original event
+    const currentTarget = e.currentTarget as HTMLElement;
+
+    // Check for double tap
+    const currentTime = new Date().getTime();
+    const timeDiff = currentTime - this.lastTapTime;
+    const isDoubleTap =
+      timeDiff < DOUBLE_TAP_DELAY && e.target === this.lastTapTarget;
+
+    if (isDoubleTap && route.double_tap_action) {
+      // Clear pending tap action if double tap is detected
+      if (this.tapTimeoutId !== null) {
+        clearTimeout(this.tapTimeoutId);
+        this.tapTimeoutId = null;
+      }
+      this._handleDoubleTapAction(currentTarget, route, isPopup);
+      this.lastTapTime = 0;
+      this.lastTapTarget = null;
+    } else if (this.holdTriggered && route.hold_action) {
+      this._handleHoldAction(currentTarget, route, isPopup);
+      this.lastTapTime = 0;
+      this.lastTapTarget = null;
     } else {
-      this._handleTapAction(e, route);
+      this.lastTapTime = currentTime;
+      this.lastTapTarget = e.target;
+
+      this._handleTapAction(currentTarget, route, isPopup);
     }
 
     this.holdTriggered = false;
   };
 
-  private _handleHoldAction = (e: PointerEvent, route: RouteItem) => {
-    this._executeAction(e, route, route.hold_action, 'hold');
+  private _handleHoldAction = (
+    target: HTMLElement,
+    route: RouteItem,
+    isPopupItem = false,
+  ) => {
+    this._executeAction(target, route, route.hold_action, 'hold', isPopupItem);
+  };
+
+  private _handleDoubleTapAction = (
+    target: HTMLElement,
+    route: RouteItem,
+    isPopupItem = false,
+  ) => {
+    this._executeAction(
+      target,
+      route,
+      route.double_tap_action,
+      'double_tap',
+      isPopupItem,
+    );
   };
 
   private _handleTapAction = (
-    e: MouseEvent,
+    target: HTMLElement,
     route: RouteItem,
     isPopupItem = false,
   ) => {
-    // Prevent default
-    e.preventDefault();
-    e.stopPropagation();
-    this._executeAction(e, route, route.tap_action, 'tap', isPopupItem);
+    // Set timeout for tap action to allow for potential double tap
+    if (route.double_tap_action) {
+      this.tapTimeoutId = window.setTimeout(() => {
+        // this._handleTapAction(currentTarget, route, false);
+        this._executeAction(
+          target,
+          route,
+          route.tap_action,
+          'tap',
+          isPopupItem,
+        );
+      }, DOUBLE_TAP_DELAY);
+    } else {
+      // this._handleTapAction(currentTarget, route, false);
+      this._executeAction(target, route, route.tap_action, 'tap', isPopupItem);
+    }
   };
 
   /**
-   * Generic handler for tap and hold actions.
+   * Generic handler for tap, hold, and double tap actions.
    */
   private _executeAction = (
-    e: MouseEvent | PointerEvent,
+    target: HTMLElement,
     route: RouteItem,
-    action: RouteItem['tap_action'] | RouteItem['hold_action'],
-    actionType: 'tap' | 'hold',
+    action:
+      | RouteItem['tap_action']
+      | RouteItem['hold_action']
+      | RouteItem['double_tap_action'],
+    actionType: 'tap' | 'hold' | 'double_tap',
     isPopupItem = false,
   ) => {
+    // Close popup for any action unless it's opening a new popup
+    if (action?.action !== 'open-popup' && isPopupItem) {
+      this._closePopup();
+    }
+
     if (!isPopupItem && action?.action === 'open-popup') {
       const popupItems = route.popup ?? route.submenu;
       if (!popupItems) {
@@ -590,7 +674,6 @@ export class NavbarCard extends LitElement {
         if (actionType === 'tap') {
           hapticFeedback();
         }
-        const target = e.currentTarget as HTMLElement;
         if (actionType === 'tap') {
           // Quick fix to prevent the popup from closing inmediately after
           // opening it on iOS devices.
@@ -606,7 +689,6 @@ export class NavbarCard extends LitElement {
         hapticFeedback();
       }
       fireDOMEvent(this, 'hass-toggle-menu', { bubbles: true, composed: true });
-      this._closePopup(); // Close popup after toggling menu
     } else if (action != null) {
       if (actionType === 'tap') {
         hapticFeedback();
@@ -622,11 +704,9 @@ export class NavbarCard extends LitElement {
           },
         },
       );
-      this._closePopup();
     } else if (actionType === 'tap' && route.url) {
       // Handle default navigation for tap action if no specific action is defined
       navigate(this, route.url);
-      this._closePopup();
     }
   };
 
