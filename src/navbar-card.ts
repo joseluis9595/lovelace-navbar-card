@@ -53,6 +53,7 @@ const PROPS_TO_FORCE_UPDATE = [
 ];
 
 const DEFAULT_DESKTOP_POSITION = DesktopPosition.bottom;
+const HOLD_ACTION_DELAY = 500;
 
 @customElement('navbar-card')
 export class NavbarCard extends LitElement {
@@ -519,7 +520,7 @@ export class NavbarCard extends LitElement {
       this.holdTimeoutId = window.setTimeout(() => {
         hapticFeedback();
         this.holdTriggered = true;
-      }, 500);
+      }, HOLD_ACTION_DELAY);
     }
   };
 
