@@ -21,6 +21,10 @@ type TemplatableString = JSTemplate | boolean;
 
 // Base properties shared by all route items
 interface RouteItemBase {
+  url?: string;
+  tap_action?: ExtendedActionConfig;
+  hold_action?: ExtendedActionConfig;
+  double_tap_action?: ExtendedActionConfig;
   icon?: string;
   image?: string;
   icon_selected?: string;
@@ -36,17 +40,9 @@ interface RouteItemBase {
 }
 
 // Type for popup menu items (don't include popup property to avoid circular references)
-export type PopupItem = RouteItemBase & {
-  url?: string;
-  tap_action?: ExtendedActionConfig;
-  hold_action?: ExtendedActionConfig;
-};
-
+export type PopupItem = RouteItemBase;
 // Main route item type
 export type RouteItem = RouteItemBase & {
-  url?: string;
-  tap_action?: ExtendedActionConfig;
-  hold_action?: ExtendedActionConfig;
   popup?: PopupItem[];
   // Alias for backward compatibility
   submenu?: PopupItem[];
