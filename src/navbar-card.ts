@@ -706,6 +706,11 @@ export class NavbarCard extends LitElement {
         hapticFeedback();
       }
       fireDOMEvent(this, 'hass-toggle-menu', { bubbles: true, composed: true });
+    } else if (action?.action === 'navigate-back') {
+      if (actionType === 'tap') {
+        hapticFeedback();
+      }
+      window.history.back();
     } else if (action != null) {
       if (actionType === 'tap') {
         hapticFeedback();
