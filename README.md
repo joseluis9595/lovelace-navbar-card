@@ -292,6 +292,8 @@ Here is a breakdown of the CSS classes available for customization:
 - `.badge`: Small indicator or badge that appears over the icon (if configured).
   - `.badge.active`: Applies when a route is selected.
 
+- `.navbar-popup`: Main container for the popup.
+
 - `.navbar-popup-backdrop`: Backdrop styles for the popup.
 
 - `.popup-item`: Styles applied to the container of each popup-item. This object contains both the "button" with the icon, and the label.
