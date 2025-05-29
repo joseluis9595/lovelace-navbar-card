@@ -7,13 +7,19 @@ export enum DesktopPosition {
   right = 'right',
 }
 
-// Define the popup action specific to this card
-export interface PopupActionConfig {
+// Custom navbar-card actions
+type PopupActionConfig = {
   action: 'open-popup';
-}
+};
+type NavigateBackActionConfig = {
+  action: 'navigate-back';
+};
 
 // Extend ActionConfig to include our custom popup action
-export type ExtendedActionConfig = ActionConfig | PopupActionConfig;
+export type ExtendedActionConfig =
+  | ActionConfig
+  | PopupActionConfig
+  | NavigateBackActionConfig;
 
 type JSTemplate = string;
 type TemplatableBoolean = JSTemplate | boolean;
