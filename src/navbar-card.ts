@@ -464,8 +464,7 @@ export class NavbarCard extends LitElement {
 
     this._popup = html`
       <div
-        class="navbar-popup-backdrop"
-        @click=${() => this._closePopup()}></div>
+        class="navbar-popup-backdrop"</div>
       <div
         class="
           navbar-popup
@@ -531,6 +530,21 @@ export class NavbarCard extends LitElement {
     });
     // Add Escape key listener when popup is opened
     window.addEventListener('keydown', this._onPopupKeyDownListener);
+
+    // Add click listener to backdrop after a short delay, to prevent a recurring issue
+    // where the popup is closed right after being opened. This happens because the click
+    // event that opens the popup, bubbles up the DOM up to this backdrop, even with
+    // preventDefault or stopPropagation :(
+    setTimeout(() => {
+      const backdrop = this.shadowRoot?.querySelector('.navbar-popup-backdrop');
+      if (backdrop) {
+        backdrop.addEventListener('click', (e: Event) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this._closePopup();
+        });
+      }
+    }, 400);
   };
 
   /**********************************************************************/
@@ -691,15 +705,7 @@ export class NavbarCard extends LitElement {
         if (actionType === 'tap') {
           hapticFeedback();
         }
-        if (actionType === 'tap') {
-          // Quick fix to prevent the popup from closing inmediately after
-          // opening it on iOS devices.
-          setTimeout(() => {
-            this._openPopup(popupItems, target);
-          }, 100);
-        } else {
-          this._openPopup(popupItems, target);
-        }
+        this._openPopup(popupItems, target);
       }
     } else if (action?.action === 'toggle-menu') {
       if (actionType === 'tap') {
