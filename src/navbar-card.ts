@@ -471,7 +471,7 @@ export class NavbarCard extends LitElement {
           navbar-popup
           ${popupDirectionClassName}
           ${labelPositionClassName}
-          ${this._isDesktop ? 'desktop' : ''}
+          ${this._isDesktop ? 'desktop' : 'mobile'}
         "
         style="${style}">
         ${popupItems
