@@ -371,7 +371,7 @@ export class NavbarCard extends LitElement {
       this._popup = null;
     }
     // Remove Escape key listener when popup is closed
-    window.removeEventListener('keydown', this._handleClosePopupListener);
+    window.removeEventListener('keydown', this._onPopupKeyDownListener);
   };
 
   /**
@@ -530,13 +530,13 @@ export class NavbarCard extends LitElement {
       }
     });
     // Add Escape key listener when popup is opened
-    window.addEventListener('keydown', this._handleClosePopupListener);
+    window.addEventListener('keydown', this._onPopupKeyDownListener);
   };
 
   /**********************************************************************/
-  /* Pointer event listenrs */
+  /* Event listenrs */
   /**********************************************************************/
-  private _handleClosePopupListener = (e: KeyboardEvent) => {
+  private _onPopupKeyDownListener = (e: KeyboardEvent) => {
     if (e.key === 'Escape' && this._popup) {
       e.preventDefault();
       this._closePopup();
