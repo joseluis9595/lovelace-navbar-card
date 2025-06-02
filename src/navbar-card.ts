@@ -22,7 +22,7 @@ import {
   processBadgeTemplate,
   processTemplate,
 } from './utils';
-import { getNavbarTemplates } from './dom-utils';
+import { forceResetRipple, getNavbarTemplates } from './dom-utils';
 import { getDefaultStyles } from './styles';
 
 declare global {
@@ -87,6 +87,9 @@ export class NavbarCard extends LitElement {
 
   connectedCallback(): void {
     super.connectedCallback();
+
+    // Quick fix for ripple effects
+    forceResetRipple(this);
 
     // Initialize location
     this._location = window.location.pathname;
@@ -341,7 +344,7 @@ export class NavbarCard extends LitElement {
 
         <div class="button ${isActive ? 'active' : ''}">
           ${this._getRouteIcon(route, isActive)}
-          <ha-ripple></ha-ripple>
+          <md-ripple></md-ripple>
         </div>
         ${this._shouldShowLabels(false)
           ? html`<div class="label ${isActive ? 'active' : ''}">
@@ -371,7 +374,7 @@ export class NavbarCard extends LitElement {
       this._popup = null;
     }
     // Remove Escape key listener when popup is closed
-    window.removeEventListener('keydown', this._handleClosePopupListener);
+    window.removeEventListener('keydown', this._onPopupKeyDownListener);
   };
 
   /**
@@ -464,14 +467,13 @@ export class NavbarCard extends LitElement {
 
     this._popup = html`
       <div
-        class="navbar-popup-backdrop"
-        @click=${() => this._closePopup()}></div>
+        class="navbar-popup-backdrop"</div>
       <div
         class="
           navbar-popup
           ${popupDirectionClassName}
           ${labelPositionClassName}
-          ${this._isDesktop ? 'desktop' : ''}
+          ${this._isDesktop ? 'desktop' : 'mobile'}
         "
         style="${style}">
         ${popupItems
@@ -507,7 +509,8 @@ export class NavbarCard extends LitElement {
                 : html``}
 
               <div class="button">
-                ${this._getRouteIcon(popupItem, false)}<ha-ripple></ha-ripple>
+                ${this._getRouteIcon(popupItem, false)}
+                <md-ripple></md-ripple>
               </div>
               ${this._shouldShowLabels(true)
                 ? html`<div class="label">
@@ -530,13 +533,28 @@ export class NavbarCard extends LitElement {
       }
     });
     // Add Escape key listener when popup is opened
-    window.addEventListener('keydown', this._handleClosePopupListener);
+    window.addEventListener('keydown', this._onPopupKeyDownListener);
+
+    // Add click listener to backdrop after a short delay, to prevent a recurring issue
+    // where the popup is closed right after being opened. This happens because the click
+    // event that opens the popup, bubbles up the DOM up to this backdrop, even with
+    // preventDefault or stopPropagation :(
+    setTimeout(() => {
+      const backdrop = this.shadowRoot?.querySelector('.navbar-popup-backdrop');
+      if (backdrop) {
+        backdrop.addEventListener('click', (e: Event) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this._closePopup();
+        });
+      }
+    }, 400);
   };
 
   /**********************************************************************/
-  /* Pointer event listenrs */
+  /* Event listenrs */
   /**********************************************************************/
-  private _handleClosePopupListener = (e: KeyboardEvent) => {
+  private _onPopupKeyDownListener = (e: KeyboardEvent) => {
     if (e.key === 'Escape' && this._popup) {
       e.preventDefault();
       this._closePopup();
@@ -691,15 +709,7 @@ export class NavbarCard extends LitElement {
         if (actionType === 'tap') {
           hapticFeedback();
         }
-        if (actionType === 'tap') {
-          // Quick fix to prevent the popup from closing inmediately after
-          // opening it on iOS devices.
-          setTimeout(() => {
-            this._openPopup(popupItems, target);
-          }, 100);
-        } else {
-          this._openPopup(popupItems, target);
-        }
+        this._openPopup(popupItems, target);
       }
     } else if (action?.action === 'toggle-menu') {
       if (actionType === 'tap') {
