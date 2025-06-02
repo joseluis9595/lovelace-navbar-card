@@ -341,7 +341,7 @@ export class NavbarCard extends LitElement {
 
         <div class="button ${isActive ? 'active' : ''}">
           ${this._getRouteIcon(route, isActive)}
-          <ha-ripple></ha-ripple>
+          <md-ripple></md-ripple>
         </div>
         ${this._shouldShowLabels(false)
           ? html`<div class="label ${isActive ? 'active' : ''}">
@@ -506,7 +506,8 @@ export class NavbarCard extends LitElement {
                 : html``}
 
               <div class="button">
-                ${this._getRouteIcon(popupItem, false)}<ha-ripple></ha-ripple>
+                ${this._getRouteIcon(popupItem, false)}
+                <md-ripple></md-ripple>
               </div>
               ${this._shouldShowLabels(true)
                 ? html`<div class="label">
