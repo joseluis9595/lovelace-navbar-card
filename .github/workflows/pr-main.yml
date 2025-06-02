@@ -33,5 +33,8 @@ jobs:
       - name: lint
         run: bun lint:check
 
+      - name: Test
+        run: bun run test
+
       - name: Build Project
         run: bun run build

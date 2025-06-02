@@ -58,7 +58,7 @@ const HOLD_ACTION_DELAY = 500;
 
 @customElement('navbar-card')
 export class NavbarCard extends LitElement {
-  @state() private hass!: HomeAssistant;
+  @state() protected hass!: HomeAssistant;
   @state() private _config?: NavbarCardConfig;
   @state() private _isDesktop?: boolean;
   @state() private _inEditDashboardMode?: boolean;

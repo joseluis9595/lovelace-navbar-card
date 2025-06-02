@@ -40,11 +40,22 @@ jobs:
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
 
-      # Install dependencies and build
-      - name: Install and build
+      # Install dependencies
+      - name: Install dependencies
         run: |
           bun install
-          bun run build
+
+      # Lint
+      - name: lint
+        run: bun lint:check
+
+      # Test
+      - name: Test
+        run: bun run test
+
+      # Build Project
+      - name: Build Project
+        run: bun run build
 
       # Create new release tag
       - name: Create tag

@@ -9,19 +9,27 @@
     "build": "bun build src/navbar-card.ts --outfile=dist/navbar-card.js --target=browser",
     "lint": "eslint --fix",
     "lint:check": "eslint",
-    "format": "prettier --write src/**/*.ts"
+    "format": "prettier --write src/**/*.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.9",
     "@eslint/js": "^9.27.0",
+    "@open-wc/testing": "^4.0.0",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
     "@types/bun": "latest",
     "@typescript-eslint/eslint-plugin": "^8.32.1",
     "@typescript-eslint/parser": "^8.32.1",
     "eslint": "^9.27.0",
     "eslint-config-prettier": "^10.1.5",
+    "jsdom": "^26.1.0",
     "prettier": "^3.4.2",
     "typescript": "^5.4.5",
-    "typescript-eslint": "^8.32.1"
+    "typescript-eslint": "^8.32.1",
+    "vitest": "^3.1.4"
   },
   "dependencies": {
     "custom-card-helpers": "^1.9.0",
