@@ -22,7 +22,7 @@ import {
   processBadgeTemplate,
   processTemplate,
 } from './utils';
-import { getNavbarTemplates } from './dom-utils';
+import { forceResetRipple, getNavbarTemplates } from './dom-utils';
 import { getDefaultStyles } from './styles';
 
 declare global {
@@ -87,6 +87,9 @@ export class NavbarCard extends LitElement {
 
   connectedCallback(): void {
     super.connectedCallback();
+
+    // Quick fix for ripple effects
+    forceResetRipple(this);
 
     // Initialize location
     this._location = window.location.pathname;

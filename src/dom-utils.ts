@@ -1,5 +1,8 @@
 import { NavbarCardConfig } from './types';
 
+/**
+ * Get a list of user defined navbar-card templates
+ */
 export const getNavbarTemplates = (): Record<
   string,
   NavbarCardConfig
@@ -16,4 +19,18 @@ export const getNavbarTemplates = (): Record<
     return lovelacePanel.lovelace.config['navbar-templates'];
   }
   return null;
+};
+
+/**
+ * Quick fix to prevent ripple effect from getting stuck in the hovered state
+ * @param element The navbar-card parent element
+ */
+export const forceResetRipple = (element: HTMLElement) => {
+  const ripples = element.querySelectorAll('md-ripple');
+  if (ripples) {
+    ripples.forEach(ripple => {
+      const surface = ripple?.shadowRoot?.querySelector('.surface');
+      surface?.classList?.remove('hovered');
+    });
+  }
 };
