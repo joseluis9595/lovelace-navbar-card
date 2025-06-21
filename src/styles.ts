@@ -102,11 +102,7 @@ const ROUTE_STYLES = css`
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    transition: filter 0.2s ease;
     --icon-primary-color: var(--state-inactive-color);
-  }
-  .route:hover {
-    filter: brightness(1.2);
   }
 
   /* Button styling */
