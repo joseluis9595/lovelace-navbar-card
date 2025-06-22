@@ -572,7 +572,9 @@ export class NavbarCard extends LitElement {
     if (route.hold_action) {
       this.holdTriggered = false;
       this.holdTimeoutId = window.setTimeout(() => {
-        hapticFeedback();
+        if (this._shouldTriggerHaptic('hold')) {
+          hapticFeedback();
+        }
         this.holdTriggered = true;
       }, HOLD_ACTION_DELAY);
     }
@@ -706,23 +708,23 @@ export class NavbarCard extends LitElement {
       if (!popupItems) {
         console.error('No popup items found for route:', route);
       } else {
-        if (actionType === 'tap') {
+        if (this._shouldTriggerHaptic(actionType)) {
           hapticFeedback();
         }
         this._openPopup(popupItems, target);
       }
     } else if (action?.action === 'toggle-menu') {
-      if (actionType === 'tap') {
+      if (this._shouldTriggerHaptic(actionType)) {
         hapticFeedback();
       }
       fireDOMEvent(this, 'hass-toggle-menu', { bubbles: true, composed: true });
     } else if (action?.action === 'navigate-back') {
-      if (actionType === 'tap') {
+      if (this._shouldTriggerHaptic(actionType, true)) {
         hapticFeedback();
       }
       window.history.back();
     } else if (action != null) {
-      if (actionType === 'tap') {
+      if (this._shouldTriggerHaptic(actionType)) {
         hapticFeedback();
       }
       fireDOMEvent(
@@ -738,6 +740,9 @@ export class NavbarCard extends LitElement {
       );
     } else if (actionType === 'tap' && route.url) {
       // Handle default navigation for tap action if no specific action is defined
+      if (this._shouldTriggerHaptic(actionType, true)) {
+        hapticFeedback();
+      }
       navigate(this, route.url);
     }
   };
@@ -805,6 +810,40 @@ export class NavbarCard extends LitElement {
       ${getDefaultStyles()}
       ${userStyles}
     `;
+  }
+
+  private _shouldTriggerHaptic(
+    actionType: 'tap' | 'hold' | 'double_tap',
+    isNavigation = false,
+  ): boolean {
+    const hapticConfig = this._config?.haptic;
+
+    // If haptic is a boolean, use it as a global setting
+    if (typeof hapticConfig === 'boolean') {
+      return hapticConfig;
+    }
+
+    // If no haptic config is provided, return default values
+    if (!hapticConfig) {
+      return !isNavigation;
+    }
+
+    // Check navigation first
+    if (isNavigation) {
+      return hapticConfig.url ?? false;
+    }
+
+    // Check specific action types
+    switch (actionType) {
+      case 'tap':
+        return hapticConfig.tap_action ?? false;
+      case 'hold':
+        return hapticConfig.hold_action ?? false;
+      case 'double_tap':
+        return hapticConfig.double_tap_action ?? false;
+      default:
+        return false;
+    }
   }
 }
 

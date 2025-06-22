@@ -55,6 +55,7 @@ Navbar Card is a custom Lovelace card designed to simplify navigation within you
 | `mobile`   | [Mobile](#mobile)     | -          | Options specific to mobile mode                       |
 | `template` | [Template](#template) | -          | Template name                                         |
 | `styles`   | [Styles](#styles)     | -          | Custom CSS styles for the card                        |
+| `haptic`   | [Haptic](#haptics)     | -          | Custom CSS styles for the card                        |
 
 ### Routes
 
@@ -92,11 +93,11 @@ Routes represents an array of clickable icons that redirects to a given path. Ea
 
 Apart from the [standard Home Assistant actions](https://www.home-assistant.io/dashboards/actions/) (navigate, call-service, etc.), `navbar-card` supports some additional custom actions:
 
-| Action          | Description                                                 | Required Parameters |
-| --------------- | ----------------------------------------------------------- | ------------------- |
-| `open-popup`    | Opens the popup menu defined in the route                   | None                |
-| `toggle-menu`   | Opens the native HA side menu                               | None                |
-| `navigate-back` | Navigates back to the previous page in the browser history  | None                |
+| Action          | Description                                                | Required Parameters |
+| --------------- | ---------------------------------------------------------- | ------------------- |
+| `open-popup`    | Opens the popup menu defined in the route                  | None                |
+| `toggle-menu`   | Opens the native HA side menu                              | None                |
+| `navigate-back` | Navigates back to the previous page in the browser history | None                |
 
 Example:
 
@@ -183,12 +184,12 @@ routes:
 
 Specific configuration for desktop mode.
 
-| Name          | Type                                    | Default  | Description                                                                |
-| ------------- | --------------------------------------  | -------- | -------------------------------------------------------------------------- |
-| `show_labels` | boolean \| `popup_only` \| `routes_only`| `false`  | Whether or not to display labels under each route                          |
-| `min_width`   | number                                  | `768`    | Screen size from which the navbar will be displayed as its desktop variant |
-| `position`    | `top` \| `bottom` \| `left` \| `right`  | `bottom` | Position of the navbar on desktop devices                                  |
-| `hidden`      | boolean \| [JSTemplate](#jstemplate)    | `false`  | Set to true to hide the navbar on desktop devices                          |
+| Name          | Type                                     | Default  | Description                                                                |
+| ------------- | ---------------------------------------- | -------- | -------------------------------------------------------------------------- |
+| `show_labels` | boolean \| `popup_only` \| `routes_only` | `false`  | Whether or not to display labels under each route                          |
+| `min_width`   | number                                   | `768`    | Screen size from which the navbar will be displayed as its desktop variant |
+| `position`    | `top` \| `bottom` \| `left` \| `right`   | `bottom` | Position of the navbar on desktop devices                                  |
+| `hidden`      | boolean \| [JSTemplate](#jstemplate)     | `false`  | Set to true to hide the navbar on desktop devices                          |
 
 ---
 
@@ -196,10 +197,24 @@ Specific configuration for desktop mode.
 
 Specific configuration for mobile mode.
 
-| Name          | Type                                    | Default | Description                                       |
-| ------------- | ------------------------------------    | ------- | ------------------------------------------------- |
-| `show_labels` | boolean \| `popup_only` \| `routes_only`| `false` | Whether or not to display labels under each route |
-| `hidden`      | boolean \| [JSTemplate](#jstemplate)    | `false` | Set to true to hide the navbar on mobile devices  |
+| Name          | Type                                     | Default | Description                                       |
+| ------------- | ---------------------------------------- | ------- | ------------------------------------------------- |
+| `show_labels` | boolean \| `popup_only` \| `routes_only` | `false` | Whether or not to display labels under each route |
+| `hidden`      | boolean \| [JSTemplate](#jstemplate)     | `false` | Set to true to hide the navbar on mobile devices  |
+
+---
+
+#### Haptic
+
+Controls when haptic feedback is triggered. You can either use a boolean to enable/disable all haptic feedback, or specify which actions should trigger haptic feedback:
+
+| Option              | Type    | Default | Description                           |
+| ------------------- | ------- | ------- | ------------------------------------- |
+| `url`               | boolean | `false` | Trigger when navigating to a new page |
+| `tap_action`        | boolean | `false` | Trigger on tap actions                |
+| `hold_action`       | boolean | `false` | Trigger on hold actions               |
+| `double_tap_action` | boolean | `false` | Trigger on double tap actions         |
+
 
 ---
 
@@ -271,6 +286,7 @@ You can check out some examples [here](#examples-with-custom-styles) for inspira
 Here is a breakdown of the CSS classes available for customization:
 
 - `.navbar`: Base component for the navbar.
+
   - `.navbar.desktop`: Styling for the desktop version.
   - `.navbar.desktop.[top | bottom | left | right]`: Specific styles for different positions of the navbar.
   - `.navbar.mobile`: Styling for the mobile version.
@@ -278,18 +294,23 @@ Here is a breakdown of the CSS classes available for customization:
 - `.route`: Represents each route (or item) within the navbar.
 
 - `.button`: Background element for each icon.
+
   - `.button.active`: Applies when a route is selected.
 
 - `.icon`: Refers to the ha-icon component used for displaying icons.
+
   - `.icon.active`: Applies when a route is selected.
 
 - `.image`: Refers to the img component used for displaying route images.
+
   - `.image.active`: Applies when a route is selected.
 
 - `.label`: Text label displayed under the icons (if labels are enabled).
+
   - `.label.active`: Applies when a route is selected.
 
 - `.badge`: Small indicator or badge that appears over the icon (if configured).
+
   - `.badge.active`: Applies when a route is selected.
 
 - `.navbar-popup`: Main container for the popup.
@@ -345,6 +366,7 @@ Another useful styling detail, is removing the native ha-tabs element on the top
 To do so, once again, using card-mod and custom themes is quite easy:
 
 #### For Home Assistant < 2025.0
+
 ```yaml
 your_theme:
   app-header-background-color: transparent
@@ -359,8 +381,8 @@ your_theme:
       }
 ```
 
-
 #### For Home Assistant ≥ 2025.0
+
 ```yaml
 your_theme:
   app-header-background-color: transparent
@@ -552,7 +574,7 @@ routes:
     icon: mdi:cog
     # This route will only be displayed for user "jose"
     show: |
-      [[[ return user.name == "jose"]]] 
+      [[[ return user.name == "jose"]]]
 ```
 
 </details>
@@ -567,7 +589,7 @@ desktop:
 routes:
   - url: /lovelace/home
     label: Home
-    selected: true      # force `selected` field to true
+    selected: true # force `selected` field to true
     icon: mdi:home-outline
     icon_selected: mdi:home-assistant
   - url: /lovelace/devices

@@ -26,7 +26,7 @@ type TemplatableBoolean = JSTemplate | boolean;
 type TemplatableString = JSTemplate | boolean;
 
 // Base properties shared by all route items
-interface RouteItemBase {
+type RouteItemBase = {
   url?: string;
   tap_action?: ExtendedActionConfig;
   hold_action?: ExtendedActionConfig;
@@ -43,7 +43,7 @@ interface RouteItemBase {
   };
   hidden?: TemplatableBoolean;
   selected?: TemplatableBoolean;
-}
+};
 
 // Type for popup menu items (don't include popup property to avoid circular references)
 export type PopupItem = RouteItemBase;
@@ -56,6 +56,14 @@ export type RouteItem = RouteItemBase & {
 
 // Labels visibility granular configuration
 type LabelVisibilityConfig = boolean | 'popup_only' | 'routes_only';
+
+// Haptic configuration
+export type HapticConfig = {
+  url?: boolean;
+  tap_action?: boolean;
+  hold_action?: boolean;
+  double_tap_action?: boolean;
+};
 
 // Main card configuration
 export type NavbarCardConfig = {
@@ -72,4 +80,5 @@ export type NavbarCardConfig = {
     hidden?: TemplatableBoolean;
   };
   styles?: string;
+  haptic?: boolean | HapticConfig;
 };
