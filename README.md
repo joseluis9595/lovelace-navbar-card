@@ -48,14 +48,14 @@ Navbar Card is a custom Lovelace card designed to simplify navigation within you
 
 ## ⚙️ Configuration
 
-| Name       | Type                  | Default    | Description                                           |
-| ---------- | --------------------- | ---------- | ----------------------------------------------------- |
-| `routes`   | [Routes](#routes)     | `Required` | Defines the array of routes to be shown in the navbar |
-| `desktop`  | [Desktop](#desktop)   | -          | Options specific to desktop mode                      |
-| `mobile`   | [Mobile](#mobile)     | -          | Options specific to mobile mode                       |
-| `template` | [Template](#template) | -          | Template name                                         |
-| `styles`   | [Styles](#styles)     | -          | Custom CSS styles for the card                        |
-| `haptic`   | [Haptic](#haptic)     | -          | Custom CSS styles for the card                        |
+| Name       | Type                  | Default    | Description                                                   |
+| ---------- | --------------------- | ---------- | ------------------------------------------------------------- |
+| `routes`   | [Routes](#routes)     | `Required` | Defines the array of routes to be shown in the navbar         |
+| `desktop`  | [Desktop](#desktop)   | -          | Options specific to desktop mode                              |
+| `mobile`   | [Mobile](#mobile)     | -          | Options specific to mobile mode                               |
+| `template` | [Template](#template) | -          | Template name                                                 |
+| `styles`   | [Styles](#styles)     | -          | Custom CSS styles for the card                                |
+| `haptic`   | [Haptic](#haptic)     | -          | Fine tune when the haptic events should be fired in the card  |
 
 ### Routes
 
@@ -204,7 +204,7 @@ Specific configuration for mobile mode.
 
 ---
 
-#### Haptic
+### Haptic
 
 Controls when haptic feedback is triggered. You can either use a boolean to enable/disable all haptic feedback, or specify which actions should trigger haptic feedback:
 
