@@ -55,7 +55,7 @@ Navbar Card is a custom Lovelace card designed to simplify navigation within you
 | `mobile`   | [Mobile](#mobile)     | -          | Options specific to mobile mode                       |
 | `template` | [Template](#template) | -          | Template name                                         |
 | `styles`   | [Styles](#styles)     | -          | Custom CSS styles for the card                        |
-| `haptic`   | [Haptic](#haptics)     | -          | Custom CSS styles for the card                        |
+| `haptic`   | [Haptic](#haptic)     | -          | Custom CSS styles for the card                        |
 
 ### Routes
 
@@ -214,7 +214,6 @@ Controls when haptic feedback is triggered. You can either use a boolean to enab
 | `tap_action`        | boolean | `false` | Trigger on tap actions                |
 | `hold_action`       | boolean | `false` | Trigger on hold actions               |
 | `double_tap_action` | boolean | `false` | Trigger on double tap actions         |
-
 
 ---
 
