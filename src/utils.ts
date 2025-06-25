@@ -18,7 +18,11 @@ export const mapStringToEnum = <T extends Record<string, unknown>>(
 };
 
 /**
- *  Badge visibility evaluator
+ * Process a Home Assistant template for badge visibility.
+ *
+ * @param hass - Home Assistant instance
+ * @param template - Template string to evaluate
+ * @returns True if the badge should be shown, false otherwise
  */
 export const processBadgeTemplate = (
   hass: HomeAssistant,
@@ -36,10 +40,11 @@ export const processBadgeTemplate = (
 };
 
 /**
- *  Process template with Home Assistant states
+ * Process a template string with Home Assistant states and user context.
  *
- *  @param hass Home Assistant instance
- *  @param template Template string to be processed
+ * @param hass - Home Assistant instance
+ * @param template - Template string to be processed
+ * @returns The processed template result or the original value if not a template
  */
 export const processTemplate = (hass: HomeAssistant, template?: unknown) => {
   if (!template || !hass) return template;
@@ -63,6 +68,15 @@ export const processTemplate = (hass: HomeAssistant, template?: unknown) => {
   }
 };
 
+/**
+ * Fire a DOM event with optional detail and event options.
+ *
+ * @param node - The node to dispatch the event from
+ * @param type - The event type
+ * @param options - Optional event options (bubbles, composed)
+ * @param detail - Optional event detail
+ * @returns The created and dispatched event
+ */
 export const fireDOMEvent = (
   node: HTMLElement | Window,
   type: Event['type'],
@@ -76,6 +90,12 @@ export const fireDOMEvent = (
   return event;
 };
 
+/**
+ * Trigger haptic feedback by firing a 'haptic' event on the window.
+ *
+ * @param hapticType - The type of haptic feedback (default: 'selection')
+ * @returns The created and dispatched event
+ */
 export const hapticFeedback = (hapticType: string = 'selection') => {
   return fireDOMEvent(window, 'haptic', undefined, hapticType);
 };

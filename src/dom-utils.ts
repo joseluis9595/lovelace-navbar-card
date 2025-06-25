@@ -22,15 +22,20 @@ export const getNavbarTemplates = (): Record<
 };
 
 /**
- * Quick fix to prevent ripple effect from getting stuck in the hovered state
- * @param element The navbar-card parent element
+ * Forcefully reset the ripple effect on a Material Design ripple element.
+ *
+ * @param target - The HTMLElement containing the md-ripple element
  */
-export const forceResetRipple = (element: HTMLElement) => {
-  const ripples = element?.shadowRoot?.querySelectorAll('md-ripple');
-  if (ripples) {
-    ripples.forEach(ripple => {
-      const surface = ripple?.shadowRoot?.querySelector('.surface');
-      surface?.classList?.remove('hovered');
-    });
+export const forceResetRipple = (target: HTMLElement) => {
+  const ripple = target?.querySelector('md-ripple');
+  if (ripple != null) {
+    setTimeout(() => {
+      ripple.shadowRoot
+        ?.querySelector('.surface')
+        ?.classList?.remove('hovered');
+      ripple.shadowRoot
+        ?.querySelector('.surface')
+        ?.classList?.remove('pressed');
+    }, 10);
   }
 };
