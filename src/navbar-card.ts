@@ -698,6 +698,9 @@ export class NavbarCard extends LitElement {
     actionType: 'tap' | 'hold' | 'double_tap',
     isPopupItem = false,
   ) => {
+    // Force reset ripple status to prevent UI bugs
+    forceResetRipple(target);
+
     // Close popup for any action unless it's opening a new popup
     if (action?.action !== 'open-popup' && isPopupItem) {
       this._closePopup();
