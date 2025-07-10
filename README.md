@@ -148,10 +148,12 @@ Configuration to display a small badge on any of the navbar items.
 
 ![navbar-card-badge](https://github.com/user-attachments/assets/5f548ce3-82b5-422f-a084-715bc73846b0)
 
-| Name    | Type                                 | Default | Description                                                     |
-| ------- | ------------------------------------ | ------- | --------------------------------------------------------------- |
-| `show`  | boolean \| [JSTemplate](#jstemplate) | false   | Boolean template indicating whether to display the badge or not |
-| `color` | string                               | red     | Background color of the badge                                   |
+| Name        | Type                                 | Default | Description                                                     |
+| ----------- | ------------------------------------ | ------- | --------------------------------------------------------------- |
+| `show`      | boolean \| [JSTemplate](#jstemplate) | false   | Boolean template indicating whether to display the badge or not |
+| `color`     | string \| [JSTemplate](#jstemplate)  | red     | Background color of the badge                                   |
+| `count`     | string \| [JSTemplate](#jstemplate)  | -       | Text to be displayed inside the badge                           |
+| `textColor` | string \| [JSTemplate](#jstemplate)  | -       | Color for the text displayed inside the badge                   |
 
 #### Popup Items
 

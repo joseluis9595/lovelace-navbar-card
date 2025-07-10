@@ -157,6 +157,18 @@ const ROUTE_STYLES = css`
     top: 0;
     right: 0;
   }
+  .badge.with-counter {
+    min-width: 16px;
+    width: auto !important;
+    padding: 0px 2px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 11px;
+    line-height: 11px;
+  }
 
   /* Desktop mode styles */
   .navbar.desktop .route {

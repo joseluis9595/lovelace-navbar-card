@@ -6,7 +6,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "bun build src/navbar-card.ts --outfile=dist/navbar-card.js --target=browser",
+    "build": "NODE_ENV=production bun build src/navbar-card.ts --outfile=dist/navbar-card.js --target=browser",
     "lint": "eslint --fix",
     "lint:check": "eslint",
     "format": "prettier --write src/**/*.ts",
@@ -32,8 +32,10 @@
     "vitest": "^3.1.4"
   },
   "dependencies": {
+    "@open-wc/scoped-elements": "^3.0.6",
+    "@open-wc/testing-helpers": "^3.0.1",
     "custom-card-helpers": "^1.9.0",
-    "lit": "^2.5.0"
+    "lit": "^3.3.0"
   },
   "module": "index.ts"
 }

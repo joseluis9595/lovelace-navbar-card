@@ -22,8 +22,7 @@ export type ExtendedActionConfig =
   | NavigateBackActionConfig;
 
 type JSTemplate = string;
-type TemplatableBoolean = JSTemplate | boolean;
-type TemplatableString = JSTemplate | boolean;
+type JSTemplatable<T> = JSTemplate | T;
 
 // Base properties shared by all route items
 type RouteItemBase = {
@@ -35,14 +34,16 @@ type RouteItemBase = {
   image?: string;
   icon_selected?: string;
   image_selected?: string;
-  label?: TemplatableString;
+  label?: JSTemplatable<string>;
   badge?: {
     template?: string; // TODO deprecate
-    color?: string;
-    show?: TemplatableBoolean;
+    color?: JSTemplatable<string>;
+    show?: JSTemplatable<boolean>;
+    count?: JSTemplatable<number>;
+    textColor?: JSTemplatable<string>;
   };
-  hidden?: TemplatableBoolean;
-  selected?: TemplatableBoolean;
+  hidden?: JSTemplatable<boolean>;
+  selected?: JSTemplatable<boolean>;
 };
 
 // Type for popup menu items (don't include popup property to avoid circular references)
@@ -73,11 +74,11 @@ export type NavbarCardConfig = {
     show_labels?: LabelVisibilityConfig;
     min_width?: number;
     position?: DesktopPosition;
-    hidden?: TemplatableBoolean;
+    hidden?: JSTemplatable<boolean>;
   };
   mobile?: {
     show_labels?: LabelVisibilityConfig;
-    hidden?: TemplatableBoolean;
+    hidden?: JSTemplatable<boolean>;
   };
   styles?: string;
   haptic?: boolean | HapticConfig;

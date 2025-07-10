@@ -24,6 +24,7 @@ import {
 } from './utils';
 import { forceResetRipple, getNavbarTemplates } from './dom-utils';
 import { getDefaultStyles } from './styles';
+import { Color } from './color';
 
 declare global {
   interface Window {
@@ -279,6 +280,35 @@ export class NavbarCard extends LitElement {
             : route.icon}"></ha-icon>`;
   }
 
+  private _renderBadge(route: RouteItem | PopupItem, isRouteActive: boolean) {
+    let showBadge = false;
+    if (route.badge?.show) {
+      showBadge = processTemplate(this.hass, route.badge?.show);
+    } else if (route.badge?.template) {
+      // TODO deprecate this
+      showBadge = processBadgeTemplate(this.hass, route.badge?.template);
+    }
+
+    const count = processTemplate(this.hass, route.badge?.count) ?? null;
+    const hasCount = count != null;
+
+    const backgroundColor =
+      processTemplate(this.hass, route.badge?.color) ?? 'red';
+    const contrastingColor =
+      processTemplate(this.hass, route.badge?.textColor) ??
+      new Color(backgroundColor).contrastingColor().hex();
+
+    return showBadge
+      ? html`<div
+          class="badge ${isRouteActive ? 'active' : ''} ${hasCount
+            ? 'with-counter'
+            : ''}"
+          style="background-color: ${backgroundColor}; color: ${contrastingColor}">
+          ${count}
+        </div>`
+      : html``;
+  }
+
   /**********************************************************************/
   /* Navbar callbacks */
   /**********************************************************************/
@@ -316,14 +346,6 @@ export class NavbarCard extends LitElement {
         ? processTemplate(this.hass, route.selected)
         : this._location == route.url;
 
-    let showBadge = false;
-    if (route.badge?.show) {
-      showBadge = processTemplate(this.hass, route.badge?.show);
-    } else if (route.badge?.template) {
-      // TODO deprecate this
-      showBadge = processBadgeTemplate(this.hass, route.badge?.template);
-    }
-
     if (processTemplate(this.hass, route.hidden)) {
       return null;
     }
@@ -336,11 +358,7 @@ export class NavbarCard extends LitElement {
         @pointerup=${(e: PointerEvent) => this._handlePointerUp(e, route)}
         @pointercancel=${(e: PointerEvent) =>
           this._handlePointerMove(e, route)}>
-        ${showBadge
-          ? html`<div
-              class="badge ${isActive ? 'active' : ''}"
-              style="background-color: ${route.badge?.color || 'red'};"></div>`
-          : html``}
+        ${this._renderBadge(route, isActive)}
 
         <div class="button ${isActive ? 'active' : ''}">
           ${this._getRouteIcon(route, isActive)}
@@ -478,16 +496,6 @@ export class NavbarCard extends LitElement {
         style="${style}">
         ${popupItems
           .map((popupItem, index) => {
-            let showBadge = false;
-            if (popupItem.badge?.show) {
-              showBadge = processTemplate(this.hass, popupItem.badge?.show);
-            } else if (popupItem.badge?.template) {
-              showBadge = processBadgeTemplate(
-                this.hass,
-                popupItem.badge?.template,
-              );
-            }
-
             if (processTemplate(this.hass, popupItem.hidden)) {
               return null;
             }
@@ -501,12 +509,7 @@ export class NavbarCard extends LitElement {
               style="--index: ${index}"
               @click=${(e: MouseEvent) =>
                 this._handlePointerUp(e as PointerEvent, popupItem, true)}>
-              ${showBadge
-                ? html`<div
-                    class="badge"
-                    style="background-color: ${popupItem.badge?.color ||
-                    'red'};"></div>`
-                : html``}
+              ${this._renderBadge(popupItem, false)}
 
               <div class="button">
                 ${this._getRouteIcon(popupItem, false)}
