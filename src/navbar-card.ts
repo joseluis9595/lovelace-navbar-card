@@ -49,7 +49,6 @@ const PROPS_TO_FORCE_UPDATE = [
   '_inEditDashboardMode',
   '_inEditCardMode',
   '_inPreviewMode',
-  '_location',
   '_popup',
 ];
 
@@ -66,7 +65,6 @@ export class NavbarCard extends LitElement {
   @state() private _inEditCardMode?: boolean;
   @state() private _inPreviewMode?: boolean;
   @state() private _lastRender?: number;
-  @state() private _location?: string;
   @state() private _popup?: TemplateResult | null;
 
   // hold_action state variables
@@ -91,9 +89,6 @@ export class NavbarCard extends LitElement {
 
     // Quick fix for ripple effects
     forceResetRipple(this);
-
-    // Initialize location
-    this._location = window.location.pathname;
 
     // Initialize screen size listener
     window.addEventListener('resize', this._checkDesktop);
@@ -310,6 +305,43 @@ export class NavbarCard extends LitElement {
   }
 
   /**********************************************************************/
+  /* Utils */
+  /**********************************************************************/
+  private _shouldTriggerHaptic(
+    actionType: 'tap' | 'hold' | 'double_tap',
+    isNavigation = false,
+  ): boolean {
+    const hapticConfig = this._config?.haptic;
+
+    // If haptic is a boolean, use it as a global setting
+    if (typeof hapticConfig === 'boolean') {
+      return hapticConfig;
+    }
+
+    // If no haptic config is provided, return default values
+    if (!hapticConfig) {
+      return !isNavigation;
+    }
+
+    // Check navigation first
+    if (isNavigation) {
+      return hapticConfig.url ?? false;
+    }
+
+    // Check specific action types
+    switch (actionType) {
+      case 'tap':
+        return hapticConfig.tap_action ?? false;
+      case 'hold':
+        return hapticConfig.hold_action ?? false;
+      case 'double_tap':
+        return hapticConfig.double_tap_action ?? false;
+      default:
+        return false;
+    }
+  }
+
+  /**********************************************************************/
   /* Navbar callbacks */
   /**********************************************************************/
 
@@ -344,7 +376,7 @@ export class NavbarCard extends LitElement {
     const isActive =
       route.selected != null
         ? processTemplate(this.hass, route.selected)
-        : this._location == route.url;
+        : window.location.pathname == route.url;
 
     if (processTemplate(this.hass, route.hidden)) {
       return null;
@@ -555,7 +587,7 @@ export class NavbarCard extends LitElement {
   };
 
   /**********************************************************************/
-  /* Event listenrs */
+  /* Event listeners */
   /**********************************************************************/
   private _onPopupKeyDownListener = (e: KeyboardEvent) => {
     if (e.key === 'Escape' && this._popup) {
@@ -816,40 +848,6 @@ export class NavbarCard extends LitElement {
       ${getDefaultStyles()}
       ${userStyles}
     `;
-  }
-
-  private _shouldTriggerHaptic(
-    actionType: 'tap' | 'hold' | 'double_tap',
-    isNavigation = false,
-  ): boolean {
-    const hapticConfig = this._config?.haptic;
-
-    // If haptic is a boolean, use it as a global setting
-    if (typeof hapticConfig === 'boolean') {
-      return hapticConfig;
-    }
-
-    // If no haptic config is provided, return default values
-    if (!hapticConfig) {
-      return !isNavigation;
-    }
-
-    // Check navigation first
-    if (isNavigation) {
-      return hapticConfig.url ?? false;
-    }
-
-    // Check specific action types
-    switch (actionType) {
-      case 'tap':
-        return hapticConfig.tap_action ?? false;
-      case 'hold':
-        return hapticConfig.hold_action ?? false;
-      case 'double_tap':
-        return hapticConfig.double_tap_action ?? false;
-      default:
-        return false;
-    }
   }
 }
 
