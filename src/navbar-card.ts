@@ -361,17 +361,17 @@ export class NavbarCard extends LitElement {
         @pointerup=${(e: PointerEvent) => this._handlePointerUp(e, route)}
         @pointercancel=${(e: PointerEvent) =>
           this._handlePointerMove(e, route)}>
-        ${this._renderBadge(route, isActive)}
-
         <div class="button ${isActive ? 'active' : ''}">
           ${this._getRouteIcon(route, isActive)}
           <ha-ripple></ha-ripple>
         </div>
+
         ${this._shouldShowLabels(false)
           ? html`<div class="label ${isActive ? 'active' : ''}">
               ${processTemplate(this.hass, route.label) ?? ' '}
             </div>`
           : html``}
+        ${this._renderBadge(route, isActive)}
       </div>
     `;
   };
@@ -512,8 +512,6 @@ export class NavbarCard extends LitElement {
               style="--index: ${index}"
               @click=${(e: MouseEvent) =>
                 this._handlePointerUp(e as PointerEvent, popupItem, true)}>
-              ${this._renderBadge(popupItem, false)}
-
               <div class="button">
                 ${this._getRouteIcon(popupItem, false)}
                 <md-ripple></md-ripple>
@@ -523,6 +521,7 @@ export class NavbarCard extends LitElement {
                     ${processTemplate(this.hass, popupItem.label) ?? ' '}
                   </div>`
                 : html``}
+              ${this._renderBadge(popupItem, false)}
             </div>`;
           })
           .filter(x => x != null)}
