@@ -355,6 +355,7 @@ export class NavbarCard extends LitElement {
       <div
         class="route ${isActive ? 'active' : ''}"
         @mouseenter=${(e: PointerEvent) => this._handleMouseEnter(e, route)}
+        @mousemove=${(e: PointerEvent) => this._handleMouseMove(e, route)}
         @mouseleave=${(e: PointerEvent) => this._handleMouseLeave(e, route)}
         @pointerdown=${(e: PointerEvent) => this._handlePointerDown(e, route)}
         @pointermove=${(e: PointerEvent) => this._handlePointerMove(e, route)}
@@ -570,14 +571,21 @@ export class NavbarCard extends LitElement {
   /* Pointer event listenrs */
   /**********************************************************************/
   private _handleMouseEnter = (e: MouseEvent, _route: RouteItem) => {
-    const ripple = (e.target as HTMLElement).querySelector(
+    const ripple = (e.currentTarget as HTMLElement).querySelector(
+      'ha-ripple',
+    ) as RippleElement;
+    if (ripple) ripple.hovered = true;
+  };
+
+  private _handleMouseMove = (e: MouseEvent, _route: RouteItem) => {
+    const ripple = (e.currentTarget as HTMLElement).querySelector(
       'ha-ripple',
     ) as RippleElement;
     if (ripple) ripple.hovered = true;
   };
 
   private _handleMouseLeave = (e: MouseEvent, _route: RouteItem) => {
-    const ripple = (e.target as HTMLElement).querySelector(
+    const ripple = (e.currentTarget as HTMLElement).querySelector(
       'ha-ripple',
     ) as RippleElement;
     if (ripple) ripple.hovered = false;
