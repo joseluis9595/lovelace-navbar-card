@@ -107,6 +107,7 @@ const ROUTE_STYLES = css`
 
   /* Button styling */
   .button {
+    position: relative;
     height: 36px;
     width: 100%;
     border-radius: 16px;
@@ -150,21 +151,21 @@ const ROUTE_STYLES = css`
 
   /* Badge styling */
   .badge {
-    border-radius: 999px;
-    width: 12px;
-    height: 12px;
     position: absolute;
     top: 0;
     right: 0;
+    border-radius: 999px;
+    width: 12px;
+    height: 12px;
   }
   .badge.with-counter {
-    min-width: 16px;
-    width: auto !important;
-    padding: 0px 2px;
-    height: 16px;
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
+    height: 16px;
+    width: auto !important;
+    min-width: 16px;
+    padding: 0px 2px;
     font-weight: bold;
     font-size: 11px;
     line-height: 11px;
