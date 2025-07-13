@@ -1,4 +1,4 @@
-import { NavbarCardConfig } from './types';
+import { NavbarCardConfig, RippleElement } from './types';
 
 /**
  * Get a list of user defined navbar-card templates
@@ -27,15 +27,12 @@ export const getNavbarTemplates = (): Record<
  * @param target - The HTMLElement containing the md-ripple element
  */
 export const forceResetRipple = (target: HTMLElement) => {
-  const ripple = target?.querySelector('md-ripple');
-  if (ripple != null) {
+  const rippleElements = target?.querySelectorAll('ha-ripple');
+
+  rippleElements.forEach((ripple: RippleElement) => {
     setTimeout(() => {
-      ripple.shadowRoot
-        ?.querySelector('.surface')
-        ?.classList?.remove('hovered');
-      ripple.shadowRoot
-        ?.querySelector('.surface')
-        ?.classList?.remove('pressed');
+      ripple.hovered = false;
+      ripple.pressed = false;
     }, 10);
-  }
+  });
 };

@@ -13,6 +13,7 @@ import {
   DesktopPosition,
   NavbarCardConfig,
   PopupItem,
+  RippleElement,
   RouteItem,
 } from './types';
 import {
@@ -353,6 +354,8 @@ export class NavbarCard extends LitElement {
     return html`
       <div
         class="route ${isActive ? 'active' : ''}"
+        @mouseenter=${(e: PointerEvent) => this._handleMouseEnter(e, route)}
+        @mouseleave=${(e: PointerEvent) => this._handleMouseLeave(e, route)}
         @pointerdown=${(e: PointerEvent) => this._handlePointerDown(e, route)}
         @pointermove=${(e: PointerEvent) => this._handlePointerMove(e, route)}
         @pointerup=${(e: PointerEvent) => this._handlePointerUp(e, route)}
@@ -362,7 +365,7 @@ export class NavbarCard extends LitElement {
 
         <div class="button ${isActive ? 'active' : ''}">
           ${this._getRouteIcon(route, isActive)}
-          <md-ripple></md-ripple>
+          <ha-ripple></ha-ripple>
         </div>
         ${this._shouldShowLabels(false)
           ? html`<div class="label ${isActive ? 'active' : ''}">
@@ -567,6 +570,20 @@ export class NavbarCard extends LitElement {
   /**********************************************************************/
   /* Pointer event listenrs */
   /**********************************************************************/
+  private _handleMouseEnter = (e: MouseEvent, _route: RouteItem) => {
+    const ripple = (e.target as HTMLElement).querySelector(
+      'ha-ripple',
+    ) as RippleElement;
+    if (ripple) ripple.hovered = true;
+  };
+
+  private _handleMouseLeave = (e: MouseEvent, _route: RouteItem) => {
+    const ripple = (e.target as HTMLElement).querySelector(
+      'ha-ripple',
+    ) as RippleElement;
+    if (ripple) ripple.hovered = false;
+  };
+
   private _handlePointerDown = (e: PointerEvent, route: RouteItem) => {
     // Store the starting position for movement detection
     this.pointerStartX = e.clientX;
@@ -854,17 +871,23 @@ export class NavbarCard extends LitElement {
 }
 
 console.info(
-  `%c navbar-card %c ${version} `,
+  `%c navbar-card%cv${version} `,
   // Card name styles
-  'background-color: #555;\
-      padding: 6px 4px;\
-      color: #fff;\
-      text-shadow: 0 1px 0 rgba(1, 1, 1, 0.3); \
-      border-radius: 10px 0 0 10px;',
+  `background-color: #555;
+      padding: 6px 8px;
+      padding-right: 6px;
+      color: #fff;
+      font-weight: 800;
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+      text-shadow: 0 1px 0 rgba(1, 1, 1, 0.3); 
+      border-radius: 16px 0 0 16px;`,
   // Card version styles
-  'background-color: #00abd1; \
-      padding: 6px 4px;\
-      color: #fff;\
-      text-shadow: 0 1px 0 rgba(1, 1, 1, 0.3); \
-      border-radius: 0 10px 10px 0;',
+  `background-color:rgb(0, 135, 197);
+      padding: 6px 8px;
+      padding-left: 6px;
+      color: #fff;
+      font-weight: 800;
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+      text-shadow: 0 1px 0 rgba(1, 1, 1, 0.3); 
+      border-radius: 0 16px 16px 0;`,
 );

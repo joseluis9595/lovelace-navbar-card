@@ -1,5 +1,10 @@
 import { ActionConfig } from 'custom-card-helpers';
 
+export type RippleElement = Element & {
+  hovered?: boolean;
+  pressed?: boolean;
+};
+
 export enum DesktopPosition {
   top = 'top',
   left = 'left',
