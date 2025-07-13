@@ -789,17 +789,19 @@ export class NavbarCard extends LitElement {
       if (this._shouldTriggerHaptic(actionType)) {
         hapticFeedback();
       }
-      fireDOMEvent(
-        this,
-        'hass-action',
-        { bubbles: true, composed: true },
-        {
-          action: actionType,
-          config: {
-            [`${actionType}_action`]: action,
+      setTimeout(() => {
+        fireDOMEvent(
+          this,
+          'hass-action',
+          { bubbles: true, composed: true },
+          {
+            action: actionType,
+            config: {
+              [`${actionType}_action`]: action,
+            },
           },
-        },
-      );
+        );
+      }, 10);
     } else if (actionType === 'tap' && route.url) {
       // Handle default navigation for tap action if no specific action is defined
       if (this._shouldTriggerHaptic(actionType, true)) {
