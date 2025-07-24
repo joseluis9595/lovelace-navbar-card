@@ -1,4 +1,10 @@
-import { ActionConfig } from 'custom-card-helpers';
+import { ActionConfig, HomeAssistant } from 'custom-card-helpers';
+
+export type TemplateFunction<T = unknown> = (
+  states: HomeAssistant['states'],
+  user: HomeAssistant['user'],
+  hass: HomeAssistant,
+) => T;
 
 export type RippleElement = Element & {
   hovered?: boolean;

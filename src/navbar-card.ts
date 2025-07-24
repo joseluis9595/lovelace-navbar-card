@@ -279,19 +279,20 @@ export class NavbarCard extends LitElement {
   private _renderBadge(route: RouteItem | PopupItem, isRouteActive: boolean) {
     let showBadge = false;
     if (route.badge?.show) {
-      showBadge = processTemplate(this.hass, route.badge?.show);
+      showBadge = processTemplate<boolean>(this.hass, route.badge?.show);
     } else if (route.badge?.template) {
       // TODO deprecate this
       showBadge = processBadgeTemplate(this.hass, route.badge?.template);
     }
 
-    const count = processTemplate(this.hass, route.badge?.count) ?? null;
+    const count =
+      processTemplate<number | null>(this.hass, route.badge?.count) ?? null;
     const hasCount = count != null;
 
     const backgroundColor =
-      processTemplate(this.hass, route.badge?.color) ?? 'red';
+      processTemplate<string>(this.hass, route.badge?.color) ?? 'red';
     const contrastingColor =
-      processTemplate(this.hass, route.badge?.textColor) ??
+      processTemplate<string>(this.hass, route.badge?.textColor) ??
       new Color(backgroundColor).contrastingColor().hex();
 
     return showBadge
@@ -376,10 +377,10 @@ export class NavbarCard extends LitElement {
   private _renderRoute = (route: RouteItem) => {
     const isActive =
       route.selected != null
-        ? processTemplate(this.hass, route.selected)
+        ? processTemplate<boolean>(this.hass, route.selected)
         : window.location.pathname == route.url;
 
-    if (processTemplate(this.hass, route.hidden)) {
+    if (processTemplate<boolean>(this.hass, route.hidden)) {
       return null;
     }
 
@@ -401,7 +402,7 @@ export class NavbarCard extends LitElement {
 
         ${this._shouldShowLabels(false)
           ? html`<div class="label ${isActive ? 'active' : ''}">
-              ${processTemplate(this.hass, route.label) ?? ' '}
+              ${processTemplate<string>(this.hass, route.label) ?? ' '}
             </div>`
           : html``}
         ${this._renderBadge(route, isActive)}
@@ -532,7 +533,7 @@ export class NavbarCard extends LitElement {
         style="${style}">
         ${popupItems
           .map((popupItem, index) => {
-            if (processTemplate(this.hass, popupItem.hidden)) {
+            if (processTemplate<boolean>(this.hass, popupItem.hidden)) {
               return null;
             }
 
@@ -551,7 +552,8 @@ export class NavbarCard extends LitElement {
               </div>
               ${this._shouldShowLabels(true)
                 ? html`<div class="label">
-                    ${processTemplate(this.hass, popupItem.label) ?? ' '}
+                    ${processTemplate<string>(this.hass, popupItem.label) ??
+                    ' '}
                   </div>`
                 : html``}
               ${this._renderBadge(popupItem, false)}
@@ -841,8 +843,10 @@ export class NavbarCard extends LitElement {
     // Handle hidden props
     if (
       !isEditMode &&
-      ((this._isDesktop && !!processTemplate(this.hass, desktopHidden)) ||
-        (!this._isDesktop && !!processTemplate(this.hass, mobileHidden)))
+      ((this._isDesktop &&
+        !!processTemplate<boolean>(this.hass, desktopHidden)) ||
+        (!this._isDesktop &&
+          !!processTemplate<boolean>(this.hass, mobileHidden)))
     ) {
       return html``;
     }
