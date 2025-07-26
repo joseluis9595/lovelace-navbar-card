@@ -43,7 +43,7 @@ const complementaryRGBColor = (r: number, g: number, b: number) => {
     return { r: 255 - r, g: 255 - g, b: 255 - b };
   } else {
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    (r /= 255), (g /= 255), (b /= 255);
+    ((r /= 255), (g /= 255), (b /= 255));
     const max = Math.max(r, g, b),
       min = Math.min(r, g, b);
     let h = 0;
@@ -85,10 +85,12 @@ const complementaryRGBColor = (r: number, g: number, b: number) => {
  ************** Color class **************
  *****************************************/
 export class Color {
-  r = 0;
-  g = 0;
-  b = 0;
-  a = 255;
+  private static colorCache = new Map<string, Color>();
+
+  private r: number = 0;
+  private g: number = 0;
+  private b: number = 0;
+  private a: number = 255;
 
   constructor(data: string | number[] | Color) {
     if (data instanceof Color) {
@@ -117,6 +119,17 @@ export class Color {
     } else {
       throw Error(`Format not supported for color: "${typeof data}"`);
     }
+  }
+
+  /**
+   * Get or create a Color instance, using cache for performance
+   */
+  static from(color: string): Color {
+    const normalizedColor = color.toLowerCase().trim();
+    if (!this.colorCache.has(normalizedColor)) {
+      this.colorCache.set(normalizedColor, new Color(normalizedColor));
+    }
+    return this.colorCache.get(normalizedColor)!;
   }
 
   ////////////////////////////

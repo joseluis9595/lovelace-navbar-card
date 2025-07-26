@@ -1,4 +1,5 @@
 import { HomeAssistant } from 'custom-card-helpers';
+import { TemplateFunction } from './types';
 
 /**
  * Map string to enum value
@@ -40,31 +41,61 @@ export const processBadgeTemplate = (
 };
 
 /**
+ * Generate a hash for a string
+ *
+ * @param str - String to hash
+ * @returns Hash of the string
+ */
+const generateHash = (str: string) => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+  }
+  return hash.toString();
+};
+
+// Template function cache for performance optimization
+const templateFunctionCache = new Map<string, TemplateFunction>();
+
+/**
  * Process a template string with Home Assistant states and user context.
  *
  * @param hass - Home Assistant instance
  * @param template - Template string to be processed
  * @returns The processed template result or the original value if not a template
  */
-export const processTemplate = (hass: HomeAssistant, template?: unknown) => {
-  if (!template || !hass) return template;
+export const processTemplate = <T = unknown>(
+  hass: HomeAssistant,
+  template?: unknown,
+): T => {
+  if (!template || !hass) return template as T;
 
   // Check if template is of type string
-  if (typeof template !== 'string') return template;
+  if (typeof template !== 'string') return template as T;
 
   // Valid template starts with [[ and ends with ]]]
   if (!(template.trim().startsWith('[[[') && template.trim().endsWith(']]]'))) {
-    return template;
+    return template as T;
   }
 
   // Run template against home assistant states
   try {
     const cleanTemplate = template.replace(/\[\[\[|\]\]\]/g, '');
-    const func = new Function('states', 'user', 'hass', cleanTemplate);
-    return func(hass.states, hass.user, hass);
+    const hashedTemplate = generateHash(cleanTemplate);
+    let func = templateFunctionCache.get(hashedTemplate);
+    if (!func) {
+      func = new Function(
+        'states',
+        'user',
+        'hass',
+        cleanTemplate,
+      ) as TemplateFunction;
+      templateFunctionCache.set(hashedTemplate, func);
+    }
+    return func(hass.states, hass.user, hass) as T;
   } catch (e) {
     console.error(`NavbarCard: Error evaluating template: ${e}`);
-    return template;
+    return template as T;
   }
 };
 
