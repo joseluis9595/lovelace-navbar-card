@@ -40,6 +40,12 @@ export const processBadgeTemplate = (
   }
 };
 
+/**
+ * Generate a hash for a string
+ *
+ * @param str - String to hash
+ * @returns Hash of the string
+ */
 const generateHash = (str: string) => {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -48,7 +54,7 @@ const generateHash = (str: string) => {
   return hash.toString();
 };
 
-// Use a more explicit function type for the template cache
+// Template function cache for performance optimization
 const templateFunctionCache = new Map<string, TemplateFunction>();
 
 /**
@@ -58,7 +64,6 @@ const templateFunctionCache = new Map<string, TemplateFunction>();
  * @param template - Template string to be processed
  * @returns The processed template result or the original value if not a template
  */
-
 export const processTemplate = <T = unknown>(
   hass: HomeAssistant,
   template?: unknown,
@@ -87,7 +92,6 @@ export const processTemplate = <T = unknown>(
       ) as TemplateFunction;
       templateFunctionCache.set(hashedTemplate, func);
     }
-    // func is always defined here
     return func(hass.states, hass.user, hass) as T;
   } catch (e) {
     console.error(`NavbarCard: Error evaluating template: ${e}`);
