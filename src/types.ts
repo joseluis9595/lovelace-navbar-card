@@ -46,10 +46,10 @@ type RouteItemBase = {
   tap_action?: ExtendedActionConfig;
   hold_action?: ExtendedActionConfig;
   double_tap_action?: ExtendedActionConfig;
-  icon?: string;
-  image?: string;
-  icon_selected?: string;
-  image_selected?: string;
+  icon?: JSTemplatable<string>;
+  image?: JSTemplatable<string>;
+  icon_selected?: JSTemplatable<string>;
+  image_selected?: JSTemplatable<string>;
   label?: JSTemplatable<string>;
   badge?: {
     template?: string; // TODO deprecate

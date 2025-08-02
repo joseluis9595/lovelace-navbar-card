@@ -117,10 +117,10 @@ Routes represents an array of clickable icons that redirects to a given path. Ea
 | Name                | Type                                 | Default     | Description                                                                                                                                                |
 | ------------------- | ------------------------------------ | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `url`               | string                               | `Required*` | The path to a Lovelace view. Ignored if `tap_action` is defined.                                                                                           |
-| `icon`              | string                               | -           | Material icon to display as this entry icon. Either `icon` or `image` is required.                                                                         |
-| `icon_selected`     | string                               | -           | Icon to be displayed when `url` matches the current browser URL                                                                                            |
-| `image`             | string                               | -           | URL of an image to display as this entry icon. Either `icon` or `image` is required.                                                                       |
-| `image_selected`    | string                               | -           | Image to be displayed when `url` matches the current browser URL                                                                                           |
+| `icon`              | string \| [JSTemplate](#jstemplate) | -           | Material icon to display as this entry icon. Either `icon` or `image` is required.                                                                         |
+| `icon_selected`     | string \| [JSTemplate](#jstemplate) | -           | Icon to be displayed when `url` matches the current browser URL                                                                                            |
+| `image`             | string \| [JSTemplate](#jstemplate) | -           | URL of an image to display as this entry icon. Either `icon` or `image` is required.                                                                       |
+| `image_selected`    | string \| [JSTemplate](#jstemplate) | -           | Image to be displayed when `url` matches the current browser URL                                                                                           |
 | `badge`             | [Badge](#badge)                      | -           | Badge configuration                                                                                                                                        |
 | `label`             | string \| [JSTemplate](#jstemplate)  | -           | Label to be displayed under the given route if `show_labels` is true                                                                                       |
 | `tap_action`        | [tap_action](#actions)               | -           | Custom tap action configuration.                                                                                                                           |
@@ -189,7 +189,7 @@ For each route, a popup menu can be configured, to display a popup when clicked.
 | Name          | Type                                | Default     | Description                                                                       |
 | ------------- | ----------------------------------- | ----------- | --------------------------------------------------------------------------------- |
 | `url`         | string                              | `Required*` | The path to a Lovelace view. Ignored if `tap_action` is defined.                  |
-| `icon`        | string                              | `Required`  | Material icon to display as this entry icon                                       |
+| `icon`        | string \| [JSTemplate](#jstemplate) | `Required`  | Material icon to display as this entry icon                                       |
 | `badge`       | [Badge](#badge)                     | -           | Badge configuration                                                               |
 | `label`       | string \| [JSTemplate](#jstemplate) | -           | Label to be displayed under the given route if `show_labels` is true              |
 | `tap_action`  | [tap_action](#actions)              | -           | Custom tap action configuration, including 'open-popup' to display a popup menu.  |

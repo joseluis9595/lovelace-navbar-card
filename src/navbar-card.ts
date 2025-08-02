@@ -252,18 +252,27 @@ export class NavbarCard extends LitElement {
   /* Subcomponents */
   /**********************************************************************/
   private _getRouteIcon(route: RouteItem | PopupItem, isActive: boolean) {
-    return route.image
+    const icon = processTemplate<string>(this.hass, this, route.icon);
+    const image = processTemplate<string>(this.hass, this, route.image);
+    const iconSelected = processTemplate<string>(
+      this.hass,
+      this,
+      route.icon_selected,
+    );
+    const imageSelected = processTemplate<string>(
+      this.hass,
+      this,
+      route.image_selected,
+    );
+
+    return image
       ? html`<img
           class="image ${isActive ? 'active' : ''}"
-          src="${isActive && route.image_selected
-            ? route.image_selected
-            : route.image}"
+          src="${isActive && imageSelected ? imageSelected : image}"
           alt="${route.label || ''}" />`
       : html`<ha-icon
           class="icon ${isActive ? 'active' : ''}"
-          icon="${isActive && route.icon_selected
-            ? route.icon_selected
-            : route.icon}"></ha-icon>`;
+          icon="${isActive && iconSelected ? iconSelected : icon}"></ha-icon>`;
   }
 
   private _renderBadge(route: RouteItem | PopupItem, isRouteActive: boolean) {
@@ -876,7 +885,6 @@ export class NavbarCard extends LitElement {
       return html``;
     }
 
-    // TODO use HA ripple effect for icon button
     return html`
       <ha-card
         class="navbar ${editModeClassname} ${deviceModeClassName} ${desktopPositionClassname}">
