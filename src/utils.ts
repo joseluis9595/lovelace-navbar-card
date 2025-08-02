@@ -1,5 +1,6 @@
 import { HomeAssistant } from 'custom-card-helpers';
-import { TemplateFunction } from './types';
+import { NavbarCardPublicState, TemplateFunction } from './types';
+import { NavbarCard } from './navbar-card';
 
 /**
  * Map string to enum value
@@ -57,6 +58,15 @@ const generateHash = (str: string) => {
 // Template function cache for performance optimization
 const templateFunctionCache = new Map<string, TemplateFunction>();
 
+// Extract publicly accessible state variables from navbar card
+const extractAccessibleStateVariables = (
+  navbar: NavbarCard,
+): NavbarCardPublicState => {
+  return {
+    isDesktop: navbar._isDesktop ?? false,
+  };
+};
+
 /**
  * Process a template string with Home Assistant states and user context.
  *
@@ -66,9 +76,10 @@ const templateFunctionCache = new Map<string, TemplateFunction>();
  */
 export const processTemplate = <T = unknown>(
   hass: HomeAssistant,
+  navbar: NavbarCard,
   template?: unknown,
 ): T => {
-  if (!template || !hass) return template as T;
+  if (!template) return template as T;
 
   // Check if template is of type string
   if (typeof template !== 'string') return template as T;
@@ -88,11 +99,17 @@ export const processTemplate = <T = unknown>(
         'states',
         'user',
         'hass',
+        'navbar',
         cleanTemplate,
       ) as TemplateFunction;
       templateFunctionCache.set(hashedTemplate, func);
     }
-    return func(hass.states, hass.user, hass) as T;
+    return func(
+      hass.states,
+      hass.user,
+      hass,
+      extractAccessibleStateVariables(navbar),
+    ) as T;
   } catch (e) {
     console.error(`NavbarCard: Error evaluating template: ${e}`);
     return template as T;
