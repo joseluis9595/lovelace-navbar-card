@@ -252,14 +252,16 @@ export class NavbarCard extends LitElement {
   /* Subcomponents */
   /**********************************************************************/
   private _getRouteIcon(route: RouteItem | PopupItem, isActive: boolean) {
-    const icon = processTemplate<string>(this.hass, route.icon);
-    const image = processTemplate<string>(this.hass, route.image);
+    const icon = processTemplate<string>(this.hass, this, route.icon);
+    const image = processTemplate<string>(this.hass, this, route.image);
     const iconSelected = processTemplate<string>(
       this.hass,
+      this,
       route.icon_selected,
     );
     const imageSelected = processTemplate<string>(
       this.hass,
+      this,
       route.image_selected,
     );
 
