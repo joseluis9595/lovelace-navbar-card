@@ -77,4 +77,4 @@ jobs:
           body: '${{ github.event.pull_request.body }}'
           tag_name: '${{ steps.get_version.outputs.version }}'
           draft: true
-          generate_release_notes: true
+          generate_release_notes: false
