@@ -208,6 +208,8 @@ Apart from using plain javascript, you can access some predefined variables:
 
 - `states` -> Contains the global state of all entities in HomeAssistant. To get the state of a specific entity, use: `states['entity_type.your_entity'].state`.
 - `user` -> Information about the current logged user.
+- `navbar` -> Internal state of the navbar-card. Accessible fields are:
+  - `isDesktop` -> Boolean indicating whether or not the card is in its desktop variant or not.
 
 > **Tip**: You can use `console.log` in your JSTemplate to help debug your HomeAssistant states.
 
@@ -231,6 +233,8 @@ routes:
       ]]]
     icon: mdi:lightbulb-outline
     icon_selected: mdi:lightbulb
+    hidden: |
+      [[[ return navbar.isDesktop; ]]]
   - url: /lovelace/devices
     label: Devices
     icon: mdi:devices
