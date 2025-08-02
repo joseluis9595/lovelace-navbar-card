@@ -31,7 +31,7 @@ Navbar Card is a custom Lovelace card designed to **simplify navigation** within
 <br>
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=joseluis9595&repository=lovelace-navbar-card&category=plugin)
-   
+
 </details>
 
 <details>
@@ -100,7 +100,6 @@ routes:
 ## ⚙️ Configuration
 
 <img width="400" height="120" alt="navbar-card" src="https://github.com/user-attachments/assets/346a6466-1a79-400e-9fe4-4f8472b3bee5" />
-
 
 | Name       | Type                  | Default    | Description                                                  |
 | ---------- | --------------------- | ---------- | ------------------------------------------------------------ |
@@ -174,7 +173,6 @@ Configuration to display a small badge on any of the navbar items.
 
 <img width="400" height="120" alt="navbar-card_badges" src="https://github.com/user-attachments/assets/44824ecd-9088-44c3-bab1-d900edeea614" />
 
-
 | Name        | Type                                 | Default | Description                                                     |
 | ----------- | ------------------------------------ | ------- | --------------------------------------------------------------- |
 | `show`      | boolean \| [JSTemplate](#jstemplate) | false   | Boolean template indicating whether to display the badge or not |
@@ -187,7 +185,6 @@ Configuration to display a small badge on any of the navbar items.
 For each route, a popup menu can be configured, to display a popup when clicked. This is activated using the `open-popup` action in either `tap_action` or `hold_action`.
 
 <img width="431" height="218" alt="navbar-card_popup" src="https://github.com/user-attachments/assets/520d85c7-9d73-4e73-b3c3-a4a6b2635dcb" />
-
 
 | Name          | Type                                | Default     | Description                                                                       |
 | ------------- | ----------------------------------- | ----------- | --------------------------------------------------------------------------------- |
@@ -208,6 +205,8 @@ Apart from using plain javascript, you can access some predefined variables:
 
 - `states` -> Contains the global state of all entities in HomeAssistant. To get the state of a specific entity, use: `states['entity_type.your_entity'].state`.
 - `user` -> Information about the current logged user.
+- `navbar` -> Internal state of the navbar-card. Accessible fields are:
+  - `isDesktop` -> Boolean indicating whether the card is in its desktop variant or not.
 
 > **Tip**: You can use `console.log` in your JSTemplate to help debug your HomeAssistant states.
 
@@ -231,6 +230,8 @@ routes:
       ]]]
     icon: mdi:lightbulb-outline
     icon_selected: mdi:lightbulb
+    hidden: |
+      [[[ return navbar.isDesktop; ]]]
   - url: /lovelace/devices
     label: Devices
     icon: mdi:devices
@@ -349,7 +350,6 @@ You can check out some examples [here](#examples-with-custom-styles) for inspira
 Here is a breakdown of the CSS classes available for customization:
 
 - `.navbar`: Base component for the navbar.
-
   - `.navbar.desktop`: Styling for the desktop version.
   - `.navbar.desktop.[top | bottom | left | right]`: Specific styles for different positions of the navbar.
   - `.navbar.mobile`: Styling for the mobile version.
@@ -357,23 +357,18 @@ Here is a breakdown of the CSS classes available for customization:
 - `.route`: Represents each route (or item) within the navbar.
 
 - `.button`: Background element for each icon.
-
   - `.button.active`: Applies when a route is selected.
 
 - `.icon`: Refers to the ha-icon component used for displaying icons.
-
   - `.icon.active`: Applies when a route is selected.
 
 - `.image`: Refers to the img component used for displaying route images.
-
   - `.image.active`: Applies when a route is selected.
 
 - `.label`: Text label displayed under the icons (if labels are enabled).
-
   - `.label.active`: Applies when a route is selected.
 
 - `.badge`: Small indicator or badge that appears over the icon (if configured).
-
   - `.badge.active`: Applies when a route is selected.
 
 - `.navbar-popup`: Main container for the popup.
@@ -465,7 +460,6 @@ your_theme:
 ---
 
 <br>
-
 
 ## 📚 Example Configurations
 
@@ -666,8 +660,6 @@ routes:
 
 </details>
 
-
-
 <br>
 
 ---
@@ -683,10 +675,9 @@ Need help using `navbar-card`, have ideas, or found a bug? Here's how you can re
 
 - **💬 Have questions, want to share feedback, or just chat?**<br>
   Either start [a discussion on GitHub](https://github.com/joseluis9595/lovelace-navbar-card/discussions) or join the conversation on the [Home Assistant Community Forum
-](https://community.home-assistant.io/t/navbar-card-easily-navigate-through-dashboards/832917).
+  ](https://community.home-assistant.io/t/navbar-card-easily-navigate-through-dashboards/832917).
 
 Your feedback helps make navbar-card better for everyone. Don’t hesitate to reach out!
-
 
 <br>
 
@@ -698,7 +689,6 @@ Your feedback helps make navbar-card better for everyone. Don’t hesitate to re
 
 If you enjoy using `navbar-card` and want to support its continued development, consider buying me a coffee (or a beer 🍺), or becoming a GitHub Sponsor!
 
-[![Buy Me A Coffee](https://img.shields.io/badge/Buy_Me_a_Beer-fdd734?&logo=buy-me-a-coffee&logoColor=black&style=for-the-badge)](https://www.buymeacoffee.com/joseluis9595)  [![GitHub Sponsors](https://img.shields.io/badge/GitHub_Sponsors-30363d?style=for-the-badge&logo=github&logoColor=white)](https://github.com/sponsors/joseluis9595)
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy_Me_a_Beer-fdd734?&logo=buy-me-a-coffee&logoColor=black&style=for-the-badge)](https://www.buymeacoffee.com/joseluis9595) [![GitHub Sponsors](https://img.shields.io/badge/GitHub_Sponsors-30363d?style=for-the-badge&logo=github&logoColor=white)](https://github.com/sponsors/joseluis9595)
 
 Your support means a lot and helps keep the project alive and growing. Thank you! 🙌
-
