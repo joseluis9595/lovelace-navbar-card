@@ -660,6 +660,40 @@ routes:
 
 </details>
 
+<details>
+<summary>Make all images display inside circles</summary>
+
+```yaml
+type: custom:navbar-card
+routes:
+  - image: |
+      [[[ 
+        return hass.states["person.jose"].attributes.entity_picture
+      ]]]
+    label: More
+    tap_action:
+      action: open-popup
+    popup:
+      - icon: mdi:cog
+        url: /config/dashboard
+      - icon: mdi:hammer
+        url: /developer-tools/yaml
+      - icon: mdi:power
+        tap_action:
+          action: call-service
+          service: homeassistant.restart
+          service_data: {}
+          confirmation:
+            text: Are you sure you want to restart Home Assistant?
+card_mod:
+  style: |
+    .image {
+      border-radius: 16px !important;
+    }
+```
+
+</details>
+
 <br>
 
 ---
