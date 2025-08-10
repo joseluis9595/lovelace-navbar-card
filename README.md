@@ -685,14 +685,14 @@ routes:
           service_data: {}
           confirmation:
             text: Are you sure you want to restart Home Assistant?
-card_mod:
-  style: |
-    .image {
-      border-radius: 16px !important;
-    }
+styles: |
+  .image {
+    border-radius: 16px !important;
+  }
 ```
 
 </details>
+
 
 <br>
 
