@@ -147,12 +147,12 @@ Routes represents an array of clickable icons that redirects to a given path. Ea
 
 Apart from the [standard Home Assistant actions](https://www.home-assistant.io/dashboards/actions/) (navigate, call-service, etc.), `navbar-card` supports some additional custom actions:
 
-| Action                | Description                                                | Required Parameters |
-| --------------------- | ---------------------------------------------------------- | ------------------- |
-| `open-popup`          | Opens the popup menu defined in the route                  | None                |
-| `toggle-menu`         | Opens the native HA side menu                              | None                |
-| `show-notifications`  | Opens the native HA notifications drawer                   | None                |
-| `navigate-back`       | Navigates back to the previous page in the browser history | None                |
+| Action               | Description                                                | Required Parameters |
+| -------------------- | ---------------------------------------------------------- | ------------------- |
+| `open-popup`         | Opens the popup menu defined in the route                  | None                |
+| `toggle-menu`        | Opens the native HA side menu                              | None                |
+| `show-notifications` | Opens the native HA notifications drawer                   | None                |
+| `navigate-back`      | Navigates back to the previous page in the browser history | None                |
 
 Example:
 
@@ -740,7 +740,7 @@ routes:
 </details>
 
 <details>
-<summary>Make all images display inside circles</summary>
+<summary>Route with rounded user's image</summary>
 
 ```yaml
 type: custom:navbar-card
@@ -771,7 +771,6 @@ styles: |
 ```
 
 </details>
-
 
 <br>
 
