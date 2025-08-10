@@ -316,6 +316,15 @@ const POPUP_STYLES = css`
     background: var(--navbar-background-color);
     box-shadow: var(--navbar-box-shadow-desktop);
   }
+
+  .popup-item.active {
+    --icon-primary-color: var(--navbar-primary-color);
+  }
+
+  .popup-item.active .button {
+    color: var(--navbar-primary-color);
+    background: color-mix(in srgb, var(--navbar-primary-color) 30%, white);
+  }
 `;
 
 /**

@@ -565,7 +565,10 @@ export class NavbarCard extends LitElement {
         style="${style}">
         ${popupItems
           .map((popupItem, index) => {
-            // Cache template evaluations
+            const isActive =
+              popupItem.selected != null
+                ? processTemplate<boolean>(this.hass, this, popupItem.selected)
+                : window.location.pathname == popupItem.url;
             const isHidden = processTemplate<boolean>(
               this.hass,
               this,
@@ -585,12 +588,13 @@ export class NavbarCard extends LitElement {
               popup-item 
               ${popupDirectionClassName}
               ${labelPositionClassName}
+              ${isActive ? 'active' : ''}
             "
               style="--index: ${index}"
               @click=${(e: MouseEvent) =>
                 this._handlePointerUp(e as PointerEvent, popupItem, true)}>
               <div class="button">
-                ${this._getRouteIcon(popupItem, false)}
+                ${this._getRouteIcon(popupItem, isActive)}
                 <md-ripple></md-ripple>
               </div>
               ${label ? html`<div class="label">${label}</div>` : html``}
