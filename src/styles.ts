@@ -214,6 +214,7 @@ const POPUP_STYLES = css`
     position: fixed;
     opacity: 0;
     padding: 6px;
+    padding-left: 0px;
     gap: 10px;
     z-index: var(--navbar-popup-index);
 
