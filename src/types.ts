@@ -126,7 +126,7 @@ export const DEFAULT_NAVBAR_CONFIG: NavbarCardConfig = {
   desktop: {
     show_labels: false,
     min_width: 768,
-    position: DesktopPosition.left,
+    position: DesktopPosition.bottom,
   },
   mobile: {
     show_labels: false,
