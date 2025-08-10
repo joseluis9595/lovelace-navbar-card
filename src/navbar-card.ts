@@ -593,7 +593,7 @@ export class NavbarCard extends LitElement {
               @click=${(e: MouseEvent) =>
                 this._handlePointerUp(e as PointerEvent, popupItem, true)}>
               <div class="button">
-                ${this._getRouteIcon(popupItem, false)}
+                ${this._getRouteIcon(popupItem, isActive)}
                 <md-ripple></md-ripple>
               </div>
               ${label ? html`<div class="label">${label}</div>` : html``}
