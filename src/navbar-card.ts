@@ -264,7 +264,7 @@ export class NavbarCard extends LitElement {
   /**********************************************************************/
   /* Subcomponents */
   /**********************************************************************/
-  private _getRouteIcon(route: RouteItem | PopupItem, isActive: boolean) {
+  private _getRouteIcon(route: RouteItem | PopupItem, isActive: boolean, isPopup: boolean) {
     const icon = processTemplate<string>(this.hass, this, route.icon);
     const image = processTemplate<string>(this.hass, this, route.image);
     const iconSelected = processTemplate<string>(
@@ -284,7 +284,7 @@ export class NavbarCard extends LitElement {
           src="${isActive && imageSelected ? imageSelected : image}"
           alt="${route.label || ''}" />`
       : html`<ha-icon
-          class="icon ${isActive ? 'active' : ''}"
+          class="icon ${isActive ? 'active' : ''} ${isPopup ? 'popup' : ''}"
           icon="${isActive && iconSelected ? iconSelected : icon}"></ha-icon>`;
   }
 
@@ -430,7 +430,7 @@ export class NavbarCard extends LitElement {
         @pointercancel=${(e: PointerEvent) =>
           this._handlePointerMove(e, route)}>
         <div class="button ${isActive ? 'active' : ''}">
-          ${this._getRouteIcon(route, isActive)}
+          ${this._getRouteIcon(route, isActive, false)}
           <ha-ripple></ha-ripple>
         </div>
 
@@ -589,7 +589,7 @@ export class NavbarCard extends LitElement {
               @click=${(e: MouseEvent) =>
                 this._handlePointerUp(e as PointerEvent, popupItem, true)}>
               <div class="button">
-                ${this._getRouteIcon(popupItem, false)}
+                ${this._getRouteIcon(popupItem, false, true)}
                 ${label ? html`<div class="label">${label}</div>` : html``}
                 <md-ripple></md-ripple>
               </div>
