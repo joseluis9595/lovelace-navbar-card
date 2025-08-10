@@ -112,7 +112,7 @@ const ROUTE_STYLES = css`
     width: 100%;
     border-radius: 16px;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
   }
@@ -315,8 +315,11 @@ const POPUP_STYLES = css`
   }
 
   .popup-item .button {
-    width: 50px;
+    width: 100%;
     height: 50px;
+    padding-left: 8px;
+    padding-right: 8px;
+    flex-direction: row;
     background: var(--navbar-background-color);
     box-shadow: var(--navbar-box-shadow-desktop);
   }
