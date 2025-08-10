@@ -130,10 +130,6 @@ const ROUTE_STYLES = css`
     --mdc-icon-size: var(--navbar-route-icon-size);
   }
 
-  .icon.popup {
-    margin-right: 4px;
-  }
-
   .image {
     width: var(--navbar-route-image-size);
     height: var(--navbar-route-image-size);
@@ -214,7 +210,6 @@ const POPUP_STYLES = css`
     position: fixed;
     opacity: 0;
     padding: 6px;
-    padding-left: 0px;
     gap: 10px;
     z-index: var(--navbar-popup-index);
 
@@ -256,6 +251,10 @@ const POPUP_STYLES = css`
 
   .navbar-popup.visible {
     opacity: 1;
+  }
+
+  .navbar-popup.popuplabelbackground {
+    padding-left: 0px;
   }
 
   /****************************************/
@@ -315,14 +314,35 @@ const POPUP_STYLES = css`
     text-align: start;
   }
 
+  .popup-item.label-left .label.popuplabelbackground {
+    margin-left: 4px;
+  }
+
+  .popup-item.label-right .label.popuplabelbackground {
+    margin-left: 4px;
+  }
+
   .popup-item .button {
-    width: 100%;
+    width: 50px;
     height: 50px;
+    background: var(--navbar-background-color);
+    box-shadow: var(--navbar-box-shadow-desktop);
+  }
+
+  .popup-item .button.popuplabelbackground {
+    width: 100%;
     padding-left: 8px;
     padding-right: 8px;
     flex-direction: row;
-    background: var(--navbar-background-color);
-    box-shadow: var(--navbar-box-shadow-desktop);
+  }
+
+  .popup-item.active {
+    --icon-primary-color: var(--navbar-primary-color);
+  }
+
+  .popup-item.active .button {
+    color: var(--navbar-primary-color);
+    background: color-mix(in srgb, var(--navbar-primary-color) 30%, white);
   }
 `;
 
