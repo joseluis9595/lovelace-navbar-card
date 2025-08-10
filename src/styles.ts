@@ -130,7 +130,7 @@ const ROUTE_STYLES = css`
     --mdc-icon-size: var(--navbar-route-icon-size);
   }
 
-  .icon.sidebar {
+  .icon.popup {
     margin-right: 4px;
   }
 
