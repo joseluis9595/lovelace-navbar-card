@@ -107,6 +107,7 @@ routes:
 | `desktop`  | [Desktop](#desktop)   | -          | Options specific to desktop mode                             |
 | `mobile`   | [Mobile](#mobile)     | -          | Options specific to mobile mode                              |
 | `template` | [Template](#template) | -          | Template name                                                |
+| `layout`   | [Layout](#layout)     | -          | Layout configuration options                                 |
 | `styles`   | [Styles](#styles)     | -          | Custom CSS styles for the card                               |
 | `haptic`   | [Haptic](#haptic)     | -          | Fine tune when the haptic events should be fired in the card |
 
@@ -117,10 +118,10 @@ Routes represents an array of clickable icons that redirects to a given path. Ea
 | Name                | Type                                 | Default     | Description                                                                                                                                                |
 | ------------------- | ------------------------------------ | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `url`               | string                               | `Required*` | The path to a Lovelace view. Ignored if `tap_action` is defined.                                                                                           |
-| `icon`              | string \| [JSTemplate](#jstemplate) | -           | Material icon to display as this entry icon. Either `icon` or `image` is required.                                                                         |
-| `icon_selected`     | string \| [JSTemplate](#jstemplate) | -           | Icon to be displayed when `url` matches the current browser URL                                                                                            |
-| `image`             | string \| [JSTemplate](#jstemplate) | -           | URL of an image to display as this entry icon. Either `icon` or `image` is required.                                                                       |
-| `image_selected`    | string \| [JSTemplate](#jstemplate) | -           | Image to be displayed when `url` matches the current browser URL                                                                                           |
+| `icon`              | string \| [JSTemplate](#jstemplate)  | -           | Material icon to display as this entry icon. Either `icon` or `image` is required.                                                                         |
+| `icon_selected`     | string \| [JSTemplate](#jstemplate)  | -           | Icon to be displayed when `url` matches the current browser URL                                                                                            |
+| `image`             | string \| [JSTemplate](#jstemplate)  | -           | URL of an image to display as this entry icon. Either `icon` or `image` is required.                                                                       |
+| `image_selected`    | string \| [JSTemplate](#jstemplate)  | -           | Image to be displayed when `url` matches the current browser URL                                                                                           |
 | `badge`             | [Badge](#badge)                      | -           | Badge configuration                                                                                                                                        |
 | `label`             | string \| [JSTemplate](#jstemplate)  | -           | Label to be displayed under the given route if `show_labels` is true                                                                                       |
 | `tap_action`        | [tap_action](#actions)               | -           | Custom tap action configuration.                                                                                                                           |
@@ -339,6 +340,28 @@ styles: |
 
 ---
 
+### Layout
+
+Configuration options for the navbar layout and behavior.
+
+| Name           | Type                          | Default | Description                                                     |
+| -------------- | ----------------------------- | ------- | --------------------------------------------------------------- |
+| `auto_padding` | [Auto Padding](#auto-padding) | -       | Add padding to your Home Asistant dashboard to prevent overlaps |
+
+#### Auto Padding
+
+Automatically adds padding to your Home Assistnat dashboard to prevent cards from overlapping with `navbar-card`. This eliminates the need for manual CSS padding adjustments in your Home Assistant theme.
+
+| Name         | Type    | Default | Description                                                                  |
+| ------------ | ------- | ------- | ---------------------------------------------------------------------------- |
+| `enabled`    | boolean | `true`  | Whether to automatically add padding to prevent overlaps                     |
+| `desktop_px` | number  | `100`   | Padding in pixels for desktop mode (applied to left/right based on position) |
+| `mobile_px`  | number  | `80`    | Padding in pixels for mobile mode (applied to bottom)                        |
+
+> **Note**: The `desktop_px` padding is automatically applied to the appropriate side based on your navbar's `desktop.position` setting.
+
+---
+
 ### Styles
 
 Custom CSS styles can be applied to the Navbar Card to personalize its appearance and adapt it to your dashboard's design. Simply provide a CSS string targeting the relevant classes to style the navbar to your liking.
@@ -390,9 +413,30 @@ Here is a breakdown of the CSS classes available for customization:
 
 ### Padding
 
-If you're using the Navbar Card, you might notice it could collide with other cards on your dashboard. A simple way to fix this is by adding some padding to your Home Assistant views. The easiest way to do that is by using [card-mod](https://github.com/thomasloven/lovelace-card-mod) with a [custom theme](https://www.home-assistant.io/integrations/frontend/#themes).
+If you're using the Navbar Card, you might notice it could collide with other cards on your dashboard. The navbar-card now includes an [**automatic padding feature**](#auto-padding) that handles this for you, eliminating the need for manual CSS adjustments.
 
-Here's an example of how you can tweak your theme to adjust the layout for both desktop and mobile:
+#### Automatic Padding (Recommended)
+
+The navbar-card automatically adds appropriate padding to prevent overlaps:
+
+- **Desktop**: Adds padding to the left or right side based on your navbar position
+- **Mobile**: Adds bottom padding to prevent cards from overlapping the bottom navbar
+
+This feature is enabled by default, but you can customize it using the `layout.auto_padding` configuration. [More info here](#auto-padding)
+
+#### Manual Adjustement (Legacy)
+
+<details>
+<summary>If you prefer to handle padding manually or need more control, you can disable automatic padding and use CSS instead:</summary>
+
+```yaml
+type: custom:navbar-card
+layout:
+  auto_padding:
+    enabled: false # Disable automatic padding
+```
+
+Then use [card-mod](https://github.com/thomasloven/lovelace-card-mod) with a [custom theme](https://www.home-assistant.io/integrations/frontend/#themes) to add manual padding:
 
 ```yaml
 your_theme:
@@ -417,6 +461,10 @@ your_theme:
         }
       }
 ```
+
+</details>
+
+---
 
 ### Hiding native tabs
 
@@ -468,6 +516,11 @@ your_theme:
 
 ```yaml
 type: custom:navbar-card
+layout:
+  auto_padding:
+    enabled: true
+    desktop_px: 100
+    mobile_px: 80
 desktop:
   position: left
   min_width: 768
@@ -609,6 +662,31 @@ styles: |
 ```
 
 ![bottom_padding](https://github.com/user-attachments/assets/b08cab6b-c978-48af-8fb3-57d2d0599925)
+
+</details>
+
+<details>
+<summary>Custom auto-padding configuration</summary>
+
+```yaml
+type: custom:navbar-card
+layout:
+  auto_padding:
+    enabled: true
+    desktop_px: 150 # Extra wide padding for desktop
+    mobile_px: 120 # Extra tall padding for mobile
+desktop:
+  position: right # Padding will be applied to the right
+  show_labels: true
+routes:
+  - url: /lovelace/home
+    label: Home
+    icon: mdi:home-outline
+    icon_selected: mdi:home-assistant
+  - url: /lovelace/devices
+    label: Devices
+    icon: mdi:devices
+```
 
 </details>
 
