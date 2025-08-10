@@ -30,12 +30,16 @@ type PopupActionConfig = {
 type NavigateBackActionConfig = {
   action: 'navigate-back';
 };
+type ShowNotificationsActionConfig = {
+  action: 'show-notifications';
+};
 
 // Extend ActionConfig to include our custom popup action
 export type ExtendedActionConfig =
   | ActionConfig
   | PopupActionConfig
-  | NavigateBackActionConfig;
+  | NavigateBackActionConfig
+  | ShowNotificationsActionConfig;
 
 type JSTemplate = string;
 type JSTemplatable<T> = JSTemplate | T;

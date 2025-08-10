@@ -819,6 +819,14 @@ export class NavbarCard extends LitElement {
         hapticFeedback();
       }
       fireDOMEvent(this, 'hass-toggle-menu', { bubbles: true, composed: true });
+    } else if (action?.action === 'show-notifications') {
+      if (this._shouldTriggerHaptic(actionType)) {
+        hapticFeedback();
+      }
+      fireDOMEvent(this, 'hass-show-notifications', {
+        bubbles: true,
+        composed: true,
+      });
     } else if (action?.action === 'navigate-back') {
       if (this._shouldTriggerHaptic(actionType, true)) {
         hapticFeedback();
