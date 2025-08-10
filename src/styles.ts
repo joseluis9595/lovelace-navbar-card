@@ -112,7 +112,7 @@ const ROUTE_STYLES = css`
     width: 100%;
     border-radius: 16px;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
   }
@@ -128,6 +128,10 @@ const ROUTE_STYLES = css`
   /* Icon and Image styling */
   .icon {
     --mdc-icon-size: var(--navbar-route-icon-size);
+  }
+
+  .icon.sidebar {
+    margin-right: 4px;
   }
 
   .image {
