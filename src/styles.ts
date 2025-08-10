@@ -253,6 +253,10 @@ const POPUP_STYLES = css`
     opacity: 1;
   }
 
+  .navbar-popup.popuplabelbackground {
+    padding-left: 0px;
+  }
+
   /****************************************/
   /* Popup item styles */
   /****************************************/
@@ -310,11 +314,26 @@ const POPUP_STYLES = css`
     text-align: start;
   }
 
+  .popup-item.label-left .label.popuplabelbackground {
+    margin-left: 4px;
+  }
+
+  .popup-item.label-right .label.popuplabelbackground {
+    margin-left: 4px;
+  }
+
   .popup-item .button {
     width: 50px;
     height: 50px;
     background: var(--navbar-background-color);
     box-shadow: var(--navbar-box-shadow-desktop);
+  }
+
+  .popup-item .button.popuplabelbackground {
+    width: 100%;
+    padding-left: 8px;
+    padding-right: 8px;
+    flex-direction: row;
   }
 
   .popup-item.active {

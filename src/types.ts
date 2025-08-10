@@ -101,12 +101,14 @@ export type NavbarCardConfig = {
   };
   desktop?: {
     show_labels?: LabelVisibilityConfig;
+    show_labels_background?: boolean;
     min_width?: number;
     position?: DesktopPosition;
     hidden?: JSTemplatable<boolean>;
   };
   mobile?: {
     show_labels?: LabelVisibilityConfig;
+    show_labels_background?: boolean;
     hidden?: JSTemplatable<boolean>;
   };
   styles?: string;
@@ -127,8 +129,10 @@ export const DEFAULT_NAVBAR_CONFIG: NavbarCardConfig = {
     show_labels: false,
     min_width: 768,
     position: DesktopPosition.bottom,
+    show_labels_background: false,
   },
   mobile: {
     show_labels: false,
+    show_labels_background: false,
   },
 };
