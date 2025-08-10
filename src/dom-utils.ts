@@ -120,17 +120,18 @@ export const forceDashboardPadding = (options?: {
   const mobilePaddingPx =
     options?.auto_padding?.mobile_px ??
     DEFAULT_NAVBAR_CONFIG.layout?.auto_padding?.mobile_px;
-  const mobilePadding = `padding-bottom: ${mobilePaddingPx}px !important;`;
 
-  if (mobilePadding) {
-    cssText += `
-        @media (max-width: ${mobileMaxWidth}px) {
-          :not(.edit-mode) > hui-view:after {
-            ${mobilePadding}
-          }
+  cssText += `
+      @media (max-width: ${mobileMaxWidth}px) {
+        :not(.edit-mode) > hui-view:after {
+          content: "";
+          display: block;
+          height: ${mobilePaddingPx}px;
+          width: 100%;
+          background-color: transparent; 
         }
-      `;
-  }
+      }
+    `;
 
   // Append styles to hui-root
   if (!styleEl) {
