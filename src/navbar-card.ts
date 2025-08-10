@@ -10,6 +10,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { version } from '../package.json';
 import { HomeAssistant, navigate } from 'custom-card-helpers';
 import {
+  DEFAULT_NAVBAR_CONFIG,
   DesktopPosition,
   NavbarCardConfig,
   PopupItem,
@@ -23,7 +24,11 @@ import {
   processBadgeTemplate,
   processTemplate,
 } from './utils';
-import { forceResetRipple, getNavbarTemplates } from './dom-utils';
+import {
+  forceDashboardPadding,
+  forceResetRipple,
+  getNavbarTemplates,
+} from './dom-utils';
 import { getDefaultStyles } from './styles';
 import { Color } from './color';
 
@@ -116,6 +121,14 @@ export class NavbarCard extends LitElement {
   }
 
   setConfig(config) {
+    forceDashboardPadding({
+      desktop: config.desktop ?? DEFAULT_NAVBAR_CONFIG.desktop,
+      mobile: config.mobile ?? DEFAULT_NAVBAR_CONFIG.mobile,
+      auto_padding:
+        config.layout?.auto_padding ??
+        DEFAULT_NAVBAR_CONFIG.layout?.auto_padding,
+    });
+
     // Check for template configuration
     if (config?.template) {
       // Get templates from the DOM

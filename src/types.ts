@@ -82,10 +82,19 @@ export type HapticConfig = {
   double_tap_action?: boolean;
 };
 
+export type AutoPaddingConfig = {
+  enabled: boolean;
+  desktop_px?: number;
+  mobile_px?: number;
+};
+
 // Main card configuration
 export type NavbarCardConfig = {
   routes: RouteItem[];
   template?: string;
+  layout?: {
+    auto_padding?: AutoPaddingConfig;
+  };
   desktop?: {
     show_labels?: LabelVisibilityConfig;
     min_width?: number;
@@ -98,4 +107,24 @@ export type NavbarCardConfig = {
   };
   styles?: string;
   haptic?: boolean | HapticConfig;
+};
+
+export const DEFAULT_NAVBAR_CONFIG: NavbarCardConfig = {
+  routes: [],
+  template: undefined,
+  layout: {
+    auto_padding: {
+      enabled: true,
+      desktop_px: 100,
+      mobile_px: 80,
+    },
+  },
+  desktop: {
+    show_labels: false,
+    min_width: 768,
+    position: DesktopPosition.left,
+  },
+  mobile: {
+    show_labels: false,
+  },
 };
