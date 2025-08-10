@@ -121,14 +121,6 @@ export class NavbarCard extends LitElement {
   }
 
   setConfig(config) {
-    forceDashboardPadding({
-      desktop: config.desktop ?? DEFAULT_NAVBAR_CONFIG.desktop,
-      mobile: config.mobile ?? DEFAULT_NAVBAR_CONFIG.mobile,
-      auto_padding:
-        config.layout?.auto_padding ??
-        DEFAULT_NAVBAR_CONFIG.layout?.auto_padding,
-    });
-
     // Check for template configuration
     if (config?.template) {
       // Get templates from the DOM
@@ -185,6 +177,15 @@ export class NavbarCard extends LitElement {
       if (route.double_tap_action && route.double_tap_action.action == null) {
         throw new Error('"double_tap_action" must have an "action" property');
       }
+    });
+
+    // Force dashboard padding
+    forceDashboardPadding({
+      desktop: config.desktop ?? DEFAULT_NAVBAR_CONFIG.desktop,
+      mobile: config.mobile ?? DEFAULT_NAVBAR_CONFIG.mobile,
+      auto_padding:
+        config.layout?.auto_padding ??
+        DEFAULT_NAVBAR_CONFIG.layout?.auto_padding,
     });
 
     // Store configuration
