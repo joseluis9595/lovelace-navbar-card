@@ -78,3 +78,13 @@ jobs:
           tag_name: '${{ steps.get_version.outputs.version }}'
           draft: true
           generate_release_notes: false
+
+      # Merge main into develop
+      - name: Merge main into develop
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin develop
+          git checkout develop
+          git merge origin/main --no-edit
+          git push origin develop
