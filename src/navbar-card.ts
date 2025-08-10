@@ -590,9 +590,9 @@ export class NavbarCard extends LitElement {
                 this._handlePointerUp(e as PointerEvent, popupItem, true)}>
               <div class="button">
                 ${this._getRouteIcon(popupItem, false)}
+                ${label ? html`<div class="label">${label}</div>` : html``}
                 <md-ripple></md-ripple>
               </div>
-              ${label ? html`<div class="label">${label}</div>` : html``}
               ${this._renderBadge(popupItem, false)}
             </div>`;
           })
