@@ -116,27 +116,34 @@ export const processTemplate = <T = unknown>(
   }
 };
 
-/**
- * Fire a DOM event with optional detail and event options.
- *
- * @param node - The node to dispatch the event from
- * @param type - The event type
- * @param options - Optional event options (bubbles, composed)
- * @param detail - Optional event detail
- * @returns The created and dispatched event
- */
-export const fireDOMEvent = (
+type EventConstructorMap = {
+  Event: [Event, EventInit];
+  KeyboardEvent: [KeyboardEvent, KeyboardEventInit];
+  MouseEvent: [MouseEvent, MouseEventInit];
+  TouchEvent: [TouchEvent, TouchEventInit];
+};
+
+export function fireDOMEvent<T extends keyof EventConstructorMap = 'Event'>(
   node: HTMLElement | Window,
-  type: Event['type'],
-  options?: { bubbles?: boolean; composed?: boolean },
-  detail?: unknown,
-) => {
-  const event = new Event(type, options ?? {});
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (event as any).detail = detail;
+  type: string,
+  options?: EventConstructorMap[T][1],
+  detailOverride?: unknown,
+  EventConstructor?: new (
+    type: string,
+    options?: EventConstructorMap[T][1],
+  ) => EventConstructorMap[T][0],
+): EventConstructorMap[T][0] {
+  const constructor = EventConstructor || Event;
+  const event = new constructor(type, options) as EventConstructorMap[T][0];
+
+  if (detailOverride !== undefined) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (event as any).detail = detailOverride;
+  }
+
   node.dispatchEvent(event);
   return event;
-};
+}
 
 /**
  * Trigger haptic feedback by firing a 'haptic' event on the window.

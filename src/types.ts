@@ -33,13 +33,18 @@ type NavigateBackActionConfig = {
 type ShowNotificationsActionConfig = {
   action: 'show-notifications';
 };
+export type QuickbarActionConfig = {
+  action: 'quickbar';
+  mode?: 'commands' | 'devices' | 'entities';
+};
 
 // Extend ActionConfig to include our custom popup action
 export type ExtendedActionConfig =
   | ActionConfig
   | PopupActionConfig
   | NavigateBackActionConfig
-  | ShowNotificationsActionConfig;
+  | ShowNotificationsActionConfig
+  | QuickbarActionConfig;
 
 type JSTemplate = string;
 type JSTemplatable<T> = JSTemplate | T;
