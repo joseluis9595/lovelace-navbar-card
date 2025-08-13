@@ -1,6 +1,7 @@
 import { HomeAssistant } from 'custom-card-helpers';
 import { NavbarCardPublicState, TemplateFunction } from './types';
 import { NavbarCard } from './navbar-card';
+import { fireDOMEvent } from './dom-utils';
 
 /**
  * Map string to enum value
@@ -114,28 +115,6 @@ export const processTemplate = <T = unknown>(
     console.error(`NavbarCard: Error evaluating template: ${e}`);
     return template as T;
   }
-};
-
-/**
- * Fire a DOM event with optional detail and event options.
- *
- * @param node - The node to dispatch the event from
- * @param type - The event type
- * @param options - Optional event options (bubbles, composed)
- * @param detail - Optional event detail
- * @returns The created and dispatched event
- */
-export const fireDOMEvent = (
-  node: HTMLElement | Window,
-  type: Event['type'],
-  options?: { bubbles?: boolean; composed?: boolean },
-  detail?: unknown,
-) => {
-  const event = new Event(type, options ?? {});
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (event as any).detail = detail;
-  node.dispatchEvent(event);
-  return event;
 };
 
 /**

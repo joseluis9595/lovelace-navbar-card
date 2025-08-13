@@ -147,12 +147,13 @@ Routes represents an array of clickable icons that redirects to a given path. Ea
 
 Apart from the [standard Home Assistant actions](https://www.home-assistant.io/dashboards/actions/) (navigate, call-service, etc.), `navbar-card` supports some additional custom actions:
 
-| Action               | Description                                                | Required Parameters |
-| -------------------- | ---------------------------------------------------------- | ------------------- |
-| `open-popup`         | Opens the popup menu defined in the route                  | None                |
-| `toggle-menu`        | Opens the native HA side menu                              | None                |
-| `show-notifications` | Opens the native HA notifications drawer                   | None                |
-| `navigate-back`      | Navigates back to the previous page in the browser history | None                |
+| Action               | Description                                                | Required Parameters                     |
+| -------------------- | ---------------------------------------------------------- | --------------------------------------- |
+| `open-popup`         | Opens the popup menu defined in the route                  | None                                    |
+| `toggle-menu`        | Opens the native HA side menu                              | None                                    |
+| `show-notifications` | Opens the native HA notifications drawer                   | None                                    |
+| `quickbar`           | Opens the native HA quickbar                               | `mode: entities \| commands \| devices` |
+| `navigate-back`      | Navigates back to the previous page in the browser history | None                                    |
 
 Example:
 
@@ -165,6 +166,9 @@ routes:
     icon: mdi:lightbulb-outline
     tap_action:
       action: open-popup # Will open the popup menu defined for this route
+    double_tap_action:
+      action: quickbar # Will open the native HA quickbar
+      mode: entities
     hold_action:
       action: toggle-menu # Will open the native HA side menu
 ```
