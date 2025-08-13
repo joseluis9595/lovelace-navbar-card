@@ -1,6 +1,7 @@
 import { HomeAssistant } from 'custom-card-helpers';
 import { NavbarCardPublicState, TemplateFunction } from './types';
 import { NavbarCard } from './navbar-card';
+import { fireDOMEvent } from './dom-utils';
 
 /**
  * Map string to enum value
@@ -115,35 +116,6 @@ export const processTemplate = <T = unknown>(
     return template as T;
   }
 };
-
-type EventConstructorMap = {
-  Event: [Event, EventInit];
-  KeyboardEvent: [KeyboardEvent, KeyboardEventInit];
-  MouseEvent: [MouseEvent, MouseEventInit];
-  TouchEvent: [TouchEvent, TouchEventInit];
-};
-
-export function fireDOMEvent<T extends keyof EventConstructorMap = 'Event'>(
-  node: HTMLElement | Window,
-  type: string,
-  options?: EventConstructorMap[T][1],
-  detailOverride?: unknown,
-  EventConstructor?: new (
-    type: string,
-    options?: EventConstructorMap[T][1],
-  ) => EventConstructorMap[T][0],
-): EventConstructorMap[T][0] {
-  const constructor = EventConstructor || Event;
-  const event = new constructor(type, options) as EventConstructorMap[T][0];
-
-  if (detailOverride !== undefined) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (event as any).detail = detailOverride;
-  }
-
-  node.dispatchEvent(event);
-  return event;
-}
 
 /**
  * Trigger haptic feedback by firing a 'haptic' event on the window.

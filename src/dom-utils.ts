@@ -143,3 +143,41 @@ export const forceDashboardPadding = (options?: {
     styleEl.textContent = cssText;
   }
 };
+
+type EventConstructorMap = {
+  Event: [Event, EventInit];
+  KeyboardEvent: [KeyboardEvent, KeyboardEventInit];
+  MouseEvent: [MouseEvent, MouseEventInit];
+  TouchEvent: [TouchEvent, TouchEventInit];
+};
+
+/**
+ * Fire a DOM event on a node.
+ *
+ * @param node - The node to fire the event on.
+ * @param type - The type of event to fire.
+ * @param options - The options for the event.
+ * @param detailOverride - The detail to override the event with.
+ * @param EventConstructor - The constructor for the event.
+ */
+export function fireDOMEvent<T extends keyof EventConstructorMap = 'Event'>(
+  node: HTMLElement | Window,
+  type: string,
+  options?: EventConstructorMap[T][1],
+  detailOverride?: unknown,
+  EventConstructor?: new (
+    type: string,
+    options?: EventConstructorMap[T][1],
+  ) => EventConstructorMap[T][0],
+): EventConstructorMap[T][0] {
+  const constructor = EventConstructor || Event;
+  const event = new constructor(type, options) as EventConstructorMap[T][0];
+
+  if (detailOverride !== undefined) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (event as any).detail = detailOverride;
+  }
+
+  node.dispatchEvent(event);
+  return event;
+}

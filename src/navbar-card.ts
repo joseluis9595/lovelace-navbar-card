@@ -19,13 +19,13 @@ import {
   RouteItem,
 } from './types';
 import {
-  fireDOMEvent,
   hapticFeedback,
   mapStringToEnum,
   processBadgeTemplate,
   processTemplate,
 } from './utils';
 import {
+  fireDOMEvent,
   forceDashboardPadding,
   forceResetRipple,
   getNavbarTemplates,
@@ -852,14 +852,14 @@ export class NavbarCard extends LitElement {
         if (this._shouldTriggerHaptic(actionType)) {
           hapticFeedback();
         }
-        fireDOMEvent(
+        fireDOMEvent<'KeyboardEvent'>(
           this,
           'keydown',
           {
             bubbles: true,
             composed: true,
             key: this._chooseKeyForQuickbar(action),
-          } as KeyboardEventInit,
+          },
           undefined,
           KeyboardEvent,
         );
