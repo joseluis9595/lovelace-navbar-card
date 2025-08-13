@@ -100,20 +100,30 @@ export const forceDashboardPadding = (options?: {
   const desktopPaddingPx =
     options?.auto_padding?.desktop_px ??
     DEFAULT_NAVBAR_CONFIG.layout?.auto_padding?.desktop_px;
-  const desktopPadding =
-    options?.desktop?.position === 'left'
-      ? `padding-left: ${desktopPaddingPx}px !important;`
-      : options?.desktop?.position === 'right'
-        ? `padding-right: ${desktopPaddingPx}px !important;`
-        : undefined;
-  if (desktopPadding) {
+
+  if (['left', 'right'].includes(options?.desktop?.position ?? '')) {
     cssText += `
-        @media (min-width: ${desktopMinWidth}px) {
-          :not(.edit-mode) > #view {
-            ${desktopPadding}
+      @media (min-width: ${desktopMinWidth}px) {
+       :not(.edit-mode) > #view {
+            padding-${options?.desktop?.position}: ${desktopPaddingPx}px !important;
           }
+      }
+    `;
+  } else if (
+    options?.desktop?.position === 'bottom' ||
+    options?.desktop?.position === 'top'
+  ) {
+    cssText += `
+      @media (min-width: ${desktopMinWidth}px) {
+        :not(.edit-mode) > hui-view:${options?.desktop?.position === 'top' ? 'before' : 'after'} {
+          content: "";
+          display: block;
+          height: ${desktopPaddingPx}px;  
+          width: 100%;
+          background-color: transparent; 
         }
-      `;
+      }
+    `;
   }
 
   // Mobile padding
