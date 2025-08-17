@@ -52,12 +52,14 @@ const NAVBAR_STYLES = css`
   /* Mobile mode styles */
   .navbar.mobile.floating {
     border-radius: var(--navbar-border-radius) !important;
+    border: none !important;
+    box-shadow: var(--navbar-box-shadow-mobile) !important;
+  }
+  .navbar.mobile.floating:not(.edit-mode) {
     bottom: 10px !important;
     left: 5vw !important;
     right: 5vw !important;
     width: 90vw !important;
-    border: none !important;
-    box-shadow: var(--navbar-box-shadow-mobile) !important;
   }
 
   /* Desktop mode styles */
