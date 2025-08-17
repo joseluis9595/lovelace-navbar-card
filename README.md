@@ -274,7 +274,8 @@ Specific configuration for desktop mode.
 
 Specific configuration for mobile mode.
 
-<img width="400" height="96" alt="navbar-card_mobile" src="https://github.com/user-attachments/assets/cefed0af-3c52-4ab2-90fa-0e277a35df4d" />
+<img width="785" height="108" alt="navbar-card_mobile" src="https://github.com/user-attachments/assets/b8134d65-d237-412a-9c0b-dfc9c009de46" />
+
 
 | Name          | Type                                     | Default  | Description                                                                                                             |
 | ------------- | ---------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
