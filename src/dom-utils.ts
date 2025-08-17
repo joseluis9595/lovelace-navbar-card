@@ -2,8 +2,8 @@ import {
   AutoPaddingConfig,
   DEFAULT_NAVBAR_CONFIG,
   NavbarCardConfig,
-  RippleElement,
-} from './types';
+} from './config';
+import { RippleElement } from './types';
 
 /**
  * Get a list of user defined navbar-card templates

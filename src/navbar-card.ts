@@ -15,9 +15,9 @@ import {
   NavbarCardConfig,
   PopupItem,
   QuickbarActionConfig,
-  RippleElement,
   RouteItem,
-} from './types';
+} from './config';
+import { RippleElement } from './types';
 import {
   hapticFeedback,
   mapStringToEnum,
