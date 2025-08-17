@@ -6,7 +6,7 @@ import {
   TemplateResult,
   unsafeCSS,
 } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { version } from '../package.json';
 import { HomeAssistant, navigate } from 'custom-card-helpers';
 import {
@@ -56,7 +56,7 @@ const HOLD_ACTION_DELAY = 500;
 
 @customElement('navbar-card')
 export class NavbarCard extends LitElement {
-  @state() protected hass!: HomeAssistant;
+  @property({ attribute: false }) public hass!: HomeAssistant;
   @state() private _config?: NavbarCardConfig;
   @state() _isDesktop?: boolean;
   @state() private _inEditDashboardMode?: boolean;
@@ -931,9 +931,6 @@ export class NavbarCard extends LitElement {
     const { routes, desktop, mobile } = this._config;
     const { position: desktopPosition, hidden: desktopHidden } = desktop ?? {};
     const { hidden: mobileHidden } = mobile ?? {};
-
-    // Keep last render timestamp for debounced state updates
-    this._lastRender = new Date().getTime();
 
     // Check visualization modes
     const isEditMode =
