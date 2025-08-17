@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
     "declaration": true,
-    "target": "es2017",
+    "target": "es2022",
     "module": "esnext",
     "moduleResolution": "node",
-    "lib": ["es2017", "dom", "dom.iterable"],
+    "lib": ["es2022", "dom", "dom.iterable"],
     "noEmit": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
