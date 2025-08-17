@@ -2,12 +2,14 @@ import { css, CSSResult } from 'lit';
 
 const HOST_STYLES = css`
   :host {
+    --navbar-border-radius: var(--ha-card-border-radius, 12px);
     --navbar-background-color: var(--card-background-color);
     --navbar-route-icon-size: 24px;
     --navbar-route-image-size: 32px;
     --navbar-primary-color: var(--primary-color);
     --navbar-box-shadow: 0px -1px 4px 0px rgba(0, 0, 0, 0.14);
     --navbar-box-shadow-desktop: var(--material-shadow-elevation-2dp);
+    --navbar-box-shadow-mobile: var(--material-shadow-elevation-2dp);
 
     --navbar-z-index: 3;
     --navbar-popup-backdrop-index: 900;
@@ -47,9 +49,22 @@ const NAVBAR_STYLES = css`
     transform: none !important;
   }
 
+  /* Mobile mode styles */
+  .navbar.mobile.floating {
+    border-radius: var(--navbar-border-radius) !important;
+    border: none !important;
+    box-shadow: var(--navbar-box-shadow-mobile) !important;
+  }
+  .navbar.mobile.floating:not(.edit-mode) {
+    bottom: 10px !important;
+    left: 5vw !important;
+    right: 5vw !important;
+    width: 90vw !important;
+  }
+
   /* Desktop mode styles */
   .navbar.desktop {
-    border-radius: var(--ha-card-border-radius, 12px);
+    border-radius: var(--navbar-border-radius);
     box-shadow: var(--navbar-box-shadow-desktop);
     width: auto;
     justify-content: space-evenly;

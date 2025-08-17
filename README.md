@@ -154,6 +154,7 @@ Apart from the [standard Home Assistant actions](https://www.home-assistant.io/d
 | `show-notifications` | Opens the native HA notifications drawer                   | None                                    |
 | `quickbar`           | Opens the native HA quickbar                               | `mode: entities \| commands \| devices` |
 | `navigate-back`      | Navigates back to the previous page in the browser history | None                                    |
+| `open-edit-mode`     | Opens the current dashboard in edit mode                   | None                                    |
 
 Example:
 
@@ -171,6 +172,9 @@ routes:
       mode: entities
     hold_action:
       action: toggle-menu # Will open the native HA side menu
+  - icon: mdi:pencil
+    tap_action:
+      action: open-edit-mode
 ```
 
 #### Badge
@@ -272,10 +276,11 @@ Specific configuration for mobile mode.
 
 <img width="400" height="96" alt="navbar-card_mobile" src="https://github.com/user-attachments/assets/cefed0af-3c52-4ab2-90fa-0e277a35df4d" />
 
-| Name          | Type                                     | Default | Description                                       |
-| ------------- | ---------------------------------------- | ------- | ------------------------------------------------- |
-| `show_labels` | boolean \| `popup_only` \| `routes_only` | `false` | Whether or not to display labels under each route |
-| `hidden`      | boolean \| [JSTemplate](#jstemplate)     | `false` | Set to true to hide the navbar on mobile devices  |
+| Name          | Type                                     | Default  | Description                                                                                                             |
+| ------------- | ---------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `show_labels` | boolean \| `popup_only` \| `routes_only` | `false`  | Whether or not to display labels under each route                                                                       |
+| `hidden`      | boolean \| [JSTemplate](#jstemplate)     | `false`  | Set to true to hide the navbar on mobile devices                                                                        |
+| `mode`        | `docked` \| `floating`                   | `docked` | Choose visualization mode on mobile devices. `docked` for default experience, `floating` for desktop-like visualization |
 
 ---
 
@@ -385,6 +390,7 @@ Here is a breakdown of the CSS classes available for customization:
   - `.navbar.desktop`: Styling for the desktop version.
   - `.navbar.desktop.[top | bottom | left | right]`: Specific styles for different positions of the navbar.
   - `.navbar.mobile`: Styling for the mobile version.
+  - `.navbar.mobile.floating`: Styling for the mobile version when using `floating` mode.
 
 - `.route`: Represents each route (or item) within the navbar.
 

@@ -145,7 +145,7 @@ export class Color {
   }
 
   _parseColorArray(data: unknown[]) {
-    const colorArray = data.map(x => parseInt(x));
+    const colorArray = data.map(x => parseInt(x as string));
     if (colorArray.length < 3) {
       throw Error(
         `Invalid array format color string: "${data}"\nSupported formats: [r,g,b] | [r,g,b,a]`,

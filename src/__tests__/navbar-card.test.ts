@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { fixture, html } from '@open-wc/testing';
 import { NavbarCard } from '../navbar-card';
 import { HomeAssistant } from 'custom-card-helpers';
-import { NavbarCardConfig } from '../types';
+import { NavbarCardConfig } from '../config';
 
 const DEFAULT_CONFIG: NavbarCardConfig = {
   desktop: {

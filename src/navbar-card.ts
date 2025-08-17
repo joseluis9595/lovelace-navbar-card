@@ -6,7 +6,7 @@ import {
   TemplateResult,
   unsafeCSS,
 } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { version } from '../package.json';
 import { HomeAssistant, navigate } from 'custom-card-helpers';
 import {
@@ -15,9 +15,9 @@ import {
   NavbarCardConfig,
   PopupItem,
   QuickbarActionConfig,
-  RippleElement,
   RouteItem,
-} from './types';
+} from './config';
+import { RippleElement } from './types';
 import {
   hapticFeedback,
   mapStringToEnum,
@@ -27,6 +27,7 @@ import {
 import {
   fireDOMEvent,
   forceDashboardPadding,
+  forceOpenEditMode,
   forceResetRipple,
   getNavbarTemplates,
 } from './dom-utils';
@@ -55,7 +56,7 @@ const HOLD_ACTION_DELAY = 500;
 
 @customElement('navbar-card')
 export class NavbarCard extends LitElement {
-  @state() protected hass!: HomeAssistant;
+  @property({ attribute: false }) public hass!: HomeAssistant;
   @state() private _config?: NavbarCardConfig;
   @state() _isDesktop?: boolean;
   @state() private _inEditDashboardMode?: boolean;
@@ -882,6 +883,13 @@ export class NavbarCard extends LitElement {
         window.history.back();
         break;
 
+      case 'open-edit-mode':
+        if (this._shouldTriggerHaptic(actionType)) {
+          hapticFeedback();
+        }
+        forceOpenEditMode();
+        break;
+
       default:
         if (action != null) {
           if (this._shouldTriggerHaptic(actionType)) {
@@ -924,9 +932,6 @@ export class NavbarCard extends LitElement {
     const { position: desktopPosition, hidden: desktopHidden } = desktop ?? {};
     const { hidden: mobileHidden } = mobile ?? {};
 
-    // Keep last render timestamp for debounced state updates
-    this._lastRender = new Date().getTime();
-
     // Check visualization modes
     const isEditMode =
       this._inEditDashboardMode || this._inPreviewMode || this._inEditCardMode;
@@ -937,6 +942,7 @@ export class NavbarCard extends LitElement {
       DEFAULT_DESKTOP_POSITION;
     const deviceModeClassName = this._isDesktop ? 'desktop' : 'mobile';
     const editModeClassname = isEditMode ? 'edit-mode' : '';
+    const mobileModeClassname = mobile?.mode === 'floating' ? 'floating' : '';
 
     // Cache hidden property evaluations
     const isDesktopHidden = processTemplate<boolean>(
@@ -961,7 +967,7 @@ export class NavbarCard extends LitElement {
 
     return html`
       <ha-card
-        class="navbar ${editModeClassname} ${deviceModeClassName} ${desktopPositionClassname}">
+        class="navbar ${editModeClassname} ${deviceModeClassName} ${desktopPositionClassname} ${mobileModeClassname}">
         ${routes?.map(this._renderRoute).filter(x => x != null)}
       </ha-card>
       ${this._popup}

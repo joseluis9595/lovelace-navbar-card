@@ -15,7 +15,8 @@
     "resolveJsonModule": true,
     "experimentalDecorators": true,
     "outDir": "dist",
-    "rootDir": "."
+    "rootDir": ".",
+    "useDefineForClassFields": false
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules"]
