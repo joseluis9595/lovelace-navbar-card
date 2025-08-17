@@ -27,6 +27,7 @@ import {
 import {
   fireDOMEvent,
   forceDashboardPadding,
+  forceOpenEditMode,
   forceResetRipple,
   getNavbarTemplates,
 } from './dom-utils';
@@ -880,6 +881,13 @@ export class NavbarCard extends LitElement {
           hapticFeedback();
         }
         window.history.back();
+        break;
+
+      case 'open-edit-mode':
+        if (this._shouldTriggerHaptic(actionType)) {
+          hapticFeedback();
+        }
+        forceOpenEditMode();
         break;
 
       default:

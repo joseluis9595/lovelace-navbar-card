@@ -154,6 +154,7 @@ Apart from the [standard Home Assistant actions](https://www.home-assistant.io/d
 | `show-notifications` | Opens the native HA notifications drawer                   | None                                    |
 | `quickbar`           | Opens the native HA quickbar                               | `mode: entities \| commands \| devices` |
 | `navigate-back`      | Navigates back to the previous page in the browser history | None                                    |
+| `open-edit-mode`     | Opens the current dashboard in edit mode                   | None                                    |
 
 Example:
 
@@ -171,6 +172,9 @@ routes:
       mode: entities
     hold_action:
       action: toggle-menu # Will open the native HA side menu
+  - icon: mdi:pencil
+    tap_action:
+      action: open-edit-mode
 ```
 
 #### Badge

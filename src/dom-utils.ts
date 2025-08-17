@@ -56,6 +56,16 @@ const findHuiRoot = () => {
 };
 
 /**
+ * Forcefully open the edit mode of the Lovelace panel.
+ */
+export const forceOpenEditMode = () => {
+  const huiRoot = findHuiRoot();
+  if (!huiRoot?.shadowRoot) return;
+  // @ts-expect-error lovelace does not have "lovelace" property type
+  huiRoot.lovelace.setEditMode(true);
+};
+
+/**
  * Manually inject styles into the hui-root element to force dashboard padding.
  * This prevents overlaps with other cards in the dashboard.
  */
