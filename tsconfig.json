@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
     "declaration": true,
-    "target": "es2022",
+    "target": "es2017",
     "module": "esnext",
     "moduleResolution": "node",
-    "lib": ["es2022", "dom", "dom.iterable"],
+    "lib": ["es2017", "dom", "dom.iterable"],
     "noEmit": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
@@ -15,7 +15,8 @@
     "resolveJsonModule": true,
     "experimentalDecorators": true,
     "outDir": "dist",
-    "rootDir": "."
+    "rootDir": ".",
+    "useDefineForClassFields": false
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules"]
