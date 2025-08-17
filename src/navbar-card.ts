@@ -942,6 +942,7 @@ export class NavbarCard extends LitElement {
       DEFAULT_DESKTOP_POSITION;
     const deviceModeClassName = this._isDesktop ? 'desktop' : 'mobile';
     const editModeClassname = isEditMode ? 'edit-mode' : '';
+    const mobileModeClassname = mobile?.mode === 'floating' ? 'floating' : '';
 
     // Cache hidden property evaluations
     const isDesktopHidden = processTemplate<boolean>(
@@ -966,7 +967,7 @@ export class NavbarCard extends LitElement {
 
     return html`
       <ha-card
-        class="navbar ${editModeClassname} ${deviceModeClassName} ${desktopPositionClassname}">
+        class="navbar ${editModeClassname} ${deviceModeClassName} ${desktopPositionClassname} ${mobileModeClassname}">
         ${routes?.map(this._renderRoute).filter(x => x != null)}
       </ha-card>
       ${this._popup}

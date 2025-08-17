@@ -99,6 +99,7 @@ export type NavbarCardConfig = {
     hidden?: JSTemplatable<boolean>;
   };
   mobile?: {
+    mode?: 'floating' | 'docked';
     show_labels?: LabelVisibilityConfig;
     hidden?: JSTemplatable<boolean>;
   };
@@ -123,5 +124,6 @@ export const DEFAULT_NAVBAR_CONFIG: NavbarCardConfig = {
   },
   mobile: {
     show_labels: false,
+    mode: 'docked',
   },
 };
