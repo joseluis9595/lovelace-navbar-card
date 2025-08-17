@@ -109,9 +109,13 @@ export const forceDashboardPadding = (options?: {
   // Desktop padding
   const desktopPaddingPx =
     options?.auto_padding?.desktop_px ??
-    DEFAULT_NAVBAR_CONFIG.layout?.auto_padding?.desktop_px;
+    DEFAULT_NAVBAR_CONFIG.layout?.auto_padding?.desktop_px ??
+    0;
 
-  if (['left', 'right'].includes(options?.desktop?.position ?? '')) {
+  if (
+    ['left', 'right'].includes(options?.desktop?.position ?? '') &&
+    desktopPaddingPx > 0
+  ) {
     cssText += `
       @media (min-width: ${desktopMinWidth}px) {
        :not(.edit-mode) > #view {
@@ -120,8 +124,9 @@ export const forceDashboardPadding = (options?: {
       }
     `;
   } else if (
-    options?.desktop?.position === 'bottom' ||
-    options?.desktop?.position === 'top'
+    (options?.desktop?.position === 'bottom' ||
+      options?.desktop?.position === 'top') &&
+    desktopPaddingPx > 0
   ) {
     cssText += `
       @media (min-width: ${desktopMinWidth}px) {
@@ -139,9 +144,11 @@ export const forceDashboardPadding = (options?: {
   // Mobile padding
   const mobilePaddingPx =
     options?.auto_padding?.mobile_px ??
-    DEFAULT_NAVBAR_CONFIG.layout?.auto_padding?.mobile_px;
+    DEFAULT_NAVBAR_CONFIG.layout?.auto_padding?.mobile_px ??
+    0;
 
-  cssText += `
+  if (mobilePaddingPx > 0) {
+    cssText += `
       @media (max-width: ${mobileMaxWidth}px) {
         :not(.edit-mode) > hui-view:after {
           content: "";
@@ -149,9 +156,10 @@ export const forceDashboardPadding = (options?: {
           height: ${mobilePaddingPx}px;
           width: 100%;
           background-color: transparent; 
+          }
         }
-      }
-    `;
+      `;
+  }
 
   // Append styles to hui-root
   if (!styleEl) {
