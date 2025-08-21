@@ -5,6 +5,8 @@ import {
 } from './config';
 import { RippleElement } from './types';
 
+const DASHBOARD_PADDING_STYLE_ID = 'navbar-card-forced-padding-styles';
+
 /**
  * Get a list of user defined navbar-card templates
  */
@@ -66,13 +68,28 @@ export const forceOpenEditMode = () => {
 };
 
 /**
+ * Remove the dashboard padding styles from the hui-root element.
+ */
+export const removeDashboardPadding = () => {
+  const huiRoot = findHuiRoot();
+  if (!huiRoot?.shadowRoot) return;
+  const styleEl = huiRoot.shadowRoot.querySelector<HTMLStyleElement>(
+    `#${DASHBOARD_PADDING_STYLE_ID}`,
+  );
+  if (styleEl) {
+    styleEl.remove();
+  }
+};
+
+/**
  * Manually inject styles into the hui-root element to force dashboard padding.
  * This prevents overlaps with other cards in the dashboard.
  */
 export const forceDashboardPadding = (options?: {
   desktop: NavbarCardConfig['desktop'];
   mobile: NavbarCardConfig['mobile'];
-  auto_padding: AutoPaddingConfig;
+  auto_padding?: AutoPaddingConfig;
+  show_media_player: boolean;
 }) => {
   const autoPaddingEnabled =
     options?.auto_padding?.enabled ??
@@ -88,9 +105,8 @@ export const forceDashboardPadding = (options?: {
   }
 
   // Find existing style element
-  const styleId = 'navbar-card-forced-padding-styles';
   let styleEl = huiRoot.shadowRoot.querySelector<HTMLStyleElement>(
-    `#${styleId}`,
+    `#${DASHBOARD_PADDING_STYLE_ID}`,
   );
 
   // Remove styles if auto padding is disabled
@@ -142,11 +158,18 @@ export const forceDashboardPadding = (options?: {
   }
 
   // Mobile padding
-  const mobilePaddingPx =
+  let mobilePaddingPx =
     options?.auto_padding?.mobile_px ??
     DEFAULT_NAVBAR_CONFIG.layout?.auto_padding?.mobile_px ??
     0;
-
+  // Add media player padding if enabled
+  if (options?.show_media_player) {
+    mobilePaddingPx +=
+      options?.auto_padding?.media_player_px ??
+      DEFAULT_NAVBAR_CONFIG.layout?.auto_padding?.media_player_px ??
+      0;
+  }
+  // Add padding to the DOM
   if (mobilePaddingPx > 0) {
     cssText += `
       @media (max-width: ${mobileMaxWidth}px) {
@@ -164,7 +187,7 @@ export const forceDashboardPadding = (options?: {
   // Append styles to hui-root
   if (!styleEl) {
     styleEl = document.createElement('style');
-    styleEl.id = styleId;
+    styleEl.id = DASHBOARD_PADDING_STYLE_ID;
     styleEl.textContent = cssText;
     huiRoot.shadowRoot.appendChild(styleEl);
   } else {

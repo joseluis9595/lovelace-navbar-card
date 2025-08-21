@@ -3,6 +3,7 @@ import {
   CSSResult,
   html,
   LitElement,
+  PropertyValues,
   TemplateResult,
   unsafeCSS,
 } from 'lit';
@@ -16,6 +17,7 @@ import {
   PopupItem,
   QuickbarActionConfig,
   RouteItem,
+  STUB_CONFIG,
 } from './config';
 import { RippleElement } from './types';
 import {
@@ -30,6 +32,7 @@ import {
   forceOpenEditMode,
   forceResetRipple,
   getNavbarTemplates,
+  removeDashboardPadding,
 } from './dom-utils';
 import { getDefaultStyles } from './styles';
 import { Color } from './color';
@@ -56,14 +59,14 @@ const HOLD_ACTION_DELAY = 500;
 
 @customElement('navbar-card')
 export class NavbarCard extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property({ attribute: false }) public _hass!: HomeAssistant;
   @state() private _config?: NavbarCardConfig;
-  @state() _isDesktop?: boolean;
+  @state() isDesktop?: boolean;
   @state() private _inEditDashboardMode?: boolean;
   @state() private _inEditCardMode?: boolean;
   @state() private _inPreviewMode?: boolean;
-  @state() private _lastRender?: number;
   @state() private _popup?: TemplateResult | null;
+  @state() private _showMediaPlayer?: boolean;
 
   // hold_action state variables
   private holdTimeoutId: number | null = null;
@@ -112,16 +115,44 @@ export class NavbarCard extends LitElement {
     const style = document.createElement('style');
     style.textContent = this.generateCustomStyles().cssText;
     this.shadowRoot?.appendChild(style);
+
+    // Force dashboard padding
+    forceDashboardPadding({
+      desktop: this._config?.desktop ?? DEFAULT_NAVBAR_CONFIG.desktop,
+      mobile: this._config?.mobile ?? DEFAULT_NAVBAR_CONFIG.mobile,
+      auto_padding: this._config?.layout?.auto_padding,
+      show_media_player: this._showMediaPlayer ?? false,
+    });
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
+
+    // Remove screen size listener
     window.removeEventListener('resize', this._checkDesktop);
+
+    // Remove dashboard padding styles
+    removeDashboardPadding();
 
     // Force popup closure without animation to prevent memory leaks
     this._popup = null;
   }
 
+  /**
+   * Set the Home Assistant instance
+   */
+  set hass(hass: HomeAssistant) {
+    this._hass = hass;
+    const { visible } = this._shouldShowMediaPlayer();
+
+    if (this._showMediaPlayer !== visible) {
+      this._showMediaPlayer = visible;
+    }
+  }
+
+  /**
+   * Set the configuration
+   */
   setConfig(config) {
     // Check for template configuration
     if (config?.template) {
@@ -181,17 +212,26 @@ export class NavbarCard extends LitElement {
       }
     });
 
-    // Force dashboard padding
-    forceDashboardPadding({
-      desktop: config.desktop ?? DEFAULT_NAVBAR_CONFIG.desktop,
-      mobile: config.mobile ?? DEFAULT_NAVBAR_CONFIG.mobile,
-      auto_padding:
-        config.layout?.auto_padding ??
-        DEFAULT_NAVBAR_CONFIG.layout?.auto_padding,
-    });
-
     // Store configuration
     this._config = config;
+  }
+
+  /**
+   * Native `updated` lit callback
+   */
+  protected updated(_changedProperties: PropertyValues): void {
+    super.updated(_changedProperties);
+
+    // Re-apply dashboard padding if media player visibility changes
+    if (_changedProperties.has('_showMediaPlayer')) {
+      // Force dashboard padding
+      forceDashboardPadding({
+        desktop: this._config?.desktop ?? DEFAULT_NAVBAR_CONFIG.desktop,
+        mobile: this._config?.mobile ?? DEFAULT_NAVBAR_CONFIG.mobile,
+        auto_padding: this._config?.layout?.auto_padding,
+        show_media_player: this._showMediaPlayer ?? false,
+      });
+    }
   }
 
   // /**
@@ -217,66 +257,22 @@ export class NavbarCard extends LitElement {
    * dialog in home assistant
    */
   static getStubConfig(): NavbarCardConfig {
-    return {
-      routes: [
-        { url: window.location.pathname, icon: 'mdi:home', label: 'Home' },
-        {
-          url: `${window.location.pathname}/devices`,
-          icon: 'mdi:devices',
-          label: 'Devices',
-          hold_action: {
-            action: 'navigate',
-            navigation_path: '/config/devices/dashboard',
-          },
-        },
-        {
-          url: '/config/automation/dashboard',
-          icon: 'mdi:creation',
-          label: 'Automations',
-        },
-        { url: '/config/dashboard', icon: 'mdi:cog', label: 'Settings' },
-        {
-          icon: 'mdi:dots-horizontal',
-          label: 'More',
-          tap_action: {
-            action: 'open-popup',
-          },
-          popup: [
-            { icon: 'mdi:cog', url: '/config/dashboard' },
-            {
-              icon: 'mdi:hammer',
-              url: '/developer-tools/yaml',
-            },
-            {
-              icon: 'mdi:power',
-              tap_action: {
-                action: 'call-service',
-                service: 'homeassistant.restart',
-                service_data: {},
-                confirmation: {
-                  text: 'Are you sure you want to restart Home Assistant?',
-                },
-              },
-            },
-          ],
-        },
-      ],
-    };
+    return STUB_CONFIG;
   }
 
   /**********************************************************************/
   /* Subcomponents */
   /**********************************************************************/
   private _getRouteIcon(route: RouteItem | PopupItem, isActive: boolean) {
-    const icon = processTemplate<string>(this.hass, this, route.icon);
-    const image = processTemplate<string>(this.hass, this, route.image);
+    const icon = processTemplate<string>(this._hass, this, route.icon);
+    const image = processTemplate<string>(this._hass, this, route.image);
     const iconSelected = processTemplate<string>(
-      this.hass,
+      this._hass,
       this,
       route.icon_selected,
     );
     const imageSelected = processTemplate<string>(
-      this.hass,
+      this._hass,
       this,
       route.image_selected,
     );
@@ -300,10 +296,10 @@ export class NavbarCard extends LitElement {
     // Cache template evaluations
     let showBadge = false;
     if (route.badge.show !== undefined) {
-      showBadge = processTemplate<boolean>(this.hass, this, route.badge.show);
+      showBadge = processTemplate<boolean>(this._hass, this, route.badge.show);
     } else if (route.badge.template) {
       // TODO deprecate this
-      showBadge = processBadgeTemplate(this.hass, route.badge.template);
+      showBadge = processBadgeTemplate(this._hass, route.badge.template);
     }
 
     if (!showBadge) {
@@ -311,14 +307,14 @@ export class NavbarCard extends LitElement {
     }
 
     const count =
-      processTemplate<number | null>(this.hass, this, route.badge.count) ??
+      processTemplate<number | null>(this._hass, this, route.badge.count) ??
       null;
     const hasCount = count != null;
 
     const backgroundColor =
-      processTemplate<string>(this.hass, this, route.badge.color) ?? 'red';
+      processTemplate<string>(this._hass, this, route.badge.color) ?? 'red';
     const textColor = processTemplate<string>(
-      this.hass,
+      this._hass,
       this,
       route.badge.textColor,
     );
@@ -381,7 +377,7 @@ export class NavbarCard extends LitElement {
    * Label visibility evaluator
    */
   private _shouldShowLabels = (isSubmenu: boolean): boolean => {
-    const config = this._isDesktop
+    const config = this.isDesktop
       ? this._config?.desktop?.show_labels
       : this._config?.mobile?.show_labels;
 
@@ -397,7 +393,7 @@ export class NavbarCard extends LitElement {
    * Check if we are on a desktop device
    */
   private _checkDesktop = () => {
-    this._isDesktop =
+    this.isDesktop =
       (window.innerWidth ?? 0) >= (this._config?.desktop?.min_width ?? 768);
   };
 
@@ -408,17 +404,17 @@ export class NavbarCard extends LitElement {
     // Cache template evaluations to avoid redundant processing
     const isActive =
       route.selected != null
-        ? processTemplate<boolean>(this.hass, this, route.selected)
+        ? processTemplate<boolean>(this._hass, this, route.selected)
         : window.location.pathname == route.url;
 
-    const isHidden = processTemplate<boolean>(this.hass, this, route.hidden);
+    const isHidden = processTemplate<boolean>(this._hass, this, route.hidden);
     if (isHidden) {
       return null;
     }
 
     // Cache label processing
     const label = this._shouldShowLabels(false)
-      ? (processTemplate<string>(this.hass, this, route.label) ?? ' ')
+      ? (processTemplate<string>(this._hass, this, route.label) ?? ' ')
       : null;
 
     return html`
@@ -536,12 +532,12 @@ export class NavbarCard extends LitElement {
   /**
    * Open the popup menu for a given popupConfig and anchor element.
    */
-  private _openPopup = (
-    popupItems: RouteItem['popup'],
-    target: HTMLElement,
-  ) => {
+  private _openPopup = (route: RouteItem, target: HTMLElement) => {
+    const popupItems = route.popup ?? route.submenu;
     if (!popupItems || popupItems.length === 0) {
-      console.warn('No popup items provided');
+      console.warn(
+        `[navbar-card] No popup items provided for route: ${route.label}`,
+      );
       return;
     }
 
@@ -550,7 +546,7 @@ export class NavbarCard extends LitElement {
     const { style, labelPositionClassName, popupDirectionClassName } =
       this._getPopupStyles(
         anchorRect,
-        !this._isDesktop
+        !this.isDesktop
           ? 'mobile'
           : (this._config?.desktop?.position ?? DEFAULT_DESKTOP_POSITION),
       );
@@ -562,17 +558,17 @@ export class NavbarCard extends LitElement {
           navbar-popup
           ${popupDirectionClassName}
           ${labelPositionClassName}
-          ${this._isDesktop ? 'desktop' : 'mobile'}
+          ${this.isDesktop ? 'desktop' : 'mobile'}
         "
         style="${style}">
         ${popupItems
           .map((popupItem, index) => {
             const isActive =
               popupItem.selected != null
-                ? processTemplate<boolean>(this.hass, this, popupItem.selected)
+                ? processTemplate<boolean>(this._hass, this, popupItem.selected)
                 : window.location.pathname == popupItem.url;
             const isHidden = processTemplate<boolean>(
-              this.hass,
+              this._hass,
               this,
               popupItem.hidden,
             );
@@ -581,7 +577,7 @@ export class NavbarCard extends LitElement {
             }
 
             const label = this._shouldShowLabels(true)
-              ? (processTemplate<string>(this.hass, this, popupItem.label) ??
+              ? (processTemplate<string>(this._hass, this, popupItem.label) ??
                 ' ')
               : null;
 
@@ -829,12 +825,14 @@ export class NavbarCard extends LitElement {
         if (!isPopupItem) {
           const popupItems = route.popup ?? route.submenu;
           if (!popupItems) {
-            console.error('No popup items found for route:', route);
+            console.error(
+              `[navbar-card] No popup items found for route: ${route.label}`,
+            );
           } else {
             if (this._shouldTriggerHaptic(actionType)) {
               hapticFeedback();
             }
-            this._openPopup(popupItems, target);
+            this._openPopup(route, target);
           }
         }
         break;
@@ -920,8 +918,170 @@ export class NavbarCard extends LitElement {
   };
 
   /**********************************************************************/
+  /* Media player */
+  /**********************************************************************/
+
+  /**
+   * Check if the media player should be shown.
+   */
+  private _shouldShowMediaPlayer = (): { visible: boolean; error?: string } => {
+    // If the media player is not configured, don't show it
+    if (
+      !this._config ||
+      !this._config.media_player ||
+      !this._config.media_player.entity
+    ) {
+      return { visible: false };
+    }
+
+    // If the card is on desktop mode, don't show the media player
+    if (this.isDesktop) return { visible: false };
+
+    // Get the media player state
+    const mediaPlayerState =
+      this._hass.states[this._config.media_player.entity];
+
+    // If the media player does not exist, display the media player
+    if (!mediaPlayerState)
+      return {
+        visible: true,
+        error: `Entity not found "${this._config.media_player.entity}"`,
+      };
+
+    return {
+      visible: ['playing', 'paused'].includes(mediaPlayerState?.state),
+    };
+  };
+
+  /**
+   * Click handler for the media player card itself.
+   */
+  private _handleMediaPlayerClick = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const mediaPlayerEntity = this._config?.media_player?.entity;
+    if (!mediaPlayerEntity) return;
+
+    // Open home assistant more-info dialog for the media player
+    fireDOMEvent(
+      this,
+      'hass-more-info',
+      {
+        bubbles: true,
+        composed: true,
+      },
+      {
+        entityId: mediaPlayerEntity,
+      },
+    );
+  };
+
+  /**
+   * Skip to next track.
+   */
+  private _handleMediaPlayerSkipNextClick = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const mediaPlayerEntity = this._config?.media_player?.entity;
+    if (!mediaPlayerEntity) return;
+    this._hass.callService('media_player', 'media_next_track', {
+      entity_id: mediaPlayerEntity,
+    });
+  };
+
+  /**
+   * Click handler for the media player play/pause button.
+   */
+  private _handleMediaPlayerPlayPauseClick = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const mediaPlayerEntity = this._config?.media_player?.entity;
+    if (!mediaPlayerEntity) return;
+    const mediaPlayerState = this._hass.states[mediaPlayerEntity];
+    if (!mediaPlayerState) return;
+
+    if (mediaPlayerState.state === 'playing') {
+      this._hass.callService('media_player', 'media_pause', {
+        entity_id: mediaPlayerEntity,
+      });
+    } else {
+      this._hass.callService('media_player', 'media_play', {
+        entity_id: mediaPlayerEntity,
+      });
+    }
+  };
+
+  /**********************************************************************/
   /* Render function */
   /**********************************************************************/
+
+  /**
+   * Render the media player card.
+   */
+  private _renderMediaPlayer = () => {
+    const { visible, error } = this._shouldShowMediaPlayer();
+    if (!visible) return html``;
+
+    if (error) {
+      return html`<ha-card class="media-player error">
+        <ha-alert alert-type="error"> ${error} </ha-alert>
+      </ha-card>`;
+    }
+
+    const mediaPlayerState =
+      this._hass.states[this._config!.media_player!.entity];
+    const progress =
+      mediaPlayerState.attributes.media_position != null
+        ? mediaPlayerState.attributes.media_position /
+          mediaPlayerState.attributes.media_duration
+        : null;
+
+    return html`
+      <ha-card class="media-player" @click=${this._handleMediaPlayerClick}>
+        <div
+          class="media-player-bg"
+          style="background-image: url(${mediaPlayerState.attributes
+            .entity_picture});"></div>
+        ${progress != null
+          ? html` <div class="media-player-progress-bar">
+              <div
+                class="media-player-progress-bar-fill"
+                style="width: ${progress * 100}%"></div>
+            </div>`
+          : html``}
+        <img
+          class="media-player-image"
+          src=${mediaPlayerState.attributes.entity_picture}
+          alt=${mediaPlayerState.attributes.media_title} />
+        <div class="media-player-info">
+          <span class="media-player-title"
+            >${mediaPlayerState.attributes.media_title}</span
+          >
+          <span class="media-player-artist"
+            >${mediaPlayerState.attributes.media_artist}</span
+          >
+        </div>
+        <ha-button
+          class="media-player-button media-player-button-play-pause"
+          appearance="accent"
+          variant="brand"
+          @click=${this._handleMediaPlayerPlayPauseClick}>
+          <ha-icon
+            icon=${mediaPlayerState.state === 'playing'
+              ? 'mdi:pause'
+              : 'mdi:play'}></ha-icon>
+        </ha-button>
+        <ha-button
+          class="media-player-button media-player-button-skip"
+          appearance="plain"
+          variant="neutral"
+          @click=${this._handleMediaPlayerSkipNextClick}>
+          <ha-icon icon="mdi:skip-next"></ha-icon>
+        </ha-button>
+      </ha-card>
+    `;
+  };
 
   protected render() {
     if (!this._config) {
@@ -940,18 +1100,18 @@ export class NavbarCard extends LitElement {
     const desktopPositionClassname =
       mapStringToEnum(DesktopPosition, desktopPosition as string) ??
       DEFAULT_DESKTOP_POSITION;
-    const deviceModeClassName = this._isDesktop ? 'desktop' : 'mobile';
+    const deviceModeClassName = this.isDesktop ? 'desktop' : 'mobile';
     const editModeClassname = isEditMode ? 'edit-mode' : '';
     const mobileModeClassname = mobile?.mode === 'floating' ? 'floating' : '';
 
     // Cache hidden property evaluations
     const isDesktopHidden = processTemplate<boolean>(
-      this.hass,
+      this._hass,
       this,
       desktopHidden,
     );
     const isMobileHidden = processTemplate<boolean>(
-      this.hass,
+      this._hass,
       this,
       mobileHidden,
     );
@@ -959,17 +1119,21 @@ export class NavbarCard extends LitElement {
     // Handle hidden props
     if (
       !isEditMode &&
-      ((this._isDesktop && !!isDesktopHidden) ||
-        (!this._isDesktop && !!isMobileHidden))
+      ((this.isDesktop && !!isDesktopHidden) ||
+        (!this.isDesktop && !!isMobileHidden))
     ) {
       return html``;
     }
 
     return html`
-      <ha-card
+      <div
         class="navbar ${editModeClassname} ${deviceModeClassName} ${desktopPositionClassname} ${mobileModeClassname}">
-        ${routes?.map(this._renderRoute).filter(x => x != null)}
-      </ha-card>
+        ${this._renderMediaPlayer()}
+        <ha-card
+          class="navbar-card ${deviceModeClassName} ${desktopPositionClassname} ${mobileModeClassname}">
+          ${routes?.map(this._renderRoute).filter(x => x != null)}
+        </ha-card>
+      </div>
       ${this._popup}
     `;
   }
@@ -989,7 +1153,9 @@ export class NavbarCard extends LitElement {
     // Combine default styles and user styles
     return css`
       ${getDefaultStyles()}
-      ${userStyles}
+      :host {
+        ${userStyles}
+      }
     `;
   }
 }

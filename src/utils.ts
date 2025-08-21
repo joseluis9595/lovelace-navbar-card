@@ -64,7 +64,7 @@ const extractAccessibleStateVariables = (
   navbar: NavbarCard,
 ): NavbarCardPublicState => {
   return {
-    isDesktop: navbar._isDesktop ?? false,
+    isDesktop: navbar.isDesktop ?? false,
   };
 };
 

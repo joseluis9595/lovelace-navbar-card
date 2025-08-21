@@ -70,8 +70,7 @@ describe('NavbarCard', () => {
     await element.updateComplete;
 
     // Set up the element
-    // @ts-expect-error - Private property access for testing
-    element.hass = hass;
+    element._hass = hass;
     element.setConfig(DEFAULT_CONFIG);
     await element.updateComplete;
   });
@@ -140,8 +139,7 @@ describe('NavbarCard', () => {
       window.dispatchEvent(new Event('resize'));
       await element.updateComplete;
 
-      // @ts-expect-error - Private property access for testing
-      expect(element._isDesktop).toBe(true);
+      expect(element.isDesktop).toBe(true);
     });
 
     it('detects mobile mode correctly', async () => {
@@ -156,8 +154,7 @@ describe('NavbarCard', () => {
       window.dispatchEvent(new Event('resize'));
       await element.updateComplete;
 
-      // @ts-expect-error - Private property access for testing
-      expect(element._isDesktop).toBe(false);
+      expect(element.isDesktop).toBe(false);
     });
   });
 });
