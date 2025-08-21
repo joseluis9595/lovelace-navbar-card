@@ -973,7 +973,9 @@ export class NavbarCard extends LitElement {
     // Combine default styles and user styles
     return css`
       ${getDefaultStyles()}
-      ${userStyles}
+      :host {
+        ${userStyles}
+      }
     `;
   }
 }
