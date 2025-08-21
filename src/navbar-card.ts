@@ -31,6 +31,7 @@ import {
   forceOpenEditMode,
   forceResetRipple,
   getNavbarTemplates,
+  removeDashboardPadding,
 } from './dom-utils';
 import { getDefaultStyles } from './styles';
 import { Color } from './color';
@@ -112,11 +113,23 @@ export class NavbarCard extends LitElement {
     const style = document.createElement('style');
     style.textContent = this.generateCustomStyles().cssText;
     this.shadowRoot?.appendChild(style);
+
+    // Force dashboard padding
+    forceDashboardPadding({
+      desktop: this._config?.desktop ?? DEFAULT_NAVBAR_CONFIG.desktop,
+      mobile: this._config?.mobile ?? DEFAULT_NAVBAR_CONFIG.mobile,
+      auto_padding: this._config?.layout?.auto_padding,
+    });
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
+
+    // Remove screen size listener
     window.removeEventListener('resize', this._checkDesktop);
+
+    // Remove dashboard padding styles
+    removeDashboardPadding();
 
     // Force popup closure without animation to prevent memory leaks
     this._popup = null;
