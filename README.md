@@ -101,15 +101,16 @@ routes:
 
 <img width="400" height="120" alt="navbar-card" src="https://github.com/user-attachments/assets/346a6466-1a79-400e-9fe4-4f8472b3bee5" />
 
-| Name       | Type                  | Default    | Description                                                  |
-| ---------- | --------------------- | ---------- | ------------------------------------------------------------ |
-| `routes`   | [Routes](#routes)     | `Required` | Defines the array of routes to be shown in the navbar        |
-| `desktop`  | [Desktop](#desktop)   | -          | Options specific to desktop mode                             |
-| `mobile`   | [Mobile](#mobile)     | -          | Options specific to mobile mode                              |
-| `template` | [Template](#template) | -          | Template name                                                |
-| `layout`   | [Layout](#layout)     | -          | Layout configuration options                                 |
-| `styles`   | [Styles](#styles)     | -          | Custom CSS styles for the card                               |
-| `haptic`   | [Haptic](#haptic)     | -          | Fine tune when the haptic events should be fired in the card |
+| Name           | Type                          | Default    | Description                                                                                             |
+| -------------- | ----------------------------- | ---------- | ------------------------------------------------------------------------------------------------------- |
+| `routes`       | [Routes](#routes)             | `Required` | Defines the array of routes to be shown in the navbar                                                   |
+| `desktop`      | [Desktop](#desktop)           | -          | Options specific to desktop mode                                                                        |
+| `mobile`       | [Mobile](#mobile)             | -          | Options specific to mobile mode                                                                         |
+| `template`     | [Template](#template)         | -          | Template name                                                                                           |
+| `layout`       | [Layout](#layout)             | -          | Layout configuration options                                                                            |
+| `styles`       | [Styles](#styles)             | -          | Custom CSS styles for the card                                                                          |
+| `haptic`       | [Haptic](#haptic)             | -          | Fine tune when the haptic events should be fired in the card                                            |
+| `media_player` | [Media player](#media-player) | -          | `[BETA]` Automatically display a media_player card on top of navbar-card. Only enabled for mobile mode. |
 
 ### Routes
 
@@ -297,6 +298,16 @@ Controls when haptic feedback is triggered. You can either use a boolean to enab
 
 ---
 
+### Media player
+
+When enabled, this configuration displays a `media_player` widget above the `navbar-card`. Currently, it is shown only in mobile mode and only when the `media_player` state is `paused` or `playing`.
+
+| Option   | Type   | Default | Description                   |
+| -------- | ------ | ------- | ----------------------------- |
+| `entity` | string | -       | Entity ID of the media_player |
+
+---
+
 ### Template
 
 Templates allow you to predefine a custom configuration for `navbar-card` and reuse it across multiple dashboards. This approach saves time and simplifies maintenance — any change to the template will automatically apply to all cards using it.
@@ -423,6 +434,17 @@ Here is a breakdown of the CSS classes available for customization:
   - `.popup-item.label-[top | bottom | left | right]`: Specific styles for different positions of the label.
   - `.popup-item .label`: Styles applied to the label of each popup item.
   - `.popup-item .button`: Button for each popup item, containing just the icon.
+
+- `.media-player`: Styles applied to the media-player card
+- `.media-player-bg`: Background of the media-player. This contains the image of the current media playing, blurred and with very low opacity
+- `.media-player-image`: Image container of the current song
+- `.media-player-info`: Container for the title and artist
+- `.media-player-title`: Container for the title
+- `.media-player-artist`: Container for the artist
+- `.media-player-button`: Class applied to all buttons in the media_player card
+- `.media-player-button-play-pause`: Play pause button
+- `.media-player-progress-bar`: Container for the progress bar of the current playing media
+- `.media-player-progress-bar-fill`: Filled section of the progress bar
 
 #### CSS variables
 
