@@ -3,6 +3,7 @@ import {
   CSSResult,
   html,
   LitElement,
+  PropertyValues,
   TemplateResult,
   unsafeCSS,
 } from 'lit';
@@ -65,6 +66,7 @@ export class NavbarCard extends LitElement {
   @state() private _inEditCardMode?: boolean;
   @state() private _inPreviewMode?: boolean;
   @state() private _popup?: TemplateResult | null;
+  @state() private _showMediaPlayer?: boolean;
 
   // hold_action state variables
   private holdTimeoutId: number | null = null;
@@ -119,6 +121,7 @@ export class NavbarCard extends LitElement {
       desktop: this._config?.desktop ?? DEFAULT_NAVBAR_CONFIG.desktop,
       mobile: this._config?.mobile ?? DEFAULT_NAVBAR_CONFIG.mobile,
       auto_padding: this._config?.layout?.auto_padding,
+      show_media_player: this._showMediaPlayer ?? false,
     });
   }
 
@@ -140,6 +143,11 @@ export class NavbarCard extends LitElement {
    */
   set hass(hass: HomeAssistant) {
     this._hass = hass;
+    const { visible } = this._shouldShowMediaPlayer();
+
+    if (this._showMediaPlayer !== visible) {
+      this._showMediaPlayer = visible;
+    }
   }
 
   /**
@@ -204,17 +212,26 @@ export class NavbarCard extends LitElement {
       }
     });
 
-    // Force dashboard padding
-    forceDashboardPadding({
-      desktop: config.desktop ?? DEFAULT_NAVBAR_CONFIG.desktop,
-      mobile: config.mobile ?? DEFAULT_NAVBAR_CONFIG.mobile,
-      auto_padding:
-        config.layout?.auto_padding ??
-        DEFAULT_NAVBAR_CONFIG.layout?.auto_padding,
-    });
-
     // Store configuration
     this._config = config;
+  }
+
+  /**
+   * Native `updated` lit callback
+   */
+  protected updated(_changedProperties: PropertyValues): void {
+    super.updated(_changedProperties);
+
+    // Re-apply dashboard padding if media player visibility changes
+    if (_changedProperties.has('_showMediaPlayer')) {
+      // Force dashboard padding
+      forceDashboardPadding({
+        desktop: this._config?.desktop ?? DEFAULT_NAVBAR_CONFIG.desktop,
+        mobile: this._config?.mobile ?? DEFAULT_NAVBAR_CONFIG.mobile,
+        auto_padding: this._config?.layout?.auto_padding,
+        show_media_player: this._showMediaPlayer ?? false,
+      });
+    }
   }
 
   // /**
@@ -901,8 +918,165 @@ export class NavbarCard extends LitElement {
   };
 
   /**********************************************************************/
+  /* Media player */
+  /**********************************************************************/
+
+  /**
+   * Check if the media player should be shown.
+   */
+  private _shouldShowMediaPlayer = (): { visible: boolean; error?: string } => {
+    // If the media player is not configured, don't show it
+    if (
+      !this._config ||
+      !this._config.media_player ||
+      !this._config.media_player.entity
+    ) {
+      return { visible: false };
+    }
+
+    // If the card is on desktop mode, don't show the media player
+    if (this.isDesktop) return { visible: false };
+
+    // Get the media player state
+    const mediaPlayerState =
+      this._hass.states[this._config.media_player.entity];
+
+    // If the media player does not exist, display the media player
+    if (!mediaPlayerState)
+      return {
+        visible: true,
+        error: `Entity not found "${this._config.media_player.entity}"`,
+      };
+
+    return {
+      visible: ['playing', 'paused'].includes(mediaPlayerState?.state),
+    };
+  };
+
+  /**
+   * Click handler for the media player card itself.
+   */
+  private _handleMediaPlayerClick = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Open home assistant more-info dialog for the media player
+    fireDOMEvent(
+      this,
+      'hass-more-info',
+      {
+        bubbles: true,
+        composed: true,
+      },
+      {
+        entityId: this._config?.media_player,
+      },
+    );
+  };
+
+  /**
+   * Skip to next track.
+   */
+  private _handleMediaPlayerSkipNextClick = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    this._hass.callService('media_player', 'media_next_track', {
+      entity_id: this._config?.media_player,
+    });
+  };
+
+  /**
+   * Click handler for the media player play/pause button.
+   */
+  private _handleMediaPlayerPlayPauseClick = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const mediaPlayerState =
+      this._hass.states[this._config!.media_player!.entity];
+    if (!mediaPlayerState) return;
+
+    if (mediaPlayerState.state === 'playing') {
+      this._hass.callService('media_player', 'media_pause', {
+        entity_id: this._config?.media_player,
+      });
+    } else {
+      this._hass.callService('media_player', 'media_play', {
+        entity_id: this._config?.media_player,
+      });
+    }
+  };
+
+  /**********************************************************************/
   /* Render function */
   /**********************************************************************/
+
+  /**
+   * Render the media player card.
+   */
+  private _renderMediaPlayer = () => {
+    const { visible, error } = this._shouldShowMediaPlayer();
+    console.log('visible', visible);
+    if (!visible) return html``;
+
+    if (error) {
+      return html`<ha-card class="media-player error">
+        <ha-alert alert-type="error"> ${error} </ha-alert>
+      </ha-card>`;
+    }
+
+    const mediaPlayerState =
+      this._hass.states[this._config!.media_player!.entity];
+    const progress =
+      mediaPlayerState.attributes.media_position != null
+        ? mediaPlayerState.attributes.media_position /
+          mediaPlayerState.attributes.media_duration
+        : null;
+
+    return html`
+      <ha-card class="media-player" @click=${this._handleMediaPlayerClick}>
+        <!-- <ha-ripple></ha-ripple> -->
+        <div
+          class="media-player-bg"
+          style="background-image: url(${mediaPlayerState.attributes
+            .entity_picture});"></div>
+        ${progress != null
+          ? html` <div class="media-player-progress-bar">
+              <div
+                class="media-player-progress-bar-fill"
+                style="width: ${progress * 100}%"></div>
+            </div>`
+          : html``}
+        <img
+          class="media-player-image"
+          src=${mediaPlayerState.attributes.entity_picture}
+          alt=${mediaPlayerState.attributes.media_title} />
+        <div class="media-player-info">
+          <span class="media-player-title"
+            >${mediaPlayerState.attributes.media_title}</span
+          >
+          <span class="media-player-artist"
+            >${mediaPlayerState.attributes.media_artist}</span
+          >
+        </div>
+        <ha-button
+          class="media-player-button media-player-button-play-pause"
+          appearance="accent"
+          variant="brand"
+          @click=${this._handleMediaPlayerPlayPauseClick}>
+          <ha-icon
+            icon=${mediaPlayerState.state === 'playing'
+              ? 'mdi:pause'
+              : 'mdi:play'}></ha-icon>
+        </ha-button>
+        <ha-button
+          class="media-player-button media-player-button-skip"
+          appearance="plain"
+          variant="neutral"
+          @click=${this._handleMediaPlayerSkipNextClick}>
+          <ha-icon icon="mdi:skip-next"></ha-icon>
+        </ha-button>
+      </ha-card>
+    `;
+  };
 
   protected render() {
     if (!this._config) {
@@ -949,6 +1123,7 @@ export class NavbarCard extends LitElement {
     return html`
       <div
         class="navbar ${editModeClassname} ${deviceModeClassName} ${desktopPositionClassname} ${mobileModeClassname}">
+        ${this._renderMediaPlayer()}
         <ha-card
           class="navbar-card ${deviceModeClassName} ${desktopPositionClassname} ${mobileModeClassname}">
           ${routes?.map(this._renderRoute).filter(x => x != null)}

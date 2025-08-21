@@ -79,15 +79,23 @@ export type HapticConfig = {
   double_tap_action?: boolean;
 };
 
+// Auto padding configuration
 export type AutoPaddingConfig = {
   enabled: boolean;
   desktop_px?: number;
   mobile_px?: number;
+  media_player_px?: number;
+};
+
+// Media player configuration
+type MediaPlayerConfig = {
+  entity: string;
 };
 
 // Main card configuration
 export type NavbarCardConfig = {
   routes: RouteItem[];
+  media_player?: MediaPlayerConfig;
   template?: string;
   layout?: {
     auto_padding?: AutoPaddingConfig;
@@ -115,6 +123,7 @@ export const DEFAULT_NAVBAR_CONFIG: NavbarCardConfig = {
       enabled: true,
       desktop_px: 100,
       mobile_px: 80,
+      media_player_px: 100,
     },
   },
   desktop: {

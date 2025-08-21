@@ -89,6 +89,7 @@ export const forceDashboardPadding = (options?: {
   desktop: NavbarCardConfig['desktop'];
   mobile: NavbarCardConfig['mobile'];
   auto_padding?: AutoPaddingConfig;
+  show_media_player: boolean;
 }) => {
   const autoPaddingEnabled =
     options?.auto_padding?.enabled ??
@@ -157,11 +158,18 @@ export const forceDashboardPadding = (options?: {
   }
 
   // Mobile padding
-  const mobilePaddingPx =
+  let mobilePaddingPx =
     options?.auto_padding?.mobile_px ??
     DEFAULT_NAVBAR_CONFIG.layout?.auto_padding?.mobile_px ??
     0;
-
+  // Add media player padding if enabled
+  if (options?.show_media_player) {
+    mobilePaddingPx +=
+      options?.auto_padding?.media_player_px ??
+      DEFAULT_NAVBAR_CONFIG.layout?.auto_padding?.media_player_px ??
+      0;
+  }
+  // Add padding to the DOM
   if (mobilePaddingPx > 0) {
     cssText += `
       @media (max-width: ${mobileMaxWidth}px) {
