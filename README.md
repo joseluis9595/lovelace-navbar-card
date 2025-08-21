@@ -302,7 +302,7 @@ Controls when haptic feedback is triggered. You can either use a boolean to enab
 
 When enabled, this configuration displays a `media_player` widget above the `navbar-card`. Currently, it is shown only in mobile mode and only when the `media_player` state is `paused` or `playing`.
 
-<img width="445" height="166" alt="navbar-card_media-player" src="https://github.com/user-attachments/assets/df1be0fb-b82d-4146-96e0-cc0e5ac0acb3" />
+<img width="445" height="166" alt="navbar-card_media-player" src="https://github.com/user-attachments/assets/b8898268-e232-4759-b35c-23a1afd43e7a" />
 
 | Option   | Type   | Default | Description                   |
 | -------- | ------ | ------- | ----------------------------- |
