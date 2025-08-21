@@ -276,7 +276,6 @@ Specific configuration for mobile mode.
 
 <img width="785" height="108" alt="navbar-card_mobile" src="https://github.com/user-attachments/assets/b8134d65-d237-412a-9c0b-dfc9c009de46" />
 
-
 | Name          | Type                                     | Default  | Description                                                                                                             |
 | ------------- | ---------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
 | `show_labels` | boolean \| `popup_only` \| `routes_only` | `false`  | Whether or not to display labels under each route                                                                       |
@@ -387,11 +386,17 @@ You can check out some examples [here](#examples-with-custom-styles) for inspira
 
 Here is a breakdown of the CSS classes available for customization:
 
-- `.navbar`: Base component for the navbar.
+- `.navbar`: Main wrapper of navbar-card and its widgets.
   - `.navbar.desktop`: Styling for the desktop version.
   - `.navbar.desktop.[top | bottom | left | right]`: Specific styles for different positions of the navbar.
   - `.navbar.mobile`: Styling for the mobile version.
   - `.navbar.mobile.floating`: Styling for the mobile version when using `floating` mode.
+
+- `.navbar-card`: The navbar-card itself (`ha-card` component).
+  - `.navbar-card.desktop`: Styling for the desktop version.
+  - `.navbar-card.desktop.[top | bottom | left | right]`: Specific styles for different positions of the navbar.
+  - `.navbar-card.mobile`: Styling for the mobile version.
+  - `.navbar-card.mobile.floating`: Styling for the mobile version when using `floating` mode.
 
 - `.route`: Represents each route (or item) within the navbar.
 
@@ -624,7 +629,7 @@ routes:
     label: Devices
     icon: mdi:devices
 styles: |
-  .navbar {
+  .navbar-card {
     background: #000000;
   }
 ```
@@ -647,7 +652,7 @@ routes:
     label: Devices
     icon: mdi:devices
 styles: |
-  .navbar.desktop{
+  .navbar-card.desktop {
     border-radius: 0px;
   }
 ```
