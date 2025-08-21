@@ -424,6 +424,24 @@ Here is a breakdown of the CSS classes available for customization:
   - `.popup-item .label`: Styles applied to the label of each popup item.
   - `.popup-item .button`: Button for each popup item, containing just the icon.
 
+#### CSS variables
+
+The `.navbar` component relies on a set of CSS variables to manage its styling. You can customize its appearance by overriding the following variables:
+
+| Name                                  | Default value                        | Uses                                                              |
+| ------------------------------------- | ------------------------------------ | ----------------------------------------------------------------- |
+| `--navbar-primary-color`              | var(--primary-color)                 | Accent color used for navbar-card                                 |
+| `--navbar-border-radius`              | var(--ha-card-border-radius, 12px)   | Border radius applied to all `ha-card` elements inside `.navbar`  |
+| `--navbar-background-color`           | var(--card-background-color)         | Background color used for all `ha-card` elements inside `.navbar` |
+| `--navbar-route-icon-size`            | 24px                                 | Size in pixels for each `.icon` element                           |
+| `--navbar-route-image-size`           | 32px                                 | Size in pixels for each `.image` element                          |
+| `--navbar-box-shadow`                 | 0px -1px 4px 0px rgba(0, 0, 0, 0.14) | Box shadow used in mobile docked layout                           |
+| `--navbar-box-shadow-mobile-floating` | var(--material-shadow-elevation-2dp) | Box shadow used in mobile floating mode                           |
+| `--navbar-box-shadow-desktop`         | var(--material-shadow-elevation-2dp) | Box shadow used in desktop mode                                   |
+| `--navbar-z-index`                    | 3                                    | Default z-index for navbar-card                                   |
+| `--navbar-popup-backdrop-z-index`     | 900                                  | z-index used for the `.navbar-popup-backdrop` element             |
+| `--navbar-popup-z-index`              | 901                                  | z-index used for the `.navbar-popup` element                      |
+
 <br>
 
 ---
