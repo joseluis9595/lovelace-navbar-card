@@ -57,13 +57,12 @@ const HOLD_ACTION_DELAY = 500;
 
 @customElement('navbar-card')
 export class NavbarCard extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property({ attribute: false }) public _hass!: HomeAssistant;
   @state() private _config?: NavbarCardConfig;
-  @state() _isDesktop?: boolean;
+  @state() isDesktop?: boolean;
   @state() private _inEditDashboardMode?: boolean;
   @state() private _inEditCardMode?: boolean;
   @state() private _inPreviewMode?: boolean;
-  @state() private _lastRender?: number;
   @state() private _popup?: TemplateResult | null;
 
   // hold_action state variables
@@ -123,6 +122,16 @@ export class NavbarCard extends LitElement {
     this._popup = null;
   }
 
+  /**
+   * Set the Home Assistant instance
+   */
+  set hass(hass: HomeAssistant) {
+    this._hass = hass;
+  }
+
+  /**
+   * Set the configuration
+   */
   setConfig(config) {
     // Check for template configuration
     if (config?.template) {
@@ -225,15 +234,15 @@ export class NavbarCard extends LitElement {
   /* Subcomponents */
   /**********************************************************************/
   private _getRouteIcon(route: RouteItem | PopupItem, isActive: boolean) {
-    const icon = processTemplate<string>(this.hass, this, route.icon);
-    const image = processTemplate<string>(this.hass, this, route.image);
+    const icon = processTemplate<string>(this._hass, this, route.icon);
+    const image = processTemplate<string>(this._hass, this, route.image);
     const iconSelected = processTemplate<string>(
-      this.hass,
+      this._hass,
       this,
       route.icon_selected,
     );
     const imageSelected = processTemplate<string>(
-      this.hass,
+      this._hass,
       this,
       route.image_selected,
     );
@@ -257,10 +266,10 @@ export class NavbarCard extends LitElement {
     // Cache template evaluations
     let showBadge = false;
     if (route.badge.show !== undefined) {
-      showBadge = processTemplate<boolean>(this.hass, this, route.badge.show);
+      showBadge = processTemplate<boolean>(this._hass, this, route.badge.show);
     } else if (route.badge.template) {
       // TODO deprecate this
-      showBadge = processBadgeTemplate(this.hass, route.badge.template);
+      showBadge = processBadgeTemplate(this._hass, route.badge.template);
     }
 
     if (!showBadge) {
@@ -268,14 +277,14 @@ export class NavbarCard extends LitElement {
     }
 
     const count =
-      processTemplate<number | null>(this.hass, this, route.badge.count) ??
+      processTemplate<number | null>(this._hass, this, route.badge.count) ??
       null;
     const hasCount = count != null;
 
     const backgroundColor =
-      processTemplate<string>(this.hass, this, route.badge.color) ?? 'red';
+      processTemplate<string>(this._hass, this, route.badge.color) ?? 'red';
     const textColor = processTemplate<string>(
-      this.hass,
+      this._hass,
       this,
       route.badge.textColor,
     );
@@ -338,7 +347,7 @@ export class NavbarCard extends LitElement {
    * Label visibility evaluator
    */
   private _shouldShowLabels = (isSubmenu: boolean): boolean => {
-    const config = this._isDesktop
+    const config = this.isDesktop
       ? this._config?.desktop?.show_labels
       : this._config?.mobile?.show_labels;
 
@@ -354,7 +363,7 @@ export class NavbarCard extends LitElement {
    * Check if we are on a desktop device
    */
   private _checkDesktop = () => {
-    this._isDesktop =
+    this.isDesktop =
       (window.innerWidth ?? 0) >= (this._config?.desktop?.min_width ?? 768);
   };
 
@@ -365,17 +374,17 @@ export class NavbarCard extends LitElement {
     // Cache template evaluations to avoid redundant processing
     const isActive =
       route.selected != null
-        ? processTemplate<boolean>(this.hass, this, route.selected)
+        ? processTemplate<boolean>(this._hass, this, route.selected)
         : window.location.pathname == route.url;
 
-    const isHidden = processTemplate<boolean>(this.hass, this, route.hidden);
+    const isHidden = processTemplate<boolean>(this._hass, this, route.hidden);
     if (isHidden) {
       return null;
     }
 
     // Cache label processing
     const label = this._shouldShowLabels(false)
-      ? (processTemplate<string>(this.hass, this, route.label) ?? ' ')
+      ? (processTemplate<string>(this._hass, this, route.label) ?? ' ')
       : null;
 
     return html`
@@ -493,12 +502,12 @@ export class NavbarCard extends LitElement {
   /**
    * Open the popup menu for a given popupConfig and anchor element.
    */
-  private _openPopup = (
-    popupItems: RouteItem['popup'],
-    target: HTMLElement,
-  ) => {
+  private _openPopup = (route: RouteItem, target: HTMLElement) => {
+    const popupItems = route.popup ?? route.submenu;
     if (!popupItems || popupItems.length === 0) {
-      console.warn('No popup items provided');
+      console.warn(
+        `[navbar-card] No popup items provided for route: ${route.label}`,
+      );
       return;
     }
 
@@ -507,7 +516,7 @@ export class NavbarCard extends LitElement {
     const { style, labelPositionClassName, popupDirectionClassName } =
       this._getPopupStyles(
         anchorRect,
-        !this._isDesktop
+        !this.isDesktop
           ? 'mobile'
           : (this._config?.desktop?.position ?? DEFAULT_DESKTOP_POSITION),
       );
@@ -519,17 +528,17 @@ export class NavbarCard extends LitElement {
           navbar-popup
           ${popupDirectionClassName}
           ${labelPositionClassName}
-          ${this._isDesktop ? 'desktop' : 'mobile'}
+          ${this.isDesktop ? 'desktop' : 'mobile'}
         "
         style="${style}">
         ${popupItems
           .map((popupItem, index) => {
             const isActive =
               popupItem.selected != null
-                ? processTemplate<boolean>(this.hass, this, popupItem.selected)
+                ? processTemplate<boolean>(this._hass, this, popupItem.selected)
                 : window.location.pathname == popupItem.url;
             const isHidden = processTemplate<boolean>(
-              this.hass,
+              this._hass,
               this,
               popupItem.hidden,
             );
@@ -538,7 +547,7 @@ export class NavbarCard extends LitElement {
             }
 
             const label = this._shouldShowLabels(true)
-              ? (processTemplate<string>(this.hass, this, popupItem.label) ??
+              ? (processTemplate<string>(this._hass, this, popupItem.label) ??
                 ' ')
               : null;
 
@@ -786,12 +795,14 @@ export class NavbarCard extends LitElement {
         if (!isPopupItem) {
           const popupItems = route.popup ?? route.submenu;
           if (!popupItems) {
-            console.error('No popup items found for route:', route);
+            console.error(
+              `[navbar-card] No popup items found for route: ${route.label}`,
+            );
           } else {
             if (this._shouldTriggerHaptic(actionType)) {
               hapticFeedback();
             }
-            this._openPopup(popupItems, target);
+            this._openPopup(route, target);
           }
         }
         break;
@@ -897,18 +908,18 @@ export class NavbarCard extends LitElement {
     const desktopPositionClassname =
       mapStringToEnum(DesktopPosition, desktopPosition as string) ??
       DEFAULT_DESKTOP_POSITION;
-    const deviceModeClassName = this._isDesktop ? 'desktop' : 'mobile';
+    const deviceModeClassName = this.isDesktop ? 'desktop' : 'mobile';
     const editModeClassname = isEditMode ? 'edit-mode' : '';
     const mobileModeClassname = mobile?.mode === 'floating' ? 'floating' : '';
 
     // Cache hidden property evaluations
     const isDesktopHidden = processTemplate<boolean>(
-      this.hass,
+      this._hass,
       this,
       desktopHidden,
     );
     const isMobileHidden = processTemplate<boolean>(
-      this.hass,
+      this._hass,
       this,
       mobileHidden,
     );
@@ -916,8 +927,8 @@ export class NavbarCard extends LitElement {
     // Handle hidden props
     if (
       !isEditMode &&
-      ((this._isDesktop && !!isDesktopHidden) ||
-        (!this._isDesktop && !!isMobileHidden))
+      ((this.isDesktop && !!isDesktopHidden) ||
+        (!this.isDesktop && !!isMobileHidden))
     ) {
       return html``;
     }
