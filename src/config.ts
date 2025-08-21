@@ -127,3 +127,49 @@ export const DEFAULT_NAVBAR_CONFIG: NavbarCardConfig = {
     mode: 'docked',
   },
 };
+
+export const STUB_CONFIG: NavbarCardConfig = {
+  routes: [
+    { url: window.location.pathname, icon: 'mdi:home', label: 'Home' },
+    {
+      url: `${window.location.pathname}/devices`,
+      icon: 'mdi:devices',
+      label: 'Devices',
+      hold_action: {
+        action: 'navigate',
+        navigation_path: '/config/devices/dashboard',
+      },
+    },
+    {
+      url: '/config/automation/dashboard',
+      icon: 'mdi:creation',
+      label: 'Automations',
+    },
+    { url: '/config/dashboard', icon: 'mdi:cog', label: 'Settings' },
+    {
+      icon: 'mdi:dots-horizontal',
+      label: 'More',
+      tap_action: {
+        action: 'open-popup',
+      },
+      popup: [
+        { icon: 'mdi:cog', url: '/config/dashboard' },
+        {
+          icon: 'mdi:hammer',
+          url: '/developer-tools/yaml',
+        },
+        {
+          icon: 'mdi:power',
+          tap_action: {
+            action: 'call-service',
+            service: 'homeassistant.restart',
+            service_data: {},
+            confirmation: {
+              text: 'Are you sure you want to restart Home Assistant?',
+            },
+          },
+        },
+      ],
+    },
+  ],
+};
