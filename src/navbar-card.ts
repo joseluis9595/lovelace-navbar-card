@@ -959,6 +959,10 @@ export class NavbarCard extends LitElement {
   private _handleMediaPlayerClick = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    const mediaPlayerEntity = this._config?.media_player?.entity;
+    if (!mediaPlayerEntity) return;
+
     // Open home assistant more-info dialog for the media player
     fireDOMEvent(
       this,
@@ -968,7 +972,7 @@ export class NavbarCard extends LitElement {
         composed: true,
       },
       {
-        entityId: this._config?.media_player,
+        entityId: mediaPlayerEntity,
       },
     );
   };
@@ -979,8 +983,10 @@ export class NavbarCard extends LitElement {
   private _handleMediaPlayerSkipNextClick = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    const mediaPlayerEntity = this._config?.media_player?.entity;
+    if (!mediaPlayerEntity) return;
     this._hass.callService('media_player', 'media_next_track', {
-      entity_id: this._config?.media_player,
+      entity_id: mediaPlayerEntity,
     });
   };
 
@@ -990,17 +996,18 @@ export class NavbarCard extends LitElement {
   private _handleMediaPlayerPlayPauseClick = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const mediaPlayerState =
-      this._hass.states[this._config!.media_player!.entity];
+    const mediaPlayerEntity = this._config?.media_player?.entity;
+    if (!mediaPlayerEntity) return;
+    const mediaPlayerState = this._hass.states[mediaPlayerEntity];
     if (!mediaPlayerState) return;
 
     if (mediaPlayerState.state === 'playing') {
       this._hass.callService('media_player', 'media_pause', {
-        entity_id: this._config?.media_player,
+        entity_id: mediaPlayerEntity,
       });
     } else {
       this._hass.callService('media_player', 'media_play', {
-        entity_id: this._config?.media_player,
+        entity_id: mediaPlayerEntity,
       });
     }
   };
@@ -1014,7 +1021,6 @@ export class NavbarCard extends LitElement {
    */
   private _renderMediaPlayer = () => {
     const { visible, error } = this._shouldShowMediaPlayer();
-    console.log('visible', visible);
     if (!visible) return html``;
 
     if (error) {
@@ -1033,7 +1039,6 @@ export class NavbarCard extends LitElement {
 
     return html`
       <ha-card class="media-player" @click=${this._handleMediaPlayerClick}>
-        <!-- <ha-ripple></ha-ripple> -->
         <div
           class="media-player-bg"
           style="background-image: url(${mediaPlayerState.attributes

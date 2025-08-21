@@ -159,6 +159,8 @@ const MEDIA_PLAYER_STYLES = css`
       border: none;
       box-shadow: var(--navbar-box-shadow-mobile-floating);
       border-radius: var(--navbar-border-radius);
+      display: flex;
+      flex-direction: row;
 
       .media-player-bg {
         position: absolute;
@@ -166,15 +168,16 @@ const MEDIA_PLAYER_STYLES = css`
         background-size: cover;
         background-position: center;
         filter: blur(20px);
-        opacity: 0.1;
+        opacity: 0.03;
         z-index: 0;
       }
 
       .media-player-image {
-        width: 45px;
-        height: 45px;
-        border-radius: 12px;
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
         object-fit: cover;
+        margin-right: 6px;
       }
 
       .media-player-info {
@@ -194,10 +197,9 @@ const MEDIA_PLAYER_STYLES = css`
       }
 
       .media-player-button {
-        width: 50px;
-        --ha-button-height: 50px;
-        // --ha-button-border-radius: 999px;
-        --ha-button-border-radius: 12px;
+        width: 38px;
+        --ha-button-height: 38px;
+        --ha-button-border-radius: 999px;
       }
 
       .media-player-button.media-player-button-play-pause {
