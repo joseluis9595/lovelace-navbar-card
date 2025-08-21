@@ -17,91 +17,129 @@ const HOST_STYLES = css`
   }
 `;
 
-const NAVBAR_STYLES = css`
+const NAVBAR_CONTAINER_STYLES = css`
   .navbar {
-    background: var(--navbar-background-color);
-    border-radius: 0px;
-    box-shadow: var(--navbar-box-shadow);
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px;
-    gap: 10px;
+    flex-direction: column;
     width: 100vw;
     position: fixed;
+    gap: 10px;
     left: 0;
     right: 0;
     bottom: 0;
     top: unset;
     z-index: var(--navbar-z-index);
+
+    ha-card {
+      background: var(--navbar-background-color);
+      border-radius: 0px;
+      box-shadow: var(--navbar-box-shadow);
+      margin: 0 auto;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      padding: 12px;
+      gap: 10px;
+    }
+
+    .navbar-card {
+      justify-content: space-between;
+      width: 100%;
+    }
+
   }
 
   /* Edit mode styles */
   .navbar.edit-mode {
     position: relative !important;
-    flex-direction: row !important;
+    flex-direction: column !important;
     left: unset !important;
     right: unset !important;
     bottom: unset !important;
-    top: unset !important;
     width: auto !important;
+    top: unset !important;
     transform: none !important;
+
+    ha-card {
+      width: 100% !important;
+      flex-direction: row !important;
+    }
   }
 
-  /* Mobile mode styles */
+  /* Mobile floating style */
   .navbar.mobile.floating {
-    border-radius: var(--navbar-border-radius) !important;
-    border: none !important;
-    box-shadow: var(--navbar-box-shadow-mobile) !important;
+    .navbar-card {
+      border: none !important;
+      box-shadow: var(--navbar-box-shadow-mobile) !important;
+      border-radius: var(--navbar-border-radius) !important;
+    }
   }
   .navbar.mobile.floating:not(.edit-mode) {
-    bottom: 10px !important;
-    left: 5vw !important;
-    right: 5vw !important;
-    width: 90vw !important;
+    .navbar-card {
+      margin-bottom: 10px !important;
+      width: 90% !important;
+    }
   }
 
   /* Desktop mode styles */
   .navbar.desktop {
-    border-radius: var(--navbar-border-radius);
-    box-shadow: var(--navbar-box-shadow-desktop);
     width: auto;
     justify-content: space-evenly;
 
     --navbar-route-icon-size: 28px;
+
+    ha-card {
+      border-radius: var(--navbar-border-radius);
+      box-shadow: var(--navbar-box-shadow-desktop);
+    }
   }
   .navbar.desktop.bottom {
-    flex-direction: row;
+    flex-direction: column;
     top: unset;
     right: unset;
     bottom: 16px;
     left: calc(50% + var(--mdc-drawer-width, 0px) / 2);
     transform: translate(-50%, 0);
+
+    .navbar-card {
+      flex-direction: row;
+    }
   }
   .navbar.desktop.top {
-    flex-direction: row;
+    flex-direction: column;
     bottom: unset;
     right: unset;
     top: 16px;
     left: calc(50% + var(--mdc-drawer-width, 0px) / 2);
     transform: translate(-50%, 0);
+
+    .navbar-card {
+      flex-direction: row;
+    }
   }
   .navbar.desktop.left {
-    flex-direction: column;
+    flex-direction: row-reverse;
     left: calc(var(--mdc-drawer-width, 0px) + 16px);
     right: unset;
     bottom: unset;
     top: 50%;
     transform: translate(0, -50%);
+
+    .navbar-card {
+      flex-direction: column;
+    }
   }
   .navbar.desktop.right {
-    flex-direction: column;
+    flex-direction: row;
     right: 16px;
     left: unset;
     bottom: unset;
     top: 50%;
     transform: translate(0, -50%);
+
+    .navbar-card {
+      flex-direction: column;
+    }
   }
 `;
 
@@ -351,7 +389,7 @@ export const getDefaultStyles = (): CSSResult => {
   // Mobile-first css styling
   return css`
     ${HOST_STYLES}
-    ${NAVBAR_STYLES}
+    ${NAVBAR_CONTAINER_STYLES}
     ${ROUTE_STYLES}
     ${POPUP_STYLES}
   `;

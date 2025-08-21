@@ -947,10 +947,12 @@ export class NavbarCard extends LitElement {
     }
 
     return html`
-      <ha-card
+      <div
         class="navbar ${editModeClassname} ${deviceModeClassName} ${desktopPositionClassname} ${mobileModeClassname}">
-        ${routes?.map(this._renderRoute).filter(x => x != null)}
-      </ha-card>
+        <ha-card class="navbar-card">
+          ${routes?.map(this._renderRoute).filter(x => x != null)}
+        </ha-card>
+      </div>
       ${this._popup}
     `;
   }
