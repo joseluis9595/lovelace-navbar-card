@@ -265,6 +265,7 @@ Specific configuration for desktop mode.
 | Name          | Type                                     | Default  | Description                                                                |
 | ------------- | ---------------------------------------- | -------- | -------------------------------------------------------------------------- |
 | `show_labels` | boolean \| `popup_only` \| `routes_only` | `false`  | Whether or not to display labels under each route                          |
+| `show_popup_label_backgrounds` | boolean | `false`  | Whether or not to display label backgrounds for popup items                          |
 | `min_width`   | number                                   | `768`    | Screen size from which the navbar will be displayed as its desktop variant |
 | `position`    | `top` \| `bottom` \| `left` \| `right`   | `bottom` | Position of the navbar on desktop devices                                  |
 | `hidden`      | boolean \| [JSTemplate](#jstemplate)     | `false`  | Set to true to hide the navbar on desktop devices                          |
@@ -280,6 +281,7 @@ Specific configuration for mobile mode.
 | Name          | Type                                     | Default  | Description                                                                                                             |
 | ------------- | ---------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
 | `show_labels` | boolean \| `popup_only` \| `routes_only` | `false`  | Whether or not to display labels under each route                                                                       |
+| `show_popup_label_backgrounds` | boolean | `false`  | Whether or not to display label backgrounds for popup items                          |
 | `hidden`      | boolean \| [JSTemplate](#jstemplate)     | `false`  | Set to true to hide the navbar on mobile devices                                                                        |
 | `mode`        | `docked` \| `floating`                   | `docked` | Choose visualization mode on mobile devices. `docked` for default experience, `floating` for desktop-like visualization |
 
