@@ -277,7 +277,7 @@ export class NavbarCard extends LitElement {
       route.image_selected,
     );
   
-    const extraIconClass = this._shouldShowLabelBackground(isSubmenu)
+    const extraIconClass = this._shouldShowLabelBackground()
       ? 'popuplabelbackground'
       : '';
 
@@ -291,13 +291,12 @@ export class NavbarCard extends LitElement {
           icon="${isActive && iconSelected ? iconSelected : icon}"></ha-icon>`;
   }
 
-  private _shouldShowLabelBackground = (isSubmenu: boolean): boolean => {
+  private _shouldShowLabelBackground = (): boolean => {
     const enabled = this.isDesktop
       ? this._config?.desktop?.show_popup_label_backgrounds
       : this._config?.mobile?.show_popup_label_backgrounds;
     if (!enabled) return false;
-    // Only when labels are actually shown (true or popup_only in the right context)
-    return this._shouldShowLabels(isSubmenu);
+    return true;
   };
 
   private _renderBadge(route: RouteItem | PopupItem, isRouteActive: boolean) {
@@ -572,7 +571,7 @@ export class NavbarCard extends LitElement {
           ${popupDirectionClassName}
           ${labelPositionClassName}
           ${this.isDesktop ? 'desktop' : 'mobile'}
-          ${this._shouldShowLabelBackground(true) ? 'popuplabelbackground' : ''}
+          ${this._shouldShowLabelBackground() ? 'popuplabelbackground' : ''}
         "
         style="${style}">
         ${popupItems
@@ -605,14 +604,14 @@ export class NavbarCard extends LitElement {
               style="--index: ${index}"
               @click=${(e: MouseEvent) =>
                 this._handlePointerUp(e as PointerEvent, popupItem, true)}>
-              <div class="button ${this._shouldShowLabelBackground(true) ? 'popuplabelbackground' : ''}">
+              <div class="button ${this._shouldShowLabelBackground() ? 'popuplabelbackground' : ''}">
                 ${this._getRouteIcon(popupItem, isActive, true)}
                 <md-ripple></md-ripple>
-                ${this._shouldShowLabelBackground(true) && label
+                ${this._shouldShowLabelBackground() && label
                   ? html`<div class="label">${label}</div>`
                   : html``}
               </div>
-              ${!this._shouldShowLabelBackground(true) && label
+              ${!this._shouldShowLabelBackground() && label
                 ? html`<div class="label">${label}</div>`
                 : html``}
               ${this._renderBadge(popupItem, false)}
