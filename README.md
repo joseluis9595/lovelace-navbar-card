@@ -307,9 +307,10 @@ When enabled, this configuration displays a `media_player` widget above the `nav
 
 <img width="445" height="166" alt="navbar-card_media-player" src="https://github.com/user-attachments/assets/b8898268-e232-4759-b35c-23a1afd43e7a" />
 
-| Option   | Type   | Default | Description                   |
-| -------- | ------ | ------- | ----------------------------- |
-| `entity` | string | -       | Entity ID of the media_player |
+| Option   | Type                                 | Default                                                  | Description                                                         |
+| -------- | ------------------------------------ | -------------------------------------------------------- | ------------------------------------------------------------------- |
+| `entity` | string                               | -                                                        | Entity ID of the media_player                                       |
+| `show`   | boolean \| [JSTemplate](#jstemplate) | `true` when media_player is either `playing` or `paused` | Manually configure when the media player widget should be displayed |
 
 ---
 

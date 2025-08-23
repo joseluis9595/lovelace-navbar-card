@@ -937,6 +937,16 @@ export class NavbarCard extends LitElement {
     // If the card is on desktop mode, don't show the media player
     if (this.isDesktop) return { visible: false };
 
+    // If the media player visibility is manually configured, use the configured value
+    if (this._config.media_player.show != null) {
+      const show = processTemplate<boolean>(
+        this._hass,
+        this,
+        this._config.media_player.show,
+      );
+      return { visible: show };
+    }
+
     // Get the media player state
     const mediaPlayerState =
       this._hass.states[this._config.media_player.entity];
