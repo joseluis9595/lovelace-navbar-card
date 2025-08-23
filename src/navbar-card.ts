@@ -595,27 +595,22 @@ export class NavbarCard extends LitElement {
                 ' ')
               : null;
 
-            const showLabelBackground = this._shouldShowLabelBackground(true);
             return html`<div
               class="
               popup-item 
               ${popupDirectionClassName}
               ${labelPositionClassName}
               ${isActive ? 'active' : ''}
-              "
+            "
               style="--index: ${index}"
               @click=${(e: MouseEvent) =>
-              this._handlePointerUp(e as PointerEvent, popupItem, true)}>
-              <div class="button ${showLabelBackground ? 'popuplabelbackground' : ''}">
-              ${this._getRouteIcon(popupItem, isActive, true)}
-              <md-ripple></md-ripple>
-              ${showLabelBackground && label
-                ? html`<div class="label">${label}</div>`
-                : html``}
-              </div>
-              ${!showLabelBackground && label
-              ? html`<div class="label">${label}</div>`
-              : html``}
+                this._handlePointerUp(e as PointerEvent, popupItem, true)}>
+              <div class="button ${this._shouldShowLabelBackground(true) ? 'popuplabelbackground' : ''}">
+                ${this._shouldShowLabelBackground(true)
+                  ? html`${this._getRouteIcon(popupItem, isActive, true)}<md-ripple></md-ripple></div>`
+                  : html`<md-ripple></md-ripple></div>${this._getRouteIcon(popupItem, isActive, true)}`
+                }
+              ${label ? html`<div class="label">${label}</div>` : html``}
               ${this._renderBadge(popupItem, false)}
             </div>`;
           })
