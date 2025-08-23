@@ -306,7 +306,7 @@ When enabled, this configuration displays a `media_player` widget above the `nav
 
 | Option   | Type   | Default | Description                   |
 | -------- | ------ | ------- | ----------------------------- |
-| `entity` | string | -       | Entity ID of the media_player |
+| `entity` | string \| [JSTemplate](#jstemplate) | -       | Entity ID of the media_player |
 
 ---
 
