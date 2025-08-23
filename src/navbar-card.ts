@@ -956,16 +956,32 @@ export class NavbarCard extends LitElement {
     // If the card is on desktop mode, don't show the media player
     if (this.isDesktop) return { visible: false };
 
+    // Support JSTemplate for entity
+    const entity = processTemplate<string>(
+      this._hass,
+      this,
+      this._config.media_player.entity,
+    );
+
     // Get the media player state
-    const mediaPlayerState =
-      this._hass.states[this._config.media_player.entity];
+    const mediaPlayerState = this._hass.states[entity];
 
     // If the media player does not exist, display the media player
     if (!mediaPlayerState)
       return {
         visible: true,
-        error: `Entity not found "${this._config.media_player.entity}"`,
+        error: `Entity not found "${entity}"`,
       };
+
+    // If the media player visibility is manually configured, use the configured value
+    if (this._config.media_player.show != null) {
+      const show = processTemplate<boolean>(
+        this._hass,
+        this,
+        this._config.media_player.show,
+      );
+      return { visible: show };
+    }
 
     return {
       visible: ['playing', 'paused'].includes(mediaPlayerState?.state),
@@ -979,8 +995,12 @@ export class NavbarCard extends LitElement {
     e.preventDefault();
     e.stopPropagation();
 
-    const mediaPlayerEntity = this._config?.media_player?.entity;
-    if (!mediaPlayerEntity) return;
+    const entity = processTemplate<string>(
+      this._hass,
+      this,
+      this._config?.media_player?.entity,
+    );
+    if (!entity) return;
 
     // Open home assistant more-info dialog for the media player
     fireDOMEvent(
@@ -991,7 +1011,7 @@ export class NavbarCard extends LitElement {
         composed: true,
       },
       {
-        entityId: mediaPlayerEntity,
+        entityId: entity,
       },
     );
   };
@@ -1002,10 +1022,14 @@ export class NavbarCard extends LitElement {
   private _handleMediaPlayerSkipNextClick = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const mediaPlayerEntity = this._config?.media_player?.entity;
-    if (!mediaPlayerEntity) return;
+    const entity = processTemplate<string>(
+      this._hass,
+      this,
+      this._config?.media_player?.entity,
+    );
+    if (!entity) return;
     this._hass.callService('media_player', 'media_next_track', {
-      entity_id: mediaPlayerEntity,
+      entity_id: entity,
     });
   };
 
@@ -1015,18 +1039,22 @@ export class NavbarCard extends LitElement {
   private _handleMediaPlayerPlayPauseClick = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const mediaPlayerEntity = this._config?.media_player?.entity;
-    if (!mediaPlayerEntity) return;
-    const mediaPlayerState = this._hass.states[mediaPlayerEntity];
+    const entity = processTemplate<string>(
+      this._hass,
+      this,
+      this._config?.media_player?.entity,
+    );
+    if (!entity) return;
+    const mediaPlayerState = this._hass.states[entity];
     if (!mediaPlayerState) return;
 
     if (mediaPlayerState.state === 'playing') {
       this._hass.callService('media_player', 'media_pause', {
-        entity_id: mediaPlayerEntity,
+        entity_id: entity,
       });
     } else {
       this._hass.callService('media_player', 'media_play', {
-        entity_id: mediaPlayerEntity,
+        entity_id: entity,
       });
     }
   };
@@ -1042,14 +1070,19 @@ export class NavbarCard extends LitElement {
     const { visible, error } = this._shouldShowMediaPlayer();
     if (!visible) return html``;
 
+    const entity = processTemplate<string>(
+      this._hass,
+      this,
+      this._config!.media_player!.entity,
+    );
+
     if (error) {
       return html`<ha-card class="media-player error">
         <ha-alert alert-type="error"> ${error} </ha-alert>
       </ha-card>`;
     }
 
-    const mediaPlayerState =
-      this._hass.states[this._config!.media_player!.entity];
+    const mediaPlayerState = this._hass.states[entity];
     const progress =
       mediaPlayerState.attributes.media_position != null
         ? mediaPlayerState.attributes.media_position /
