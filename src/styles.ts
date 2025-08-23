@@ -261,6 +261,10 @@ const ROUTE_STYLES = css`
     --mdc-icon-size: var(--navbar-route-icon-size);
   }
 
+  .icon.popuplabelbackground {
+    margin-right: 4px;
+  }
+
   .image {
     width: var(--navbar-route-image-size);
     height: var(--navbar-route-image-size);
