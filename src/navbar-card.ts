@@ -954,6 +954,16 @@ export class NavbarCard extends LitElement {
         error: `Entity not found "${entity}"`,
       };
 
+    // If the media player visibility is manually configured, use the configured value
+    if (this._config.media_player.show != null) {
+      const show = processTemplate<boolean>(
+        this._hass,
+        this,
+        this._config.media_player.show,
+      );
+      return { visible: show };
+    }
+
     return {
       visible: ['playing', 'paused'].includes(mediaPlayerState?.state),
     };
