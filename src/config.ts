@@ -89,7 +89,8 @@ export type AutoPaddingConfig = {
 
 // Media player configuration
 type MediaPlayerConfig = {
-  entity: string;
+  entity: JSTemplatable<string>;
+  show?: JSTemplatable<boolean>;
 };
 
 // Main card configuration
