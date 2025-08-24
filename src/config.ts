@@ -103,6 +103,7 @@ export type NavbarCardConfig = {
   };
   desktop?: {
     show_labels?: LabelVisibilityConfig;
+    show_popup_label_backgrounds?: boolean;
     min_width?: number;
     position?: DesktopPosition;
     hidden?: JSTemplatable<boolean>;
@@ -110,6 +111,7 @@ export type NavbarCardConfig = {
   mobile?: {
     mode?: 'floating' | 'docked';
     show_labels?: LabelVisibilityConfig;
+    show_popup_label_backgrounds?: boolean;
     hidden?: JSTemplatable<boolean>;
   };
   styles?: string;
@@ -129,11 +131,13 @@ export const DEFAULT_NAVBAR_CONFIG: NavbarCardConfig = {
   },
   desktop: {
     show_labels: false,
+    show_popup_label_backgrounds: false,
     min_width: 768,
     position: DesktopPosition.bottom,
   },
   mobile: {
     show_labels: false,
+    show_popup_label_backgrounds: false,
     mode: 'docked',
   },
 };
