@@ -599,18 +599,21 @@ export class NavbarCard extends LitElement {
               "
               style="--index: ${index}"
               @click=${(e: MouseEvent) =>
-              this._handlePointerUp(e as PointerEvent, popupItem, true)}>
-              <div class="button ${showLabelBackground ? 'popuplabelbackground' : ''}">
-              ${this._getRouteIcon(popupItem, isActive)}
-              <md-ripple></md-ripple>
-              ${this._renderBadge(popupItem, false)}
-              ${showLabelBackground && label
-                ? html`<div class="label">${label}</div>`
-                : html``}
+                this._handlePointerUp(e as PointerEvent, popupItem, true)}>
+              <div
+                class="button ${showLabelBackground
+                  ? 'popuplabelbackground'
+                  : ''}">
+                ${this._getRouteIcon(popupItem, isActive)}
+                <md-ripple></md-ripple>
+                ${this._renderBadge(popupItem, false)}
+                ${showLabelBackground && label
+                  ? html`<div class="label">${label}</div>`
+                  : html``}
               </div>
               ${!showLabelBackground && label
-              ? html`<div class="label">${label}</div>`
-              : html``}
+                ? html`<div class="label">${label}</div>`
+                : html``}
             </div>`;
           })
           .filter(x => x != null)}
