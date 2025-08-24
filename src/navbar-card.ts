@@ -603,6 +603,7 @@ export class NavbarCard extends LitElement {
               <div class="button ${showLabelBackground ? 'popuplabelbackground' : ''}">
               ${this._getRouteIcon(popupItem, isActive)}
               <md-ripple></md-ripple>
+              ${this._renderBadge(popupItem, false)}
               ${showLabelBackground && label
                 ? html`<div class="label">${label}</div>`
                 : html``}
@@ -610,7 +611,6 @@ export class NavbarCard extends LitElement {
               ${!showLabelBackground && label
               ? html`<div class="label">${label}</div>`
               : html``}
-              ${this._renderBadge(popupItem, false)}
             </div>`;
           })
           .filter(x => x != null)}
