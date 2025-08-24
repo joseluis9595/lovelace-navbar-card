@@ -449,13 +449,6 @@ const POPUP_STYLES = css`
     text-align: start;
   }
 
-  .popup-item.label-left .label.popuplabelbackground {
-    margin-left: 4px;
-  }
-  .popup-item.label-right .label.popuplabelbackground {
-    margin-left: 4px;
-  }
-
   .popup-item .button {
     width: 50px;
     height: 50px;
