@@ -594,9 +594,9 @@ export class NavbarCard extends LitElement {
               <div class="button">
                 ${this._getRouteIcon(popupItem, isActive)}
                 <md-ripple></md-ripple>
+                ${this._renderBadge(popupItem, false)}
               </div>
               ${label ? html`<div class="label">${label}</div>` : html``}
-              ${this._renderBadge(popupItem, false)}
             </div>`;
           })
           .filter(x => x != null)}
