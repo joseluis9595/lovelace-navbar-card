@@ -276,10 +276,6 @@ export class NavbarCard extends LitElement {
       this,
       route.image_selected,
     );
-  
-    const extraIconClass = this._shouldShowLabelBackground()
-      ? 'popuplabelbackground'
-      : '';
 
     return image
       ? html`<img
@@ -287,7 +283,7 @@ export class NavbarCard extends LitElement {
           src="${isActive && imageSelected ? imageSelected : image}"
           alt="${route.label || ''}" />`
       : html`<ha-icon
-          class="icon ${isActive ? 'active' : ''} ${extraIconClass}"
+          class="icon ${isActive ? 'active' : ''}"
           icon="${isActive && iconSelected ? iconSelected : icon}"></ha-icon>`;
   }
 
@@ -295,8 +291,7 @@ export class NavbarCard extends LitElement {
     const enabled = this.isDesktop
       ? this._config?.desktop?.show_popup_label_backgrounds
       : this._config?.mobile?.show_popup_label_backgrounds;
-    if (!enabled) return false;
-    return true;
+    return !!enabled;
   };
 
   private _renderBadge(route: RouteItem | PopupItem, isRouteActive: boolean) {
