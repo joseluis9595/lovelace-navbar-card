@@ -287,6 +287,13 @@ export class NavbarCard extends LitElement {
           icon="${isActive && iconSelected ? iconSelected : icon}"></ha-icon>`;
   }
 
+  private _shouldShowLabelBackground = (): boolean => {
+    const enabled = this.isDesktop
+      ? this._config?.desktop?.show_popup_label_backgrounds
+      : this._config?.mobile?.show_popup_label_backgrounds;
+    return !!enabled;
+  };
+
   private _renderBadge(route: RouteItem | PopupItem, isRouteActive: boolean) {
     // Early return if no badge configuration
     if (!route.badge) {
@@ -559,6 +566,7 @@ export class NavbarCard extends LitElement {
           ${popupDirectionClassName}
           ${labelPositionClassName}
           ${this.isDesktop ? 'desktop' : 'mobile'}
+          ${this._shouldShowLabelBackground() ? 'popuplabelbackground' : ''}
         "
         style="${style}">
         ${popupItems
@@ -581,22 +589,28 @@ export class NavbarCard extends LitElement {
                 ' ')
               : null;
 
+            const showLabelBackground = this._shouldShowLabelBackground();
             return html`<div
               class="
               popup-item 
               ${popupDirectionClassName}
               ${labelPositionClassName}
               ${isActive ? 'active' : ''}
-            "
+              "
               style="--index: ${index}"
               @click=${(e: MouseEvent) =>
-                this._handlePointerUp(e as PointerEvent, popupItem, true)}>
-              <div class="button">
-                ${this._getRouteIcon(popupItem, isActive)}
-                <md-ripple></md-ripple>
-                ${this._renderBadge(popupItem, false)}
+              this._handlePointerUp(e as PointerEvent, popupItem, true)}>
+              <div class="button ${showLabelBackground ? 'popuplabelbackground' : ''}">
+              ${this._getRouteIcon(popupItem, isActive)}
+              <md-ripple></md-ripple>
+              ${this._renderBadge(popupItem, false)}
+              ${showLabelBackground && label
+                ? html`<div class="label">${label}</div>`
+                : html``}
               </div>
-              ${label ? html`<div class="label">${label}</div>` : html``}
+              ${!showLabelBackground && label
+              ? html`<div class="label">${label}</div>`
+              : html``}
             </div>`;
           })
           .filter(x => x != null)}

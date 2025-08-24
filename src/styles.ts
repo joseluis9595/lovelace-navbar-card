@@ -383,6 +383,10 @@ const POPUP_STYLES = css`
   .navbar-popup.visible {
     opacity: 1;
   }
+  
+  .navbar-popup.popuplabelbackground {
+    padding-left: 0px;
+  }
 
   /****************************************/
   /* Popup item styles */
@@ -446,6 +450,14 @@ const POPUP_STYLES = css`
     height: 50px;
     background: var(--navbar-background-color);
     box-shadow: var(--navbar-box-shadow-desktop);
+  }
+
+  .popup-item .button.popuplabelbackground {
+    width: 100%;
+    padding-left: 8px;
+    padding-right: 8px;
+    flex-direction: row;
+    gap: 4px;
   }
 
   .popup-item.active {
