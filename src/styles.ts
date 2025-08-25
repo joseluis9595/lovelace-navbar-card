@@ -367,9 +367,17 @@ const POPUP_STYLES = css`
     margin-left: 32px;
   }
 
+  .navbar-popup.open-right.popuplabelbackground {
+    gap: 24px;
+  }
+
   .navbar-popup.open-left {
     flex-direction: row-reverse;
     margin-right: 32px;
+  }
+
+  .navbar-popup.open-left.popuplabelbackground {
+    gap: 24px;
   }
 
   .navbar-popup.label-right {
@@ -383,7 +391,7 @@ const POPUP_STYLES = css`
   .navbar-popup.visible {
     opacity: 1;
   }
-  
+
   .navbar-popup.popuplabelbackground {
     padding-left: 0px;
   }
