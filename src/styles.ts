@@ -470,21 +470,11 @@ const POPUP_STYLES = css`
  */
 export const getDefaultStyles = (): CSSResult | CSSResult[] => {
   // Mobile-first css styling
-  return [
-    css`
-      ${HOST_STYLES}
-    `,
-    css`
-      ${NAVBAR_CONTAINER_STYLES}
-    `,
-    css`
-      ${MEDIA_PLAYER_STYLES}
-    `,
-    css`
-      ${ROUTE_STYLES}
-    `,
-    css`
-      ${POPUP_STYLES}
-    `,
-  ];
+  return css`
+    ${HOST_STYLES}
+    ${NAVBAR_CONTAINER_STYLES}
+    ${MEDIA_PLAYER_STYLES}
+    ${ROUTE_STYLES}
+    ${POPUP_STYLES}
+  `;
 };
