@@ -1,3 +1,4 @@
+import { CSSResult } from 'lit';
 import {
   AutoPaddingConfig,
   DEFAULT_NAVBAR_CONFIG,
@@ -6,6 +7,8 @@ import {
 import { RippleElement } from './types';
 
 const DASHBOARD_PADDING_STYLE_ID = 'navbar-card-forced-padding-styles';
+const DEFAULT_STYLES_ID = 'navbar-card-default-styles';
+const USER_STYLES_ID = 'navbar-card-user-styles';
 
 /**
  * Get a list of user defined navbar-card templates
@@ -232,3 +235,42 @@ export function fireDOMEvent<T extends keyof EventConstructorMap = 'Event'>(
   node.dispatchEvent(event);
   return event;
 }
+
+/**
+ * Create a style element and append it to the shadow root of a given HTMLElement.
+ *
+ * @param root - The root element to append the style element to.
+ * @param id - The id of the style element.
+ * @param styles - The styles to append to the style element.
+ */
+const createStyleElement = (
+  root: HTMLElement,
+  id: string,
+  styles: CSSResult,
+) => {
+  const rootEl = root.shadowRoot;
+  let styleEl = rootEl?.querySelector<HTMLStyleElement>(`#${id}`);
+  if (styleEl) {
+    styleEl.remove();
+  }
+  styleEl = document.createElement('style');
+  styleEl.id = id;
+  styleEl.textContent = styles.cssText;
+  rootEl?.appendChild(styleEl);
+};
+
+/**
+ * Inject styles into the shadow root of a given HTMLElement.
+ *
+ * @param root - The root element to inject the styles into.
+ * @param styles - The styles to inject.
+ */
+export const injectStyles = (
+  root: HTMLElement,
+  defaultStyles: CSSResult,
+  userStyles: CSSResult,
+) => {
+  console.log('••••• injectStyles');
+  createStyleElement(root, DEFAULT_STYLES_ID, defaultStyles);
+  createStyleElement(root, USER_STYLES_ID, userStyles);
+};

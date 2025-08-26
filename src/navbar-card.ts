@@ -32,6 +32,7 @@ import {
   forceOpenEditMode,
   forceResetRipple,
   getNavbarTemplates,
+  injectStyles,
   removeDashboardPadding,
 } from './dom-utils';
 import { getDefaultStyles } from './styles';
@@ -111,10 +112,12 @@ export class NavbarCard extends LitElement {
     this._inPreviewMode =
       this.parentElement?.closest('.card > .preview') != null;
 
-    // Manually append styles to the card to prevent unnecessary style re-rendering
-    const style = document.createElement('style');
-    style.textContent = this.generateCustomStyles().cssText;
-    this.shadowRoot?.appendChild(style);
+    // Inject styles into the card to prevent unnecessary style re-rendering
+    injectStyles(
+      this,
+      getDefaultStyles(),
+      this._config?.styles ? unsafeCSS(this._config.styles) : css``,
+    );
 
     // Force dashboard padding
     forceDashboardPadding({
@@ -1185,27 +1188,6 @@ export class NavbarCard extends LitElement {
         </ha-card>
       </div>
       ${this._popup}
-    `;
-  }
-
-  /**********************************************************************/
-  /* Styles */
-  /**********************************************************************/
-
-  /**
-   * Dynamically apply user-provided styles
-   */
-  private generateCustomStyles(): CSSResult {
-    const userStyles = this._config?.styles
-      ? unsafeCSS(this._config.styles)
-      : css``;
-
-    // Combine default styles and user styles
-    return css`
-      ${getDefaultStyles()}
-      :host {
-        ${userStyles}
-      }
     `;
   }
 }
