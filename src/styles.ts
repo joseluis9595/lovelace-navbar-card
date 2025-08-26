@@ -31,7 +31,7 @@ const NAVBAR_CONTAINER_STYLES = css`
     z-index: var(--navbar-z-index);
   }
 
-  .navbar ha-card {
+  ha-card {
     background: var(--navbar-background-color);
     border-radius: 0px;
     box-shadow: var(--navbar-box-shadow);
@@ -43,7 +43,7 @@ const NAVBAR_CONTAINER_STYLES = css`
     gap: 10px;
   }
 
-  .navbar .navbar-card {
+  .navbar-card {
     justify-content: space-between;
     width: 100%;
   }
@@ -66,15 +66,12 @@ const NAVBAR_CONTAINER_STYLES = css`
   }
 
   /* Mobile floating style */
-  .navbar.mobile.floating .navbar-card {
+  .navbar-card.mobile.floating {
     border: none !important;
     box-shadow: var(--navbar-box-shadow-mobile-floating) !important;
     border-radius: var(--navbar-border-radius) !important;
-  }
-
-  .navbar.mobile.floating:not(.edit-mode) .navbar-card {
-    margin-bottom: 10px !important;
-    width: 90% !important;
+    margin-bottom: 10px;
+    width: 90%;
   }
 
   /* Desktop mode styles */
@@ -84,7 +81,7 @@ const NAVBAR_CONTAINER_STYLES = css`
     --navbar-route-icon-size: 28px;
   }
 
-  .navbar.desktop ha-card {
+  .navbar-card.desktop {
     border-radius: var(--navbar-border-radius);
     box-shadow: var(--navbar-box-shadow-desktop);
   }
@@ -98,7 +95,7 @@ const NAVBAR_CONTAINER_STYLES = css`
     transform: translate(-50%, 0);
   }
 
-  .navbar.desktop.bottom .navbar-card {
+  .navbar-card.desktop.bottom {
     flex-direction: row;
   }
 
@@ -111,7 +108,7 @@ const NAVBAR_CONTAINER_STYLES = css`
     transform: translate(-50%, 0);
   }
 
-  .navbar.desktop.top .navbar-card {
+  .navbar-card.desktop.top {
     flex-direction: row;
   }
 
@@ -124,7 +121,7 @@ const NAVBAR_CONTAINER_STYLES = css`
     transform: translate(0, -50%);
   }
 
-  .navbar.desktop.left .navbar-card {
+  .navbar-card.desktop.left {
     flex-direction: column;
   }
 
@@ -137,21 +134,21 @@ const NAVBAR_CONTAINER_STYLES = css`
     transform: translate(0, -50%);
   }
 
-  .navbar.desktop.right .navbar-card {
+  .navbar-card.desktop.right {
     flex-direction: column;
   }
 `;
 
 const MEDIA_PLAYER_STYLES = css`
-  .navbar .media-player.error {
+  .media-player.error {
     padding: 0px !important;
   }
 
-  .navbar .media-player.error ha-alert {
+  .media-player.error ha-alert {
     width: 100%;
   }
 
-  .navbar .media-player {
+  .media-player {
     cursor: pointer;
     width: 90%;
     overflow: hidden;
@@ -163,7 +160,7 @@ const MEDIA_PLAYER_STYLES = css`
     flex-direction: row;
   }
 
-  .navbar .media-player .media-player-bg {
+  .media-player .media-player-bg {
     position: absolute;
     inset: 0;
     background-size: cover;
@@ -173,7 +170,7 @@ const MEDIA_PLAYER_STYLES = css`
     z-index: 0;
   }
 
-  .navbar .media-player .media-player-image {
+  .media-player .media-player-image {
     width: 48px;
     height: 48px;
     border-radius: 14px;
@@ -181,32 +178,32 @@ const MEDIA_PLAYER_STYLES = css`
     margin-right: 6px;
   }
 
-  .navbar .media-player .media-player-info {
+  .media-player .media-player-info {
     display: flex;
     flex-direction: column;
     flex: 1;
   }
 
-  .navbar .media-player .media-player-title {
+  .media-player .media-player-title {
     font-size: 14px;
     font-weight: 500;
   }
 
-  .navbar .media-player .media-player-artist {
+  .media-player .media-player-artist {
     font-size: 12px;
     color: var(--secondary-text-color);
   }
 
-  .navbar .media-player .media-player-button {
+  .media-player .media-player-button {
     width: 38px;
     --ha-button-height: 38px;
     --ha-button-border-radius: 999px;
   }
 
-  .navbar .media-player .media-player-button.media-player-button-play-pause {
+  .media-player .media-player-button.media-player-button-play-pause {
   }
 
-  .navbar .media-player .media-player-progress-bar {
+  .media-player .media-player-progress-bar {
     position: absolute;
     bottom: 0;
     left: 0;
@@ -214,7 +211,7 @@ const MEDIA_PLAYER_STYLES = css`
     height: 4px;
   }
 
-  .navbar .media-player .media-player-progress-bar-fill {
+  .media-player .media-player-progress-bar-fill {
     background-color: var(--navbar-primary-color);
     height: 100%;
   }
@@ -302,11 +299,11 @@ const ROUTE_STYLES = css`
   }
 
   /* Desktop mode styles */
-  .navbar.desktop .route {
+  .desktop .route {
     height: 60px;
     width: 60px;
   }
-  .navbar.desktop .button {
+  .desktop .button {
     flex: unset;
     height: 100%;
   }
@@ -468,7 +465,7 @@ const POPUP_STYLES = css`
  * styles(), so that we can prioritize user custom styles over the default
  * ones defined in this card
  */
-export const getDefaultStyles = (): CSSResult | CSSResult[] => {
+export const getDefaultStyles = (): CSSResult => {
   // Mobile-first css styling
   return css`
     ${HOST_STYLES}
