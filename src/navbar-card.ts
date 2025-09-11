@@ -543,7 +543,7 @@ export class NavbarCard extends LitElement {
    * Open the popup menu for a given popupConfig and anchor element.
    */
   private _openPopup = (route: RouteItem, target: HTMLElement) => {
-        const popupItems = processTemplate<PopupItem[]>(
+    const popupItems = processTemplate<PopupItem[]>(
       this._hass,
       this,
       route.popup,
