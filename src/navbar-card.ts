@@ -543,7 +543,19 @@ export class NavbarCard extends LitElement {
    * Open the popup menu for a given popupConfig and anchor element.
    */
   private _openPopup = (route: RouteItem, target: HTMLElement) => {
-    const popupItems = route.popup ?? route.submenu;
+        const popupItems = processTemplate<PopupItem[]>(
+      this._hass,
+      this,
+      route.popup,
+    ) ?? route.popup ?? route.submenu;
+
+    if (typeof popupItems === 'string') {
+      console.warn(
+        `[navbar-card] Invalid JSTemplate provided for route: ${route.label}`,
+      );
+      return;
+    }
+
     if (!popupItems || popupItems.length === 0) {
       console.warn(
         `[navbar-card] No popup items provided for route: ${route.label}`,
