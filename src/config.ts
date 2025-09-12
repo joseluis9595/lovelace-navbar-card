@@ -7,27 +7,40 @@ export enum DesktopPosition {
   right = 'right',
 }
 
+export enum NavbarCustomActions {
+  openPopup = 'open-popup',
+  navigateBack = 'navigate-back',
+  showNotifications = 'show-notifications',
+  quickbar = 'quickbar',
+  openEditMode = 'open-edit-mode',
+  toggleMenu = 'toggle-menu',
+}
+
 // Custom navbar-card actions
 type PopupActionConfig = {
-  action: 'open-popup';
+  action: NavbarCustomActions.openPopup;
+};
+type ToggleMenuActionConfig = {
+  action: NavbarCustomActions.toggleMenu;
 };
 type NavigateBackActionConfig = {
-  action: 'navigate-back';
+  action: NavbarCustomActions.navigateBack;
 };
 type ShowNotificationsActionConfig = {
-  action: 'show-notifications';
+  action: NavbarCustomActions.showNotifications;
 };
 export type QuickbarActionConfig = {
-  action: 'quickbar';
+  action: NavbarCustomActions.quickbar;
   mode?: 'commands' | 'devices' | 'entities';
 };
 type OpenEditModeActionConfig = {
-  action: 'open-edit-mode';
+  action: NavbarCustomActions.openEditMode;
 };
 
 // Extend ActionConfig to include our custom popup action
 export type ExtendedActionConfig =
   | ActionConfig
+  | ToggleMenuActionConfig
   | PopupActionConfig
   | NavigateBackActionConfig
   | ShowNotificationsActionConfig
@@ -93,6 +106,9 @@ type MediaPlayerConfig = {
   show?: JSTemplatable<boolean>;
 };
 
+// Mobile mode configuration
+export type MobileMode = 'floating' | 'docked';
+
 // Main card configuration
 export type NavbarCardConfig = {
   routes: RouteItem[];
@@ -109,7 +125,7 @@ export type NavbarCardConfig = {
     hidden?: JSTemplatable<boolean>;
   };
   mobile?: {
-    mode?: 'floating' | 'docked';
+    mode?: MobileMode;
     show_labels?: LabelVisibilityConfig;
     show_popup_label_backgrounds?: boolean;
     hidden?: JSTemplatable<boolean>;
@@ -164,7 +180,7 @@ export const STUB_CONFIG: NavbarCardConfig = {
       icon: 'mdi:dots-horizontal',
       label: 'More',
       tap_action: {
-        action: 'open-popup',
+        action: NavbarCustomActions.openPopup,
       },
       popup: [
         { icon: 'mdi:cog', url: '/config/dashboard' },

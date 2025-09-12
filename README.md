@@ -216,14 +216,14 @@ For each route, a popup menu can be configured, to display a popup when clicked.
 
 You can easily customize some properties of the navbar-card by writing your own JavaScript rules. To do this, you simply wrap the value of the field that supports JSTemplates in `[[[` and `]]]`, then write the JavaScript code that determines the property's value.
 
+> **Note**: `[[[` and `]]]` are only needed in the YAML editor. For the visual editor, simply write plain javascript in the code block without the template wrappers.
+
 Apart from using plain javascript, you can access some predefined variables:
 
 - `states` -> Contains the global state of all entities in HomeAssistant. To get the state of a specific entity, use: `states['entity_type.your_entity'].state`.
 - `user` -> Information about the current logged user.
 - `navbar` -> Internal state of the navbar-card. Accessible fields are:
   - `isDesktop` -> Boolean indicating whether the card is in its desktop variant or not.
-
-> **Tip**: You can use `console.log` in your JSTemplate to help debug your HomeAssistant states.
 
 Below is an example using JSTemplates for displaying a route only for one user, and a label indicating the number of lights currently on:
 
@@ -253,6 +253,8 @@ routes:
     hidden: |
       [[[ return user.name != "jose"; ]]]
 ```
+
+> **Tip**: You can use `console.log` in your JSTemplate to help debug your HomeAssistant states.
 
 ---
 

@@ -1,8 +1,8 @@
 import { CSSResult } from 'lit';
 import {
+  NavbarCardConfig,
   AutoPaddingConfig,
   DEFAULT_NAVBAR_CONFIG,
-  NavbarCardConfig,
 } from './config';
 import { RippleElement } from './types';
 
@@ -270,7 +270,6 @@ export const injectStyles = (
   defaultStyles: CSSResult,
   userStyles: CSSResult,
 ) => {
-  console.log('••••• injectStyles');
   createStyleElement(root, DEFAULT_STYLES_ID, defaultStyles);
   createStyleElement(root, USER_STYLES_ID, userStyles);
 };

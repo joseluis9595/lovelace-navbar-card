@@ -468,6 +468,205 @@ const POPUP_STYLES = css`
   }
 `;
 
+const EDITOR_STYLES = css`
+  .navbar-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    ha-textfield {
+      width: 100%;
+    }
+
+    ha-button {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .navbar-template-toggle-button {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 0.5em;
+      padding: 0px !important;
+      border-radius: 99px;
+      font-size: 0.85em;
+      font-weight: 600;
+      border: 0px;
+      padding: 4px 8px !important;
+      cursor: pointer;
+    }
+  }
+  .editor-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    padding: 12px;
+  }
+  .editor-row {
+    gap: 6px;
+    display: flex;
+    flex-direction: row;
+  }
+  .editor-row-item {
+    flex: 1;
+
+    ha-textfield {
+      width: 100%;
+    }
+  }
+  @media (max-width: 600px) {
+    .editor-row {
+      flex-direction: column !important;
+      gap: 0.5em;
+    }
+    .route-grid {
+      grid-template-columns: 1fr !important;
+    }
+    .editor-row-item {
+      width: 100%;
+    }
+  }
+  .editor-label {
+    font-weight: 500;
+  }
+  .routes-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25em;
+  }
+  ha-expansion-panel {
+    h4[slot='header'],
+    h5[slot='header'],
+    h6[slot='header'] {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 0.7em;
+      padding: 0.2em 0.5em 0.2em 0;
+      height: 40px;
+      margin: 0px !important;
+      margin-left: 1em;
+
+      .expansion-panel-title {
+        flex: 1;
+      }
+    }
+  }
+  .route-header {
+    display: flex;
+    align-items: center;
+    gap: 0.7em;
+    padding: 0.2em 0.5em 0.2em 0;
+  }
+  .route-header-title {
+    font-weight: bold;
+    color: var(--primary-color);
+  }
+  .route-header-summary {
+    flex: 1;
+    opacity: 0.7;
+    font-size: 0.95em;
+    display: flex;
+    align-items: center;
+    gap: 0.3em;
+  }
+  .route-header-image {
+    height: 1.2em;
+    vertical-align: middle;
+  }
+  .route-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    background: var(--primary-background-color);
+    border-radius: 8px;
+    padding: 1em 1.2em 1.2em 1.2em;
+    margin: 1em 0em;
+  }
+  .popup-controls {
+    display: flex;
+    gap: 0.5em;
+    margin-bottom: 1em;
+  }
+  .route-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1em;
+  }
+  .route-divider {
+    margin: 1.5em 0 1em 0;
+    border: none;
+    border-top: 1px solid #e0e0e0;
+    height: 1px;
+    background: none;
+  }
+  .add-popup-btn {
+    margin-top: 1em;
+  }
+  .template-editor-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3em;
+    margin-bottom: 0.7em;
+  }
+  .template-editor-helper {
+    font-size: 0.93em;
+    color: var(--secondary-text-color, #888);
+  }
+  .quickbar-mode-container {
+    display: flex;
+    flex-direction: column;
+  }
+  .templatable-field-container {
+    display: flex;
+    flex-direction: row;
+  }
+  .templatable-field-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5em;
+  }
+  .templatable-field-header-label {
+    flex: 1;
+  }
+`;
+
+// Drag-and-drop styles for routes editor
+export const ROUTES_EDITOR_DND_STYLES = css`
+  .draggable-route {
+    border: 1.5px dashed transparent;
+    border-radius: 8px;
+    transition:
+      border-color 0.2s,
+      background 0.2s;
+    background: none;
+    position: relative;
+  }
+  .draggable-route.drag-over {
+    border-color: var(--primary-color, #03a9f4);
+    background: rgba(3, 169, 244, 0.08);
+  }
+  .draggable-route.dragging {
+    opacity: 0.6;
+    background: #eee;
+    z-index: 2;
+  }
+  .drag-handle {
+    cursor: grab;
+    margin-right: 8px;
+    color: var(--primary-color, #03a9f4);
+    vertical-align: middle;
+    display: inline-flex;
+    align-items: center;
+  }
+  .delete-btn ha-icon {
+    color: var(--error-color, #db4437) !important;
+  }
+`;
+
 /**
  * Custom function to apply default styles instead of using lit's static
  * styles(), so that we can prioritize user custom styles over the default
@@ -481,5 +680,12 @@ export const getDefaultStyles = (): CSSResult => {
     ${MEDIA_PLAYER_STYLES}
     ${ROUTE_STYLES}
     ${POPUP_STYLES}
+  `;
+};
+
+export const getEditorStyles = (): CSSResult => {
+  return css`
+    ${EDITOR_STYLES}
+    ${ROUTES_EDITOR_DND_STYLES}
   `;
 };
