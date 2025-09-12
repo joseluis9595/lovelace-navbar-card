@@ -128,7 +128,7 @@ Routes represents an array of clickable icons that redirects to a given path. Ea
 | `tap_action`        | [tap_action](#actions)               | -           | Custom tap action configuration.                                                                                                                           |
 | `hold_action`       | [hold_action](#actions)              | -           | Custom hold action configuration.                                                                                                                          |
 | `double_tap_action` | [double_tap_action](#actions)        | -           | Custom double_tap action configuration.                                                                                                                    |
-| `popup`             | [Popup items](#popup-items)          | -           | List of routes to display in a popup menu                                                                                                                  |
+| `popup`             | [Popup items](#popup-items)\| [JSTemplate](#jstemplate)          | -           | List of routes to display in a popup menu                                                                                                                  |
 | `hidden`            | boolean \| [JSTemplate](#jstemplate) | -           | Controls whether to render this route or not                                                                                                               |
 | `selected`          | boolean \| [JSTemplate](#jstemplate) | -           | Controls whether to display this route as selected or not. If not defined, the selected status will be computed as `route.url == window.location.pathname` |
 
@@ -221,6 +221,24 @@ For each route, a popup menu can be configured, to display a popup when clicked.
 | `selected`       | boolean \| [JSTemplate](#jstemplate) | -           | Controls whether to display this item as selected or not. If not defined, the selected status will be computed as `item.url == window.location.pathname` |
 
 > **Note**: `url` is required unless `tap_action` is present. If `tap_action` is defined, `url` is ignored.
+
+In addition to the default annotation, we also support using JSTemplate to define popup items.
+For example, you can dynamically define items based on the areas in your Home Assistant environment:
+
+```yaml
+- icon: mdi:sofa-outline
+  icon_selected: mdi:sofa
+  label: Rooms
+  tap_action: { action: open-popup }
+  popup: |
+    [[[
+      return Object.values(hass.areas).map(area => ({
+        label: area.name,
+        url: "/d-bubble/home#" + area.area_id,
+        icon: area.icon
+      }));
+    ]]]
+```
 
 #### JSTemplate
 
