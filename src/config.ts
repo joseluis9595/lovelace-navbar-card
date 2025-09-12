@@ -14,6 +14,7 @@ export enum NavbarCustomActions {
   quickbar = 'quickbar',
   openEditMode = 'open-edit-mode',
   toggleMenu = 'toggle-menu',
+  customJSAction = 'custom-js-action',
 }
 
 // Custom navbar-card actions
@@ -36,6 +37,10 @@ export type QuickbarActionConfig = {
 type OpenEditModeActionConfig = {
   action: NavbarCustomActions.openEditMode;
 };
+type CustomJSActionConfig = {
+  action: NavbarCustomActions.customJSAction;
+  code: JSTemplate;
+};
 
 // Extend ActionConfig to include our custom popup action
 export type ExtendedActionConfig =
@@ -45,7 +50,8 @@ export type ExtendedActionConfig =
   | NavigateBackActionConfig
   | ShowNotificationsActionConfig
   | QuickbarActionConfig
-  | OpenEditModeActionConfig;
+  | OpenEditModeActionConfig
+  | CustomJSActionConfig;
 
 type JSTemplate = string;
 type JSTemplatable<T> = JSTemplate | T;

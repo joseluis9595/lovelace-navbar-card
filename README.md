@@ -148,14 +148,15 @@ Routes represents an array of clickable icons that redirects to a given path. Ea
 
 Apart from the [standard Home Assistant actions](https://www.home-assistant.io/dashboards/actions/) (navigate, call-service, etc.), `navbar-card` supports some additional custom actions:
 
-| Action               | Description                                                | Required Parameters                     |
-| -------------------- | ---------------------------------------------------------- | --------------------------------------- |
-| `open-popup`         | Opens the popup menu defined in the route                  | None                                    |
-| `toggle-menu`        | Opens the native HA side menu                              | None                                    |
-| `show-notifications` | Opens the native HA notifications drawer                   | None                                    |
-| `quickbar`           | Opens the native HA quickbar                               | `mode: entities \| commands \| devices` |
-| `navigate-back`      | Navigates back to the previous page in the browser history | None                                    |
-| `open-edit-mode`     | Opens the current dashboard in edit mode                   | None                                    |
+| Action               | Description                                                | Required Parameters                           |
+| -------------------- | ---------------------------------------------------------- | --------------------------------------------- |
+| `open-popup`         | Opens the popup menu defined in the route                  | -                                             |
+| `toggle-menu`        | Opens the native HA side menu                              | -                                             |
+| `show-notifications` | Opens the native HA notifications drawer                   | -                                             |
+| `quickbar`           | Opens the native HA quickbar                               | `mode`: `entities` \| `commands` \| `devices` |
+| `navigate-back`      | Navigates back to the previous page in the browser history | -                                             |
+| `open-edit-mode`     | Opens the current dashboard in edit mode                   | -                                             |
+| `custom-js-action`   | Allows the user to execute custom Javascript code          | `code`: JS code                               |
 
 Example:
 
@@ -173,6 +174,15 @@ routes:
       mode: entities
     hold_action:
       action: toggle-menu # Will open the native HA side menu
+  - icon: mdi:menu
+    tap_action:
+      action: custom-js-action
+      code: |
+        [[[
+          const newURL = window.location.href + "#bubble-popup";
+          history.replaceState(null, "", newURL);
+          window.dispatchEvent(new Event('location-changed'));
+        ]]]
   - icon: mdi:pencil
     tap_action:
       action: open-edit-mode
@@ -264,13 +274,13 @@ Specific configuration for desktop mode.
 
 <img width="400" height="120" alt="navbar-card_desktop" src="https://github.com/user-attachments/assets/3f110a2d-3078-41ff-b357-459c69785fe8" />
 
-| Name          | Type                                     | Default  | Description                                                                |
-| ------------- | ---------------------------------------- | -------- | -------------------------------------------------------------------------- |
-| `show_labels` | boolean \| `popup_only` \| `routes_only` | `false`  | Whether or not to display labels under each route                          |
-| `show_popup_label_backgrounds` | boolean | `false`  | Whether or not to display label backgrounds for popup items                          |
-| `min_width`   | number                                   | `768`    | Screen size from which the navbar will be displayed as its desktop variant |
-| `position`    | `top` \| `bottom` \| `left` \| `right`   | `bottom` | Position of the navbar on desktop devices                                  |
-| `hidden`      | boolean \| [JSTemplate](#jstemplate)     | `false`  | Set to true to hide the navbar on desktop devices                          |
+| Name                           | Type                                     | Default  | Description                                                                |
+| ------------------------------ | ---------------------------------------- | -------- | -------------------------------------------------------------------------- |
+| `show_labels`                  | boolean \| `popup_only` \| `routes_only` | `false`  | Whether or not to display labels under each route                          |
+| `show_popup_label_backgrounds` | boolean                                  | `false`  | Whether or not to display label backgrounds for popup items                |
+| `min_width`                    | number                                   | `768`    | Screen size from which the navbar will be displayed as its desktop variant |
+| `position`                     | `top` \| `bottom` \| `left` \| `right`   | `bottom` | Position of the navbar on desktop devices                                  |
+| `hidden`                       | boolean \| [JSTemplate](#jstemplate)     | `false`  | Set to true to hide the navbar on desktop devices                          |
 
 <img width="200" alt="Popup labels turned off for desktop" src="https://github.com/user-attachments/assets/33516186-be1e-48de-9f25-808851f302b6" />
 <img width="200" alt="Popup labels turned on for desktop" src="https://github.com/user-attachments/assets/d8453509-9c67-4e5d-949f-2848630346d6" />
@@ -283,12 +293,12 @@ Specific configuration for mobile mode.
 
 <img width="785" height="108" alt="navbar-card_mobile" src="https://github.com/user-attachments/assets/b8134d65-d237-412a-9c0b-dfc9c009de46" />
 
-| Name          | Type                                     | Default  | Description                                                                                                             |
-| ------------- | ---------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `show_labels` | boolean \| `popup_only` \| `routes_only` | `false`  | Whether or not to display labels under each route                                                                       |
-| `show_popup_label_backgrounds` | boolean | `false`  | Whether or not to display label backgrounds for popup items                          |
-| `hidden`      | boolean \| [JSTemplate](#jstemplate)     | `false`  | Set to true to hide the navbar on mobile devices                                                                        |
-| `mode`        | `docked` \| `floating`                   | `docked` | Choose visualization mode on mobile devices. `docked` for default experience, `floating` for desktop-like visualization |
+| Name                           | Type                                     | Default  | Description                                                                                                             |
+| ------------------------------ | ---------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `show_labels`                  | boolean \| `popup_only` \| `routes_only` | `false`  | Whether or not to display labels under each route                                                                       |
+| `show_popup_label_backgrounds` | boolean                                  | `false`  | Whether or not to display label backgrounds for popup items                                                             |
+| `hidden`                       | boolean \| [JSTemplate](#jstemplate)     | `false`  | Set to true to hide the navbar on mobile devices                                                                        |
+| `mode`                         | `docked` \| `floating`                   | `docked` | Choose visualization mode on mobile devices. `docked` for default experience, `floating` for desktop-like visualization |
 
 <img width="200" alt="Popup labels turned off for mobile" src="https://github.com/user-attachments/assets/0547373e-283c-4233-b8d7-fd0928f0af4b" />
 <img width="200" alt="Popup labels turned on for mobile" src="https://github.com/user-attachments/assets/aaa6c424-1f44-46a5-9a20-2eb08d5d8eb4" />

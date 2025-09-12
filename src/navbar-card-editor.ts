@@ -1014,6 +1014,7 @@ export class NavbarCardEditor extends LitElement {
       { label: 'Toggle Menu', value: NavbarCustomActions.toggleMenu },
       { label: 'Quickbar', value: NavbarCustomActions.quickbar },
       { label: 'Open Edit Mode', value: NavbarCustomActions.openEditMode },
+      { label: 'Custom JS Action', value: NavbarCustomActions.customJSAction },
       {
         label: 'Show Notifications',
         value: NavbarCustomActions.showNotifications,
@@ -1115,6 +1116,13 @@ export class NavbarCardEditor extends LitElement {
                   </ha-formfield>
                 </div>
               `
+            : html``}
+          ${selected === NavbarCustomActions.customJSAction
+            ? this.makeTemplateEditor({
+                label: 'Code',
+                configKey: `${options.configKey}.code` as any,
+                helper: GENERIC_JS_TEMPLATE_HELPER,
+              })
             : html``}
           ${selected === 'hass_action'
             ? html`
