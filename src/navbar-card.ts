@@ -909,6 +909,13 @@ export class NavbarCard extends LitElement {
         forceOpenEditMode();
         break;
 
+      case NavbarCustomActions.customJSAction:
+        if (this._shouldTriggerHaptic(actionType)) {
+          hapticFeedback();
+        }
+        processTemplate<string>(this._hass, this, action.code);
+        break;
+
       default:
         if (action != null) {
           if (this._shouldTriggerHaptic(actionType)) {
