@@ -28,9 +28,9 @@ export type RippleElement = Element & {
  */
 export type DotNotationKeys<T> = T extends object
   ? {
-      [K in keyof T]: T[K] extends any[]
-        ? `${K}`
-        : `${K}` | `${K}.${DotNotationKeys<T[K]>}`;
+      [K in keyof T]: T[K] extends unknown[]
+        ? `${string & K}`
+        : `${string & K}` | `${string & K}.${DotNotationKeys<T[K]>}`;
     }[keyof T]
   : never;
 
@@ -42,7 +42,9 @@ export type NestedType<
   K extends DotNotationKeys<T>,
 > = K extends `${infer FirstKey}.${infer RestKeys}`
   ? FirstKey extends keyof T
-    ? NestedType<T[FirstKey], RestKeys>
+    ? RestKeys extends DotNotationKeys<T[FirstKey]>
+      ? NestedType<T[FirstKey], RestKeys>
+      : never
     : never
   : K extends keyof T
     ? T[K]
@@ -84,8 +86,8 @@ export function genericSetProperty<T, K extends DotNotationKeys<T>>(
   const copy = Array.isArray(obj) ? [...obj] : { ...obj };
 
   // Pointers for both current and original objects
-  let currentObj: any = copy;
-  let originalObj: any = obj;
+  let currentObj: Record<string, unknown> = copy as Record<string, unknown>;
+  let originalObj: Record<string, unknown> = obj as Record<string, unknown>;
 
   // Iterate through each entry
   for (let i = 0; i < paths.length; i++) {
@@ -103,11 +105,11 @@ export function genericSetProperty<T, K extends DotNotationKeys<T>>(
     } else {
       // Copy each level
       currentObj[p] = Array.isArray(originalObj[p])
-        ? [...originalObj[p]]
-        : { ...originalObj[p] };
+        ? [...(originalObj[p] as unknown[])]
+        : { ...(originalObj[p] as Record<string, unknown>) };
     }
-    currentObj = currentObj[p];
-    originalObj = originalObj[p] ?? {};
+    currentObj = currentObj[p] as Record<string, unknown>;
+    originalObj = (originalObj[p] as Record<string, unknown>) ?? {};
   }
 
   // Return the modified copy
