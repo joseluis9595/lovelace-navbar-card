@@ -166,7 +166,7 @@ const MEDIA_PLAYER_STYLES = css`
     background-size: cover;
     background-position: center;
     filter: blur(20px);
-    opacity: 0.03;
+    opacity: 0.3;
     z-index: 0;
   }
 

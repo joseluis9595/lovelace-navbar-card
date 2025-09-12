@@ -1102,8 +1102,11 @@ export class NavbarCard extends LitElement {
       <ha-card class="media-player" @click=${this._handleMediaPlayerClick}>
         <div
           class="media-player-bg"
-          style="background-image: url(${mediaPlayerState.attributes
-            .entity_picture});"></div>
+          style=${this._config?.media_player?.album_cover_background
+            ? `background-image: url(${
+                mediaPlayerState.attributes.entity_picture
+              });`
+            : ''}></div>
         ${progress != null
           ? html` <div class="media-player-progress-bar">
               <div

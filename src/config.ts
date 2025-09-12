@@ -110,6 +110,7 @@ export type AutoPaddingConfig = {
 type MediaPlayerConfig = {
   entity: JSTemplatable<string>;
   show?: JSTemplatable<boolean>;
+  album_cover_background?: boolean;
 };
 
 // Mobile mode configuration
