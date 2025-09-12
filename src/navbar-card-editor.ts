@@ -304,10 +304,15 @@ export class NavbarCardEditor extends LitElement {
                       label: '',
                       ...rest,
                     })
-                  : this.makeTextInput({
-                      label: '',
-                      ...rest,
-                    })}
+                  : options.inputType === 'entity'
+                    ? this.makeEntityPicker({
+                        label: '',
+                        ...rest,
+                      })
+                    : this.makeTextInput({
+                        label: '',
+                        ...rest,
+                      })}
       </div>
     `;
   }
@@ -818,10 +823,16 @@ export class NavbarCardEditor extends LitElement {
         </h4>
         <div class="editor-section">
           ${this.makeTemplatable({
+            inputType: 'entity',
             label: 'Media player entity',
             configKey: 'media_player.entity',
-            inputType: 'entity',
             includeDomains: ['media_player'],
+          })}
+          ${this.makeSwitch({
+            label: 'Show album cover background',
+            configKey: 'media_player.album_cover_background',
+            defaultValue:
+              DEFAULT_NAVBAR_CONFIG.media_player?.album_cover_background,
           })}
           ${this.makeTemplateEditor({
             // TODO JLAQ maybe replace with a templateSwitchEditor
