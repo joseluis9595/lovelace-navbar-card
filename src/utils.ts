@@ -131,6 +131,19 @@ export const cleanTemplate = (template: unknown): string => {
 };
 
 /**
+ * Checks if a template string is wrapped in navbar-card template delimiters ([[[ and ]]]).
+ *
+ * @param template - The template string to check.
+ * @returns True if the template string is wrapped in navbar-card template delimiters, false otherwise.
+ */
+export const isTemplate = (template: unknown): boolean => {
+  if (typeof template === 'string') {
+    return template.trim().startsWith('[[[') && template.trim().endsWith(']]]');
+  }
+  return false;
+};
+
+/**
  * Adds navbar-card template delimiters ([[[ and ]]]), if not already present, to a template string.
  *
  * @param template - The template string to wrap (e.g., 'some code').

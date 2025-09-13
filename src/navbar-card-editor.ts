@@ -24,6 +24,7 @@ import {
 import {
   cleanTemplate,
   deepMergeKeepArrays,
+  isTemplate,
   processTemplate,
   wrapTemplate,
 } from './utils';
@@ -394,6 +395,7 @@ export class NavbarCardEditor extends LitElement {
     popupIndex?: number,
   ) {
     const isPopup = popupIndex != null;
+    const usesTemplate = !isPopup && isTemplate((item as RouteItem).popup);
 
     const baseConfigKey = isPopup
       ? `routes.${routeIndex}.popup.${popupIndex}`
@@ -584,22 +586,75 @@ export class NavbarCardEditor extends LitElement {
                       Popup/Submenu
                     </h5>
                     <div class="editor-section">
-                      <div class="routes-container">
-                        ${((item as RouteItem).popup ?? []).map(
-                          (popupItem, index) => {
-                            return this.makeDraggableRouteEditor(
-                              popupItem,
-                              routeIndex,
-                              index,
+                      <div class="editor-tab-nav">
+                        <button
+                          class="editor-tab-button ${!usesTemplate
+                            ? 'active'
+                            : ''}"
+                          @click=${() => {
+                            if (!usesTemplate) return;
+                            let parsedPopup = [];
+                            try {
+                              parsedPopup = JSON.parse(
+                                cleanTemplate((item as RouteItem).popup) ??
+                                  '[]',
+                              );
+                            } catch (_e) {
+                              parsedPopup = [];
+                            }
+
+                            this.updateConfigByKey(
+                              `${baseConfigKey}.popup` as any,
+                              parsedPopup,
                             );
-                          },
-                        )}
+                          }}>
+                          <ha-icon icon="mdi:palette"></ha-icon>
+                          UI editor
+                        </button>
+                        <button
+                          class="editor-tab-button ${usesTemplate
+                            ? 'active'
+                            : ''}"
+                          @click=${() => {
+                            if (usesTemplate) return;
+                            this.updateConfigByKey(
+                              `${baseConfigKey}.popup` as any,
+                              wrapTemplate(
+                                JSON.stringify(
+                                  (item as RouteItem).popup ?? [],
+                                  null,
+                                  2,
+                                ),
+                              ),
+                            );
+                          }}>
+                          <ha-icon icon="mdi:code-tags"></ha-icon>
+                          Use template
+                        </button>
                       </div>
-                      ${this.makeButton({
-                        text: 'Add Popup item',
-                        icon: 'mdi:plus',
-                        onClick: () => this.addRouteOrPopup(routeIndex),
-                      })}
+
+                      ${usesTemplate
+                        ? this.makeTemplateEditor({
+                            label: 'Popup',
+                            configKey: `${baseConfigKey}.popup` as any,
+                            helper: GENERIC_JS_TEMPLATE_HELPER,
+                          })
+                        : html`<div class="routes-container">
+                              ${((item as RouteItem).popup ?? []).map(
+                                (popupItem, index) => {
+                                  return this.makeDraggableRouteEditor(
+                                    popupItem,
+                                    routeIndex,
+                                    index,
+                                  );
+                                },
+                              )}
+                            </div>
+                            ${this.makeButton({
+                              text: 'Add Popup item',
+                              icon: 'mdi:plus',
+                              onClick: () => this.addRouteOrPopup(routeIndex),
+                            })}`}
                     </div>
                   </ha-expansion-panel>
                 `
