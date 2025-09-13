@@ -85,6 +85,7 @@ const NAVBAR_CONTAINER_STYLES = css`
   .navbar-card.desktop {
     border-radius: var(--navbar-border-radius);
     box-shadow: var(--navbar-box-shadow-desktop);
+    padding: 12px 8px;
   }
 
   .navbar.desktop.bottom {
@@ -124,6 +125,7 @@ const NAVBAR_CONTAINER_STYLES = css`
 
   .navbar-card.desktop.left {
     flex-direction: column;
+    gap: 10px;
   }
 
   .navbar.desktop.right {
@@ -137,6 +139,7 @@ const NAVBAR_CONTAINER_STYLES = css`
 
   .navbar-card.desktop.right {
     flex-direction: column;
+    gap: 10px;
   }
 `;
 
@@ -227,7 +230,6 @@ const ROUTE_STYLES = css`
     cursor: pointer;
     width: 100%;
     position: relative;
-    flex: 1;
     text-decoration: none;
     color: var(--primary-text-color);
     display: flex;
