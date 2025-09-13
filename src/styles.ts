@@ -186,11 +186,16 @@ const MEDIA_PLAYER_STYLES = css`
     display: flex;
     flex-direction: column;
     flex: 1;
+    min-width: 0;
   }
 
   .media-player .media-player-title {
     font-size: 14px;
     font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
   }
 
   .media-player .media-player-artist {
@@ -200,6 +205,7 @@ const MEDIA_PLAYER_STYLES = css`
 
   .media-player .media-player-button {
     width: 38px;
+    flex-shrink: 0;
     --ha-button-height: 38px;
     --ha-button-border-radius: 999px;
   }
