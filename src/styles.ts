@@ -476,6 +476,7 @@ const POPUP_STYLES = css`
 
   .popup-item .button.popuplabelbackground {
     width: 100%;
+    max-width: unset;
     padding-left: 8px;
     padding-right: 8px;
     flex-direction: row;
