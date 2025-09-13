@@ -46,6 +46,7 @@ const NAVBAR_CONTAINER_STYLES = css`
   .navbar-card {
     justify-content: space-between;
     width: 100%;
+    gap: 2px;
   }
 
   /* Edit mode styles */
@@ -219,10 +220,14 @@ const MEDIA_PLAYER_STYLES = css`
 
 const ROUTE_STYLES = css`
   .route {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    max-width: 60px;
     width: 100%;
     position: relative;
+    flex: 1;
     text-decoration: none;
     color: var(--primary-text-color);
     display: flex;
@@ -230,10 +235,12 @@ const ROUTE_STYLES = css`
     align-items: center;
     justify-content: center;
     --icon-primary-color: var(--state-inactive-color);
+    overflow: hidden;
   }
 
   /* Button styling */
   .button {
+    max-width: 60px;
     position: relative;
     height: 36px;
     width: 100%;
@@ -270,10 +277,12 @@ const ROUTE_STYLES = css`
   .label {
     flex: 1;
     width: 100%;
-    /* TODO fix ellipsis*/
     text-align: center;
     font-size: var(--paper-font-caption_-_font-size, 12px);
     font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   /* Badge styling */
@@ -299,13 +308,20 @@ const ROUTE_STYLES = css`
   }
 
   /* Desktop mode styles */
+  .desktop .route .label {
+    flex: unset;
+  }
   .desktop .route {
     height: 60px;
-    width: 60px;
+    width: 70px;
   }
   .desktop .button {
     flex: unset;
     height: 100%;
+  }
+
+  .desktop .route:has(.label) .button {
+    height: 40px;
   }
 `;
 

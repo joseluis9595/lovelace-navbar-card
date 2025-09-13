@@ -425,7 +425,7 @@ export class NavbarCard extends LitElement {
 
     // Cache label processing
     const label = this._shouldShowLabels(false)
-      ? (processTemplate<string>(this._hass, this, route.label) ?? ' ')
+      ? (processTemplate<string>(this._hass, this, route.label) ?? null)
       : null;
 
     return html`
@@ -544,11 +544,10 @@ export class NavbarCard extends LitElement {
    * Open the popup menu for a given popupConfig and anchor element.
    */
   private _openPopup = (route: RouteItem, target: HTMLElement) => {
-    const popupItems = processTemplate<PopupItem[]>(
-      this._hass,
-      this,
-      route.popup,
-    ) ?? route.popup ?? route.submenu;
+    const popupItems =
+      processTemplate<PopupItem[]>(this._hass, this, route.popup) ??
+      route.popup ??
+      route.submenu;
 
     if (typeof popupItems === 'string') {
       console.warn(
