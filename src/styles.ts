@@ -632,6 +632,52 @@ const EDITOR_STYLES = css`
   .templatable-field-header-label {
     flex: 1;
   }
+
+  /* Custom Tabs Styles */
+
+  .editor-tab-nav {
+    margin-bottom: 0.25em;
+    display: flex;
+    background: var(--card-background-color, #fff);
+    border-radius: 8px;
+    border: 1px solid var(--divider-color, #e0e0e0);
+  }
+
+  .editor-tab-button {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--secondary-text-color, #666);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .editor-tab-button:hover {
+    background: color-mix(
+      in srgb,
+      var(--primary-color, #03a9f4) 10%,
+      transparent
+    );
+  }
+
+  .editor-tab-button.active {
+    background: var(--primary-color, #03a9f4);
+    color: white;
+  }
+
+  .editor-tab-button ha-icon {
+    --mdc-icon-size: 18px;
+  }
 `;
 
 // Drag-and-drop styles for routes editor
