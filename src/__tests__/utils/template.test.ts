@@ -1,8 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi, afterAll } from 'vitest';
 import { HomeAssistant } from 'custom-card-helpers';
 import { NavbarCard } from '@/navbar-card';
 import { RouteItem } from '@/config';
-import { TemplateError } from '@errors';
 import {
   cleanTemplate,
   isTemplate,
@@ -138,7 +137,7 @@ describe('Template utilities', () => {
       expect(result).toBe('Hello, User');
     });
 
-    it('Throws TemplateError for templates without explicit return', () => {
+    it('Returns original value for templates without explicit return', () => {
       const template = `
         [[[
           states["light.kitchen"].state === 'on';
@@ -146,24 +145,19 @@ describe('Template utilities', () => {
       `;
 
       expect(() => processTemplate<boolean>(mockHass, mockNavbar, template))
-        .toThrowError(TemplateError);
+        .toBe(template);
     });
 
-    it('Throws TemplateError for completely invalid templates', () => {
-      expect(() => processTemplate<string>(mockHass, mockNavbar, 'Not a template'))
-        .toThrowError(TemplateError);
-    });
-
-    it('Returns original value in safe mode instead of throwing', () => {
+    it('Returns original value as template is invalid', () => {
       const invalidTemplate = 'Not a template';
-      const result = processTemplate<string>(mockHass, mockNavbar, invalidTemplate, { safe: true });
+      const result = processTemplate<string>(mockHass, mockNavbar, invalidTemplate);
 
       expect(result).toBe(invalidTemplate);
     });
 
-    it('Handles empty templates gracefully in safe mode', () => {
+    it('Handles empty templates gracefully', () => {
       const emptyTemplate = '[[[ ]]]';
-      const result = processTemplate<string>(mockHass, mockNavbar, emptyTemplate, { safe: true });
+      const result = processTemplate<string>(mockHass, mockNavbar, emptyTemplate);
 
       expect(result).toBe(emptyTemplate);
     });
