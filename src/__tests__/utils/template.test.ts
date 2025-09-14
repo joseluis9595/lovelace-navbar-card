@@ -38,7 +38,7 @@ describe('Template utilities', () => {
 
     mockNavbar = { isDesktop: true } as NavbarCard;
   });
--
+
   describe('isTemplate', () => {
     it('Correctly identifies valid JSTemplates', () => {
       expect(isTemplate('[[[ return states["light.kitchen"].state ]]]')).toBe(true);
