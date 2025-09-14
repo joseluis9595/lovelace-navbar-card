@@ -23,7 +23,11 @@ const templateFunctionCache = new Map<string, TemplateFunction>();
  * @returns True if the value is a template string, false otherwise.
  */
 export const isTemplate = (value: unknown): value is string => {
-  return typeof value === 'string' && value.trim().startsWith('[[[') && value.trim().endsWith(']]]');
+  return (
+    typeof value === 'string' &&
+    value.trim().startsWith('[[[') &&
+    value.trim().endsWith(']]]')
+  );
 };
 
 /**
@@ -85,7 +89,9 @@ export const processTemplate = <T = unknown>(
     }
 
     const hashed = generateHash(clean);
-    let func = templateFunctionCache.get(hashed) as TemplateFunction | undefined;
+    let func = templateFunctionCache.get(hashed) as
+      | TemplateFunction
+      | undefined;
 
     // If we haven't cached the function yet, create and cache it
     if (!func) {
@@ -102,12 +108,9 @@ export const processTemplate = <T = unknown>(
     // Execute the function with the current context
     // This is stored in a variable instead of directly returned
     // to allow for easier debugging and error handling
-    const result = func(
-      hass.states,
-      hass.user,
-      hass,
-      { isDesktop: navbar?.isDesktop ?? false }
-    ) as T;
+    const result = func(hass.states, hass.user, hass, {
+      isDesktop: navbar?.isDesktop ?? false,
+    }) as T;
 
     if (result === undefined) {
       console.error(`NavbarCard: Template did not return a value: ${template}`);

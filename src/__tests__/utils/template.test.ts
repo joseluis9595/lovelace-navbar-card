@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi, afterAll } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { HomeAssistant } from 'custom-card-helpers';
 import { NavbarCard } from '@/navbar-card';
 import { RouteItem } from '@/config';
