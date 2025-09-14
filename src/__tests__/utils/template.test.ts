@@ -144,8 +144,13 @@ describe('Template utilities', () => {
         ]]]
       `;
 
-      expect(() => processTemplate<boolean>(mockHass, mockNavbar, template))
-        .toBe(template);
+      const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const result = processTemplate<boolean>(mockHass, mockNavbar, template);
+
+      expect(result).toBe(template);
+      expect(spy).toHaveBeenCalledWith(
+        expect.stringContaining('NavbarCard: Template did not return a value')
+      );
     });
 
     it('Returns original value as template is invalid', () => {
@@ -157,9 +162,13 @@ describe('Template utilities', () => {
 
     it('Handles empty templates gracefully', () => {
       const emptyTemplate = '[[[ ]]]';
+      const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const result = processTemplate<string>(mockHass, mockNavbar, emptyTemplate);
 
       expect(result).toBe(emptyTemplate);
+      expect(spy).toHaveBeenCalledWith(
+        expect.stringContaining('NavbarCard: Template did not return a value')
+      );
     });
 
     it('Caches compiled template functions to improve performance', () => {
