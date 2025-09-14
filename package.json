@@ -36,6 +36,8 @@
     "@open-wc/scoped-elements": "^3.0.6",
     "@open-wc/testing-helpers": "^3.0.1",
     "custom-card-helpers": "^1.9.0",
+    "eslint-import-resolver-alias": "^1.1.2",
+    "eslint-plugin-import": "^2.32.0",
     "lit": "^3.3.1"
   },
   "module": "index.ts"

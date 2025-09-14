@@ -22,12 +22,7 @@ import {
 } from './config';
 import { RippleElement } from './types';
 import {
-  hapticFeedback,
-  mapStringToEnum,
-  processBadgeTemplate,
-  processTemplate,
-} from './utils';
-import {
+  Color,
   fireDOMEvent,
   forceDashboardPadding,
   forceOpenEditMode,
@@ -35,9 +30,12 @@ import {
   getNavbarTemplates,
   injectStyles,
   removeDashboardPadding,
-} from './dom-utils';
+  hapticFeedback,
+  mapStringToEnum,
+  processBadgeTemplate,
+  processTemplate,
+} from '@utils';
 import { getDefaultStyles } from './styles';
-import { Color } from './color';
 
 declare global {
   interface Window {

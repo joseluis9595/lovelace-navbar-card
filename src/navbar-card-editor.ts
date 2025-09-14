@@ -22,14 +22,14 @@ import {
   NestedType,
 } from './types';
 import {
+  getNavbarTemplates,
   cleanTemplate,
   deepMergeKeepArrays,
   isTemplate,
   processTemplate,
   wrapTemplate,
-} from './utils';
+} from '@utils';
 import { getEditorStyles } from './styles';
-import { getNavbarTemplates } from './dom-utils';
 import { loadHaComponents } from '@kipk/load-ha-components';
 import { TemplatableInputOptions } from './navbar-card-editor.types';
 

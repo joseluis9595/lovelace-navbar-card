@@ -1,3 +1,4 @@
+// eslint-disable-next-line
 import { HomeAssistant } from 'custom-card-helpers';
 
 // Extend the `HomeAssistant` type to include updated properties.
@@ -10,13 +11,6 @@ declare module 'custom-card-helpers' {
 export type NavbarCardPublicState = {
   isDesktop: boolean;
 };
-
-export type TemplateFunction<T = unknown> = (
-  states: HomeAssistant['states'],
-  user: HomeAssistant['user'],
-  hass: HomeAssistant,
-  navbar: NavbarCardPublicState,
-) => T;
 
 export type RippleElement = Element & {
   hovered?: boolean;
@@ -125,5 +119,5 @@ export function genericSetProperty<T, K extends DotNotationKeys<T>>(
  * @template T - The object type to apply deep partiality to.
  */
 export type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
+  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> | null : T[P] | null;
 };
