@@ -2,7 +2,6 @@ import { HomeAssistant } from 'custom-card-helpers';
 import { NavbarCardPublicState } from '@/types';
 import { NavbarCard } from '@/navbar-card';
 import { generateHash } from '@utils';
-import { TemplateError } from '@errors';
 
 export type TemplateFunction<T = unknown> = (
   states: HomeAssistant['states'],
@@ -67,28 +66,22 @@ export const wrapTemplate = (value: string): string => {
  * @param hass - The Home Assistant instance providing `states`, `user`, and other context.
  * @param navbar - Optional `NavbarCard` context to provide template access to properties like `isDesktop`.
  * @param template - The raw value or template string to process.
- * @param options - Optional settings:
- *   - `safe`: If `true`, errors or invalid templates return the original value instead of throwing.
- * @returns The evaluated template result of type `T`.
- * @throws `TemplateError` if the template is invalid, fails to clean, or does not return a value,
- *   unless `options.safe` is `true`.
+ * @returns The evaluated template result of type `T`. If not a valid template, returns the original value.
  */
 export const processTemplate = <T = unknown>(
   hass: HomeAssistant,
   navbar?: NavbarCard,
   template?: unknown,
-  options?: { safe?: boolean } // optional safe mode
 ): T => {
   if (template == null || !isTemplate(template)) {
-    if (options?.safe) return template as T;
-    throw new TemplateError('Invalid template', template);
+    return template as T;
   }
 
   try {
     const clean = cleanTemplate(template);
     if (clean === null) {
-      if (options?.safe) return template as T;
-      throw new TemplateError('Failed to clean template', template);
+      console.error(`NavbarCard: Invalid template format: ${template}`);
+      return template as T;
     }
 
     const hashed = generateHash(clean);
@@ -117,13 +110,15 @@ export const processTemplate = <T = unknown>(
     ) as T;
 
     if (result === undefined) {
-      throw new TemplateError('Template did not return a value', template);
+      console.error(`NavbarCard: Template did not return a value: ${template}`);
+      return template as T;
     }
 
     return result;
   } catch (err) {
-    if (options?.safe) return template as T;
-    throw new TemplateError('Error evaluating template', template, err);  }
+    console.error(`NavbarCard: Error evaluating template: ${err}`);
+    return template as T;
+  }
 };
 
 /**
