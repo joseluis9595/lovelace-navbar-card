@@ -121,7 +121,7 @@ describe('NavbarCard', () => {
           routes: [{ icon: 'mdi:home', label: 'Invalid Route' }],
         } as NavbarCardConfig);
       }).toThrow(
-        'Each route must have either "url", "popup", "tap_action", "hold_action" or "double_tap_action" property configured',
+        'Each route must have at least one actionable property (url, popup, tap_action, hold_action, double_tap_action)',
       );
     });
   });
