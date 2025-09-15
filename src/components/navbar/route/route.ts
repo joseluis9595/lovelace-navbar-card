@@ -1,7 +1,6 @@
 import { html, TemplateResult } from 'lit';
-import { HomeAssistant } from 'custom-card-helpers';
 import { NavbarCard } from '@/navbar-card';
-import { NavbarCardConfig, PopupItem, RouteItem } from '@/config';
+import { PopupItem, RouteItem } from '@/config';
 import { processTemplate } from '@/utils';
 import { Popup } from './popup/popup';
 import { BaseRoute } from './base-route';
@@ -10,53 +9,47 @@ export class Route extends BaseRoute {
   constructor(
     _navbarCard: NavbarCard,
     private readonly _routeData: RouteItem,
-
-    // Cache for computed properties
-    private _cachedPopup?: Popup,
   ) {
-    super(_hass, _config, _navbarCard, _routeData);
+    super(_navbarCard, _routeData);
     this._validateRoute();
   }
 
   get popup(): Popup {
-    return (this._cachedPopup ??= new Popup(
-      this._hass,
-      this._config,
+    return new Popup(
       this._navbarCard,
       processTemplate<PopupItem[]>(
-        this._hass,
+        this._navbarCard._hass,
         this._navbarCard,
         this._routeData.popup,
       ) ??
         this._routeData.popup ??
         this._routeData.submenu ??
         [],
-    ));
+    );
   }
 
   get isSelfOrChildActive(): boolean {
     // TODO: Add configuration option to control this behavior
-    if (this.isActive) return true;
-    if (this.popup && this.popup.popupItems.some((item) => item.isActive))
-      return true;
-    return false;
+    if (this.selected) return true;
+    return this.popup.items.some((item) => item.selected);
   }
 
   public render(): TemplateResult | null {
-    if (this.isHidden) return null;
+    if (this.hidden) return null;
 
     return html`
       <div
         class="route ${this.isSelfOrChildActive ? 'active' : ''}"
-        @mouseenter=${(e: PointerEvent) => this._handleMouseEnter(e, this)}
-        @mousemove=${(e: PointerEvent) => this._handleMouseMove(e, this)}
-        @mouseleave=${(e: PointerEvent) => this._handleMouseLeave(e, this)}
-        @pointerdown=${(e: PointerEvent) => this._handlePointerDown(e, this)}
-        @pointermove=${(e: PointerEvent) => this._handlePointerMove(e, this)}
-        @pointerup=${(e: PointerEvent) => this._handlePointerUp(e, this)}
-        @pointercancel=${(e: PointerEvent) => this._handlePointerMove(e, this)}>
+        @mouseenter=${(e: PointerEvent) => this._navbarCard.eventManager.handleMouseEnter(e, this)}
+        @mousemove=${(e: PointerEvent) => this._navbarCard.eventManager.handleMouseMove(e, this)}
+        @mouseleave=${(e: PointerEvent) => this._navbarCard.eventManager.handleMouseLeave(e, this)}
+        @pointerdown=${(e: PointerEvent) => this._navbarCard.eventManager.handlePointerDown(e, this)}
+        @pointermove=${(e: PointerEvent) => this._navbarCard.eventManager.handlePointerMove(e, this)}
+        @pointerup=${(e: PointerEvent) => this._navbarCard.eventManager.handlePointerUp(e, this)}
+        @pointercancel=${(e: PointerEvent) =>
+          this._navbarCard.eventManager.handlePointerMove(e, this)}>
         <div class="button ${this.isSelfOrChildActive ? 'active' : ''}">
-          ${this._getRouteIcon(this, this.isSelfOrChildActive)}
+          ${this.icon.render()}
           <ha-ripple></ha-ripple>
         </div>
         ${this.label
@@ -64,20 +57,19 @@ export class Route extends BaseRoute {
               ${this.label}
             </div>`
           : html``}
-        ${this._renderBadge(this, this.isSelfOrChildActive)}
+        ${this.badge.render()}
       </div>
     `;
   }
 
   private _validateRoute(): void {
-    if (!this.icon && !this.image) {
+    if (!this.data.icon && !this.data.image) {
       throw new Error(
         'Each route must have either an "icon" or "image" property configured',
       );
     }
 
     if (
-      !this.popup &&
       !this.tap_action &&
       !this.hold_action &&
       !this.url &&

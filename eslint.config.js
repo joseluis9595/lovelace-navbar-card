@@ -71,6 +71,7 @@ export default defineConfig([
           extensions: ['.ts', '.js'],
           map: [
             ['@', './src'],
+            ['@components', './src/components'],
             ['@utils', './src/utils'],
           ],
         },
