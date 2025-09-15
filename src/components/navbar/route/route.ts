@@ -29,9 +29,12 @@ export class Route extends BaseRoute {
   }
 
   get isSelfOrChildActive(): boolean {
-    // TODO: Add configuration option to control this behavior
-    if (this.selected) return true;
-    return this.popup.items.some((item) => item.selected);
+    // If the route is not active, check if any of its children are active (if configured to do so)
+    if (this._navbarCard.config?.reflect_child_state_on_parent) {
+      return this.popup.items.some(item => item.selected);
+    }
+
+    return this.selected;
   }
 
   public render(): TemplateResult | null {
@@ -40,12 +43,18 @@ export class Route extends BaseRoute {
     return html`
       <div
         class="route ${this.isSelfOrChildActive ? 'active' : ''}"
-        @mouseenter=${(e: PointerEvent) => this._navbarCard.eventManager.handleMouseEnter(e, this)}
-        @mousemove=${(e: PointerEvent) => this._navbarCard.eventManager.handleMouseMove(e, this)}
-        @mouseleave=${(e: PointerEvent) => this._navbarCard.eventManager.handleMouseLeave(e, this)}
-        @pointerdown=${(e: PointerEvent) => this._navbarCard.eventManager.handlePointerDown(e, this)}
-        @pointermove=${(e: PointerEvent) => this._navbarCard.eventManager.handlePointerMove(e, this)}
-        @pointerup=${(e: PointerEvent) => this._navbarCard.eventManager.handlePointerUp(e, this)}
+        @mouseenter=${(e: PointerEvent) =>
+          this._navbarCard.eventManager.handleMouseEnter(e, this)}
+        @mousemove=${(e: PointerEvent) =>
+          this._navbarCard.eventManager.handleMouseMove(e, this)}
+        @mouseleave=${(e: PointerEvent) =>
+          this._navbarCard.eventManager.handleMouseLeave(e, this)}
+        @pointerdown=${(e: PointerEvent) =>
+          this._navbarCard.eventManager.handlePointerDown(e, this)}
+        @pointermove=${(e: PointerEvent) =>
+          this._navbarCard.eventManager.handlePointerMove(e, this)}
+        @pointerup=${(e: PointerEvent) =>
+          this._navbarCard.eventManager.handlePointerUp(e, this)}
         @pointercancel=${(e: PointerEvent) =>
           this._navbarCard.eventManager.handlePointerMove(e, this)}>
         <div class="button ${this.isSelfOrChildActive ? 'active' : ''}">
