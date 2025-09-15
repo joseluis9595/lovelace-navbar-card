@@ -6,11 +6,11 @@ import {
 } from '@/config';
 import { NavbarCard } from '@/navbar-card';
 import {
-  NavbarIcon,
-  NavbarBadge,
-  NavbarRoute,
-  NavbarPopupItem,
-} from '@components';
+  Icon,
+  Badge,
+  Route,
+  PopupItem,
+} from '@components/navbar';
 import {
   fireDOMEvent,
   forceOpenEditMode,
@@ -24,8 +24,8 @@ export class BaseRoute {
     protected _navbarCard: NavbarCard,
     public readonly data: RouteItemBase,
 
-    private _iconInstance?: NavbarIcon.Icon,
-    private _badgeInstance?: NavbarBadge.Badge,
+    private _iconInstance?: Icon,
+    private _badgeInstance?: Badge,
     private _cachedLabel?: string | null,
     private _cachedHidden?: boolean,
     private _cachedSelected?: boolean
@@ -35,10 +35,10 @@ export class BaseRoute {
     return this.data.url;
   }
   get icon() {
-    return this._iconInstance ??= new NavbarIcon.Icon(this._navbarCard, this);
+    return this._iconInstance ??= new Icon(this._navbarCard, this);
   }
   get badge() {
-    return this._badgeInstance ??= new NavbarBadge.Badge(this._navbarCard, this);
+    return this._badgeInstance ??= new Badge(this._navbarCard, this);
   }
 
   get label(): string | null {
@@ -79,7 +79,7 @@ export class BaseRoute {
    */
   public executeAction = (
     target: HTMLElement,
-    route: NavbarRoute.Route | NavbarPopupItem.PopupItem,
+    route: Route | PopupItem,
     action:
       | RouteItemBase['tap_action']
       | RouteItemBase['hold_action']
@@ -98,14 +98,14 @@ export class BaseRoute {
     // Close popup for any action unless it's opening a new popup
     if (
       action?.action !== NavbarCustomActions.openPopup &&
-      route instanceof NavbarRoute.Route
+      route instanceof Route
     ) {
       route.popup.close();
     }
 
     switch (action?.action) {
       case NavbarCustomActions.openPopup:
-        if (route instanceof NavbarRoute.Route) {
+        if (route instanceof Route) {
           if (route.popup.items.length === 0) {
             console.error(
               `[navbar-card] No popup items found for route: ${route.label}`,

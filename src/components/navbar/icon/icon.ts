@@ -1,6 +1,6 @@
 import { html } from 'lit';
-import { BaseRoute } from '@components';
 import { NavbarCard } from '@/navbar-card';
+import { BaseRoute } from '@components/navbar';
 import { processTemplate } from '@/utils';
 
 export class Icon {

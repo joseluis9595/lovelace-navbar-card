@@ -4,7 +4,7 @@ import {
   DesktopPosition,
   PopupItem as PopupItemDef,
 } from '@/config';
-import { PopupItem } from './popup-item';
+import { PopupItem } from '@components/navbar';
 
 export class Popup {
   constructor(

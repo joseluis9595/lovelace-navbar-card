@@ -32,7 +32,7 @@ export class Route extends BaseRoute {
 
   get isSelfOrChildActive(): boolean {
     // If the route is not active, check if any of its children are active (if configured to do so)
-    if (this._navbarCard.config?.reflect_child_state_on_parent && !this.selected) {
+    if (this._navbarCard.config?.reflect_child_state && !this.selected) {
       return this.popup.items.some(item => item.selected);
     }
 

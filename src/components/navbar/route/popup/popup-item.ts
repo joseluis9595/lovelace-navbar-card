@@ -1,7 +1,7 @@
 import { html, TemplateResult } from 'lit';
 import { NavbarCard } from '@/navbar-card';
 import { PopupItem as PopupItemDef } from '@/config';
-import { BaseRoute } from '../base-route';
+import { BaseRoute } from '@components/navbar';
 
 export class PopupItem extends BaseRoute {
   constructor(

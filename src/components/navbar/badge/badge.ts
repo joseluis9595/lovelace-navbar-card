@@ -1,6 +1,7 @@
 import { html } from 'lit';
 import { NavbarCard } from '@/navbar-card';
-import { Color, BaseRoute } from '@/components';
+import { Color } from '@components';
+import { BaseRoute } from '@components/navbar';
 import { processBadgeTemplate, processTemplate } from '@/utils';
 
 export class Badge {

@@ -1,4 +1,4 @@
-import { NavbarPopupItem, NavbarRoute } from "./components";
+import {PopupItem, Route } from "@components/navbar";
 import { RippleElement } from "./types";
 
 const DOUBLE_TAP_DELAY = 250;
@@ -18,28 +18,28 @@ export class EventManager {
   // tap_action state variables
   private tapTimeoutId: number | null = null;
 
-  public handleMouseEnter = (e: MouseEvent, _route: NavbarRoute.Route | NavbarPopupItem.PopupItem,) => {
+  public handleMouseEnter = (e: MouseEvent, _route: Route | PopupItem,) => {
     const ripple = (e.currentTarget as HTMLElement).querySelector(
       'ha-ripple',
     ) as RippleElement;
     if (ripple) ripple.hovered = true;
   };
 
-  public handleMouseMove = (e: MouseEvent, _route: NavbarRoute.Route | NavbarPopupItem.PopupItem,) => {
+  public handleMouseMove = (e: MouseEvent, _route: Route | PopupItem,) => {
     const ripple = (e.currentTarget as HTMLElement).querySelector(
       'ha-ripple',
     ) as RippleElement;
     if (ripple) ripple.hovered = true;
   };
 
-  public handleMouseLeave = (e: MouseEvent, _route: NavbarRoute.Route | NavbarPopupItem.PopupItem,) => {
+  public handleMouseLeave = (e: MouseEvent, _route: Route | PopupItem,) => {
     const ripple = (e.currentTarget as HTMLElement).querySelector(
       'ha-ripple',
     ) as RippleElement;
     if (ripple) ripple.hovered = false;
   };
 
-  public handlePointerDown = (e: PointerEvent, route: NavbarRoute.Route | NavbarPopupItem.PopupItem,) => {
+  public handlePointerDown = (e: PointerEvent, route: Route | PopupItem,) => {
     // Store the starting position for movement detection
     this.pointerStartX = e.clientX;
     this.pointerStartY = e.clientY;
@@ -55,7 +55,7 @@ export class EventManager {
     }
   };
 
-  public handlePointerMove = (e: PointerEvent, _route: NavbarRoute.Route | NavbarPopupItem.PopupItem,) => {
+  public handlePointerMove = (e: PointerEvent, _route: Route | PopupItem,) => {
     if (!this.holdTimeoutId) {
       return;
     }
@@ -75,7 +75,7 @@ export class EventManager {
 
   public handlePointerUp = (
     e: PointerEvent,
-    route: NavbarRoute.Route | NavbarPopupItem.PopupItem,
+    route: Route | PopupItem,
   ) => {
     if (this.holdTimeoutId !== null) {
       clearTimeout(this.holdTimeoutId);
@@ -116,14 +116,14 @@ export class EventManager {
 
   public handleHoldAction = (
     target: HTMLElement,
-    route: NavbarRoute.Route | NavbarPopupItem.PopupItem,
+    route: Route | PopupItem,
   ) => {
     route.executeAction(target, route, route.hold_action, 'hold');
   };
 
   public handleDoubleTapAction = (
     target: HTMLElement,
-    route: NavbarRoute.Route | NavbarPopupItem.PopupItem,
+    route: Route | PopupItem,
   ) => {
     route.executeAction(
       target,
@@ -135,7 +135,7 @@ export class EventManager {
 
   public handleTapAction = (
     target: HTMLElement,
-    route: NavbarRoute.Route | NavbarPopupItem.PopupItem,
+    route: Route | PopupItem,
   ) => {
     // Set timeout for tap action to allow for potential double tap
     if (route.double_tap_action) {

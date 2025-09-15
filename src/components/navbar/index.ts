@@ -1,6 +1,6 @@
-export * as NavbarBadge from './badge/badge';
-export * as NavbarIcon from './icon/icon';
-export * as NavbarRoute from './route/route';
+export * from './badge/badge';
+export * from './icon/icon';
+export * from './route/route';
 export * from './route/base-route';
-export * as NavbarPopup from './route/popup/popup';
-export * as NavbarPopupItem from './route/popup/popup-item';
+export * from './route/popup/popup';
+export * from './route/popup/popup-item';

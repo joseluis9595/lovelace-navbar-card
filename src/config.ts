@@ -139,7 +139,7 @@ export type NavbarCardConfig = {
   };
   styles?: string;
   haptic?: boolean | HapticConfig;
-  reflect_child_state_on_parent?: boolean;
+  reflect_child_state?: boolean;
 };
 
 export const DEFAULT_NAVBAR_CONFIG: NavbarCardConfig = {

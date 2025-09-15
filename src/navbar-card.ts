@@ -8,7 +8,7 @@ import {
   NavbarCardConfig,
   STUB_CONFIG,
 } from './config';
-import { NavbarRoute } from '@components';
+import { Route } from '@components/navbar';
 import {
   fireDOMEvent,
   forceDashboardPadding,
@@ -53,8 +53,9 @@ export class NavbarCard extends LitElement {
 
   /** Runtime state */
   eventManager = new EventManager();
-  @state() private _routes: NavbarRoute.Route[] = [];
+
   @state() private _showMediaPlayer?: boolean;
+  @state() private _routes: Route[] = [];
   @state() focussedPopup: TemplateResult<1> | null = null;
   @state() isDesktop?: boolean;
 
@@ -161,7 +162,7 @@ export class NavbarCard extends LitElement {
     // Skip if unchanged (avoid rerenders)
     if (JSON.stringify(config) === JSON.stringify(this.config)) return;
 
-    this._routes = config.routes.map(route => new NavbarRoute.Route(this, route));
+    this._routes = config.routes.map(route => new Route(this, route));
     this.config = config;
   }
 
