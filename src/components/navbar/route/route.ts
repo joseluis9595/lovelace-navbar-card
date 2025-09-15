@@ -9,13 +9,15 @@ export class Route extends BaseRoute {
   constructor(
     _navbarCard: NavbarCard,
     private readonly _routeData: RouteItem,
+
+    private _popupInstance?: Popup,
   ) {
     super(_navbarCard, _routeData);
     this._validateRoute();
   }
 
   get popup(): Popup {
-    return new Popup(
+    return this._popupInstance ??= new Popup(
       this._navbarCard,
       processTemplate<PopupItem[]>(
         this._navbarCard._hass,
@@ -30,7 +32,7 @@ export class Route extends BaseRoute {
 
   get isSelfOrChildActive(): boolean {
     // If the route is not active, check if any of its children are active (if configured to do so)
-    if (this._navbarCard.config?.reflect_child_state_on_parent) {
+    if (this._navbarCard.config?.reflect_child_state_on_parent && !this.selected) {
       return this.popup.items.some(item => item.selected);
     }
 
@@ -40,9 +42,11 @@ export class Route extends BaseRoute {
   public render(): TemplateResult | null {
     if (this.hidden) return null;
 
+    const isActive = this.isSelfOrChildActive;
+
     return html`
       <div
-        class="route ${this.isSelfOrChildActive ? 'active' : ''}"
+        class="route ${isActive ? 'active' : ''}"
         @mouseenter=${(e: PointerEvent) =>
           this._navbarCard.eventManager.handleMouseEnter(e, this)}
         @mousemove=${(e: PointerEvent) =>
@@ -57,12 +61,12 @@ export class Route extends BaseRoute {
           this._navbarCard.eventManager.handlePointerUp(e, this)}
         @pointercancel=${(e: PointerEvent) =>
           this._navbarCard.eventManager.handlePointerMove(e, this)}>
-        <div class="button ${this.isSelfOrChildActive ? 'active' : ''}">
+        <div class="button ${isActive ? 'active' : ''}">
           ${this.icon.render()}
           <ha-ripple></ha-ripple>
         </div>
         ${this.label
-          ? html`<div class="label ${this.isSelfOrChildActive ? 'active' : ''}">
+          ? html`<div class="label ${isActive ? 'active' : ''}">
               ${this.label}
             </div>`
           : html``}

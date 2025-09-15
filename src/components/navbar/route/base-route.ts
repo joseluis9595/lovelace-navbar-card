@@ -23,43 +23,46 @@ export class BaseRoute {
   constructor(
     protected _navbarCard: NavbarCard,
     public readonly data: RouteItemBase,
+
+    private _iconInstance?: NavbarIcon.Icon,
+    private _badgeInstance?: NavbarBadge.Badge,
+    private _cachedLabel?: string | null,
+    private _cachedHidden?: boolean,
+    private _cachedSelected?: boolean
   ) {}
 
   get url() {
     return this.data.url;
   }
   get icon() {
-    return new NavbarIcon.Icon(this._navbarCard, this);
+    return this._iconInstance ??= new NavbarIcon.Icon(this._navbarCard, this);
   }
   get badge() {
-    return new NavbarBadge.Badge(this._navbarCard, this);
+    return this._badgeInstance ??= new NavbarBadge.Badge(this._navbarCard, this);
   }
 
   get label(): string | null {
-    return this._shouldShowLabels(false)
-      ? (processTemplate<string>(
-          this._navbarCard._hass,
-          this._navbarCard,
-          this.data.label,
-        ) ?? ' ')
-      : null;
+    if (!this._shouldShowLabels(false)) return null;
+    return this._cachedLabel ??=
+        processTemplate<string>(this._navbarCard._hass, this._navbarCard, this.data.label)
+        ?? ' ';
   }
 
   get hidden() {
-    return processTemplate<boolean>(
-      this._navbarCard._hass,
-      this._navbarCard,
-      this.data.hidden,
-    );
+    return this._cachedHidden ??= !!processTemplate<boolean>(
+        this._navbarCard._hass,
+        this._navbarCard,
+        this.data.hidden,
+      );
   }
   get selected() {
-    return this.data.selected != null
-      ? processTemplate<boolean>(
-          this._navbarCard._hass,
-          this._navbarCard,
-          this.data.selected,
-        )
-      : window.location.pathname === this.url;
+    return this._cachedSelected ??= this.data.selected != null
+        ? !!processTemplate<boolean>(
+            this._navbarCard._hass,
+            this._navbarCard,
+            this.data.selected,
+          )
+        : window.location.pathname === this.url;;
   }
   get tap_action() {
     return this.data.tap_action;

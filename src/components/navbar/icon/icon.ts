@@ -44,17 +44,28 @@ export class Icon {
   }
 
   public render() {
-    return this.image
+    const isSelected = this._route.selected;
+    const resolvedImage = this.image;
+    const resolvedImageSelected = this.imageSelected;
+    const resolvedIcon = this.icon;
+    const resolvedIconSelected = this.iconSelected;
+
+    // If neither image nor icon resolve to a value, render nothing
+    if (!resolvedImage && !resolvedIcon) {
+      return html``;
+    }
+
+    return resolvedImage
       ? html` <img
-          class="image ${this._route.selected ? 'active' : ''}"
-          src="${this._route.selected && this.imageSelected
-            ? this.imageSelected
-            : this.image}"
+          class="image ${isSelected ? 'active' : ''}"
+          src="${isSelected && resolvedImageSelected
+            ? resolvedImageSelected
+            : resolvedImage}"
           alt="${this._route.label || ''}" />`
       : html` <ha-icon
-          class="icon ${this._route.selected ? 'active' : ''}"
-          icon="${this._route.selected && this.iconSelected
-            ? this.iconSelected
-            : this.icon}"></ha-icon>`;
+          class="icon ${isSelected ? 'active' : ''}"
+          icon="${isSelected && resolvedIconSelected
+            ? resolvedIconSelected
+            : resolvedIcon}"></ha-icon>`;
   }
 }
