@@ -10,7 +10,6 @@ import {
 } from '@types';
 import { Route } from '@components/navbar';
 import {
-  fireDOMEvent,
   forceDashboardPadding,
   forceResetRipple,
   getNavbarTemplates,

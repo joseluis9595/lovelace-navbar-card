@@ -121,7 +121,7 @@ export class Popup {
         const { top, left, x, width, height } = anchorRect;
         const windowWidth = window.innerWidth;
 
-        const positions: Record<typeof position, any> = {
+        const positions: Record<typeof position, {style: CSSResult, label: string, dir: string } | null> = {
             top: {
                 style: css`top: ${top + height}px; left: ${x}px;`,
                 label: 'label-right',
