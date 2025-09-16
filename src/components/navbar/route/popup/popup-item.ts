@@ -1,7 +1,7 @@
 import { html, TemplateResult } from 'lit';
 import { NavbarCard } from '@/navbar-card';
-import { BaseRoute, RouteEvents } from '@components/navbar';
-import { PopupItem as PopupItemDef } from '@types';
+import { BaseRoute, RouteEvents } from '@/components/navbar';
+import { PopupItem as PopupItemDef } from '@/types';
 
 export class PopupItem extends BaseRoute {
     private readonly _events = new RouteEvents();
@@ -10,7 +10,7 @@ export class PopupItem extends BaseRoute {
         _navbarCard: NavbarCard,
         _data: PopupItemDef,
 
-        private readonly _index: number,
+        private readonly _index: number
     ) {
         super(_navbarCard, _data);
     }

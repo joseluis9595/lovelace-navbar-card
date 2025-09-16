@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { generateHash } from '@utils'; // adjust path as needed
+import { generateHash } from '@/utils'; // adjust path as needed
 
 describe('generateHash', () => {
   it('returns a string result for a given input', () => {

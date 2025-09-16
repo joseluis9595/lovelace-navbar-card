@@ -1,9 +1,34 @@
 import { html } from 'lit';
 import { NavbarCard } from '@/navbar-card';
-import { fireDOMEvent, processTemplate } from '@utils';
+import { fireDOMEvent, processTemplate } from '@/utils';
 
 export class MediaPlayer {
   constructor(private readonly _navbarCard: NavbarCard) {}
+  /**
+   * Check if the media player should be shown.
+   */
+  public shouldShowMediaPlayer = (): { visible: boolean; error?: string } => {
+    const config = this._navbarCard.config?.media_player;
+    if (!config?.entity) return { visible: false };
+    if (this._navbarCard.isDesktop) return { visible: false };
+
+    const entity = this._getEntity();
+    const state = this._navbarCard._hass.states[entity];
+
+    if (!state) return { visible: true, error: `Entity not found "${entity}"` };
+
+    if (config.show != null) {
+      return {
+        visible: processTemplate<boolean>(
+          this._navbarCard._hass,
+          this._navbarCard,
+          config.show,
+        ),
+      };
+    }
+
+    return { visible: ['playing', 'paused'].includes(state.state) };
+  };
 
   public render = () => {
     const { visible, error } = this.shouldShowMediaPlayer();
@@ -72,32 +97,6 @@ export class MediaPlayer {
         </ha-button>
       </ha-card>
     `;
-  };
-
-  /**
-   * Check if the media player should be shown.
-   */
-  public shouldShowMediaPlayer = (): { visible: boolean; error?: string } => {
-    const config = this._navbarCard.config?.media_player;
-    if (!config?.entity) return { visible: false };
-    if (this._navbarCard.isDesktop) return { visible: false };
-
-    const entity = this._getEntity();
-    const state = this._navbarCard._hass.states[entity];
-
-    if (!state) return { visible: true, error: `Entity not found "${entity}"` };
-
-    if (config.show != null) {
-      return {
-        visible: processTemplate<boolean>(
-          this._navbarCard._hass,
-          this._navbarCard,
-          config.show,
-        ),
-      };
-    }
-
-    return { visible: ['playing', 'paused'].includes(state.state) };
   };
 
   private _getEntity(): string | null {

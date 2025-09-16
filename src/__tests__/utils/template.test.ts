@@ -7,7 +7,7 @@ import {
   isTemplate,
   wrapTemplate,
   processTemplate,
-} from '@utils';
+} from '@/utils';
 
 describe('Template utilities', () => {
   let mockHass: HomeAssistant;
@@ -174,13 +174,20 @@ describe('Template utilities', () => {
     it('Caches compiled template functions to improve performance', () => {
       const template = '[[[ return states["light.kitchen"].state ]]]';
 
-      // First call compiles and caches
+      // First call
+      const start1 = performance.now();
       const first = processTemplate<string>(mockHass, mockNavbar, template);
+      const duration1 = performance.now() - start1;
       expect(first).toBe('on');
 
-      // Second call should use cache, result should be identical
+      // Second call (cached)
+      const start2 = performance.now();
       const second = processTemplate<string>(mockHass, mockNavbar, template);
+      const duration2 = performance.now() - start2;
       expect(second).toBe('on');
+
+      // The second call should be faster due to caching
+      expect(duration2).toBeLessThan(duration1);
     });
   });
 });

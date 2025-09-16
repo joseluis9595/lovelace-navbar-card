@@ -1,6 +1,3 @@
-// eslint-disable-next-line
-import { HomeAssistant } from 'custom-card-helpers';
-
 // Extend the `HomeAssistant` type to include updated properties.
 declare module 'custom-card-helpers' {
   interface HomeAssistant {

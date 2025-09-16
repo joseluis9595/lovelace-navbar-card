@@ -19,7 +19,7 @@ import {
   genericGetProperty,
   genericSetProperty,
   NestedType,
-} from '@types';
+} from '@/types';
 import { TemplatableInputOptions } from './navbar-card-editor.types';
 import {
   getNavbarTemplates,
@@ -28,7 +28,7 @@ import {
   isTemplate,
   processTemplate,
   wrapTemplate,
-} from '@utils';
+} from '@/utils';
 import { getEditorStyles } from './styles';
 
 enum HAActions {

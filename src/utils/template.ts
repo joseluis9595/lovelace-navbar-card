@@ -1,7 +1,7 @@
 import { HomeAssistant } from 'custom-card-helpers';
 import { NavbarCardPublicState } from '@/types/types';
 import { NavbarCard } from '@/navbar-card';
-import { generateHash } from '@utils';
+import { generateHash } from '@/utils';
 
 export type TemplateFunction<T = unknown> = (
   states: HomeAssistant['states'],
@@ -56,9 +56,6 @@ export const wrapTemplate = (value: string): string => {
  *
  * Templates must be wrapped in `[[[` and `]]]`. Multi-line templates are supported.
  * Templates are compiled once and cached internally by a hash of their cleaned content.
- *
- * If the template does not explicitly return a value (i.e., returns `undefined`), a
- * `TemplateError` will be thrown, unless `options.safe` is set to `true`.
  *
  * Example:
  * ```ts

@@ -7,8 +7,8 @@ import {
   DesktopPosition,
   NavbarCardConfig,
   STUB_CONFIG,
-} from '@types';
-import { Route } from '@components/navbar';
+} from '@/types';
+import { Route } from '@/components/navbar';
 import {
   forceDashboardPadding,
   forceResetRipple,
@@ -17,7 +17,7 @@ import {
   mapStringToEnum,
   processTemplate,
   removeDashboardPadding,
-} from '@utils';
+} from '@/utils';
 import { getDefaultStyles } from './styles';
 import { MediaPlayer } from './components/media-player';
 
@@ -54,7 +54,7 @@ export class NavbarCard extends LitElement {
   private readonly _mediaPlayer: MediaPlayer = new MediaPlayer(this);
   @state() private _showMediaPlayer?: boolean;
   @state() private _routes: Route[] = [];
-  @state() focussedPopup: TemplateResult<1> | null = null;
+  @state() focusedPopup: TemplateResult<1> | null = null;
   @state() isDesktop?: boolean;
 
   /** Set HA instance (called by HA runtime) */
@@ -120,7 +120,7 @@ export class NavbarCard extends LitElement {
     removeDashboardPadding();
 
     // Force popup closure without animation to prevent memory leaks
-    this.focussedPopup = null;
+    this.focusedPopup = null;
   }
 
   /**
@@ -205,7 +205,7 @@ export class NavbarCard extends LitElement {
           ${this._routes.map(route => route.render()).filter(Boolean)}
         </ha-card>
       </div>
-      ${this.focussedPopup ?? html``}
+      ${this.focusedPopup ?? html``}
     `;
   }
 

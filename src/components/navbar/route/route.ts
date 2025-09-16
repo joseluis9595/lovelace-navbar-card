@@ -1,17 +1,16 @@
 import { html, TemplateResult } from 'lit';
 import { NavbarCard } from '@/navbar-card';
-import { Popup, BaseRoute, RouteEvents } from '@components/navbar';
-import { PopupItem, RouteItem } from '@types';
-import { processTemplate } from '@utils';
+import { Popup, BaseRoute, RouteEvents } from '@/components/navbar';
+import { PopupItem, RouteItem } from '@/types';
+import { processTemplate } from '@/utils';
 
 export class Route extends BaseRoute {
   private readonly _events = new RouteEvents();
+  private _popupInstance?: Popup;
 
   constructor(
     _navbarCard: NavbarCard,
     private readonly _routeData: RouteItem,
-
-    private _popupInstance?: Popup,
   ) {
     super(_navbarCard, _routeData);
     this._validateRoute();

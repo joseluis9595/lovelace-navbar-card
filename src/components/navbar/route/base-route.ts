@@ -5,30 +5,27 @@ import {
   Badge,
   Route,
   PopupItem,
-} from '@components/navbar';
+} from '@/components/navbar';
 import {
   NavbarCustomActions,
   QuickbarActionConfig,
   RouteItemBase,
-} from '@types';
+} from '@/types';
 import {
   fireDOMEvent,
   forceOpenEditMode,
   forceResetRipple,
   hapticFeedback,
   processTemplate,
-} from '@utils';
+} from '@/utils';
 
 export class BaseRoute {
+  private _iconInstance?: Icon;
+  private _badgeInstance?: Badge;
+
   constructor(
     protected _navbarCard: NavbarCard,
     public readonly data: RouteItemBase,
-
-    private _iconInstance?: Icon,
-    private _badgeInstance?: Badge,
-    private _cachedLabel?: string | null,
-    private _cachedHidden?: boolean,
-    private _cachedSelected?: boolean
   ) {}
 
   get url() {
@@ -43,26 +40,25 @@ export class BaseRoute {
 
   get label(): string | null {
     if (!this._shouldShowLabels(false)) return null;
-    return this._cachedLabel ??=
-        processTemplate<string>(this._navbarCard._hass, this._navbarCard, this.data.label)
+    return processTemplate<string>(this._navbarCard._hass, this._navbarCard, this.data.label)
         ?? ' ';
   }
 
   get hidden() {
-    return this._cachedHidden ??= !!processTemplate<boolean>(
+    return processTemplate<boolean>(
         this._navbarCard._hass,
         this._navbarCard,
         this.data.hidden,
       );
   }
   get selected() {
-    return this._cachedSelected ??= this.data.selected != null
-        ? !!processTemplate<boolean>(
+    return this.data.selected != null
+        ? processTemplate<boolean>(
             this._navbarCard._hass,
             this._navbarCard,
             this.data.selected,
           )
-        : window.location.pathname === this.url;;
+        : window.location.pathname === this.url;
   }
   get tap_action() {
     return this.data.tap_action;

@@ -1,6 +1,6 @@
 // src/components/navbar/route/events.ts
-import { PopupItem, Route } from '@components/navbar';
-import { RippleElement } from '@types';
+import { PopupItem, Route } from '@/components/navbar';
+import { RippleElement } from '@/types';
 
 const DOUBLE_TAP_DELAY = 250;
 const HOLD_ACTION_DELAY = 500;

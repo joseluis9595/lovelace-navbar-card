@@ -1,20 +1,20 @@
 import { css, CSSResult, html } from 'lit';
 import { NavbarCard } from '@/navbar-card';
-import { PopupItem } from '@components/navbar';
+import { PopupItem } from '@/components/navbar';
 import {
     DesktopPosition,
     PopupItem as PopupItemDef,
-} from '@types';
+} from '@/types';
 
 export class Popup {
+    private _popupItems: PopupItem[] = [];
+
     constructor(
         private _navbarCard: NavbarCard,
         private readonly _popupItemData: PopupItemDef[],
-
-        private _popupItems: PopupItem[] = [],
     ) {
         _popupItemData.forEach((_itemData, _index) => {
-            _popupItems.push(new PopupItem(this._navbarCard, _itemData, _index));
+            this._popupItems.push(new PopupItem(this._navbarCard, _itemData, _index));
         });
     }
 
@@ -34,7 +34,7 @@ export class Popup {
                         DesktopPosition.bottom),
             );
 
-        this._navbarCard.focussedPopup = html`
+        this._navbarCard.focusedPopup = html`
       <div class="navbar-popup-backdrop"></div>
       <div
         class="
@@ -91,10 +91,10 @@ export class Popup {
 
             // Wait for transitions to complete before removing
             setTimeout(() => {
-                this._navbarCard.focussedPopup = null;
+                this._navbarCard.focusedPopup = null;
             }, 200);
         } else {
-            this._navbarCard.focussedPopup = null;
+            this._navbarCard.focusedPopup = null;
         }
         // Remove Escape key listener when popup is closed
         window.removeEventListener('keydown', this._onPopupKeyDownListener);
@@ -165,7 +165,7 @@ export class Popup {
     }
 
     private _onPopupKeyDownListener = (e: KeyboardEvent) => {
-        if (e.key === 'Escape' && this._navbarCard.focussedPopup) {
+        if (e.key === 'Escape' && this._navbarCard.focusedPopup) {
             e.preventDefault();
             this.close();
         }

@@ -1,7 +1,7 @@
 import { html } from 'lit';
 import { NavbarCard } from '@/navbar-card';
-import { BaseRoute } from '@components/navbar';
-import { processTemplate } from '@utils';
+import { BaseRoute } from '@/components/navbar';
+import { processTemplate } from '@/utils';
 
 export class Icon {
   constructor(
