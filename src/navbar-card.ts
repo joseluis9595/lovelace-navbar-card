@@ -7,7 +7,7 @@ import {
   DesktopPosition,
   NavbarCardConfig,
   STUB_CONFIG,
-} from './config';
+} from '@types';
 import { Route } from '@components/navbar';
 import {
   fireDOMEvent,
@@ -20,7 +20,7 @@ import {
   removeDashboardPadding,
 } from '@utils';
 import { getDefaultStyles } from './styles';
-import { EventManager } from './event-manager';
+import { MediaPlayer } from './components/media-player';
 
 declare global {
   interface Window {
@@ -52,8 +52,7 @@ export class NavbarCard extends LitElement {
   @state() config?: NavbarCardConfig;
 
   /** Runtime state */
-  eventManager = new EventManager();
-
+  private readonly _mediaPlayer: MediaPlayer = new MediaPlayer(this);
   @state() private _showMediaPlayer?: boolean;
   @state() private _routes: Route[] = [];
   @state() focussedPopup: TemplateResult<1> | null = null;
@@ -62,7 +61,7 @@ export class NavbarCard extends LitElement {
   /** Set HA instance (called by HA runtime) */
   set hass(hass: HomeAssistant) {
     this._hass = hass;
-    const { visible } = this._shouldShowMediaPlayer();
+    const { visible } = this._mediaPlayer.shouldShowMediaPlayer();
 
     if (this._showMediaPlayer !== visible) {
       this._showMediaPlayer = visible;
@@ -184,200 +183,6 @@ export class NavbarCard extends LitElement {
     }
   }
 
-  /**
-   * Check if the media player should be shown.
-   */
-  private _shouldShowMediaPlayer = (): { visible: boolean; error?: string } => {
-    // If the media player is not configured, don't show it
-    if (
-      !this.config ||
-      !this.config.media_player ||
-      !this.config.media_player.entity
-    ) {
-      return { visible: false };
-    }
-
-    // If the card is on desktop mode, don't show the media player
-    if (this.isDesktop) return { visible: false };
-
-    // Support JSTemplate for entity
-    const entity = processTemplate<string>(
-      this._hass,
-      this,
-      this.config.media_player.entity,
-    );
-
-    // Get the media player state
-    const mediaPlayerState = this._hass.states[entity];
-
-    // If the media player does not exist, display the media player
-    if (!mediaPlayerState)
-      return {
-        visible: true,
-        error: `Entity not found "${entity}"`,
-      };
-
-    // If the media player visibility is manually configured, use the configured value
-    if (this.config.media_player.show != null) {
-      const show = processTemplate<boolean>(
-        this._hass,
-        this,
-        this.config.media_player.show,
-      );
-      return { visible: show };
-    }
-
-    return {
-      visible: ['playing', 'paused'].includes(mediaPlayerState?.state),
-    };
-  };
-
-  /**
-   * Click handler for the media player card itself.
-   */
-  private _handleMediaPlayerClick = (e: MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const entity = processTemplate<string>(
-      this._hass,
-      this,
-      this.config?.media_player?.entity,
-    );
-    if (!entity) return;
-
-    // Open home assistant more-info dialog for the media player
-    fireDOMEvent(
-      this,
-      'hass-more-info',
-      {
-        bubbles: true,
-        composed: true,
-      },
-      {
-        entityId: entity,
-      },
-    );
-  };
-
-  /**
-   * Skip to next track.
-   */
-  private _handleMediaPlayerSkipNextClick = (e: MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const entity = processTemplate<string>(
-      this._hass,
-      this,
-      this.config?.media_player?.entity,
-    );
-    if (!entity) return;
-    this._hass.callService('media_player', 'media_next_track', {
-      entity_id: entity,
-    });
-  };
-
-  /**
-   * Click handler for the media player play/pause button.
-   */
-  private _handleMediaPlayerPlayPauseClick = (e: MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const entity = processTemplate<string>(
-      this._hass,
-      this,
-      this.config?.media_player?.entity,
-    );
-    if (!entity) return;
-    const mediaPlayerState = this._hass.states[entity];
-    if (!mediaPlayerState) return;
-
-    if (mediaPlayerState.state === 'playing') {
-      this._hass.callService('media_player', 'media_pause', {
-        entity_id: entity,
-      });
-    } else {
-      this._hass.callService('media_player', 'media_play', {
-        entity_id: entity,
-      });
-    }
-  };
-
-  /**
-   * Render the media player card.
-   */
-  private _renderMediaPlayer = () => {
-    const { visible, error } = this._shouldShowMediaPlayer();
-    if (!visible) return html``;
-
-    const entity = processTemplate<string>(
-      this._hass,
-      this,
-      this.config!.media_player!.entity,
-    );
-
-    if (error) {
-      return html`<ha-card class="media-player error">
-        <ha-alert alert-type="error"> ${error} </ha-alert>
-      </ha-card>`;
-    }
-
-    const mediaPlayerState = this._hass.states[entity];
-    const progress =
-      mediaPlayerState.attributes.media_position != null
-        ? mediaPlayerState.attributes.media_position /
-          mediaPlayerState.attributes.media_duration
-        : null;
-
-    return html`
-      <ha-card class="media-player" @click=${this._handleMediaPlayerClick}>
-        <div
-          class="media-player-bg"
-          style=${this.config?.media_player?.album_cover_background
-            ? `background-image: url(${
-                mediaPlayerState.attributes.entity_picture
-              });`
-            : ''}></div>
-        ${progress != null
-          ? html` <div class="media-player-progress-bar">
-              <div
-                class="media-player-progress-bar-fill"
-                style="width: ${progress * 100}%"></div>
-            </div>`
-          : html``}
-        <img
-          class="media-player-image"
-          src=${mediaPlayerState.attributes.entity_picture}
-          alt=${mediaPlayerState.attributes.media_title} />
-        <div class="media-player-info">
-          <span class="media-player-title"
-            >${mediaPlayerState.attributes.media_title}</span
-          >
-          <span class="media-player-artist"
-            >${mediaPlayerState.attributes.media_artist}</span
-          >
-        </div>
-        <ha-button
-          class="media-player-button media-player-button-play-pause"
-          appearance="accent"
-          variant="brand"
-          @click=${this._handleMediaPlayerPlayPauseClick}>
-          <ha-icon
-            icon=${mediaPlayerState.state === 'playing'
-              ? 'mdi:pause'
-              : 'mdi:play'}></ha-icon>
-        </ha-button>
-        <ha-button
-          class="media-player-button media-player-button-skip"
-          appearance="plain"
-          variant="neutral"
-          @click=${this._handleMediaPlayerSkipNextClick}>
-          <ha-icon icon="mdi:skip-next"></ha-icon>
-        </ha-button>
-      </ha-card>
-    `;
-  };
-
   protected render() {
     if (!this.config || this._shouldHide()) return html``;
 
@@ -395,7 +200,7 @@ export class NavbarCard extends LitElement {
     return html`
       <div
         class="navbar ${editClass} ${deviceClass} ${desktopPosition} ${mobileModeClass}">
-        ${this._renderMediaPlayer()}
+        ${this._mediaPlayer.render()}
         <ha-card
           class="navbar-card ${deviceClass} ${desktopPosition} ${mobileModeClass}">
           ${this._routes.map(route => route.render()).filter(Boolean)}

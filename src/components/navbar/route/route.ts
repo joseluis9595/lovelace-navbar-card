@@ -1,11 +1,12 @@
 import { html, TemplateResult } from 'lit';
 import { NavbarCard } from '@/navbar-card';
-import { PopupItem, RouteItem } from '@/config';
-import { processTemplate } from '@/utils';
-import { Popup } from './popup/popup';
-import { BaseRoute } from './base-route';
+import { Popup, BaseRoute, RouteEvents } from '@components/navbar';
+import { PopupItem, RouteItem } from '@types';
+import { processTemplate } from '@utils';
 
 export class Route extends BaseRoute {
+  private readonly _events = new RouteEvents();
+
   constructor(
     _navbarCard: NavbarCard,
     private readonly _routeData: RouteItem,
@@ -48,19 +49,19 @@ export class Route extends BaseRoute {
       <div
         class="route ${isActive ? 'active' : ''}"
         @mouseenter=${(e: PointerEvent) =>
-          this._navbarCard.eventManager.handleMouseEnter(e, this)}
+          this._events.handleMouseEnter(e as unknown as MouseEvent, this)}
         @mousemove=${(e: PointerEvent) =>
-          this._navbarCard.eventManager.handleMouseMove(e, this)}
+          this._events.handleMouseMove(e as unknown as MouseEvent, this)}
         @mouseleave=${(e: PointerEvent) =>
-          this._navbarCard.eventManager.handleMouseLeave(e, this)}
+          this._events.handleMouseLeave(e as unknown as MouseEvent, this)}
         @pointerdown=${(e: PointerEvent) =>
-          this._navbarCard.eventManager.handlePointerDown(e, this)}
+          this._events.handlePointerDown(e, this)}
         @pointermove=${(e: PointerEvent) =>
-          this._navbarCard.eventManager.handlePointerMove(e, this)}
+          this._events.handlePointerMove(e, this)}
         @pointerup=${(e: PointerEvent) =>
-          this._navbarCard.eventManager.handlePointerUp(e, this)}
+          this._events.handlePointerUp(e, this)}
         @pointercancel=${(e: PointerEvent) =>
-          this._navbarCard.eventManager.handlePointerMove(e, this)}>
+          this._events.handlePointerMove(e, this)}>
         <div class="button ${isActive ? 'active' : ''}">
           ${this.icon.render()}
           <ha-ripple></ha-ripple>

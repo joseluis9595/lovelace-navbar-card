@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { HomeAssistant } from 'custom-card-helpers';
 import { NavbarCard } from '@/navbar-card';
-import { RouteItem } from '@/config';
+import { RouteItem } from '@/types/config';
 import {
   cleanTemplate,
   isTemplate,

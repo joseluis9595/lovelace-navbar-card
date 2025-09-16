@@ -3,8 +3,8 @@ import {
   NavbarCardConfig,
   AutoPaddingConfig,
   DEFAULT_NAVBAR_CONFIG,
-} from '@/config';
-import { RippleElement } from '@/types';
+} from '@/types/config';
+import { RippleElement } from '@/types/types';
 
 const DASHBOARD_PADDING_STYLE_ID = 'navbar-card-forced-padding-styles';
 const DEFAULT_STYLES_ID = 'navbar-card-default-styles';

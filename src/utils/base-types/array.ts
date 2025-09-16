@@ -1,4 +1,4 @@
-import { DeepPartial } from "@/types";
+import { DeepPartial } from "@/types/types";
 
 /**
  * Deep merges data from "newData" into "item", completely replacing arrays

@@ -1,9 +1,4 @@
 import { navigate } from 'custom-card-helpers';
-import {
-  NavbarCustomActions,
-  QuickbarActionConfig,
-  RouteItemBase,
-} from '@/config';
 import { NavbarCard } from '@/navbar-card';
 import {
   Icon,
@@ -12,12 +7,17 @@ import {
   PopupItem,
 } from '@components/navbar';
 import {
+  NavbarCustomActions,
+  QuickbarActionConfig,
+  RouteItemBase,
+} from '@types';
+import {
   fireDOMEvent,
   forceOpenEditMode,
   forceResetRipple,
   hapticFeedback,
   processTemplate,
-} from '@/utils';
+} from '@utils';
 
 export class BaseRoute {
   constructor(

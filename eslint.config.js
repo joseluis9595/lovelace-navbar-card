@@ -72,6 +72,7 @@ export default defineConfig([
           map: [
             ['@', './src'],
             ['@components', './src/components'],
+            ['@types', './src/types'],
             ['@utils', './src/utils'],
           ],
         },

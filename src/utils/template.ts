@@ -1,5 +1,5 @@
 import { HomeAssistant } from 'custom-card-helpers';
-import { NavbarCardPublicState } from '@/types';
+import { NavbarCardPublicState } from '@/types/types';
 import { NavbarCard } from '@/navbar-card';
 import { generateHash } from '@utils';
 
