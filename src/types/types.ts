@@ -116,5 +116,5 @@ export function genericSetProperty<T, K extends DotNotationKeys<T>>(
  * @template T - The object type to apply deep partiality to.
  */
 export type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> | null : T[P] | null;
+  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
 };
