@@ -3,8 +3,8 @@ import {
   NavbarCardConfig,
   AutoPaddingConfig,
   DEFAULT_NAVBAR_CONFIG,
-} from './config';
-import { RippleElement } from './types';
+} from '@/types/config';
+import { RippleElement } from '@/types/types';
 
 const DASHBOARD_PADDING_STYLE_ID = 'navbar-card-forced-padding-styles';
 const DEFAULT_STYLES_ID = 'navbar-card-default-styles';
@@ -181,7 +181,7 @@ export const forceDashboardPadding = (options?: {
           display: block;
           height: ${mobilePaddingPx}px;
           width: 100%;
-          background-color: transparent; 
+          background-color: transparent;
           }
         }
       `;
@@ -272,4 +272,14 @@ export const injectStyles = (
 ) => {
   createStyleElement(root, DEFAULT_STYLES_ID, defaultStyles);
   createStyleElement(root, USER_STYLES_ID, userStyles);
+};
+
+/**
+ * Trigger haptic feedback by firing a 'haptic' event on the window.
+ *
+ * @param hapticType - The type of haptic feedback (default: 'selection')
+ * @returns The created and dispatched event
+ */
+export const hapticFeedback = (hapticType: string = 'selection') => {
+  return fireDOMEvent(window, 'haptic', undefined, hapticType);
 };

@@ -2,6 +2,7 @@
 // Reason: Dynamic dot-notation keys for deeply nested config editing in a generic editor.
 import { LitElement, PropertyValues, TemplateResult, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { loadHaComponents } from '@kipk/load-ha-components';
 import {
   DEFAULT_NAVBAR_CONFIG,
   DesktopPosition,
@@ -13,25 +14,22 @@ import {
   PopupItem,
   QuickbarActionConfig,
   RouteItem,
-} from './config';
-import {
   DeepPartial,
   DotNotationKeys,
   genericGetProperty,
   genericSetProperty,
   NestedType,
-} from './types';
+} from '@/types';
+import { TemplatableInputOptions } from './navbar-card-editor.types';
 import {
+  getNavbarTemplates,
   cleanTemplate,
   deepMergeKeepArrays,
   isTemplate,
   processTemplate,
   wrapTemplate,
-} from './utils';
+} from '@/utils';
 import { getEditorStyles } from './styles';
-import { getNavbarTemplates } from './dom-utils';
-import { loadHaComponents } from '@kipk/load-ha-components';
-import { TemplatableInputOptions } from './navbar-card-editor.types';
 
 enum HAActions {
   tap_action = 'tap_action',

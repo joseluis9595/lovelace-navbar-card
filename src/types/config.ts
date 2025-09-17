@@ -57,7 +57,7 @@ type JSTemplate = string;
 type JSTemplatable<T> = JSTemplate | T;
 
 // Base properties shared by all route items
-type RouteItemBase = {
+export type RouteItemBase = {
   url?: string;
   tap_action?: ExtendedActionConfig;
   hold_action?: ExtendedActionConfig;
@@ -139,6 +139,7 @@ export type NavbarCardConfig = {
   };
   styles?: string;
   haptic?: boolean | HapticConfig;
+  reflect_child_state?: boolean;
 };
 
 export const DEFAULT_NAVBAR_CONFIG: NavbarCardConfig = {

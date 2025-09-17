@@ -1,6 +1,5 @@
 import { TemplateResult } from 'lit';
-import { NavbarCardConfig } from './config';
-import { DotNotationKeys } from './types';
+import { NavbarCardConfig, DotNotationKeys } from '@/types';
 
 type BaseInputOptions = {
   configKey: DotNotationKeys<NavbarCardConfig>;
