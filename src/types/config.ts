@@ -123,6 +123,7 @@ export type NavbarCardConfig = {
   template?: string;
   layout?: {
     auto_padding?: AutoPaddingConfig;
+    reflect_child_state?: boolean;
   };
   desktop?: {
     show_labels?: LabelVisibilityConfig;
@@ -139,7 +140,6 @@ export type NavbarCardConfig = {
   };
   styles?: string;
   haptic?: boolean | HapticConfig;
-  reflect_child_state?: boolean;
 };
 
 export const DEFAULT_NAVBAR_CONFIG: NavbarCardConfig = {
@@ -152,6 +152,7 @@ export const DEFAULT_NAVBAR_CONFIG: NavbarCardConfig = {
       mobile_px: 80,
       media_player_px: 100,
     },
+    reflect_child_state: false,
   },
   desktop: {
     show_labels: false,

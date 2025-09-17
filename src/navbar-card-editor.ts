@@ -799,6 +799,15 @@ export class NavbarCardEditor extends LitElement {
           Layout
         </h4>
         <div class="editor-section">
+          <label class="editor-label">Reflect child state</label>
+          ${this.makeSwitch({
+            label:
+              'Display routes as selected if any of its popup items is selected',
+            configKey: 'layout.reflect_child_state',
+            defaultValue: DEFAULT_NAVBAR_CONFIG.layout?.reflect_child_state,
+          })}
+        </div>
+        <div class="editor-section">
           <label class="editor-label">Auto padding</label>
           ${this.makeSwitch({
             label: 'Enable auto padding',
@@ -825,7 +834,8 @@ export class NavbarCardEditor extends LitElement {
               DEFAULT_NAVBAR_CONFIG.layout?.auto_padding?.mobile_px?.toString(),
             helper: 'Padding for mobile mode. 0 to disable.',
           })}
-        </div></ha-expansion-panel
+        </div>
+      </ha-expansion-panel>
     `;
   }
 
