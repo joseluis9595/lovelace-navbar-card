@@ -1,6 +1,13 @@
 import { version } from '../package.json';
 import { HomeAssistant } from 'custom-card-helpers';
-import { css, html, LitElement, PropertyValues, TemplateResult, unsafeCSS } from 'lit';
+import {
+  css,
+  html,
+  LitElement,
+  PropertyValues,
+  TemplateResult,
+  unsafeCSS,
+} from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import {
   DEFAULT_NAVBAR_CONFIG,
