@@ -31,15 +31,17 @@ export class BaseRoute {
   get url() {
     return this.data.url;
   }
+
   get icon() {
     return this._iconInstance ??= new Icon(this._navbarCard, this);
   }
+
   get badge() {
     return this._badgeInstance ??= new Badge(this._navbarCard, this);
   }
 
   get label(): string | null {
-    if (!this._shouldShowLabels(false)) return null;
+    if (!this._shouldShowLabels()) return null;
     return processTemplate<string>(this._navbarCard._hass, this._navbarCard, this.data.label)
         ?? ' ';
   }
@@ -51,6 +53,7 @@ export class BaseRoute {
         this.data.hidden,
       );
   }
+
   get selected() {
     return this.data.selected != null
         ? processTemplate<boolean>(
@@ -60,12 +63,15 @@ export class BaseRoute {
           )
         : window.location.pathname === this.url;
   }
+
   get tap_action() {
     return this.data.tap_action;
   }
+
   get hold_action() {
     return this.data.hold_action;
   }
+  
   get double_tap_action() {
     return this.data.double_tap_action;
   }
@@ -186,7 +192,7 @@ export class BaseRoute {
     }
   };
 
-  protected _shouldShowLabels = (isSubmenu: boolean): boolean => {
+  protected _shouldShowLabels = (): boolean => {
     const config = this._navbarCard.isDesktop
       ? this._navbarCard.config?.desktop?.show_labels
       : this._navbarCard.config?.mobile?.show_labels;
@@ -194,8 +200,8 @@ export class BaseRoute {
     if (typeof config === 'boolean') return config;
 
     return (
-      (config === 'popup_only' && isSubmenu) ||
-      (config === 'routes_only' && !isSubmenu)
+      (config === 'popup_only' && this instanceof PopupItem) ||
+      (config === 'routes_only' && !(this instanceof PopupItem))
     );
   };
 

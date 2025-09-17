@@ -19,7 +19,7 @@ export class Badge {
         this._navbarCard._hass,
         this._navbarCard,
         badge.show,
-      );
+      ) ?? false;
     }
 
     if (badge.template) {
