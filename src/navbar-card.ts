@@ -17,6 +17,7 @@ import {
 } from '@/types';
 import { Route } from '@/components/navbar';
 import {
+  deepMergeKeepArrays,
   forceDashboardPadding,
   forceResetRipple,
   getNavbarTemplates,
@@ -146,10 +147,7 @@ export class NavbarCard extends LitElement {
         const templateConfig = templates[config.template];
 
         if (templateConfig) {
-          config = {
-            ...templateConfig,
-            ...config,
-          };
+          config = deepMergeKeepArrays(templateConfig, config);
         }
       } else {
         console.warn(
