@@ -83,6 +83,7 @@ export class Route extends BaseRoute {
     }
 
     if (
+      !this._routeData.popup &&
       !this.tap_action &&
       !this.hold_action &&
       !this.url &&

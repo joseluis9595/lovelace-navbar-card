@@ -32,7 +32,7 @@ export class Badge {
 
   get count(): number | null {
     return (
-      processTemplate<number | null>(
+      processTemplate<number>(
         this._navbarCard._hass,
         this._navbarCard,
         this._route.data.badge?.count,
