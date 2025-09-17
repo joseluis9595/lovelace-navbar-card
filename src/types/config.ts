@@ -111,6 +111,9 @@ type MediaPlayerConfig = {
   entity: JSTemplatable<string>;
   show?: JSTemplatable<boolean>;
   album_cover_background?: boolean;
+  tap_action?: ExtendedActionConfig;
+  hold_action?: ExtendedActionConfig;
+  double_tap_action?: ExtendedActionConfig;
 };
 
 // Mobile mode configuration

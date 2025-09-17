@@ -1,11 +1,6 @@
 import { navigate } from 'custom-card-helpers';
 import { NavbarCard } from '@/navbar-card';
-import {
-  Icon,
-  Badge,
-  Route,
-  PopupItem,
-} from '@/components/navbar';
+import { Icon, Badge, Route, PopupItem } from '@/components/navbar';
 import {
   NavbarCustomActions,
   QuickbarActionConfig,
@@ -18,8 +13,9 @@ import {
   hapticFeedback,
   processTemplate,
 } from '@/utils';
+import { ActionableElement } from '@/components/action-events';
 
-export class BaseRoute {
+export class BaseRoute implements ActionableElement {
   private _iconInstance?: Icon;
   private _badgeInstance?: Badge;
 
@@ -33,35 +29,40 @@ export class BaseRoute {
   }
 
   get icon() {
-    return this._iconInstance ??= new Icon(this._navbarCard, this);
+    return (this._iconInstance ??= new Icon(this._navbarCard, this));
   }
 
   get badge() {
-    return this._badgeInstance ??= new Badge(this._navbarCard, this);
+    return (this._badgeInstance ??= new Badge(this._navbarCard, this));
   }
 
   get label(): string | null {
     if (!this._shouldShowLabels()) return null;
-    return processTemplate<string>(this._navbarCard._hass, this._navbarCard, this.data.label)
-        ?? ' ';
+    return (
+      processTemplate<string>(
+        this._navbarCard._hass,
+        this._navbarCard,
+        this.data.label,
+      ) ?? ' '
+    );
   }
 
   get hidden() {
     return processTemplate<boolean>(
-        this._navbarCard._hass,
-        this._navbarCard,
-        this.data.hidden,
-      );
+      this._navbarCard._hass,
+      this._navbarCard,
+      this.data.hidden,
+    );
   }
 
   get selected() {
     return this.data.selected != null
-        ? processTemplate<boolean>(
-            this._navbarCard._hass,
-            this._navbarCard,
-            this.data.selected,
-          )
-        : window.location.pathname === this.url;
+      ? processTemplate<boolean>(
+          this._navbarCard._hass,
+          this._navbarCard,
+          this.data.selected,
+        )
+      : window.location.pathname === this.url;
   }
 
   get tap_action() {
@@ -71,7 +72,7 @@ export class BaseRoute {
   get hold_action() {
     return this.data.hold_action;
   }
-  
+
   get double_tap_action() {
     return this.data.double_tap_action;
   }
@@ -81,7 +82,7 @@ export class BaseRoute {
    */
   public executeAction = (
     target: HTMLElement,
-    route: Route | PopupItem,
+    element: ActionableElement,
     action:
       | RouteItemBase['tap_action']
       | RouteItemBase['hold_action']
@@ -100,21 +101,21 @@ export class BaseRoute {
     // Close popup for any action unless it's opening a new popup
     if (
       action?.action !== NavbarCustomActions.openPopup &&
-      route instanceof Route
+      element instanceof Route
     ) {
-      route.popup.close();
+      element.popup.close();
     }
 
     switch (action?.action) {
       case NavbarCustomActions.openPopup:
-        if (route instanceof Route) {
-          if (route.popup.items.length === 0) {
+        if (element instanceof Route) {
+          if (element.popup.items.length === 0) {
             console.error(
-              `[navbar-card] No popup items found for route: ${route.label}`,
+              `[navbar-card] No popup items found for route: ${element.label}`,
             );
           } else {
             triggerHaptic();
-            route.popup.open(target);
+            element.popup.open(target);
           }
         }
         break;
@@ -184,9 +185,9 @@ export class BaseRoute {
               },
             );
           }, 10);
-        } else if (actionType === 'tap' && route.url) {
+        } else if (actionType === 'tap' && (element as Route).url) {
           triggerHaptic(true);
-          navigate(this, route.url);
+          navigate(this, (element as Route).url!);
         }
         break;
     }

@@ -903,6 +903,34 @@ export class NavbarCardEditor extends LitElement {
             configKey: 'media_player.show',
             helper: BOOLEAN_JS_TEMPLATE_HELPER,
           })}
+          ${Object.values(HAActions).map(type => {
+            const key =
+              `media_player.${type}` as DotNotationKeys<NavbarCardConfig>;
+            const actionValue = genericGetProperty(this._config, key);
+            console.log(key, actionValue);
+            const label = this._chooseLabelForAction(type as HAActions);
+
+            return html`
+              ${actionValue != null
+                ? this.makeActionSelector({
+                    actionType: type as HAActions,
+                    configKey: key,
+                  })
+                : html`
+                    <ha-button
+                      @click=${() =>
+                        this.updateConfigByKey(key, {
+                          action: 'none',
+                        })}
+                      style="margin-bottom: 1em;"
+                      outlined
+                      hasTrailingIcon>
+                      <ha-icon slot="start" icon="mdi:plus"></ha-icon>
+                      <span>Add ${label}</span>
+                    </ha-button>
+                  `}
+            `;
+          })}
         </div>
       </ha-expansion-panel>
     `;
