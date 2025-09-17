@@ -1070,7 +1070,8 @@ export class NavbarCardEditor extends LitElement {
   }
 
   isCustomAction(value: string) {
-    return !['none', 'hass_action'].includes(value);
+    if (value === 'none') return false;
+    return Object.values(NavbarCustomActions).includes(value as any);
   }
 
   makeActionSelector(options: {
