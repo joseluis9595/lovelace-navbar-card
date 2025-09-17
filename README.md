@@ -101,17 +101,16 @@ routes:
 
 <img width="400" height="120" alt="navbar-card" src="https://github.com/user-attachments/assets/346a6466-1a79-400e-9fe4-4f8472b3bee5" />
 
-| Name                  | Type                          | Default    | Description                                                                                             |
-| --------------------- | ----------------------------- | ---------- | ------------------------------------------------------------------------------------------------------- |
-| `routes`              | [Routes](#routes)             | `Required` | Defines the array of routes to be shown in the navbar                                                   |
-| `desktop`             | [Desktop](#desktop)           | -          | Options specific to desktop mode                                                                        |
-| `mobile`              | [Mobile](#mobile)             | -          | Options specific to mobile mode                                                                         |
-| `template`            | [Template](#template)         | -          | Template name                                                                                           |
-| `layout`              | [Layout](#layout)             | -          | Layout configuration options                                                                            |
-| `styles`              | [Styles](#styles)             | -          | Custom CSS styles for the card                                                                          |
-| `haptic`              | [Haptic](#haptic)             | -          | Fine tune when the haptic events should be fired in the card                                            |
-| `reflect_child_state` | `boolean`                     | -          | Determines if the parent item should reflect the child's active state                                   |
-| `media_player`        | [Media player](#media-player) | -          | `[BETA]` Automatically display a media_player card on top of navbar-card. Only enabled for mobile mode. |
+| Name           | Type                          | Default    | Description                                                                                             |
+| -------------- | ----------------------------- | ---------- | ------------------------------------------------------------------------------------------------------- |
+| `routes`       | [Routes](#routes)             | `Required` | Defines the array of routes to be shown in the navbar                                                   |
+| `desktop`      | [Desktop](#desktop)           | -          | Options specific to desktop mode                                                                        |
+| `mobile`       | [Mobile](#mobile)             | -          | Options specific to mobile mode                                                                         |
+| `template`     | [Template](#template)         | -          | Template name                                                                                           |
+| `layout`       | [Layout](#layout)             | -          | Layout configuration options                                                                            |
+| `styles`       | [Styles](#styles)             | -          | Custom CSS styles for the card                                                                          |
+| `haptic`       | [Haptic](#haptic)             | -          | Fine tune when the haptic events should be fired in the card                                            |
+| `media_player` | [Media player](#media-player) | -          | `[BETA]` Automatically display a media_player card on top of navbar-card. Only enabled for mobile mode. |
 
 ### Routes
 
@@ -450,9 +449,10 @@ styles: |
 
 Configuration options for the navbar layout and behavior.
 
-| Name           | Type                          | Default | Description                                                     |
-| -------------- | ----------------------------- | ------- | --------------------------------------------------------------- |
-| `auto_padding` | [Auto Padding](#auto-padding) | -       | Add padding to your Home Asistant dashboard to prevent overlaps |
+| Name                  | Type                          | Default | Description                                                                                           |
+| --------------------- | ----------------------------- | ------- | ----------------------------------------------------------------------------------------------------- |
+| `auto_padding`        | [Auto Padding](#auto-padding) | -       | Add padding to your Home Asistant dashboard to prevent overlaps                                       |
+| `reflect_child_state` | `boolean`                     | -       | Determines if each route item should be displayed as selected when any of its popup items is selected |
 
 #### Auto Padding
 
