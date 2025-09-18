@@ -160,6 +160,11 @@ export class BaseRoute {
         forceOpenEditMode();
         break;
 
+      case NavbarCustomActions.logout:
+        triggerHaptic();
+        this._navbarCard._hass.auth.revoke();
+        break;
+
       case NavbarCustomActions.customJSAction:
         triggerHaptic();
         processTemplate<string>(
