@@ -1,11 +1,12 @@
 import { html, TemplateResult } from 'lit';
 import { NavbarCard } from '@/navbar-card';
-import { Popup, BaseRoute, RouteEvents } from '@/components/navbar';
+import { Popup, BaseRoute } from '@/components/navbar';
 import { PopupItem, RouteItem } from '@/types';
 import { processTemplate } from '@/utils';
+import { ActionEvents } from '@/components/action-events';
 
 export class Route extends BaseRoute {
-  private readonly _events = new RouteEvents();
+  private readonly _events = new ActionEvents();
   private _popupInstance?: Popup;
 
   constructor(
@@ -17,7 +18,7 @@ export class Route extends BaseRoute {
   }
 
   get popup(): Popup {
-    return this._popupInstance ??= new Popup(
+    return (this._popupInstance ??= new Popup(
       this._navbarCard,
       processTemplate<PopupItem[]>(
         this._navbarCard._hass,
@@ -27,12 +28,15 @@ export class Route extends BaseRoute {
         this._routeData.popup ??
         this._routeData.submenu ??
         [],
-    );
+    ));
   }
 
   get isSelfOrChildActive(): boolean {
     // If the route is not active, check if any of its children are active (if configured to do so)
-    if (this._navbarCard.config?.layout?.reflect_child_state && !this.selected) {
+    if (
+      this._navbarCard.config?.layout?.reflect_child_state &&
+      !this.selected
+    ) {
       return this.popup.items.some(item => item.selected);
     }
 
@@ -57,8 +61,7 @@ export class Route extends BaseRoute {
           this._events.handlePointerDown(e, this)}
         @pointermove=${(e: PointerEvent) =>
           this._events.handlePointerMove(e, this)}
-        @pointerup=${(e: PointerEvent) =>
-          this._events.handlePointerUp(e, this)}
+        @pointerup=${(e: PointerEvent) => this._events.handlePointerUp(e, this)}
         @pointercancel=${(e: PointerEvent) =>
           this._events.handlePointerMove(e, this)}>
         <div class="button ${isActive ? 'active' : ''}">
