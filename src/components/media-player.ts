@@ -1,6 +1,6 @@
 import { html } from 'lit';
 import { NavbarCard } from '@/navbar-card';
-import { fireDOMEvent, processTemplate } from '@/utils';
+import { fireDOMEvent, preventEventDefault, processTemplate } from '@/utils';
 import { ActionEvents, ActionableElement } from '@/components/action-events';
 import { ExtendedActionConfig } from '@/types';
 
@@ -185,7 +185,9 @@ export class MediaPlayer implements ActionableElement {
           class="media-player-button media-player-button-play-pause"
           appearance="accent"
           variant="brand"
-          @click=${this._handleMediaPlayerPlayPauseClick}>
+          @click=${this._handleMediaPlayerPlayPauseClick}
+          @pointerdown=${preventEventDefault}
+          @pointerup=${preventEventDefault}>
           <ha-icon
             icon=${mediaPlayerState.state === 'playing'
               ? 'mdi:pause'
@@ -195,7 +197,9 @@ export class MediaPlayer implements ActionableElement {
           class="media-player-button media-player-button-skip"
           appearance="plain"
           variant="neutral"
-          @click=${this._handleMediaPlayerSkipNextClick}>
+          @click=${this._handleMediaPlayerSkipNextClick}
+          @pointerdown=${preventEventDefault}
+          @pointerup=${preventEventDefault}>
           <ha-icon icon="mdi:skip-next"></ha-icon>
         </ha-button>
       </ha-card>

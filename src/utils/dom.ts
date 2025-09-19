@@ -283,3 +283,13 @@ export const injectStyles = (
 export const hapticFeedback = (hapticType: string = 'selection') => {
   return fireDOMEvent(window, 'haptic', undefined, hapticType);
 };
+
+/**
+ * Prevent the default action of an event and stop the propagation of the event.
+ *
+ * @param e - The event to prevent the default action of.
+ */
+export const preventEventDefault = (e: Event) => {
+  e.preventDefault();
+  e.stopPropagation();
+};
