@@ -14,6 +14,7 @@ export enum NavbarCustomActions {
   quickbar = 'quickbar',
   openEditMode = 'open-edit-mode',
   toggleMenu = 'toggle-menu',
+  logout = 'logout',
   customJSAction = 'custom-js-action',
 }
 
@@ -37,6 +38,9 @@ export type QuickbarActionConfig = {
 type OpenEditModeActionConfig = {
   action: NavbarCustomActions.openEditMode;
 };
+type LogoutActionConfig = {
+  action: NavbarCustomActions.logout;
+};
 type CustomJSActionConfig = {
   action: NavbarCustomActions.customJSAction;
   code: JSTemplate;
@@ -51,6 +55,7 @@ export type ExtendedActionConfig =
   | ShowNotificationsActionConfig
   | QuickbarActionConfig
   | OpenEditModeActionConfig
+  | LogoutActionConfig
   | CustomJSActionConfig;
 
 type JSTemplate = string;

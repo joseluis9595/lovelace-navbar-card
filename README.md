@@ -156,6 +156,7 @@ Apart from the [standard Home Assistant actions](https://www.home-assistant.io/d
 | `quickbar`           | Opens the native HA quickbar                               | `mode`: `entities` \| `commands` \| `devices` |
 | `navigate-back`      | Navigates back to the previous page in the browser history | -                                             |
 | `open-edit-mode`     | Opens the current dashboard in edit mode                   | -                                             |
+| `logout`             | Logs out the current user from Home Assistant              | -                                             |
 | `custom-js-action`   | Allows the user to execute custom Javascript code          | `code`: JS code                               |
 
 Example:

@@ -1117,6 +1117,7 @@ export class NavbarCardEditor extends LitElement {
       { label: 'Toggle Menu', value: NavbarCustomActions.toggleMenu },
       { label: 'Quickbar', value: NavbarCustomActions.quickbar },
       { label: 'Open Edit Mode', value: NavbarCustomActions.openEditMode },
+      { label: 'Logout current user', value: NavbarCustomActions.logout },
       { label: 'Custom JS Action', value: NavbarCustomActions.customJSAction },
       {
         label: 'Show Notifications',
