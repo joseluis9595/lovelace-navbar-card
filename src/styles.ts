@@ -182,6 +182,13 @@ const MEDIA_PLAYER_STYLES = css`
     margin-right: 6px;
   }
 
+  .media-player .media-player-icon-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--disabled-color);
+  }
+
   .media-player .media-player-info {
     display: flex;
     flex-direction: column;
