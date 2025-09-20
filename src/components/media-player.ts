@@ -27,8 +27,8 @@ export class MediaPlayer implements ActionableElement {
     action: ExtendedActionConfig | undefined,
     actionType: 'tap' | 'hold' | 'double_tap',
   ) => {
+    const entity = this._getEntity();
     if (action) {
-      // TODO JLAQ update README to properly explain this widget does not support custom actions
       // Dispatch the action event for Home Assistant to handle
       fireDOMEvent(
         this._navbarCard,
@@ -36,12 +36,11 @@ export class MediaPlayer implements ActionableElement {
         { bubbles: true, composed: true },
         {
           action: actionType,
-          config: { [`${actionType}_action`]: action },
+          config: { [`${actionType}_action`]: action, entity: entity },
         },
       );
     } else if (actionType === 'tap') {
       // Default tap action: open media player more-info dialog
-      const entity = this._getEntity();
       if (entity) {
         fireDOMEvent(
           this._navbarCard,
