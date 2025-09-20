@@ -43,12 +43,21 @@ export class Icon {
     );
   }
 
+  get iconColor(): string {
+    return processTemplate<string>(
+      this._navbarCard._hass,
+      this._navbarCard,
+      this._route.data.icon_color,
+    );
+  }
+
   public render() {
     const isSelected = this._route.selected;
     const resolvedImage = this.image;
     const resolvedImageSelected = this.imageSelected;
     const resolvedIcon = this.icon;
     const resolvedIconSelected = this.iconSelected;
+    const resolvedIconColor = this.iconColor;
 
     // If neither image nor icon resolve to a value, render nothing
     if (!resolvedImage && !resolvedIcon) {
@@ -64,6 +73,7 @@ export class Icon {
           alt="${this._route.label || ''}" />`
       : html` <ha-icon
           class="icon ${isSelected ? 'active' : ''}"
+          style="--icon-primary-color: ${resolvedIconColor ?? 'inherit'}"
           icon="${isSelected && resolvedIconSelected
             ? resolvedIconSelected
             : resolvedIcon}"></ha-icon>`;

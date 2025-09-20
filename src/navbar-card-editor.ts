@@ -20,7 +20,10 @@ import {
   genericSetProperty,
   NestedType,
 } from '@/types';
-import { TemplatableInputOptions } from './navbar-card-editor.types';
+import {
+  ColorInputOptions,
+  TemplatableInputOptions,
+} from './navbar-card-editor.types';
 import {
   getNavbarTemplates,
   cleanTemplate,
@@ -28,6 +31,7 @@ import {
   isTemplate,
   processTemplate,
   wrapTemplate,
+  conditionallyRender,
 } from '@/utils';
 import { getEditorStyles } from './styles';
 
@@ -53,10 +57,20 @@ const BOOLEAN_JS_TEMPLATE_HELPER = html`${GENERIC_JS_TEMPLATE_HELPER}<br />Must
 const STRING_JS_TEMPLATE_HELPER = html`${GENERIC_JS_TEMPLATE_HELPER}<br />Must
   return a <strong>string</strong> value`;
 
+enum LazyLoadedEditorSections {
+  routes = 'routes',
+}
+
 @customElement('navbar-card-editor')
 export class NavbarCardEditor extends LitElement {
   @property({ attribute: false }) public hass: any;
   @state() private _config: NavbarCardConfig = { routes: [] };
+  @state() private _lazyLoadedSections: Record<
+    LazyLoadedEditorSections,
+    boolean
+  > = {
+    [LazyLoadedEditorSections.routes]: false,
+  };
 
   protected firstUpdated(_changedProperties: PropertyValues): void {
     super.firstUpdated(_changedProperties);
@@ -77,6 +91,17 @@ export class NavbarCardEditor extends LitElement {
       'ha-entity-picker',
       'ha-textarea',
     ]);
+  }
+
+  /**********************************************************************/
+  /* Lazy load sections */
+  /**********************************************************************/
+  private markSectionAsLazyLoaded(section: LazyLoadedEditorSections) {
+    if (this._lazyLoadedSections[section]) return;
+    this._lazyLoadedSections[section] = true;
+    setTimeout(() => {
+      this.requestUpdate();
+    }, 200);
   }
 
   /**********************************************************************/
@@ -228,6 +253,15 @@ export class NavbarCardEditor extends LitElement {
     `;
   }
 
+  makeColorPicker(options: Omit<ColorInputOptions, 'inputType'>) {
+    // TODO: for now, the color picker is not supported in the editor,
+    // we need a way to handle empty color values
+    return this.makeTextInput({
+      ...options,
+      type: 'text',
+    });
+  }
+
   makeTemplatable(options: TemplatableInputOptions) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { label, inputType, ...rest } = options;
@@ -242,7 +276,7 @@ export class NavbarCardEditor extends LitElement {
 
     // Handler to toggle between template and text
     const toggleMode = () => {
-      let newValue: string = value ? value.toString() : '';
+      let newValue: string | null = value ? value.toString() : '';
       if (isTemplate) {
         // Remove template delimiters
         newValue = cleanTemplate(newValue);
@@ -308,10 +342,15 @@ export class NavbarCardEditor extends LitElement {
                         label: '',
                         ...rest,
                       })
-                    : this.makeTextInput({
-                        label: '',
-                        ...rest,
-                      })}
+                    : options.inputType === 'color'
+                      ? this.makeColorPicker({
+                          label: '',
+                          ...rest,
+                        })
+                      : this.makeTextInput({
+                          label: '',
+                          ...rest,
+                        })}
       </div>
     `;
   }
@@ -527,6 +566,11 @@ export class NavbarCardEditor extends LitElement {
               configKey: `${baseConfigKey}.icon_selected` as any,
             })}
             ${this.makeTemplatable({
+              inputType: 'color',
+              label: 'Icon color',
+              configKey: `${baseConfigKey}.icon_color` as any,
+            })}
+            ${this.makeTemplatable({
               inputType: 'string',
               label: 'Image',
               configKey: `${baseConfigKey}.image` as any,
@@ -594,8 +638,9 @@ export class NavbarCardEditor extends LitElement {
                             let parsedPopup = [];
                             try {
                               parsedPopup = JSON.parse(
-                                cleanTemplate((item as RouteItem).popup) ??
-                                  '[]',
+                                cleanTemplate(
+                                  (item as RouteItem).popup?.toString(),
+                                ) ?? '[]',
                               );
                             } catch (_e) {
                               parsedPopup = [];
@@ -907,7 +952,6 @@ export class NavbarCardEditor extends LitElement {
             const key =
               `media_player.${type}` as DotNotationKeys<NavbarCardConfig>;
             const actionValue = genericGetProperty(this._config, key);
-            console.log(key, actionValue);
             const label = this._chooseLabelForAction(type as HAActions);
 
             return html`
@@ -1051,17 +1095,28 @@ export class NavbarCardEditor extends LitElement {
 
   renderRoutesEditor() {
     return html`
-      <ha-expansion-panel outlined>
+      <ha-expansion-panel
+        outlined
+        @expanded-changed=${e => {
+          if (e.target.expanded) {
+            this.markSectionAsLazyLoaded(LazyLoadedEditorSections.routes);
+          }
+        }}>
         <h4 slot="header">
           <ha-icon icon="mdi:routes"></ha-icon>
           Routes
         </h4>
         <div class="editor-section">
-          <div class="routes-container">
-            ${(this._config.routes ?? []).map((route, i) => {
-              return this.makeDraggableRouteEditor(route, i);
-            })}
-          </div>
+          ${conditionallyRender(
+            this._lazyLoadedSections[LazyLoadedEditorSections.routes],
+            () => html`
+              <div class="routes-container">
+                ${(this._config.routes ?? []).map((route, i) => {
+                  return this.makeDraggableRouteEditor(route, i);
+                })}
+              </div>
+            `,
+          )}
           ${this.makeButton({
             text: 'Add Route',
             icon: 'mdi:plus',
