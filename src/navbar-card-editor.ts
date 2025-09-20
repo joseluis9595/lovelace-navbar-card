@@ -20,7 +20,10 @@ import {
   genericSetProperty,
   NestedType,
 } from '@/types';
-import { TemplatableInputOptions } from './navbar-card-editor.types';
+import {
+  ColorInputOptions,
+  TemplatableInputOptions,
+} from './navbar-card-editor.types';
 import {
   getNavbarTemplates,
   cleanTemplate,
@@ -228,6 +231,15 @@ export class NavbarCardEditor extends LitElement {
     `;
   }
 
+  makeColorPicker(options: Omit<ColorInputOptions, 'inputType'>) {
+    // TODO: for now, the color picker is not supported in the editor,
+    // we need a way to handle empty color values
+    return this.makeTextInput({
+      ...options,
+      type: 'text',
+    });
+  }
+
   makeTemplatable(options: TemplatableInputOptions) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { label, inputType, ...rest } = options;
@@ -308,10 +320,15 @@ export class NavbarCardEditor extends LitElement {
                         label: '',
                         ...rest,
                       })
-                    : this.makeTextInput({
-                        label: '',
-                        ...rest,
-                      })}
+                    : options.inputType === 'color'
+                      ? this.makeColorPicker({
+                          label: '',
+                          ...rest,
+                        })
+                      : this.makeTextInput({
+                          label: '',
+                          ...rest,
+                        })}
       </div>
     `;
   }
@@ -525,6 +542,11 @@ export class NavbarCardEditor extends LitElement {
               inputType: 'icon',
               label: 'Icon selected',
               configKey: `${baseConfigKey}.icon_selected` as any,
+            })}
+            ${this.makeTemplatable({
+              inputType: 'color',
+              label: 'Icon color',
+              configKey: `${baseConfigKey}.icon_color` as any,
             })}
             ${this.makeTemplatable({
               inputType: 'string',
@@ -907,7 +929,6 @@ export class NavbarCardEditor extends LitElement {
             const key =
               `media_player.${type}` as DotNotationKeys<NavbarCardConfig>;
             const actionValue = genericGetProperty(this._config, key);
-            console.log(key, actionValue);
             const label = this._chooseLabelForAction(type as HAActions);
 
             return html`
