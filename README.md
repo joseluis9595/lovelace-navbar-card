@@ -121,13 +121,14 @@ Routes represents an array of clickable icons that redirects to a given path. Ea
 | `url`               | string                                                  | `Required*` | The path to a Lovelace view. Ignored if `tap_action` is defined.                                                                                           |
 | `icon`              | string \| [JSTemplate](#jstemplate)                     | -           | Material icon to display as this entry icon. Either `icon` or `image` is required.                                                                         |
 | `icon_selected`     | string \| [JSTemplate](#jstemplate)                     | -           | Icon to be displayed when `url` matches the current browser URL                                                                                            |
+| `icon_color`        | string \| [JSTemplate](#jstemplate)                     | -           | Custom color for the icon of this route.                                                                                                                   |
 | `image`             | string \| [JSTemplate](#jstemplate)                     | -           | URL of an image to display as this entry icon. Either `icon` or `image` is required.                                                                       |
 | `image_selected`    | string \| [JSTemplate](#jstemplate)                     | -           | Image to be displayed when `url` matches the current browser URL                                                                                           |
 | `badge`             | [Badge](#badge)                                         | -           | Badge configuration                                                                                                                                        |
 | `label`             | string \| [JSTemplate](#jstemplate)                     | -           | Label to be displayed under the given route if `show_labels` is true                                                                                       |
-| `tap_action`        | [tap_action](#actions)                                  | -           | Custom tap action configuration.                                                                                                                           |
-| `hold_action`       | [hold_action](#actions)                                 | -           | Custom hold action configuration.                                                                                                                          |
-| `double_tap_action` | [double_tap_action](#actions)                           | -           | Custom double_tap action configuration.                                                                                                                    |
+| `tap_action`        | [CustomAction](#custom-actions)                         | -           | Custom tap action configuration.                                                                                                                           |
+| `hold_action`       | [CustomAction](#custom-actions)                         | -           | Custom hold action configuration.                                                                                                                          |
+| `double_tap_action` | [CustomAction](#custom-actions)                         | -           | Custom double_tap action configuration.                                                                                                                    |
 | `popup`             | [Popup items](#popup-items)\| [JSTemplate](#jstemplate) | -           | List of routes to display in a popup menu                                                                                                                  |
 | `hidden`            | boolean \| [JSTemplate](#jstemplate)                    | -           | Controls whether to render this route or not                                                                                                               |
 | `selected`          | boolean \| [JSTemplate](#jstemplate)                    | -           | Controls whether to display this route as selected or not. If not defined, the selected status will be computed as `route.url == window.location.pathname` |
@@ -144,7 +145,7 @@ Routes represents an array of clickable icons that redirects to a given path. Ea
 > 2. Use images with a transparent background for best results
 > 3. Keep image dimensions squared for best results
 
-#### Actions
+#### Custom actions
 
 Apart from the [standard Home Assistant actions](https://www.home-assistant.io/dashboards/actions/) (navigate, call-service, etc.), `navbar-card` supports some additional custom actions:
 
@@ -156,6 +157,7 @@ Apart from the [standard Home Assistant actions](https://www.home-assistant.io/d
 | `quickbar`           | Opens the native HA quickbar                               | `mode`: `entities` \| `commands` \| `devices` |
 | `navigate-back`      | Navigates back to the previous page in the browser history | -                                             |
 | `open-edit-mode`     | Opens the current dashboard in edit mode                   | -                                             |
+| `logout`             | Logs out the current user from Home Assistant              | -                                             |
 | `custom-js-action`   | Allows the user to execute custom Javascript code          | `code`: JS code                               |
 
 Example:
@@ -345,11 +347,14 @@ When enabled, this configuration displays a `media_player` widget above the `nav
 
 <img width="445" height="166" alt="navbar-card_media-player" src="https://github.com/user-attachments/assets/b8898268-e232-4759-b35c-23a1afd43e7a" />
 
-| Option                   | Type                                 | Default                                                  | Description                                                                                    |
-| ------------------------ | ------------------------------------ | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `entity`                 | string \| [JSTemplate](#jstemplate)  | -                                                        | Entity ID of the media_player                                                                  |
-| `show`                   | boolean \| [JSTemplate](#jstemplate) | `true` when media_player is either `playing` or `paused` | Manually configure when the media player widget should be displayed                            |
-| `album_cover_background` | boolean                              | `false`                                                  | Enable this option to display the album cover as blurred background of the media player widget |
+| Option                   | Type                                                           | Default                                                  | Description                                                                                    |
+| ------------------------ | -------------------------------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `entity`                 | string \| [JSTemplate](#jstemplate)                            | -                                                        | Entity ID of the media_player                                                                  |
+| `show`                   | boolean \| [JSTemplate](#jstemplate)                           | `true` when media_player is either `playing` or `paused` | Manually configure when the media player widget should be displayed                            |
+| `album_cover_background` | boolean                                                        | `false`                                                  | Enable this option to display the album cover as blurred background of the media player widget |
+| `tap_action`             | [HA Action](https://www.home-assistant.io/dashboards/actions/) | -                                                        | Home Assistant tap action configuration.                                                       |
+| `hold_action`            | [HA Action](https://www.home-assistant.io/dashboards/actions/) | -                                                        | Home Assistant hold action configuration.                                                      |
+| `double_tap_action`      | [HA Action](https://www.home-assistant.io/dashboards/actions/) | -                                                        | Home Assistant double_tap action configuration.                                                |
 
 Example:
 
@@ -449,9 +454,10 @@ styles: |
 
 Configuration options for the navbar layout and behavior.
 
-| Name           | Type                          | Default | Description                                                     |
-| -------------- | ----------------------------- | ------- | --------------------------------------------------------------- |
-| `auto_padding` | [Auto Padding](#auto-padding) | -       | Add padding to your Home Asistant dashboard to prevent overlaps |
+| Name                  | Type                          | Default | Description                                                                                           |
+| --------------------- | ----------------------------- | ------- | ----------------------------------------------------------------------------------------------------- |
+| `auto_padding`        | [Auto Padding](#auto-padding) | -       | Add padding to your Home Asistant dashboard to prevent overlaps                                       |
+| `reflect_child_state` | `boolean`                     | -       | Determines if each route item should be displayed as selected when any of its popup items is selected |
 
 #### Auto Padding
 

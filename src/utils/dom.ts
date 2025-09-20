@@ -1,10 +1,10 @@
-import { CSSResult } from 'lit';
+import { CSSResult, html, TemplateResult } from 'lit';
 import {
   NavbarCardConfig,
   AutoPaddingConfig,
   DEFAULT_NAVBAR_CONFIG,
-} from './config';
-import { RippleElement } from './types';
+} from '@/types/config';
+import { RippleElement } from '@/types/types';
 
 const DASHBOARD_PADDING_STYLE_ID = 'navbar-card-forced-padding-styles';
 const DEFAULT_STYLES_ID = 'navbar-card-default-styles';
@@ -181,7 +181,7 @@ export const forceDashboardPadding = (options?: {
           display: block;
           height: ${mobilePaddingPx}px;
           width: 100%;
-          background-color: transparent; 
+          background-color: transparent;
           }
         }
       `;
@@ -272,4 +272,43 @@ export const injectStyles = (
 ) => {
   createStyleElement(root, DEFAULT_STYLES_ID, defaultStyles);
   createStyleElement(root, USER_STYLES_ID, userStyles);
+};
+
+/**
+ * Trigger haptic feedback by firing a 'haptic' event on the window.
+ *
+ * @param hapticType - The type of haptic feedback (default: 'selection')
+ * @returns The created and dispatched event
+ */
+export const hapticFeedback = (hapticType: string = 'selection') => {
+  return fireDOMEvent(window, 'haptic', undefined, hapticType);
+};
+
+/**
+ * Prevent the default action of an event and stop the propagation of the event.
+ *
+ * @param e - The event to prevent the default action of.
+ */
+export const preventEventDefault = (e: Event) => {
+  e.preventDefault();
+  e.stopPropagation();
+};
+
+/**
+ * Conditionally render a content based on a condition.
+ *
+ * @param condition - The condition to render the content based on.
+ * @param renderContent - The content to render if the condition is true.
+ * @returns The rendered content or a loader if the condition is false.
+ */
+export const conditionallyRender = (
+  condition: boolean,
+  renderContent: () => TemplateResult,
+) => {
+  if (condition) {
+    return renderContent();
+  }
+  return html`<div class="loader-container">
+    <span class="loader"></span>
+  </div>`;
 };

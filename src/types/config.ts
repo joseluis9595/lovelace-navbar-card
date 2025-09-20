@@ -14,6 +14,7 @@ export enum NavbarCustomActions {
   quickbar = 'quickbar',
   openEditMode = 'open-edit-mode',
   toggleMenu = 'toggle-menu',
+  logout = 'logout',
   customJSAction = 'custom-js-action',
 }
 
@@ -37,6 +38,9 @@ export type QuickbarActionConfig = {
 type OpenEditModeActionConfig = {
   action: NavbarCustomActions.openEditMode;
 };
+type LogoutActionConfig = {
+  action: NavbarCustomActions.logout;
+};
 type CustomJSActionConfig = {
   action: NavbarCustomActions.customJSAction;
   code: JSTemplate;
@@ -51,20 +55,22 @@ export type ExtendedActionConfig =
   | ShowNotificationsActionConfig
   | QuickbarActionConfig
   | OpenEditModeActionConfig
+  | LogoutActionConfig
   | CustomJSActionConfig;
 
 type JSTemplate = string;
 type JSTemplatable<T> = JSTemplate | T;
 
 // Base properties shared by all route items
-type RouteItemBase = {
+export type RouteItemBase = {
   url?: string;
   tap_action?: ExtendedActionConfig;
   hold_action?: ExtendedActionConfig;
   double_tap_action?: ExtendedActionConfig;
   icon?: JSTemplatable<string>;
-  image?: JSTemplatable<string>;
+  icon_color?: JSTemplatable<string>;
   icon_selected?: JSTemplatable<string>;
+  image?: JSTemplatable<string>;
   image_selected?: JSTemplatable<string>;
   label?: JSTemplatable<string>;
   badge?: {
@@ -111,6 +117,9 @@ type MediaPlayerConfig = {
   entity: JSTemplatable<string>;
   show?: JSTemplatable<boolean>;
   album_cover_background?: boolean;
+  tap_action?: ExtendedActionConfig;
+  hold_action?: ExtendedActionConfig;
+  double_tap_action?: ExtendedActionConfig;
 };
 
 // Mobile mode configuration
@@ -123,6 +132,7 @@ export type NavbarCardConfig = {
   template?: string;
   layout?: {
     auto_padding?: AutoPaddingConfig;
+    reflect_child_state?: boolean;
   };
   desktop?: {
     show_labels?: LabelVisibilityConfig;
@@ -151,6 +161,7 @@ export const DEFAULT_NAVBAR_CONFIG: NavbarCardConfig = {
       mobile_px: 80,
       media_player_px: 100,
     },
+    reflect_child_state: false,
   },
   desktop: {
     show_labels: false,

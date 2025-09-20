@@ -8,6 +8,7 @@ import tsEslintPlugin from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import eslintConfigPrettier from 'eslint-config-prettier/flat';
 
+import importPlugin from 'eslint-plugin-import'
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -38,18 +39,19 @@ export default defineConfig([
       },
     },
 
+    // Plugins
+    plugins: {
+      js,
+      '@typescript-eslint': tsEslintPlugin,
+      'import': importPlugin,
+    },
+
     // Extends
     extends: [
       'js/recommended',
       tsEslint.configs.recommended,
       eslintConfigPrettier,
     ],
-
-    // Plugins
-    plugins: {
-      js,
-      '@typescript-eslint': tsEslintPlugin,
-    },
 
     // Rules
     rules: {
@@ -61,6 +63,17 @@ export default defineConfig([
           caughtErrorsIgnorePattern: '^_',
         },
       ],
+    },
+
+    settings: {
+      'import/resolver': {
+        alias: {
+          extensions: ['.ts', '.js'],
+          map: [
+            ['@', './src'],
+          ],
+        },
+      },
     },
   },
 ]);
