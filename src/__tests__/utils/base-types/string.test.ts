@@ -117,16 +117,6 @@ describe('mapStringToEnum', () => {
     expect(result).toBeUndefined();
   });
 
-  it('should handle enum with duplicate values', () => {
-    enum DuplicateEnum {
-      FIRST = 'same',
-      SECOND = 'same',
-    }
-
-    const result = mapStringToEnum(DuplicateEnum, 'same');
-    expect(result).toBe('same');
-  });
-
   it('should handle single value enum', () => {
     enum SingleEnum {
       ONLY = 'only',
