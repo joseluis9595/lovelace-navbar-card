@@ -28,6 +28,7 @@ export class PopupItem extends BaseRoute {
         popup-item
         ${popupDirectionClassName}
         ${labelPositionClassName}
+        ${showLabelBackground ? 'popuplabelbackground' : ''}
         ${this.selected ? 'active' : ''}
       "
       style="--index: ${this._index}"
