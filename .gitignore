@@ -2,6 +2,9 @@
 /node_modules/
 /dist
 
+# Testing
+coverage/
+
 # Misc
 *.log
 TODO.txt

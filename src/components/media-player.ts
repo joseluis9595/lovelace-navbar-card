@@ -1,6 +1,6 @@
 import { html } from 'lit';
 import { NavbarCard } from '@/navbar-card';
-import { fireDOMEvent, processTemplate } from '@/utils';
+import { fireDOMEvent, preventEventDefault, processTemplate } from '@/utils';
 import { ActionEvents, ActionableElement } from '@/components/action-events';
 import { ExtendedActionConfig } from '@/types';
 
@@ -27,8 +27,8 @@ export class MediaPlayer implements ActionableElement {
     action: ExtendedActionConfig | undefined,
     actionType: 'tap' | 'hold' | 'double_tap',
   ) => {
+    const entity = this._getEntity();
     if (action) {
-      // TODO JLAQ update README to properly explain this widget does not support custom actions
       // Dispatch the action event for Home Assistant to handle
       fireDOMEvent(
         this._navbarCard,
@@ -36,12 +36,11 @@ export class MediaPlayer implements ActionableElement {
         { bubbles: true, composed: true },
         {
           action: actionType,
-          config: { [`${actionType}_action`]: action },
+          config: { [`${actionType}_action`]: action, entity: entity },
         },
       );
     } else if (actionType === 'tap') {
       // Default tap action: open media player more-info dialog
-      const entity = this._getEntity();
       if (entity) {
         fireDOMEvent(
           this._navbarCard,
@@ -133,6 +132,7 @@ export class MediaPlayer implements ActionableElement {
     }
 
     const mediaPlayerState = this._navbarCard._hass.states[entity];
+    const mediaPlayerImage = mediaPlayerState.attributes.entity_picture;
     const progress =
       mediaPlayerState.attributes.media_position != null
         ? mediaPlayerState.attributes.media_position /
@@ -164,10 +164,14 @@ export class MediaPlayer implements ActionableElement {
                 style="width: ${progress * 100}%"></div>
             </div>`
           : html``}
-        <img
-          class="media-player-image"
-          src=${mediaPlayerState.attributes.entity_picture}
-          alt=${mediaPlayerState.attributes.media_title} />
+        ${mediaPlayerImage
+          ? html`<img
+              class="media-player-image"
+              src=${mediaPlayerImage}
+              alt=${mediaPlayerState.attributes.media_title} />`
+          : html`<ha-icon
+              class="media-player-image media-player-icon-fallback"
+              icon="mdi:music"></ha-icon>`}
         <div class="media-player-info">
           <span class="media-player-title"
             >${mediaPlayerState.attributes.media_title}</span
@@ -180,7 +184,9 @@ export class MediaPlayer implements ActionableElement {
           class="media-player-button media-player-button-play-pause"
           appearance="accent"
           variant="brand"
-          @click=${this._handleMediaPlayerPlayPauseClick}>
+          @click=${this._handleMediaPlayerPlayPauseClick}
+          @pointerdown=${preventEventDefault}
+          @pointerup=${preventEventDefault}>
           <ha-icon
             icon=${mediaPlayerState.state === 'playing'
               ? 'mdi:pause'
@@ -190,7 +196,9 @@ export class MediaPlayer implements ActionableElement {
           class="media-player-button media-player-button-skip"
           appearance="plain"
           variant="neutral"
-          @click=${this._handleMediaPlayerSkipNextClick}>
+          @click=${this._handleMediaPlayerSkipNextClick}
+          @pointerdown=${preventEventDefault}
+          @pointerup=${preventEventDefault}>
           <ha-icon icon="mdi:skip-next"></ha-icon>
         </ha-button>
       </ha-card>
