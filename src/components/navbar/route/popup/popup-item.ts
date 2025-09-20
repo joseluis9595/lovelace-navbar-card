@@ -32,8 +32,8 @@ export class PopupItem extends BaseRoute {
         ${this.selected ? 'active' : ''}
       "
       style="--index: ${this._index}"
-      @click=${(e: MouseEvent) =>
-        this._events.handlePointerUp(e as unknown as PointerEvent, this)}>
+      @pointerup=${(e: MouseEvent) => this._events.handlePointerUp(e as unknown as PointerEvent, this)}
+      @pointerdown=${(e: MouseEvent) => this._events.handlePointerDown(e as unknown as PointerEvent, this)}>
       <div class="button ${showLabelBackground ? 'popuplabelbackground' : ''}">
         ${this.icon.render()}
         <md-ripple></md-ripple>
