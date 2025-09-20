@@ -710,6 +710,32 @@ const EDITOR_STYLES = css`
   .editor-tab-button ha-icon {
     --mdc-icon-size: 18px;
   }
+  .loader-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 60px;
+  }
+  .loader {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: inline-block;
+    border: 2px solid transparent;
+    border-top: 4px solid var(--primary-color, #03a9f4);
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+  }
+
+  @keyframes rotation {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
 `;
 
 // Drag-and-drop styles for routes editor
