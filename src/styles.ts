@@ -505,31 +505,32 @@ const EDITOR_STYLES = css`
     display: flex;
     flex-direction: column;
     gap: 6px;
-
-    ha-textfield {
-      width: 100%;
-    }
-
-    ha-button {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-    }
-
-    .navbar-template-toggle-button {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 0.5em;
-      padding: 0px !important;
-      border-radius: 99px;
-      font-size: 0.85em;
-      font-weight: 600;
-      border: 0px;
-      padding: 4px 8px !important;
-      cursor: pointer;
-    }
   }
+
+  .navbar-editor ha-textfield {
+    width: 100%;
+  }
+
+  .navbar-editor ha-button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .navbar-editor .navbar-template-toggle-button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5em;
+    padding: 0px !important;
+    border-radius: 99px;
+    font-size: 0.85em;
+    font-weight: 600;
+    border: 0px;
+    padding: 4px 8px !important;
+    cursor: pointer;
+  }
+
   .editor-section {
     display: flex;
     flex-direction: column;
@@ -543,10 +544,9 @@ const EDITOR_STYLES = css`
   }
   .editor-row-item {
     flex: 1;
-
-    ha-textfield {
-      width: 100%;
-    }
+  }
+  .editor-row-item ha-textfield {
+    width: 100%;
   }
   @media (max-width: 600px) {
     .editor-row {
@@ -568,23 +568,23 @@ const EDITOR_STYLES = css`
     flex-direction: column;
     gap: 0.25em;
   }
-  ha-expansion-panel {
-    h4[slot='header'],
-    h5[slot='header'],
-    h6[slot='header'] {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 0.7em;
-      padding: 0.2em 0.5em 0.2em 0;
-      height: 40px;
-      margin: 0px !important;
-      margin-left: 1em;
+  ha-expansion-panel h4[slot='header'],
+  ha-expansion-panel h5[slot='header'],
+  ha-expansion-panel h6[slot='header'] {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.7em;
+    padding: 0.2em 0.5em 0.2em 0;
+    height: 40px;
+    margin: 0px !important;
+    margin-left: 1em;
+  }
 
-      .expansion-panel-title {
-        flex: 1;
-      }
-    }
+  ha-expansion-panel h4[slot='header'] .expansion-panel-title,
+  ha-expansion-panel h5[slot='header'] .expansion-panel-title,
+  ha-expansion-panel h6[slot='header'] .expansion-panel-title {
+    flex: 1;
   }
   .route-header {
     display: flex;
