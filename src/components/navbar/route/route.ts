@@ -67,13 +67,13 @@ export class Route extends BaseRoute {
         <div class="button ${isActive ? 'active' : ''}">
           ${this.icon.render()}
           <ha-ripple></ha-ripple>
+          ${this.badge.render()}
         </div>
         ${this.label
           ? html`<div class="label ${isActive ? 'active' : ''}">
               ${this.label}
             </div>`
           : html``}
-        ${this.badge.render()}
       </div>
     `;
   }
