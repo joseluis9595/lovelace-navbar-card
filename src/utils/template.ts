@@ -36,7 +36,9 @@ export const isTemplate = (value: unknown): value is string => {
  * @param value - The template string to clean.
  * @returns The unwrapped template content, or null if not a valid template.
  */
-export const cleanTemplate = (value: string): string | null => {
+export const cleanTemplate = (
+  value: string | null | undefined,
+): string | null => {
   if (!isTemplate(value)) return null;
   return value.replace(/\[\[\[|\]\]\]/g, '').trim();
 };

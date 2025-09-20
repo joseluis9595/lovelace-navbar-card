@@ -68,8 +68,9 @@ export type RouteItemBase = {
   hold_action?: ExtendedActionConfig;
   double_tap_action?: ExtendedActionConfig;
   icon?: JSTemplatable<string>;
-  image?: JSTemplatable<string>;
+  icon_color?: JSTemplatable<string>;
   icon_selected?: JSTemplatable<string>;
+  image?: JSTemplatable<string>;
   image_selected?: JSTemplatable<string>;
   label?: JSTemplatable<string>;
   badge?: {

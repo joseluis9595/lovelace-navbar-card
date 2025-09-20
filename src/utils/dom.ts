@@ -1,4 +1,4 @@
-import { CSSResult } from 'lit';
+import { CSSResult, html, TemplateResult } from 'lit';
 import {
   NavbarCardConfig,
   AutoPaddingConfig,
@@ -292,4 +292,23 @@ export const hapticFeedback = (hapticType: string = 'selection') => {
 export const preventEventDefault = (e: Event) => {
   e.preventDefault();
   e.stopPropagation();
+};
+
+/**
+ * Conditionally render a content based on a condition.
+ *
+ * @param condition - The condition to render the content based on.
+ * @param renderContent - The content to render if the condition is true.
+ * @returns The rendered content or a loader if the condition is false.
+ */
+export const conditionallyRender = (
+  condition: boolean,
+  renderContent: () => TemplateResult,
+) => {
+  if (condition) {
+    return renderContent();
+  }
+  return html`<div class="loader-container">
+    <span class="loader"></span>
+  </div>`;
 };

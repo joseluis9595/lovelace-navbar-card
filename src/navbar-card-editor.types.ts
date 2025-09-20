@@ -36,9 +36,14 @@ type SwitchInputOptions = BaseInputOptions & {
   defaultValue?: boolean;
 };
 
+export type ColorInputOptions = BaseInputOptions & {
+  inputType: 'color';
+};
+
 export type TemplatableInputOptions =
   | StringInputOptions
   | EntityInputOptions
   | IconInputOptions
   | NumberInputOptions
-  | SwitchInputOptions;
+  | SwitchInputOptions
+  | ColorInputOptions;
