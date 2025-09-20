@@ -494,6 +494,10 @@ const POPUP_STYLES = css`
     --icon-primary-color: var(--navbar-primary-color);
   }
 
+  .popup-item.popuplabelbackground {
+    max-width: unset;
+  }
+
   .popup-item.active .button {
     color: var(--navbar-primary-color);
     background: color-mix(in srgb, var(--navbar-primary-color) 30%, white);
