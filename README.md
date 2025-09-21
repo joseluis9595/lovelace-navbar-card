@@ -147,7 +147,7 @@ Routes represents an array of clickable icons that redirects to a given path. Ea
 
 #### Custom actions
 
-Apart from the [standard Home Assistant actions](https://www.home-assistant.io/dashboards/actions/) (navigate, call-service, etc.), `navbar-card` supports some additional custom actions:
+Apart from the [standard Home Assistant actions](https://www.home-assistant.io/dashboards/actions/) (navigate, call-service, etc.), `navbar-card` supports some additional custom actions for routes and popup items:
 
 | Action               | Description                                                | Required Parameters                           |
 | -------------------- | ---------------------------------------------------------- | --------------------------------------------- |
@@ -209,20 +209,19 @@ For each route, a popup menu can be configured, to display a popup when clicked.
 
 <img width="431" height="218" alt="navbar-card_popup" src="https://github.com/user-attachments/assets/520d85c7-9d73-4e73-b3c3-a4a6b2635dcb" />
 
-| Name             | Type                                 | Default     | Description                                                                                                                                              |
-| ---------------- | ------------------------------------ | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `url`            | string                               | `Required*` | The path to a Lovelace view. Ignored if `tap_action` is defined.                                                                                         |
-| `icon`           | string \| [JSTemplate](#jstemplate)  | -           | Material icon to display as this entry icon.                                                                                                             |
-| `icon_selected`  | string \| [JSTemplate](#jstemplate)  | -           | Icon to be displayed when `url` matches the current browser URL                                                                                          |
-| `image`          | string \| [JSTemplate](#jstemplate)  | -           | URL of an image to display as this entry icon.                                                                                                           |
-| `image_selected` | string \| [JSTemplate](#jstemplate)  | -           | Image to be displayed when `url` matches the current browser URL                                                                                         |
-| `badge`          | [Badge](#badge)                      | -           | Badge configuration                                                                                                                                      |
-| `label`          | string \| [JSTemplate](#jstemplate)  | -           | Label to be displayed under the given route if `show_labels` is true                                                                                     |
-| `tap_action`     | [tap_action](#actions)               | -           | Custom tap action configuration, including 'open-popup' to display a popup menu.                                                                         |
-| `hold_action`    | [hold_action](#actions)              | -           | Custom hold action configuration, including 'open-popup' to display a popup menu.                                                                        |
-| `selected`       | boolean \| [JSTemplate](#jstemplate) | -           | Controls whether to display this item as selected or not. If not defined, the selected status will be computed as `item.url == window.location.pathname` |
-
-> **Note**: `url` is required unless `tap_action` is present. If `tap_action` is defined, `url` is ignored.
+| Name                | Type                                 | Default     | Description                                                                                                                                              |
+| ------------------- | ------------------------------------ | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `url`               | string                               | `Required*` | The path to a Lovelace view. Ignored if `tap_action` is defined.                                                                                         |
+| `icon`              | string \| [JSTemplate](#jstemplate)  | -           | Material icon to display as this entry icon.                                                                                                             |
+| `icon_selected`     | string \| [JSTemplate](#jstemplate)  | -           | Icon to be displayed when `url` matches the current browser URL                                                                                          |
+| `image`             | string \| [JSTemplate](#jstemplate)  | -           | URL of an image to display as this entry icon.                                                                                                           |
+| `image_selected`    | string \| [JSTemplate](#jstemplate)  | -           | Image to be displayed when `url` matches the current browser URL                                                                                         |
+| `badge`             | [Badge](#badge)                      | -           | Badge configuration                                                                                                                                      |
+| `label`             | string \| [JSTemplate](#jstemplate)  | -           | Label to be displayed under the given route if `show_labels` is true                                                                                     |
+| `tap_action`        | [CustomAction](#custom-actions)      | -           | Custom tap action configuration.                                                                                                                         |
+| `hold_action`       | [CustomAction](#custom-actions)      | -           | Custom hold action configuration.                                                                                                                        |
+| `double_tap_action` | [CustomAction](#custom-actions)      | -           | Custom double_tap action configuration.                                                                                                                  |
+| `selected`          | boolean \| [JSTemplate](#jstemplate) | -           | Controls whether to display this item as selected or not. If not defined, the selected status will be computed as `item.url == window.location.pathname` |
 
 In addition to the default annotation, we also support using JSTemplate to define popup items.
 For example, you can dynamically define items based on the areas in your Home Assistant environment:
