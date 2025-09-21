@@ -99,11 +99,12 @@ export class BaseRoute implements ActionableElement {
     };
 
     // Close popup for any action unless it's opening a new popup
-    if (
-      action?.action !== NavbarCustomActions.openPopup &&
-      element instanceof Route
-    ) {
-      element.popup.close();
+    if (action?.action !== NavbarCustomActions.openPopup) {
+      if (element instanceof Route) {
+        element.popup.close();
+      } else if (element instanceof PopupItem) {
+        element.closeParentPopup();
+      }
     }
 
     switch (action?.action) {

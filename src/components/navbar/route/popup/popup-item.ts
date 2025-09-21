@@ -1,6 +1,6 @@
 import { html, TemplateResult } from 'lit';
 import { NavbarCard } from '@/navbar-card';
-import { BaseRoute } from '@/components/navbar';
+import { BaseRoute, Popup } from '@/components/navbar';
 import { ActionEvents } from '@/components/action-events';
 import { PopupItem as PopupItemDef } from '@/types';
 
@@ -9,11 +9,16 @@ export class PopupItem extends BaseRoute {
 
   constructor(
     _navbarCard: NavbarCard,
+    private readonly _parentPopup: Popup,
     _data: PopupItemDef,
 
     private readonly _index: number,
   ) {
     super(_navbarCard, _data);
+  }
+
+  public closeParentPopup(): void {
+    this._parentPopup.close();
   }
 
   public render(
