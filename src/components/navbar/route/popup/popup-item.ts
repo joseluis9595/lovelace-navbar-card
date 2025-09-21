@@ -32,8 +32,16 @@ export class PopupItem extends BaseRoute {
         ${this.selected ? 'active' : ''}
       "
       style="--index: ${this._index}"
-      @pointerup=${(e: MouseEvent) => this._events.handlePointerUp(e as unknown as PointerEvent, this)}
-      @pointerdown=${(e: MouseEvent) => this._events.handlePointerDown(e as unknown as PointerEvent, this)}>
+      @mouseenter=${(e: MouseEvent) => this._events.handleMouseEnter(e, this)}
+      @mousemove=${(e: MouseEvent) => this._events.handleMouseMove(e, this)}
+      @mouseleave=${(e: MouseEvent) => this._events.handleMouseLeave(e, this)}
+      @pointerdown=${(e: PointerEvent) =>
+        this._events.handlePointerDown(e, this)}
+      @pointermove=${(e: PointerEvent) =>
+        this._events.handlePointerMove(e, this)}
+      @pointerup=${(e: PointerEvent) => this._events.handlePointerUp(e, this)}
+      @pointercancel=${(e: PointerEvent) =>
+        this._events.handlePointerMove(e, this)}>
       <div class="button ${showLabelBackground ? 'popuplabelbackground' : ''}">
         ${this.icon.render()}
         <md-ripple></md-ripple>

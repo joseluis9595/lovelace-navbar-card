@@ -51,12 +51,9 @@ export class Route extends BaseRoute {
     return html`
       <div
         class="route ${isActive ? 'active' : ''}"
-        @mouseenter=${(e: PointerEvent) =>
-          this._events.handleMouseEnter(e as unknown as MouseEvent, this)}
-        @mousemove=${(e: PointerEvent) =>
-          this._events.handleMouseMove(e as unknown as MouseEvent, this)}
-        @mouseleave=${(e: PointerEvent) =>
-          this._events.handleMouseLeave(e as unknown as MouseEvent, this)}
+        @mouseenter=${(e: MouseEvent) => this._events.handleMouseEnter(e, this)}
+        @mousemove=${(e: MouseEvent) => this._events.handleMouseMove(e, this)}
+        @mouseleave=${(e: MouseEvent) => this._events.handleMouseLeave(e, this)}
         @pointerdown=${(e: PointerEvent) =>
           this._events.handlePointerDown(e, this)}
         @pointermove=${(e: PointerEvent) =>
