@@ -1,19 +1,25 @@
 import { html, TemplateResult } from 'lit';
 import { NavbarCard } from '@/navbar-card';
-import { BaseRoute } from '@/components/navbar';
+import { BaseRoute, Popup } from '@/components/navbar';
 import { ActionEvents } from '@/components/action-events';
 import { PopupItem as PopupItemDef } from '@/types';
+import { preventEventDefault } from '@/utils';
 
 export class PopupItem extends BaseRoute {
   private readonly _events = new ActionEvents();
 
   constructor(
     _navbarCard: NavbarCard,
+    private readonly _parentPopup: Popup,
     _data: PopupItemDef,
 
     private readonly _index: number,
   ) {
     super(_navbarCard, _data);
+  }
+
+  public closeParentPopup(): void {
+    this._parentPopup.close();
   }
 
   public render(
@@ -32,6 +38,7 @@ export class PopupItem extends BaseRoute {
         ${this.selected ? 'active' : ''}
       "
       style="--index: ${this._index}"
+      @click=${preventEventDefault}
       @mouseenter=${(e: MouseEvent) => this._events.handleMouseEnter(e, this)}
       @mousemove=${(e: MouseEvent) => this._events.handleMouseMove(e, this)}
       @mouseleave=${(e: MouseEvent) => this._events.handleMouseLeave(e, this)}

@@ -33,87 +33,113 @@ export class ActionEvents {
 
   private tapTimeoutId: number | null = null;
 
-  public handleMouseEnter = (e: MouseEvent, _element: ActionableElement) => {
-    const ripple = (e.currentTarget as HTMLElement).querySelector(
-      'ha-ripple',
-    ) as RippleElement;
-    if (ripple) ripple.hovered = true;
+  /**
+   * Wrapper function to automatically prevent default behavior and stop propagation
+   * for all event handlers to avoid ghost clicks on mobile
+   */
+  private preventPropagation = <T extends Event>(
+    handler: (e: T, element: ActionableElement) => void,
+  ) => {
+    return (e: T, element: ActionableElement) => {
+      e.preventDefault();
+      e.stopPropagation();
+      handler(e, element);
+    };
   };
 
-  public handleMouseMove = (e: MouseEvent, _element: ActionableElement) => {
-    const ripple = (e.currentTarget as HTMLElement).querySelector(
-      'ha-ripple',
-    ) as RippleElement;
-    if (ripple) ripple.hovered = true;
-  };
+  public handleMouseEnter = this.preventPropagation(
+    (e: MouseEvent, _element: ActionableElement) => {
+      const ripple = (e.currentTarget as HTMLElement).querySelector(
+        'ha-ripple',
+      ) as RippleElement;
+      if (ripple) ripple.hovered = true;
+    },
+  );
 
-  public handleMouseLeave = (e: MouseEvent, _element: ActionableElement) => {
-    const ripple = (e.currentTarget as HTMLElement).querySelector(
-      'ha-ripple',
-    ) as RippleElement;
-    if (ripple) ripple.hovered = false;
-  };
+  public handleMouseMove = this.preventPropagation(
+    (e: MouseEvent, _element: ActionableElement) => {
+      const ripple = (e.currentTarget as HTMLElement).querySelector(
+        'ha-ripple',
+      ) as RippleElement;
+      if (ripple) ripple.hovered = true;
+    },
+  );
 
-  public handlePointerDown = (e: PointerEvent, element: ActionableElement) => {
-    this.pointerStartX = e.clientX;
-    this.pointerStartY = e.clientY;
+  public handleMouseLeave = this.preventPropagation(
+    (e: MouseEvent, _element: ActionableElement) => {
+      const ripple = (e.currentTarget as HTMLElement).querySelector(
+        'ha-ripple',
+      ) as RippleElement;
+      if (ripple) ripple.hovered = false;
+    },
+  );
 
-    if (element.hold_action) {
-      this.holdTriggered = false;
-      this.holdTimeoutId = window.setTimeout(() => {
-        this.holdTriggered = true;
-      }, HOLD_ACTION_DELAY);
-    }
-  };
+  public handlePointerDown = this.preventPropagation(
+    (e: PointerEvent, element: ActionableElement) => {
+      this.pointerStartX = e.clientX;
+      this.pointerStartY = e.clientY;
 
-  public handlePointerMove = (e: PointerEvent, _element: ActionableElement) => {
-    if (!this.holdTimeoutId) return;
+      if (element.hold_action) {
+        this.holdTriggered = false;
+        this.holdTimeoutId = window.setTimeout(() => {
+          this.holdTriggered = true;
+        }, HOLD_ACTION_DELAY);
+      }
+    },
+  );
 
-    const moveX = Math.abs(e.clientX - this.pointerStartX);
-    const moveY = Math.abs(e.clientY - this.pointerStartY);
+  public handlePointerMove = this.preventPropagation(
+    (e: PointerEvent, _element: ActionableElement) => {
+      if (!this.holdTimeoutId) return;
 
-    if (moveX > 10 || moveY > 10) {
+      const moveX = Math.abs(e.clientX - this.pointerStartX);
+      const moveY = Math.abs(e.clientY - this.pointerStartY);
+
+      if (moveX > 10 || moveY > 10) {
+        if (this.holdTimeoutId !== null) {
+          clearTimeout(this.holdTimeoutId);
+          this.holdTimeoutId = null;
+        }
+      }
+    },
+  );
+
+  public handlePointerUp = this.preventPropagation(
+    (e: PointerEvent, element: ActionableElement) => {
       if (this.holdTimeoutId !== null) {
         clearTimeout(this.holdTimeoutId);
         this.holdTimeoutId = null;
       }
-    }
-  };
 
-  public handlePointerUp = (e: PointerEvent, element: ActionableElement) => {
-    if (this.holdTimeoutId !== null) {
-      clearTimeout(this.holdTimeoutId);
-      this.holdTimeoutId = null;
-    }
+      const currentTarget = e.currentTarget as HTMLElement;
 
-    const currentTarget = e.currentTarget as HTMLElement;
+      const currentTime = new Date().getTime();
+      const timeDiff = currentTime - this.lastTapTime;
+      const isDoubleTap =
+        timeDiff < DOUBLE_TAP_DELAY && e.target === this.lastTapTarget;
 
-    const currentTime = new Date().getTime();
-    const timeDiff = currentTime - this.lastTapTime;
-    const isDoubleTap =
-      timeDiff < DOUBLE_TAP_DELAY && e.target === this.lastTapTarget;
+      if (isDoubleTap && element.double_tap_action) {
+        if (this.tapTimeoutId !== null) {
+          clearTimeout(this.tapTimeoutId);
+          this.tapTimeoutId = null;
+        }
+        this.handleDoubleTapAction(currentTarget, element);
+        this.lastTapTime = 0;
+        this.lastTapTarget = null;
+      } else if (this.holdTriggered && element.hold_action) {
+        this.handleHoldAction(currentTarget, element);
+        this.lastTapTime = 0;
+        this.lastTapTarget = null;
+      } else {
+        this.lastTapTime = currentTime;
+        this.lastTapTarget = e.target;
 
-    if (isDoubleTap && element.double_tap_action) {
-      if (this.tapTimeoutId !== null) {
-        clearTimeout(this.tapTimeoutId);
-        this.tapTimeoutId = null;
+        this.handleTapAction(currentTarget, element);
       }
-      this.handleDoubleTapAction(currentTarget, element);
-      this.lastTapTime = 0;
-      this.lastTapTarget = null;
-    } else if (this.holdTriggered && element.hold_action) {
-      this.handleHoldAction(currentTarget, element);
-      this.lastTapTime = 0;
-      this.lastTapTarget = null;
-    } else {
-      this.lastTapTime = currentTime;
-      this.lastTapTarget = e.target;
 
-      this.handleTapAction(currentTarget, element);
-    }
-
-    this.holdTriggered = false;
-  };
+      this.holdTriggered = false;
+    },
+  );
 
   public handleHoldAction = (
     target: HTMLElement,

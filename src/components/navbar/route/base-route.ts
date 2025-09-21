@@ -99,87 +99,92 @@ export class BaseRoute implements ActionableElement {
     };
 
     // Close popup for any action unless it's opening a new popup
-    if (
-      action?.action !== NavbarCustomActions.openPopup &&
-      element instanceof Route
-    ) {
-      element.popup.close();
+    if (action?.action !== NavbarCustomActions.openPopup) {
+      if (element instanceof Route) {
+        element.popup.close();
+      } else if (element instanceof PopupItem) {
+        element.closeParentPopup();
+      }
     }
 
-    switch (action?.action) {
-      case NavbarCustomActions.openPopup:
-        if (element instanceof Route) {
-          if (element.popup.items.length === 0) {
-            console.error(
-              `[navbar-card] No popup items found for route: ${element.label}`,
-            );
-          } else {
-            triggerHaptic();
-            element.popup.open(target);
+    // Quick patch to prevent event propagation. For unknown reasons, the event
+    // propagation is not properly prevented, and when clicking a route or popup
+    // and navigating to a new page, the event is triggered again, causing a new
+    // click event in the destination page.
+    setTimeout(() => {
+      switch (action?.action) {
+        case NavbarCustomActions.openPopup:
+          if (element instanceof Route) {
+            if (element.popup.items.length === 0) {
+              console.error(
+                `[navbar-card] No popup items found for route: ${element.label}`,
+              );
+            } else {
+              triggerHaptic();
+              element.popup.open(target);
+            }
           }
-        }
-        break;
+          break;
 
-      case NavbarCustomActions.toggleMenu:
-        triggerHaptic();
-        fireDOMEvent(this._navbarCard, 'hass-toggle-menu', {
-          bubbles: true,
-          composed: true,
-        });
-        break;
-
-      case NavbarCustomActions.quickbar:
-        triggerHaptic();
-        fireDOMEvent<'KeyboardEvent'>(
-          this._navbarCard,
-          'keydown',
-          {
+        case NavbarCustomActions.toggleMenu:
+          triggerHaptic();
+          fireDOMEvent(this._navbarCard, 'hass-toggle-menu', {
             bubbles: true,
             composed: true,
-            key: this._chooseKeyForQuickbar(action),
-          },
-          undefined,
-          KeyboardEvent,
-        );
-        break;
+          });
+          break;
 
-      case NavbarCustomActions.showNotifications:
-        triggerHaptic();
-        fireDOMEvent(this._navbarCard, 'hass-show-notifications', {
-          bubbles: true,
-          composed: true,
-        });
-        break;
-
-      case NavbarCustomActions.navigateBack:
-        triggerHaptic(true);
-        window.history.back();
-        break;
-
-      case NavbarCustomActions.openEditMode:
-        triggerHaptic();
-        forceOpenEditMode();
-        break;
-
-      case NavbarCustomActions.logout:
-        triggerHaptic();
-        this._navbarCard._hass.auth.revoke();
-        break;
-
-      case NavbarCustomActions.customJSAction:
-        triggerHaptic();
-        processTemplate<string>(
-          this._navbarCard._hass,
-          this._navbarCard,
-          action.code,
-        );
-        break;
-
-      default:
-        if (action != null) {
+        case NavbarCustomActions.quickbar:
           triggerHaptic();
-          // Slight delay before dispatching to prevent event conflicts
-          setTimeout(() => {
+          fireDOMEvent<'KeyboardEvent'>(
+            this._navbarCard,
+            'keydown',
+            {
+              bubbles: true,
+              composed: true,
+              key: this._chooseKeyForQuickbar(action),
+            },
+            undefined,
+            KeyboardEvent,
+          );
+          break;
+
+        case NavbarCustomActions.showNotifications:
+          triggerHaptic();
+          fireDOMEvent(this._navbarCard, 'hass-show-notifications', {
+            bubbles: true,
+            composed: true,
+          });
+          break;
+
+        case NavbarCustomActions.navigateBack:
+          triggerHaptic(true);
+          window.history.back();
+          break;
+
+        case NavbarCustomActions.openEditMode:
+          triggerHaptic();
+          forceOpenEditMode();
+          break;
+
+        case NavbarCustomActions.logout:
+          triggerHaptic();
+          this._navbarCard._hass.auth.revoke();
+          break;
+
+        case NavbarCustomActions.customJSAction:
+          triggerHaptic();
+          processTemplate<string>(
+            this._navbarCard._hass,
+            this._navbarCard,
+            action.code,
+          );
+          break;
+
+        default:
+          if (action != null) {
+            triggerHaptic();
+            // Slight delay before dispatching to prevent event conflicts
             fireDOMEvent(
               this._navbarCard,
               'hass-action',
@@ -189,13 +194,13 @@ export class BaseRoute implements ActionableElement {
                 config: { [`${actionType}_action`]: action },
               },
             );
-          }, 10);
-        } else if (actionType === 'tap' && (element as Route).url) {
-          triggerHaptic(true);
-          navigate(this, (element as Route).url!);
-        }
-        break;
-    }
+          } else if (actionType === 'tap' && (element as Route).url) {
+            triggerHaptic(true);
+            navigate(this, (element as Route).url!);
+          }
+          break;
+      }
+    }, 10);
   };
 
   protected _shouldShowLabels = (): boolean => {
