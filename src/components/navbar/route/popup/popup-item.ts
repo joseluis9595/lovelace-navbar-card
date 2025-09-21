@@ -3,6 +3,7 @@ import { NavbarCard } from '@/navbar-card';
 import { BaseRoute, Popup } from '@/components/navbar';
 import { ActionEvents } from '@/components/action-events';
 import { PopupItem as PopupItemDef } from '@/types';
+import { preventEventDefault } from '@/utils';
 
 export class PopupItem extends BaseRoute {
   private readonly _events = new ActionEvents();
@@ -37,6 +38,7 @@ export class PopupItem extends BaseRoute {
         ${this.selected ? 'active' : ''}
       "
       style="--index: ${this._index}"
+      @click=${preventEventDefault}
       @mouseenter=${(e: MouseEvent) => this._events.handleMouseEnter(e, this)}
       @mousemove=${(e: MouseEvent) => this._events.handleMouseMove(e, this)}
       @mouseleave=${(e: MouseEvent) => this._events.handleMouseLeave(e, this)}

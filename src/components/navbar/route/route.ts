@@ -2,7 +2,7 @@ import { html, TemplateResult } from 'lit';
 import { NavbarCard } from '@/navbar-card';
 import { Popup, BaseRoute } from '@/components/navbar';
 import { PopupItem, RouteItem } from '@/types';
-import { processTemplate } from '@/utils';
+import { preventEventDefault, processTemplate } from '@/utils';
 import { ActionEvents } from '@/components/action-events';
 
 export class Route extends BaseRoute {
@@ -51,6 +51,7 @@ export class Route extends BaseRoute {
     return html`
       <div
         class="route ${isActive ? 'active' : ''}"
+        @click=${preventEventDefault}
         @mouseenter=${(e: MouseEvent) => this._events.handleMouseEnter(e, this)}
         @mousemove=${(e: MouseEvent) => this._events.handleMouseMove(e, this)}
         @mouseleave=${(e: MouseEvent) => this._events.handleMouseLeave(e, this)}
