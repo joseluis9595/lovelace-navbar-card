@@ -1,7 +1,6 @@
 ---
 id: installation
 title: Installation
-sidebar_position: 2
 ---
 
 <details open>
@@ -18,7 +17,7 @@ sidebar_position: 2
 
 <br/>
 
-1. Go to HACS in Home Assistant.
+1. Go to HACS in your Home Assistant instance.
 2. On the top right, click "Custom repositories".
 3. Enter the repository URL: https://github.com/joseluis9595/lovelace-navbar-card.git
 4. Search for "Navbar Card".

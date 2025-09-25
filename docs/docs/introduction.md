@@ -1,7 +1,6 @@
 ---
 id: introduction
 title: Introduction
-sidebar_position: 1
 ---
 
 [![Buy me a beer](https://img.shields.io/badge/Support-Buy%20me%20a%20beer-fdd734?logo=buy-me-a-coffee)](https://www.buymeacoffee.com/joseluis9595)

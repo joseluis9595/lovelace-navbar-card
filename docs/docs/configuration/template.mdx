@@ -9,7 +9,7 @@ Templates allow you to predefine a custom configuration for `navbar-card` and re
 
 #### Defining Templates
 
-To define custom templates, add them under `navbar-templates` in your main Lovelace YAML configuration like this:
+To define templates in the visual editor, go to your dashboard, click on the three dots in the top right corner and select "Edit YAML". There, add your template configuration as so:
 
 ```yaml
 navbar-templates:
@@ -57,3 +57,7 @@ styles: |
     --navbar-primary-color: red;
   }
 ```
+
+### Visual editor
+
+Right now, using the visual editor only applies properties to the card itself, not the template. This means that if you want to change a property of the template, you need to follow the steps mentioned in the [Defining Templates](#defining-templates) section.

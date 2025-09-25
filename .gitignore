@@ -10,6 +10,7 @@ coverage/
 # Misc
 *.log
 TODO.txt
+TODO.md
 
 # OS specifics
 .DS_Store

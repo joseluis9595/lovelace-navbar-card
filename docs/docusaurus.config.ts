@@ -82,7 +82,7 @@ const config: Config = {
           ],
         },
         {
-          title: 'Community',
+          title: 'Need help?',
           items: [
             {
               label: 'GitHub Issues',

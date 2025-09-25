@@ -1,5 +1,0 @@
----
-id: contributing
-title: Contributing
----
-

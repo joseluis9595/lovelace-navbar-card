@@ -7,19 +7,19 @@ import { AlignedImage } from '@site/src/components';
 
 Routes represents an array of clickable icons that redirects to a given path. Each item in the array should contain the following configuration:
 
-| Name                | Type                                                            | Default     | Description                                                                                                                                                |
-| ------------------- | --------------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `url`               | string                                                          | `Required*` | The path to a Lovelace view. Ignored if `tap_action` is defined.                                                                                           |
+| Name                | Type                                                             | Default     | Description                                                                                                                                                |
+| ------------------- | ---------------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `url`               | string                                                           | `Required*` | The path to a Lovelace view. Ignored if `tap_action` is defined.                                                                                           |
 | `icon`              | string \| [JSTemplate](../types/js-template)                     | -           | Material icon to display as this entry icon. Either `icon` or `image` is required.                                                                         |
 | `icon_selected`     | string \| [JSTemplate](../types/js-template)                     | -           | Icon to be displayed when `url` matches the current browser URL                                                                                            |
 | `icon_color`        | string \| [JSTemplate](../types/js-template)                     | -           | Custom color for the icon of this route.                                                                                                                   |
 | `image`             | string \| [JSTemplate](../types/js-template)                     | -           | URL of an image to display as this entry icon. Either `icon` or `image` is required.                                                                       |
 | `image_selected`    | string \| [JSTemplate](../types/js-template)                     | -           | Image to be displayed when `url` matches the current browser URL                                                                                           |
-| `badge`             | [Badge](#badge)                                                 | -           | Badge configuration                                                                                                                                        |
+| `badge`             | [Badge](#badge)                                                  | -           | Badge configuration                                                                                                                                        |
 | `label`             | string \| [JSTemplate](../types/js-template)                     | -           | Label to be displayed under the given route if `show_labels` is true                                                                                       |
-| `tap_action`        | [CustomAction](../types/custom-actions)                         | -           | Custom tap action configuration.                                                                                                                           |
-| `hold_action`       | [CustomAction](../types/custom-actions)                         | -           | Custom hold action configuration.                                                                                                                          |
-| `double_tap_action` | [CustomAction](../types/custom-actions)                         | -           | Custom double_tap action configuration.                                                                                                                    |
+| `tap_action`        | [CustomAction](../types/custom-actions)                          | -           | Custom tap action configuration.                                                                                                                           |
+| `hold_action`       | [CustomAction](../types/custom-actions)                          | -           | Custom hold action configuration.                                                                                                                          |
+| `double_tap_action` | [CustomAction](../types/custom-actions)                          | -           | Custom double_tap action configuration.                                                                                                                    |
 | `popup`             | [Popup items](#popup-items)\| [JSTemplate](../types/js-template) | -           | List of routes to display in a popup menu                                                                                                                  |
 | `hidden`            | boolean \| [JSTemplate](../types/js-template)                    | -           | Controls whether to render this route or not                                                                                                               |
 | `selected`          | boolean \| [JSTemplate](../types/js-template)                    | -           | Controls whether to display this route as selected or not. If not defined, the selected status will be computed as `route.url == window.location.pathname` |
@@ -44,10 +44,14 @@ Some suggestions when using the `image` property:
 
 Configuration to display a small badge on any of the navbar items.
 
-<AlignedImage imageURL={'/img/configuration/navbar-card_badges.png'} alt="navbar-card_badges" alignment="center" />
+<AlignedImage
+  imageURL={'/img/configuration/navbar-card_badges.png'}
+  alt="navbar-card_badges"
+  alignment="center"
+/>
 
-| Name        | Type                                         | Default | Description                                                     |
-| ----------- | -------------------------------------------- | ------- | --------------------------------------------------------------- |
+| Name        | Type                                          | Default | Description                                                     |
+| ----------- | --------------------------------------------- | ------- | --------------------------------------------------------------- |
 | `show`      | boolean \| [JSTemplate](../types/js-template) | false   | Boolean template indicating whether to display the badge or not |
 | `color`     | string \| [JSTemplate](../types/js-template)  | red     | Background color of the badge                                   |
 | `count`     | string \| [JSTemplate](../types/js-template)  | -       | Text to be displayed inside the badge                           |
@@ -57,20 +61,24 @@ Configuration to display a small badge on any of the navbar items.
 
 For each route, a popup menu can be configured, to display a popup when clicked. This is activated using the `open-popup` action in either `tap_action` or `hold_action`.
 
-<AlignedImage imageURL={'/img/configuration/navbar-card_popup.png'} alt="navbar-card_popup" alignment="center" />
+<AlignedImage
+  imageURL={'/img/configuration/navbar-card_popup.png'}
+  alt="navbar-card_popup"
+  alignment="center"
+/>
 
-| Name                | Type                                         | Default     | Description                                                                                                                                              |
-| ------------------- | -------------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `url`               | string                                       | `Required*` | The path to a Lovelace view. Ignored if `tap_action` is defined.                                                                                         |
+| Name                | Type                                          | Default     | Description                                                                                                                                              |
+| ------------------- | --------------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `url`               | string                                        | `Required*` | The path to a Lovelace view. Ignored if `tap_action` is defined.                                                                                         |
 | `icon`              | string \| [JSTemplate](../types/js-template)  | -           | Material icon to display as this entry icon.                                                                                                             |
 | `icon_selected`     | string \| [JSTemplate](../types/js-template)  | -           | Icon to be displayed when `url` matches the current browser URL                                                                                          |
 | `image`             | string \| [JSTemplate](../types/js-template)  | -           | URL of an image to display as this entry icon.                                                                                                           |
 | `image_selected`    | string \| [JSTemplate](../types/js-template)  | -           | Image to be displayed when `url` matches the current browser URL                                                                                         |
-| `badge`             | [Badge](#badge)                              | -           | Badge configuration                                                                                                                                      |
+| `badge`             | [Badge](#badge)                               | -           | Badge configuration                                                                                                                                      |
 | `label`             | string \| [JSTemplate](../types/js-template)  | -           | Label to be displayed under the given route if `show_labels` is true                                                                                     |
-| `tap_action`        | [CustomAction](../types/custom-actions)      | -           | Custom tap action configuration.                                                                                                                         |
-| `hold_action`       | [CustomAction](../types/custom-actions)      | -           | Custom hold action configuration.                                                                                                                        |
-| `double_tap_action` | [CustomAction](../types/custom-actions)      | -           | Custom double_tap action configuration.                                                                                                                  |
+| `tap_action`        | [CustomAction](../types/custom-actions)       | -           | Custom tap action configuration.                                                                                                                         |
+| `hold_action`       | [CustomAction](../types/custom-actions)       | -           | Custom hold action configuration.                                                                                                                        |
+| `double_tap_action` | [CustomAction](../types/custom-actions)       | -           | Custom double_tap action configuration.                                                                                                                  |
 | `selected`          | boolean \| [JSTemplate](../types/js-template) | -           | Controls whether to display this item as selected or not. If not defined, the selected status will be computed as `item.url == window.location.pathname` |
 
 In addition to the default annotation, we also support using JSTemplate to define popup items.
