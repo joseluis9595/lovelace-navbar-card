@@ -11,7 +11,7 @@ const HOST_STYLES = css`
     --navbar-box-shadow-desktop: var(--material-shadow-elevation-2dp);
     --navbar-box-shadow-mobile-floating: var(--material-shadow-elevation-2dp);
 
-    --navbar-z-index: 7;
+    --navbar-z-index: 3;
     --navbar-popup-backdrop-z-index: 900;
     --navbar-popup-z-index: 901;
   }
