@@ -1,7 +1,8 @@
 import { html } from 'lit';
 import { NavbarCard } from '@/navbar-card';
 import { BaseRoute } from '@/components/navbar';
-import { processTemplate } from '@/utils';
+import { isTemplate, processTemplate } from '@/utils';
+import { Color } from '@/components/color';
 
 export class Icon {
   constructor(
@@ -43,12 +44,21 @@ export class Icon {
     );
   }
 
-  get iconColor(): string {
-    return processTemplate<string>(
-      this._navbarCard._hass,
-      this._navbarCard,
-      this._route.data.icon_color,
-    );
+  get iconColor(): string | null {
+    try {
+      const rawValue = processTemplate<string>(
+        this._navbarCard._hass,
+        this._navbarCard,
+        this._route.data.icon_color,
+      );
+      // If the template was not properly processed, return null
+      if (isTemplate(rawValue)) {
+        return null;
+      }
+      return new Color(rawValue).rgbaString();
+    } catch (_err) {
+      return null;
+    }
   }
 
   public render() {

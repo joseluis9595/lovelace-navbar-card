@@ -308,6 +308,15 @@ export class Color {
   }
 
   /**
+   * Converts the color to an RGBA format.
+   *
+   * @returns An object containing the red, green, blue, and alpha (opacity) components of the color.
+   */
+  rgbaString(): string {
+    return `rgba(${this.r}, ${this.g}, ${this.b}, ${this.a})`;
+  }
+
+  /**
    * Converts the color to a hexadecimal (hex) string format.
    *
    * @returns A hex string representing the color in RGB format (e.g., `#RRGGBB`).

@@ -435,6 +435,13 @@ describe('Color class', () => {
       });
     });
 
+    describe('rgbaString', () => {
+      it('should return RGBA string', () => {
+        const rgbaString = testColor.rgbaString();
+        expect(rgbaString).toBe('rgba(255, 128, 0, 255)');
+      });
+    });
+
     describe('hex', () => {
       it('should return hex string', () => {
         const hex = testColor.hex();
