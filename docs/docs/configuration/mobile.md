@@ -1,0 +1,28 @@
+---
+id: mobile
+title: Mobile
+---
+
+import { AlignedImage } from '@site/src/components';
+
+Specific configuration for mobile mode.
+
+<AlignedImage imageURL={'/img/configuration/navbar-card_mobile.png'} alt="Mobile mode image" alignment="center" />
+
+| Name                           | Type                                     | Default  | Description                                                                                                             |
+| ------------------------------ | ---------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `mode`                         | `docked` \| `floating`                   | `docked` | Choose visualization mode on mobile devices. `docked` for default experience, `floating` for desktop-like visualization |
+| `show_labels`                  | boolean \| `popup_only` \| `routes_only` | `false`  | Whether or not to display labels under each route                                                                       |
+| `show_popup_label_backgrounds` | boolean                                  | `false`  | Whether or not to display label backgrounds for popup items                                                             |
+| `hidden`                       | boolean \| [JSTemplate](#jstemplate)     | `false`  | Set to true to hide the navbar on mobile devices                                                                        |
+
+<br/>
+
+---
+
+Example of mobile mode with popup labels turned off and on.
+
+<!-- TODO JLAQ replace these images -->
+
+<img width="200" alt="Popup labels turned off for mobile" src="https://github.com/user-attachments/assets/0547373e-283c-4233-b8d7-fd0928f0af4b" />
+<img width="200" alt="Popup labels turned on for mobile" src="https://github.com/user-attachments/assets/aaa6c424-1f44-46a5-9a20-2eb08d5d8eb4" />

@@ -1,0 +1,31 @@
+---
+id: desktop
+title: Desktop
+---
+
+import { AlignedImage } from '@site/src/components';
+
+Specific configuration for desktop mode.
+
+<AlignedImage imageURL={'/img/configuration/navbar-card_desktop.png'} alt="Desktop mode image" alignment="center" />
+
+| Name                           | Type                                     | Default  | Description                                                                |
+| ------------------------------ | ---------------------------------------- | -------- | -------------------------------------------------------------------------- |
+| `show_labels`                  | boolean \| `popup_only` \| `routes_only` | `false`  | Whether or not to display labels under each route                          |
+| `show_popup_label_backgrounds` | boolean                                  | `false`  | Whether or not to display label backgrounds for popup items                |
+| `min_width`                    | number                                   | `768`    | Screen size from which the navbar will be displayed as its desktop variant |
+| `position`                     | `top` \| `bottom` \| `left` \| `right`   | `bottom` | Position of the navbar on desktop devices                                  |
+| `hidden`                       | boolean \| [JSTemplate](#jstemplate)     | `false`  | Set to true to hide the navbar on desktop devices                          |
+
+<br/>
+
+---
+
+<!-- TODO JLAQ this section feels so out of place -->
+
+Example of desktop mode with popup labels turned off and on.
+
+<!-- TODO JLAQ replace these images -->
+
+<img width="200" alt="Popup labels turned off for desktop" src="https://github.com/user-attachments/assets/33516186-be1e-48de-9f25-808851f302b6" />
+<img width="200" alt="Popup labels turned on for desktop" src="https://github.com/user-attachments/assets/d8453509-9c67-4e5d-949f-2848630346d6" />
