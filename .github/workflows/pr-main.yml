@@ -38,3 +38,6 @@ jobs:
 
       - name: Build Project
         run: bun run build
+
+      - name: Build Docs
+        run: bun run docs:build
