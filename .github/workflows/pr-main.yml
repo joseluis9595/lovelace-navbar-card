@@ -39,5 +39,18 @@ jobs:
       - name: Build Project
         run: bun run build
 
+  build-docs:
+    runs-on: ubuntu-latest
+    working-directory: docs
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install
+
       - name: Build Docs
         run: bun run docs:build

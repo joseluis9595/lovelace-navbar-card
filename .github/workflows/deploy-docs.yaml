@@ -1,5 +1,7 @@
 name: Deploy to GitHub Pages
 
+# TODO JLAQ depends on the pre-release workflow
+
 on:
   push:
     branches:
@@ -7,6 +9,7 @@ on:
 
 jobs:
   build:
+    working-directory: docs
     name: Build Docusaurus
     runs-on: ubuntu-latest
     steps:
@@ -26,9 +29,10 @@ jobs:
       - name: Upload Build Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/build
+          path: build
 
   deploy:
+    working-directory: docs
     name: Deploy to GitHub Pages
     needs: build
 
