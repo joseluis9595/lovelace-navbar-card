@@ -130,7 +130,6 @@ Before committing code, ensure:
 
 Remember that this is a Home Assistant custom card, so all changes should maintain compatibility with Home Assistant's architecture and user experience guidelines.
 
-
 ## Expectations for AI Agents
 
 - Do not introduce new dependencies without approval.
