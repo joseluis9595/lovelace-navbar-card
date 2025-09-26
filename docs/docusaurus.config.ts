@@ -1,6 +1,14 @@
 import { themes as prismThemes } from 'prism-react-renderer';
 import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+
+// Read version from root package.json
+const rootPackageJson = JSON.parse(
+  readFileSync(join(__dirname, '..', 'package.json'), 'utf8'),
+);
+const version = rootPackageJson.version;
 
 const GITHUB_ORG_NAME = 'joseluis9595';
 const GITHUB_REPO_NAME = 'lovelace-navbar-card';
@@ -52,7 +60,7 @@ const config: Config = {
 
   themeConfig: {
     navbar: {
-      title: 'Navbar Card',
+      title: `Navbar Card v${version}`,
       logo: {
         alt: 'Navbar Card Logo',
         src: 'img/logo.svg',

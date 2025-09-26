@@ -41,7 +41,9 @@ jobs:
 
   build-docs:
     runs-on: ubuntu-latest
-    working-directory: docs
+    defaults:
+      run:
+        working-directory: ./docs
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

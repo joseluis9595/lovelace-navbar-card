@@ -9,7 +9,9 @@ on:
 
 jobs:
   build:
-    working-directory: docs
+    defaults:
+      run:
+        working-directory: ./docs
     name: Build Docusaurus
     runs-on: ubuntu-latest
     steps:
@@ -32,7 +34,9 @@ jobs:
           path: build
 
   deploy:
-    working-directory: docs
+    defaults:
+      run:
+        working-directory: ./docs
     name: Deploy to GitHub Pages
     needs: build
 
