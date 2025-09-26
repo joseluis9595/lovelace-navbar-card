@@ -33,6 +33,7 @@ const sidebars: SidebarsConfig = {
         'configuration/haptic',
         'configuration/media-player',
         'configuration/layout',
+        'configuration/styles',
       ],
     },
     {
