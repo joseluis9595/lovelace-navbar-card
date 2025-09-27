@@ -48,6 +48,8 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/) specifica
 [optional footer(s)]
 ```
 
+Commit messages should be kept short and concise, adding optional body and footer only when needed.
+
 Types:
 
 - `feat`: New features
