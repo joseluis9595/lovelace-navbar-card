@@ -29,4 +29,27 @@
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
 
+/* Version chip styles */
+.navbar-version-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  line-height: 1.5;
+  text-align: center;
+  white-space: nowrap;
+  border-radius: 9999px;
+  background-color: var(--ifm-color-primary);
+  color: white;
+  height: 24px;
+  cursor: default !important;
+}
 
+.navbar-version-chip:hover {
+  color: white !important;
+}
+
+[data-theme='dark'] .navbar-version-chip {
+  background-color: var(--ifm-color-primary-darker);
+}

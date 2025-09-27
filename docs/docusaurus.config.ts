@@ -60,13 +60,19 @@ const config: Config = {
 
   themeConfig: {
     navbar: {
-      title: `Navbar Card v${version}`,
+      title: 'Navbar Card',
       logo: {
         alt: 'Navbar Card Logo',
         src: 'img/logo_transparent.svg',
         href: '/docs/introduction',
       },
       items: [
+        {
+          html: `<span>v${version}</span>`,
+          position: 'left',
+          className: 'navbar-version-chip',
+          href: '#',
+        },
         {
           href: `${GITHUB_REPO_URL}`,
           label: 'GitHub',
