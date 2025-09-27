@@ -82,34 +82,6 @@ const config: Config = {
     },
     footer: {
       style: 'dark',
-      links: [
-        {
-          title: 'Docs',
-          items: [
-            {
-              label: 'Getting Started',
-              to: '/docs/getting-started',
-            },
-            {
-              label: 'Configuration',
-              to: '/docs/configuration',
-            },
-          ],
-        },
-        {
-          title: 'Need help?',
-          items: [
-            {
-              label: 'GitHub Issues',
-              href: `${GITHUB_REPO_URL}/issues`,
-            },
-            {
-              label: 'Home Assistant Community',
-              href: `${COMMUNITY_FORUM_URL}`,
-            },
-          ],
-        },
-      ],
       copyright: `Copyright © ${new Date().getFullYear()} Navbar Card. Built with Docusaurus.`,
     },
     colorMode: {
