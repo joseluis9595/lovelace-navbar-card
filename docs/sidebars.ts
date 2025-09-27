@@ -12,19 +12,11 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Getting Started',
-      link: {
-        type: 'doc',
-        id: 'getting-started/index',
-      },
       items: ['getting-started/installation', 'getting-started/quickstart'],
     },
     {
       type: 'category',
       label: 'Configuration',
-      link: {
-        type: 'doc',
-        id: 'configuration/index',
-      },
       items: [
         'configuration/all_options',
         'configuration/routes',
@@ -40,10 +32,6 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Types',
-      link: {
-        type: 'doc',
-        id: 'types/index',
-      },
       items: ['types/custom-actions', 'types/js-template'],
     },
     {
