@@ -63,7 +63,7 @@ const config: Config = {
       title: `Navbar Card v${version}`,
       logo: {
         alt: 'Navbar Card Logo',
-        src: 'img/logo.svg',
+        src: 'img/logo_transparent.svg',
         href: '/docs/introduction',
       },
       items: [
