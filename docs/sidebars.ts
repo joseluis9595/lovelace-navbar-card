@@ -26,6 +26,7 @@ const sidebars: SidebarsConfig = {
         id: 'configuration/index',
       },
       items: [
+        'configuration/all_options',
         'configuration/routes',
         'configuration/template',
         'configuration/desktop',
