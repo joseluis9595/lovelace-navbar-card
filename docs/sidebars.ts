@@ -36,11 +36,6 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'doc',
-      label: 'Examples',
-      id: 'examples',
-    },
-    {
-      type: 'doc',
       id: 'faq',
       label: 'FAQ',
     },

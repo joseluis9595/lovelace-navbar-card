@@ -13,9 +13,8 @@ const version = rootPackageJson.version;
 const GITHUB_ORG_NAME = 'joseluis9595';
 const GITHUB_REPO_NAME = 'lovelace-navbar-card';
 const GITHUB_REPO_URL = `https://github.com/${GITHUB_ORG_NAME}/${GITHUB_REPO_NAME}`;
+const DOCS_FOLDER = 'docs';
 const PAGE_URL = `https://${GITHUB_ORG_NAME}.github.io/${GITHUB_REPO_NAME}`;
-const COMMUNITY_FORUM_URL =
-  'https://community.home-assistant.io/t/navbar-card-easily-navigate-through-dashboards/832917?u=joseluis9595';
 
 const config: Config = {
   title: 'Navbar Card',
@@ -48,13 +47,26 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
-          editUrl: `${GITHUB_REPO_URL}/tree/main/docs/`,
+          editUrl: `${GITHUB_REPO_URL}/tree/main/${DOCS_FOLDER}/`,
         },
         blog: false,
         theme: {
           customCss: './src/css/custom.css',
         },
       } satisfies Preset.Options,
+    ],
+  ],
+
+  plugins: [
+    [
+      '@docusaurus/plugin-content-docs',
+      {
+        id: 'showcase',
+        path: 'showcase',
+        routeBasePath: 'showcase',
+        sidebarPath: false,
+        editUrl: `${GITHUB_REPO_URL}/tree/main/${DOCS_FOLDER}/`,
+      },
     ],
   ],
 
@@ -72,6 +84,20 @@ const config: Config = {
           position: 'left',
           className: 'navbar-version-chip',
           href: '#',
+        },
+        {
+          id: 'docs',
+          label: 'Docs',
+          position: 'left',
+          activeBasePath: '/docs',
+          to: '/docs/introduction',
+        },
+        {
+          id: 'showcase',
+          label: 'Showcase',
+          position: 'left',
+          activeBasePath: '/showcase',
+          to: '/showcase/examples',
         },
         {
           href: `${GITHUB_REPO_URL}`,
