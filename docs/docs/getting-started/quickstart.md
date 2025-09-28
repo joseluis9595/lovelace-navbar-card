@@ -63,6 +63,6 @@ A comprehensive guide to using the new visual editor introduced in version 1.0.0
 
 ## Next Steps
 
-- Check out our [Configuration Guide](/docs/configuration/all_options) for detailed options
+- Check out our [Configuration Guide](/docs/configuration/all-options) for detailed options
 - Browse the [Examples Gallery](/showcase/examples) for inspiration
 - **Need help?** Check out the [FAQ](/docs/getting-help/faq) or [Contact](/docs/getting-help/contact) channels for help and tips

@@ -18,7 +18,7 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Configuration',
       items: [
-        'configuration/all_options',
+        'configuration/all-options',
         'configuration/routes',
         'configuration/template',
         'configuration/desktop',

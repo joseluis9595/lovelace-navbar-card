@@ -1,17 +1,83 @@
 ---
-id: all_options
-title: Configuration options
+id: all-options
+title: Configuration Reference
+description: Complete reference of all configuration options available in the Navbar Card
 ---
 
-This page lists all the configuration options available for the `navbar-card` card. You can find more information about each option in its corresponding section.
+# Configuration Reference
 
-| Name           | Type                           | Default    | Description                                                                                             |
-| -------------- | ------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------- |
-| `routes`       | [Routes](./routes)             | `Required` | Defines the array of routes to be shown in the navbar                                                   |
-| `desktop`      | [Desktop](./desktop)           | -          | Options specific to desktop mode                                                                        |
-| `mobile`       | [Mobile](./mobile)             | -          | Options specific to mobile mode                                                                         |
-| `template`     | [Template](./template)         | -          | Template name                                                                                           |
-| `layout`       | [Layout](./layout)             | -          | Layout configuration options                                                                            |
-| `styles`       | [Styles](./styles)             | -          | Custom CSS styles for the card                                                                          |
-| `haptic`       | [Haptic](./haptic)             | -          | Fine tune when the haptic events should be fired in the card                                            |
-| `media_player` | [Media player](./media-player) | -          | `[BETA]` Automatically display a media_player card on top of navbar-card. Only enabled for mobile mode. |
+Navbar Card's configuration is structured into logical sections, making it easy to customize different aspects of the card:
+
+| Name           | Type                               | Default    | Description                                        |
+| -------------- | ---------------------------------- | ---------- | -------------------------------------------------- |
+| `routes`       | [Routes](./routes.mdx)             | `Required` | Array of navigation items to display in the navbar |
+| `desktop`      | [Desktop](./desktop.mdx)           | -          | Desktop-specific layout and behavior settings      |
+| `mobile`       | [Mobile](./mobile.mdx)             | -          | Mobile-specific layout and behavior settings       |
+| `layout`       | [Layout](./layout.mdx)             | -          | General layout configuration                       |
+| `styles`       | [Styles](./styles.mdx)             | -          | Custom CSS styling options                         |
+| `template`     | [Template](./template.mdx)         | -          | Predefined template to use as base configuration   |
+| `haptic`       | [Haptic](./haptic.mdx)             | -          | Configure haptic feedback on interactions          |
+| `media_player` | [Media Player](./media-player.mdx) | -          | `[BETA]` Media player integration for mobile view  |
+
+## Basic Example
+
+Here's a basic configuration example for `navbar-card`:
+
+```yaml
+type: custom:navbar-card
+haptic:
+  url: false
+  tap_action: false
+  hold_action: true
+  double_tap_action: true
+desktop:
+  position: left
+  show_labels: true
+mobile:
+  show_labels: false
+media_player:
+  entity: media_player.your_media_player
+  album_cover_background: true
+routes:
+  - url: /lovelace/home
+    icon: mdi:home
+    label: Home
+  - url: /lovelace/home/devices
+    icon: mdi:devices
+    label: Devices
+    hold_action:
+      action: navigate
+      navigation_path: /config/devices/dashboard
+  - url: /config/automation/dashboard
+    icon: mdi:creation
+    label: Automations
+  - url: /config/dashboard
+    icon: mdi:cog
+    label: Settings
+  - icon: mdi:dots-horizontal
+    label: More
+    tap_action:
+      action: open-popup
+    popup:
+      - icon: mdi:cog
+        url: /config/dashboard
+      - icon: mdi:hammer
+        url: /developer-tools/yaml
+      - icon: mdi:power
+        tap_action:
+          action: call-service
+          service: homeassistant.restart
+          service_data: {}
+          confirmation:
+            text: Are you sure you want to restart Home Assistant?
+styles: |
+  .navbar {
+    --navbar-primary-color:rgb(0, 0, 0);
+  }
+  .navbar-card {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(10px);
+    border: none;
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1) !important;
+  }
+```
