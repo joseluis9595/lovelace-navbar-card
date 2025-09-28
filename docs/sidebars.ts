@@ -32,7 +32,7 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Types',
-      items: ['types/custom-actions', 'types/js-template'],
+      items: ['types/js-template', 'types/custom-actions'],
     },
     {
       type: 'category',

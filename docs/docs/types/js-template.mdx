@@ -1,50 +1,105 @@
 ---
 id: js-template
-title: JSTemplate
+title: JavaScript Templates
 ---
 
-You can easily customize some properties of `navbar-card` by writing your own JavaScript rules. To do this, you simply wrap the value of the field that supports JSTemplates in `[[[` and `]]]`, then write the JavaScript code that determines the property's value.
+# JavaScript Templates
 
-:::note
-`[[[` and `]]]` are only needed in the YAML editor. For the visual editor, simply write plain javascript in the code block without the template wrappers.
-:::
+JavaScript templates provide powerful customization capabilities for your Navbar Card. They allow you to create dynamic content, conditional rendering, and interactive features based on your Home Assistant state and user context.
 
-Apart from using plain javascript, you can access some predefined variables:
+Check the [**configuration**](../configuration/all_options.mdx) to see which fields support JavaScript templates.
 
-- `states` -> Contains the global state of all entities in HomeAssistant. To get the state of a specific entity, use: `states['entity_type.your_entity'].state`.
-- `user` -> Information about the current logged user.
-- `navbar` -> Internal state of the navbar-card. Accessible fields are:
-  - `isDesktop` -> Boolean indicating whether the card is in its desktop variant or not.
+## Template Syntax
 
-Below is an example using JSTemplates for displaying a route only for one user, and a label indicating the number of lights currently on:
+To use JavaScript templates in your configuration:
 
-```yaml
-type: custom:navbar-card
-desktop:
-  position: bottom
-  show_labels: true
-routes:
-  - url: /lovelace/lights
-    label: |
-      [[[ 
-        const lightsOn = Object.entries(states)
-          .filter(([entityId, value]) => {
-            return entityId.startsWith('light.') && value.state == 'on';
-          })
-          .length;
-        return `Lights (${lightsOn})` 
-      ]]]
-    icon: mdi:lightbulb-outline
-    icon_selected: mdi:lightbulb
-    hidden: |
-      [[[ return navbar.isDesktop; ]]]
-  - url: /lovelace/devices
-    label: Devices
-    icon: mdi:devices
-    hidden: |
-      [[[ return user.name != "jose"; ]]]
+1. In YAML editor, wrap your JavaScript code in `[[[` and `]]]`:
+
+   ```yaml
+   field: |
+     [[[ your_javascript_code_here ]]]
+   ```
+
+2. In visual editor, simply write your JavaScript code:
+
+   ```javascript
+   your_javascript_code_here;
+   ```
+
+---
+
+## Available Context
+
+Your JavaScript templates have access to these predefined variables:
+
+| Variable | Description                     | Content                                                                           |
+| -------- | ------------------------------- | --------------------------------------------------------------------------------- |
+| `states` | Global state of all HA entities | [HA states](https://developers.home-assistant.io/docs/frontend/data#hassstates)   |
+| `user`   | Current user information        | [HA user state](https://developers.home-assistant.io/docs/frontend/data#hassuser) |
+| `hass`   | Home Assistant instance         | [HA `hass` object](https://developers.home-assistant.io/docs/frontend/data)       |
+| `navbar` | Navbar card internal state      | `{isDesktop: boolean}`                                                            |
+
+### States Object
+
+Access entity states and attributes:
+
+```javascript
+// Get entity state
+states['light.kitchen'].state;
+
+// Get entity attributes
+states['light.kitchen'].attributes.brightness;
+
+// Check if entity exists
+states['sensor.temperature'] !== undefined;
 ```
 
-:::tip
-You can use `console.log` in your JSTemplate to help debug your HomeAssistant states.
-:::
+### User Object
+
+Access user information:
+
+```javascript
+// User properties
+user.name; // Username
+user.is_admin; // Admin status
+user.is_owner; // Owner status
+user.id; // User ID
+```
+
+### Navbar Object
+
+Access navbar-specific information:
+
+```javascript
+// Navbar properties
+navbar.isDesktop; // Desktop/mobile mode
+```
+
+---
+
+## Debugging Tips
+
+1. **Use Console Logging**. Open the browser console (F12) to debug your templates.
+
+   ```javascript
+   [[[
+     console.log('States:', states);
+     console.log('User:', user);
+     console.log('Navbar:', navbar);
+     return 'Debug Mode';
+   ]]]
+   ```
+
+2. **Error Handling**. Use try/catch to handle errors in your templates.
+
+   ```javascript
+   [[[
+     try {
+       // Your code here
+       return 'Success';
+     } catch (error) {
+       console.error('Template Error:', error);
+       return 'Error';
+     }
+   ]]]
+   ```
