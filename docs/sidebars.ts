@@ -35,9 +35,9 @@ const sidebars: SidebarsConfig = {
       items: ['types/custom-actions', 'types/js-template'],
     },
     {
-      type: 'doc',
-      id: 'faq',
-      label: 'FAQ',
+      type: 'category',
+      label: 'Need Help?',
+      items: ['getting-help/faq', 'getting-help/contact'],
     },
     {
       type: 'doc',
