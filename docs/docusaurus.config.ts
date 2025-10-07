@@ -70,6 +70,18 @@ const config: Config = {
     ],
   ],
 
+  themes: [
+    [
+      require.resolve('@easyops-cn/docusaurus-search-local'),
+      /** @type {import("@easyops-cn/docusaurus-search-local").PluginOptions} */
+      {
+        hashed: true,
+        fuzzyMatchingDistance: 1.2,
+        highlightSearchTermsOnTargetPage: true,
+      },
+    ],
+  ],
+
   themeConfig: {
     navbar: {
       title: 'Navbar Card',
@@ -98,6 +110,10 @@ const config: Config = {
           position: 'left',
           activeBasePath: '/showcase',
           to: '/showcase/examples',
+        },
+        {
+          type: 'search',
+          position: 'right',
         },
         {
           href: `${GITHUB_REPO_URL}`,

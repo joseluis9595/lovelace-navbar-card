@@ -13,6 +13,7 @@
   "dependencies": {
     "@docusaurus/core": "3.8.1",
     "@docusaurus/preset-classic": "3.8.1",
+    "@easyops-cn/docusaurus-search-local": "^0.52.1",
     "@mdx-js/react": "^3.0.0",
     "clsx": "^2.1.0",
     "prism-react-renderer": "^2.3.1",
@@ -40,5 +41,3 @@
     "node": ">=18.0"
   }
 }
-
-
