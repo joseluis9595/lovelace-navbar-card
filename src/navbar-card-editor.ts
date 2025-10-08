@@ -556,6 +556,12 @@ export class NavbarCardEditor extends LitElement {
               templateHelper: STRING_JS_TEMPLATE_HELPER,
             })}
             ${this.makeTemplatable({
+              inputType: 'string',
+              label: 'Selected color',
+              configKey: `${baseConfigKey}.selected_color` as any,
+              templateHelper: STRING_JS_TEMPLATE_HELPER,
+            })}
+            ${this.makeTemplatable({
               inputType: 'icon',
               label: 'Icon',
               configKey: `${baseConfigKey}.icon` as any,

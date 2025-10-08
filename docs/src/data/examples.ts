@@ -95,6 +95,39 @@ routes:
     url: /config/info
 `,
   },
+  {
+    title: 'Custom Selected Color',
+    description: 'Navigation bar with a custom selected color',
+    screenshot: '/img/examples/route-selected-colors.png',
+    code: `type: custom:navbar-card
+routes:
+  - url: /lovelace/home
+    icon: mdi:home
+    label: Home
+    selected_color: "#E57373"
+    selected: true       # hardcoded to true for demo purposes
+  - url: /lovelace/home/devices
+    icon: mdi:devices
+    label: Devices
+    selected_color: "#64B5F6"
+    selected: true       # hardcoded to true for demo purposes
+  - url: /config/automation/dashboard
+    icon: mdi:creation
+    label: Automations
+    selected_color: "#81C784"
+    selected: true       # hardcoded to true for demo purposes
+  - url: /config/dashboard
+    icon: mdi:cog
+    label: Settings
+    selected_color: "#FBC02D"
+    selected: true       # hardcoded to true for demo purposes
+  - icon: mdi:information
+    label: More
+    url: /config/info
+    selected_color: "#BA68C8"
+    selected: true       # hardcoded to true for demo purposes
+`,
+  },
 ];
 
 export const stylingExamples: Example[] = [
@@ -102,7 +135,6 @@ export const stylingExamples: Example[] = [
     title: 'Custom Primary Color',
     description: 'Navigation bar with a custom red primary color',
     screenshot: '/img/examples/custom-primary-color.png',
-    createdBy: '@joseluis9595',
     code: `type: custom:navbar-card
 routes:
   - url: /lovelace/home
