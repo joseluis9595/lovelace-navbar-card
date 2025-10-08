@@ -15,25 +15,16 @@ export function ExampleDialog({ example, onClose }: ExampleDialogProps) {
   // Close dialog on back button press on mobile devices
   //   Handle also ESC key press
   useEffect(() => {
-    const closeDialog = (e: KeyboardEvent | PopStateEvent) => {
-      if (
-        e instanceof KeyboardEvent &&
-        (e.key === 'Escape' || e.key === 'Backspace')
-      ) {
-        e.preventDefault();
-        e.stopPropagation();
-        onClose();
-      } else if (e instanceof PopStateEvent) {
+    const closeDialog = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
         e.preventDefault();
         e.stopPropagation();
         onClose();
       }
     };
     window.addEventListener('keydown', closeDialog);
-    window.addEventListener('popstate', closeDialog);
     return () => {
       window.removeEventListener('keydown', closeDialog);
-      window.removeEventListener('popstate', closeDialog);
     };
   }, [onClose]);
 

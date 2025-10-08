@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styles from './ExamplesGrid.module.css';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import {
@@ -15,6 +15,38 @@ export function ExamplesGrid() {
   const [selectedExample, setSelectedExample] = useState<Example | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category>('styling');
   const baseUrl = useBaseUrl('/');
+  const openedWithClick = useRef(false);
+
+  // Handle browser history
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1); // Remove the # symbol
+      if (!hash) {
+        setSelectedExample(null);
+        return;
+      }
+
+      // Find example by title in URL
+      const allExamples = [...configurationExamples, ...stylingExamples];
+      const example = allExamples.find(
+        ex => ex.title.toLowerCase().replace(/\s+/g, '-') === hash,
+      );
+
+      if (example) {
+        setSelectedExample(example);
+        setSelectedCategory(
+          configurationExamples.includes(example) ? 'configuration' : 'styling',
+        );
+      }
+    };
+
+    // Check hash on mount
+    handleHashChange();
+
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   const currentExamples =
     selectedCategory === 'configuration'
@@ -44,7 +76,11 @@ export function ExamplesGrid() {
           <div
             key={index}
             className={styles.exampleCard}
-            onClick={() => setSelectedExample(example)}>
+            onClick={() => {
+              openedWithClick.current = true;
+              const hash = example.title.toLowerCase().replace(/\s+/g, '-');
+              window.location.hash = hash;
+            }}>
             <img
               className={styles.exampleImage}
               src={`${baseUrl}${example.screenshot}`}
@@ -65,7 +101,15 @@ export function ExamplesGrid() {
       {selectedExample && (
         <ExampleDialog
           example={selectedExample}
-          onClose={() => setSelectedExample(null)}
+          onClose={() => {
+            if (openedWithClick.current) {
+              window.history.back();
+            } else {
+              window.history.replaceState(null, '', window.location.pathname);
+            }
+            openedWithClick.current = false;
+            setSelectedExample(null);
+          }}
         />
       )}
     </div>
