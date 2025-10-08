@@ -1,0 +1,7 @@
+.author {
+  font-size: 0.8em;
+  color: var(--ifm-color-primary-light);
+  margin: 0;
+  font-weight: 800;
+  font-style: italic;
+}

@@ -1,27 +1,46 @@
 import React, { useState } from 'react';
 import styles from './ExamplesGrid.module.css';
 import useBaseUrl from '@docusaurus/useBaseUrl';
+import {
+  configurationExamples,
+  Example,
+  stylingExamples,
+} from '../data/examples';
+import { AuthorText } from './AuthorText';
+import { ExampleDialog } from './ExampleDialog';
 
-interface Example {
-  title: string;
-  description: string;
-  code: string;
-  screenshot: string;
-  createdBy: string;
-}
+type Category = 'configuration' | 'styling';
 
-interface ExamplesGridProps {
-  examples: Example[];
-}
-
-export function ExamplesGrid({ examples }: ExamplesGridProps) {
+export function ExamplesGrid() {
   const [selectedExample, setSelectedExample] = useState<Example | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<Category>('styling');
   const baseUrl = useBaseUrl('/');
+
+  const currentExamples =
+    selectedCategory === 'configuration'
+      ? configurationExamples
+      : stylingExamples;
 
   return (
     <div>
+      <div className={styles.tabs}>
+        <button
+          className={`${styles.tab} ${
+            selectedCategory === 'styling' ? styles.tabActive : ''
+          }`}
+          onClick={() => setSelectedCategory('styling')}>
+          Styling Examples
+        </button>
+        <button
+          className={`${styles.tab} ${
+            selectedCategory === 'configuration' ? styles.tabActive : ''
+          }`}
+          onClick={() => setSelectedCategory('configuration')}>
+          Configuration Examples
+        </button>
+      </div>
       <div className={styles.grid}>
-        {examples.map((example, index) => (
+        {currentExamples.map((example, index) => (
           <div
             key={index}
             className={styles.exampleCard}
@@ -34,53 +53,20 @@ export function ExamplesGrid({ examples }: ExamplesGridProps) {
             <div className={styles.exampleContent}>
               <h3 className={styles.exampleTitle}>{example.title}</h3>
               <p className={styles.exampleDescription}>{example.description}</p>
-              {example.createdBy && (
-                <p className={styles.exampleCreator}>
-                  Created by {example.createdBy}
-                </p>
-              )}
+              <AuthorText
+                author={example.author}
+                authorUrl={example.authorUrl}
+              />
             </div>
           </div>
         ))}
       </div>
 
       {selectedExample && (
-        <div
-          className={styles.dialogOverlay}
-          onClick={() => setSelectedExample(null)}>
-          <div className={styles.dialog} onClick={e => e.stopPropagation()}>
-            <div className={styles.dialogHeader}>
-              <h2 className={styles.dialogTitle}>{selectedExample.title}</h2>
-              <button
-                className={styles.dialogClose}
-                onClick={() => setSelectedExample(null)}>
-                ×
-              </button>
-            </div>
-            <div className={styles.dialogContent}>
-              <div className={styles.dialogImageContainer}>
-                <img
-                  className={styles.dialogImage}
-                  src={`${baseUrl}${selectedExample.screenshot}`}
-                  alt={selectedExample.title}
-                />
-              </div>
-              <div className={styles.dialogInfo}>
-                <p className={styles.dialogDescription}>
-                  {selectedExample.description}
-                </p>
-                {selectedExample.createdBy && (
-                  <p className={styles.dialogCreator}>
-                    Created by {selectedExample.createdBy}
-                  </p>
-                )}
-              </div>
-              <pre>
-                <code>{selectedExample.code}</code>
-              </pre>
-            </div>
-          </div>
-        </div>
+        <ExampleDialog
+          example={selectedExample}
+          onClose={() => setSelectedExample(null)}
+        />
       )}
     </div>
   );

@@ -1,3 +1,34 @@
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding: 0 20px;
+}
+
+.tab {
+  padding: 12px 24px;
+  border: none;
+  border-radius: var(--ifm-card-border-radius);
+  background: var(--ifm-color-emphasis-100);
+  color: var(--ifm-color-emphasis-700);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.tab:hover {
+  background: var(--ifm-color-emphasis-200);
+}
+
+.tabActive {
+  background: var(--ifm-color-primary);
+  color: var(--ifm-color-white);
+}
+
+.tabActive:hover {
+  background: var(--ifm-color-primary-darker);
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -14,6 +45,7 @@
   transition:
     transform 0.2s ease-in-out,
     box-shadow 0.2s ease-in-out;
+  border: 1px solid var(--ifm-color-emphasis-200);
 }
 
 .exampleCard:hover {
@@ -41,106 +73,6 @@
   font-size: 0.9em;
   color: var(--ifm-color-emphasis-600);
   margin: 0 0 8px 0;
-}
-
-.exampleCreator {
-  font-size: 0.8em;
-  color: var(--ifm-color-primary-light);
-  margin: 0;
-  font-weight: 800;
-  font-style: italic;
-}
-
-.dialogOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-}
-
-.dialog {
-  background: var(--ifm-card-background-color);
-  border-radius: var(--ifm-card-border-radius);
-  box-shadow: var(--ifm-global-shadow-md);
-  max-width: 90vw;
-  max-height: 90vh;
-  width: 800px;
-  overflow: hidden;
-  position: relative;
-}
-
-.dialogHeader {
-  padding: 16px;
-  border-bottom: 1px solid var(--ifm-color-emphasis-200);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.dialogTitle {
-  font-size: 1.2em;
-  font-weight: 500;
-  margin: 0;
-}
-
-.dialogClose {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 8px;
-  color: var(--ifm-color-emphasis-700);
-  font-size: 1.5em;
-  line-height: 1;
-}
-
-.dialogContent {
-  padding: 16px;
-  overflow-y: auto;
-  max-height: calc(90vh - 120px);
-}
-
-.dialogImageContainer {
-  margin: -16px -16px 16px -16px;
-  background: var(--ha-background-color);
-  padding: 16px;
-  text-align: center;
-}
-
-.dialogImage {
-  max-width: 100%;
-  max-height: 300px;
-  object-fit: contain;
-  border-radius: var(--ifm-card-border-radius);
-}
-
-.dialogInfo {
-  margin-bottom: 24px;
-  padding: 16px;
-  background: var(--ifm-color-emphasis-100);
-  border-radius: var(--ifm-card-border-radius);
-}
-
-.dialogDescription {
-  font-size: 1em;
-  color: var(--ifm-color-emphasis-800);
-  margin: 0 0 8px 0;
-}
-
-.dialogCreator {
-  font-size: 0.9em;
-  color: var(--ifm-color-emphasis-600);
-  margin: 0;
-  font-style: italic;
-}
-
-.dialogContent pre {
-  margin: 0;
 }
 
 @media (max-width: 600px) {
