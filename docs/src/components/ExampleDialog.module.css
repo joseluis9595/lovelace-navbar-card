@@ -141,18 +141,16 @@
   color: var(--ifm-color-emphasis-900);
 }
 
-pre {
+.dialog pre {
   border-radius: 12px;
   background: var(--ifm-color-emphasis-100);
   border: 1px solid var(--ifm-color-emphasis-200);
-  padding: 0;
   overflow: auto;
   max-height: 400px;
-  margin: 0;
   padding: 20px;
 }
 
-code {
+.dialog code {
   font-size: 0.95em;
   line-height: 1.5;
   display: block;
@@ -170,8 +168,11 @@ code {
 @media (max-width: 600px) {
   .dialog {
     max-width: 100vw;
+    max-height: 100vh;
+    border-radius: 0px;
     width: 100vw;
-    margin: 6px;
+    height: 100vh;
+    margin: 0px;
   }
 
   .mainSection {
