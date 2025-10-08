@@ -1,11 +1,9 @@
 name: Deploy to GitHub Pages
 
-# TODO JLAQ depends on the pre-release workflow
-
 on:
   push:
     branches:
-      - feature/proper-docs
+      - main
 
 jobs:
   build:
