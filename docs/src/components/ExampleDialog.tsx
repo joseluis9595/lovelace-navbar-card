@@ -40,27 +40,32 @@ export function ExampleDialog({ example, onClose }: ExampleDialogProps) {
               alt={example.title}
             />
           </div>
-          <div className={styles.info}>
-            <p className={styles.description}>{example.description}</p>
-            <AuthorText author={example.author} authorUrl={example.authorUrl} />
-          </div>
-          <div className={styles.codeContainer}>
-            <button
-              className={styles.copyButton}
-              onClick={e => {
-                e.stopPropagation();
-                navigator.clipboard.writeText(example.code);
-                const button = e.currentTarget;
-                button.innerText = 'Copied!';
-                setTimeout(() => {
-                  button.innerText = 'Copy';
-                }, 2000);
-              }}>
-              Copy
-            </button>
-            <pre>
-              <code>{example.code}</code>
-            </pre>
+          <div className={styles.mainSection}>
+            <div className={styles.info}>
+              <p className={styles.description}>{example.description}</p>
+              <AuthorText
+                author={example.author}
+                authorUrl={example.authorUrl}
+              />
+            </div>
+            <div className={styles.codeContainer}>
+              <button
+                className={styles.copyButton}
+                onClick={e => {
+                  e.stopPropagation();
+                  navigator.clipboard.writeText(example.code);
+                  const button = e.currentTarget;
+                  button.innerText = 'Copied!';
+                  setTimeout(() => {
+                    button.innerText = 'Copy';
+                  }, 2000);
+                }}>
+                Copy
+              </button>
+              <pre>
+                <code>{example.code}</code>
+              </pre>
+            </div>
           </div>
         </div>
       </div>

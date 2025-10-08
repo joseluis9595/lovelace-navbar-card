@@ -11,7 +11,6 @@
   z-index: 999;
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  padding: 24px;
   animation: overlayFadeIn 0.15s ease-out;
 }
 
@@ -21,12 +20,12 @@
   box-shadow:
     0 24px 48px -12px rgba(0, 0, 0, 0.18),
     0 16px 32px -12px rgba(0, 0, 0, 0.12);
-  max-width: 90vw;
   max-height: 90vh;
   max-width: 900px;
   width: 100%;
   overflow: hidden;
   position: relative;
+  margin: 24px;
 }
 
 .header {
@@ -92,11 +91,17 @@
   border-radius: 12px;
 }
 
+.mainSection {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
 .info {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin: 24px 32px 0 32px;
+  gap: 8px;
   padding: 24px;
   background: var(--ifm-color-emphasis-100);
   border-radius: 12px;
@@ -112,7 +117,6 @@
 }
 
 .codeContainer {
-  margin: 24px 32px;
   position: relative;
 }
 
@@ -160,5 +164,18 @@ code {
   }
   to {
     opacity: 1;
+  }
+}
+
+@media (max-width: 600px) {
+  .dialog {
+    max-width: 100vw;
+    width: 100vw;
+    margin: 6px;
+  }
+
+  .mainSection {
+    padding: 12px;
+    gap: 12px;
   }
 }

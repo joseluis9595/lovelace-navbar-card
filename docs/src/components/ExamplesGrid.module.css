@@ -2,7 +2,6 @@
   display: flex;
   gap: 8px;
   margin-bottom: 24px;
-  padding: 0 20px;
 }
 
 .tab {
@@ -33,7 +32,6 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
-  padding: 20px;
 }
 
 .exampleCard {
@@ -78,6 +76,15 @@
 @media (max-width: 600px) {
   .grid {
     grid-template-columns: 1fr;
-    padding: 16px;
+    padding: 0px;
+  }
+
+  .tabs {
+    width: 100%;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 12px;
   }
 }
