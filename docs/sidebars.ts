@@ -35,6 +35,11 @@ const sidebars: SidebarsConfig = {
       items: ['types/js-template', 'types/custom-actions'],
     },
     {
+      type: 'doc',
+      id: 'dashboard-adjustements',
+      label: 'Dashboard Adjustements',
+    },
+    {
       type: 'category',
       label: 'Need Help?',
       items: ['getting-help/faq', 'getting-help/contact'],
