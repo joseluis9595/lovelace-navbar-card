@@ -8,7 +8,7 @@ import tsEslintPlugin from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import eslintConfigPrettier from 'eslint-config-prettier/flat';
 
-import importPlugin from 'eslint-plugin-import'
+import importPlugin from 'eslint-plugin-import';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -26,6 +26,7 @@ export default defineConfig([
     '**/.github',
     '.prettierrc.cjs',
     'eslint.config.js',
+    'docs/**/*',
   ]),
   {
     // Language options
@@ -43,7 +44,7 @@ export default defineConfig([
     plugins: {
       js,
       '@typescript-eslint': tsEslintPlugin,
-      'import': importPlugin,
+      import: importPlugin,
     },
 
     // Extends
@@ -69,9 +70,7 @@ export default defineConfig([
       'import/resolver': {
         alias: {
           extensions: ['.ts', '.js'],
-          map: [
-            ['@', './src'],
-          ],
+          map: [['@', './src']],
         },
       },
     },
