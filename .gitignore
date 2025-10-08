@@ -2,8 +2,6 @@
 /node_modules/
 /dist
 
-docs_old/
-
 # Testing
 coverage/
 
