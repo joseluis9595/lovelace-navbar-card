@@ -40,7 +40,7 @@ You can find all configuration options [**in the wiki**](https://joseluis9595.gi
 
 ### 📚 Showcase
 
-Want inspiration? Visit our [**examples showcase**](https://joseluis9595.github.io/lovelace-navbar-card/showcase/examples) to see what's possible with Navbar Card.
+Want inspiration? Visit our [**examples showcase**](https://joseluis9595.github.io/lovelace-navbar-card/docs/examples) to see what's possible with Navbar Card.
 
 ### 🍻 Support
 

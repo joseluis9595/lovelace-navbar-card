@@ -62,7 +62,15 @@ export class Route extends BaseRoute {
         @pointerup=${(e: PointerEvent) => this._events.handlePointerUp(e, this)}
         @pointercancel=${(e: PointerEvent) =>
           this._events.handlePointerMove(e, this)}>
-        <div class="button ${isActive ? 'active' : ''}">
+        <div
+          class="button ${isActive ? 'active' : ''}"
+          style=${this._routeData.selected_color
+            ? `--navbar-primary-color: ${processTemplate<string>(
+                this._navbarCard._hass,
+                this._navbarCard,
+                this._routeData.selected_color,
+              )}`
+            : ''}>
           ${this.icon.render()}
           <ha-ripple></ha-ripple>
           ${this.badge.render()}

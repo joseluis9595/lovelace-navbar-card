@@ -82,6 +82,7 @@ export type RouteItemBase = {
   };
   hidden?: JSTemplatable<boolean>;
   selected?: JSTemplatable<boolean>;
+  selected_color?: JSTemplatable<string>;
 };
 
 // Type for popup menu items (don't include popup property to avoid circular references)
