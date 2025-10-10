@@ -97,7 +97,8 @@ routes:
   },
   {
     title: 'Custom Selected Color',
-    description: 'Navigation bar with a custom selected color',
+    description:
+      'Navigation bar with a custom different selected color for each route',
     screenshot: '/img/examples/route-selected-colors.png',
     code: `type: custom:navbar-card
 routes:
