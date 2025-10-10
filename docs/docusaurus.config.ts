@@ -57,19 +57,6 @@ const config: Config = {
     ],
   ],
 
-  plugins: [
-    [
-      '@docusaurus/plugin-content-docs',
-      {
-        id: 'showcase',
-        path: 'showcase',
-        routeBasePath: 'showcase',
-        sidebarPath: false,
-        editUrl: `${GITHUB_REPO_URL}/tree/main/${DOCS_FOLDER}/`,
-      },
-    ],
-  ],
-
   themes: [
     [
       require.resolve('@easyops-cn/docusaurus-search-local'),
@@ -96,20 +83,6 @@ const config: Config = {
           position: 'left',
           className: 'navbar-version-chip',
           href: '#',
-        },
-        {
-          id: 'docs',
-          label: 'Docs',
-          position: 'left',
-          activeBasePath: '/docs',
-          to: '/docs/introduction',
-        },
-        {
-          id: 'showcase',
-          label: 'Showcase',
-          position: 'left',
-          activeBasePath: '/showcase',
-          to: '/showcase/examples',
         },
         {
           type: 'search',

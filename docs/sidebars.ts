@@ -46,8 +46,13 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'doc',
-      id: 'support',
+      label: 'Examples',
+      id: 'examples',
+    },
+    {
+      type: 'doc',
       label: 'Support the project',
+      id: 'support',
     },
   ],
 };
