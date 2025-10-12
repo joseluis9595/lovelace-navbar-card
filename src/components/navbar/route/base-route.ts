@@ -65,6 +65,14 @@ export class BaseRoute implements ActionableElement {
       : window.location.pathname === this.url;
   }
 
+  get selected_color() {
+    return processTemplate<string>(
+      this._navbarCard._hass,
+      this._navbarCard,
+      this.data.selected_color,
+    );
+  }
+
   get tap_action() {
     return this.data.tap_action;
   }

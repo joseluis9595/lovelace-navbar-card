@@ -721,14 +721,12 @@ export class NavbarCardEditor extends LitElement {
                   configKey: `${baseConfigKey}.hidden` as any,
                   helper: BOOLEAN_JS_TEMPLATE_HELPER,
                 })}
-                ${!isPopup
-                  ? this.makeTemplateEditor({
-                      // TODO JLAQ maybe replace with a templateSwitchEditor
-                      label: 'Selected',
-                      configKey: `${baseConfigKey}.selected` as any,
-                      helper: BOOLEAN_JS_TEMPLATE_HELPER,
-                    })
-                  : html``}
+                ${this.makeTemplateEditor({
+                  // TODO JLAQ maybe replace with a templateSwitchEditor
+                  label: 'Selected',
+                  configKey: `${baseConfigKey}.selected` as any,
+                  helper: BOOLEAN_JS_TEMPLATE_HELPER,
+                })}
               </div>
             </ha-expansion-panel>
 

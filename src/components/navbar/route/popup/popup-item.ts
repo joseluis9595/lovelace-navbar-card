@@ -37,7 +37,9 @@ export class PopupItem extends BaseRoute {
         ${showLabelBackground ? 'popuplabelbackground' : ''}
         ${this.selected ? 'active' : ''}
       "
-      style="--index: ${this._index}"
+      style="--index: ${this._index}; ${this.selected_color
+        ? `--navbar-primary-color: ${this.selected_color}`
+        : ''}"
       @click=${preventEventDefault}
       @mouseenter=${(e: MouseEvent) => this._events.handleMouseEnter(e, this)}
       @mousemove=${(e: MouseEvent) => this._events.handleMouseMove(e, this)}

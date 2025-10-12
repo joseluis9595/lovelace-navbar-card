@@ -64,12 +64,8 @@ export class Route extends BaseRoute {
           this._events.handlePointerMove(e, this)}>
         <div
           class="button ${isActive ? 'active' : ''}"
-          style=${this._routeData.selected_color
-            ? `--navbar-primary-color: ${processTemplate<string>(
-                this._navbarCard._hass,
-                this._navbarCard,
-                this._routeData.selected_color,
-              )}`
+          style=${this.selected_color
+            ? `--navbar-primary-color: ${this.selected_color}`
             : ''}>
           ${this.icon.render()}
           <ha-ripple></ha-ripple>
