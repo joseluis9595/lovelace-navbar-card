@@ -24,6 +24,15 @@ export class BaseRoute implements ActionableElement {
     public readonly data: RouteItemBase,
   ) {}
 
+  public destroy(): void {
+    this._iconInstance?.destroy?.();
+    this._badgeInstance?.destroy?.();
+    this._iconInstance = undefined;
+    this._badgeInstance = undefined;
+    // @ts-expect-error: This is a workaround to break the circular reference
+    this._navbarCard = null;
+  }
+
   get url() {
     return this.data.url;
   }

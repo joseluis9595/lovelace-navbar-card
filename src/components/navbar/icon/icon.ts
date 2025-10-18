@@ -10,6 +10,13 @@ export class Icon {
     private readonly _route: BaseRoute,
   ) {}
 
+  public destroy(): void {
+    // @ts-expect-error: This is a workaround to break the circular reference
+    this._navbarCard = null;
+    // @ts-expect-error: This is a workaround to break the circular reference
+    this._route = null;
+  }
+
   get icon(): string {
     return processTemplate<string>(
       this._navbarCard._hass,

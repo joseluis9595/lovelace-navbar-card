@@ -10,6 +10,13 @@ export class Badge {
     private readonly _route: BaseRoute,
   ) {}
 
+  public destroy(): void {
+    // @ts-expect-error: Workaround to prevent memory leaks
+    this._navbarCard = null;
+    // @ts-expect-error: Workaround to prevent memory leaks
+    this._route = null;
+  }
+
   get show(): boolean {
     const badge = this._route.data.badge;
     if (!badge) return false;

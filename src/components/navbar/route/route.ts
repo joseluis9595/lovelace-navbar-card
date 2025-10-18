@@ -17,6 +17,20 @@ export class Route extends BaseRoute {
     this._validateRoute();
   }
 
+  public destroy(): void {
+    this._events.destroy?.();
+
+    if (this._popupInstance) {
+      this._popupInstance.destroy?.();
+      this._popupInstance = undefined;
+    }
+
+    // @ts-expect-error: This is a workaround to break the circular reference
+    this._navbarCard = undefined;
+
+    super.destroy?.();
+  }
+
   get popup(): Popup {
     return (this._popupInstance ??= new Popup(
       this._navbarCard,

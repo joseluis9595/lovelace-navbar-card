@@ -9,6 +9,10 @@ export class MediaPlayer implements ActionableElement {
 
   constructor(private readonly _navbarCard: NavbarCard) {}
 
+  public destroy(): void {
+    this._events.destroy();
+  }
+
   get tap_action(): ExtendedActionConfig | undefined {
     return this._navbarCard.config?.media_player?.tap_action;
   }

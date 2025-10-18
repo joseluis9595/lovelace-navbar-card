@@ -18,6 +18,11 @@ export class PopupItem extends BaseRoute {
     super(_navbarCard, _data);
   }
 
+  public destroy(): void {
+    this._events.destroy();
+    super.destroy();
+  }
+
   public closeParentPopup(): void {
     this._parentPopup.close();
   }
