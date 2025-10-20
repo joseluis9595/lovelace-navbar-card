@@ -100,6 +100,7 @@ export class NavbarCard extends LitElement {
 
     // Quick fix for ripple effects
     forceResetRipple(this);
+    window.removeEventListener('resize', this._checkDesktop);
     window.addEventListener('resize', this._checkDesktop);
 
     this._detectModes();
