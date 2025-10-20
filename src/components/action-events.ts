@@ -33,6 +33,22 @@ export class ActionEvents {
 
   private tapTimeoutId: number | null = null;
 
+  public destroy(): void {
+    if (this.holdTimeoutId !== null) {
+      clearTimeout(this.holdTimeoutId);
+      this.holdTimeoutId = null;
+    }
+    if (this.tapTimeoutId !== null) {
+      clearTimeout(this.tapTimeoutId);
+      this.tapTimeoutId = null;
+    }
+    this.holdTriggered = false;
+    this.pointerStartX = 0;
+    this.pointerStartY = 0;
+    this.lastTapTime = 0;
+    this.lastTapTarget = null;
+  }
+
   /**
    * Wrapper function to automatically prevent default behavior and stop propagation
    * for all event handlers to avoid ghost clicks on mobile

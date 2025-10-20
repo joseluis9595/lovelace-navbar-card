@@ -5,6 +5,7 @@ import { DesktopPosition, PopupItem as PopupItemDef } from '@/types';
 
 export class Popup {
   private _popupItems: PopupItem[] = [];
+  private _backdropClickListener?: (e: Event) => void;
 
   constructor(
     private _navbarCard: NavbarCard,
@@ -17,8 +18,26 @@ export class Popup {
     });
   }
 
+  public destroy(): void {
+    if (this._backdropClickListener && this.backdrop) {
+      this.backdrop.removeEventListener('click', this._backdropClickListener);
+      this._backdropClickListener = undefined;
+    }
+    this._popupItems.forEach(item => item.destroy?.());
+    this._popupItems = [];
+    // @ts-expect-error: This is a workaround to break the circular reference
+    this._navbarCard = undefined;
+  }
+
   get items(): PopupItem[] {
     return this._popupItems;
+  }
+
+  get backdrop(): HTMLElement | null {
+    return (
+      this._navbarCard.shadowRoot?.querySelector('.navbar-popup-backdrop') ??
+      null
+    );
   }
 
   public open(target: HTMLElement): void {
@@ -71,28 +90,30 @@ export class Popup {
     // event that opens the popup, bubbles up the DOM up to this backdrop, even with
     // preventDefault or stopPropagation :(
     setTimeout(() => {
-      const backdrop = this._navbarCard.shadowRoot?.querySelector(
-        '.navbar-popup-backdrop',
-      );
-      if (backdrop) {
-        backdrop.addEventListener('click', (e: Event) => {
+      if (this.backdrop) {
+        // Store reference for cleanup
+        this._backdropClickListener = (e: Event) => {
           e.preventDefault();
           e.stopPropagation();
           this.close();
-        });
+        };
+        this.backdrop.addEventListener('click', this._backdropClickListener);
       }
     }, 400);
   }
 
   public close(): void {
     const popup = this._navbarCard.shadowRoot?.querySelector('.navbar-popup');
-    const backdrop = this._navbarCard.shadowRoot?.querySelector(
-      '.navbar-popup-backdrop',
-    );
 
-    if (popup && backdrop) {
+    // Remove backdrop listener
+    if (this._backdropClickListener && this.backdrop) {
+      this.backdrop.removeEventListener('click', this._backdropClickListener);
+      this._backdropClickListener = undefined;
+    }
+
+    if (popup && this.backdrop) {
       popup.classList.remove('visible');
-      backdrop.classList.remove('visible');
+      this.backdrop.classList.remove('visible');
 
       // Wait for transitions to complete before removing
       setTimeout(() => {

@@ -100,6 +100,7 @@ export class NavbarCard extends LitElement {
 
     // Quick fix for ripple effects
     forceResetRipple(this);
+    window.removeEventListener('resize', this._checkDesktop);
     window.addEventListener('resize', this._checkDesktop);
 
     this._detectModes();
@@ -126,6 +127,10 @@ export class NavbarCard extends LitElement {
 
     window.removeEventListener('resize', this._checkDesktop);
     removeDashboardPadding();
+
+    // Clean up media player and routes
+    this._mediaPlayer.destroy();
+    this._routes.forEach(r => r.destroy?.());
 
     // Force popup closure without animation to prevent memory leaks
     this.focusedPopup = null;
@@ -165,6 +170,7 @@ export class NavbarCard extends LitElement {
     // Skip if unchanged (avoid rerenders)
     if (JSON.stringify(config) === JSON.stringify(this.config)) return;
 
+    this._routes.forEach(r => r.destroy?.());
     this._routes = config.routes.map(route => new Route(this, route));
     this.config = config;
   }
