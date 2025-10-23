@@ -211,3 +211,41 @@ export const STUB_CONFIG: NavbarCardConfig = {
     },
   ],
 };
+
+/**
+ * Validate the navbar-card configuration. Throws errors if the configuration is invalid.
+ */
+export const validateConfig = (config: NavbarCardConfig) => {
+  if (!config.routes) {
+    throw new Error('"routes" param is required for navbar card');
+  }
+  config.routes.forEach(route => {
+    if (route.icon == null && route.image == null) {
+      throw new Error(
+        'Each route must have either an "icon" or "image" property configured',
+      );
+    }
+    if (
+      route.popup == null &&
+      route.submenu == null &&
+      route.tap_action == null &&
+      route.hold_action == null &&
+      route.url == null &&
+      route.double_tap_action == null
+    ) {
+      throw new Error(
+        'Each route must have at least one actionable property (url, popup, tap_action, hold_action, double_tap_action)',
+      );
+    }
+    // Validate specific action types if defined
+    if (route.tap_action && route.tap_action.action == null) {
+      throw new Error('"tap_action" must have an "action" property');
+    }
+    if (route.hold_action && route.hold_action.action == null) {
+      throw new Error('"hold_action" must have an "action" property');
+    }
+    if (route.double_tap_action && route.double_tap_action.action == null) {
+      throw new Error('"double_tap_action" must have an "action" property');
+    }
+  });
+};

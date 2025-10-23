@@ -18,6 +18,7 @@ import {
   PopupItem,
   RouteItem,
   STUB_CONFIG,
+  validateConfig,
 } from './config';
 import { mapStringToEnum, processTemplate } from './utils';
 import {
@@ -167,39 +168,8 @@ export class NavbarCard extends LitElement {
       }
     }
 
-    // Check for valid configuration
-    if (!config.routes) {
-      throw new Error('"routes" param is required for navbar card');
-    }
-    config.routes.forEach(route => {
-      if (route.icon == null && route.image == null) {
-        throw new Error(
-          'Each route must have either an "icon" or "image" property configured',
-        );
-      }
-      if (
-        route.popup == null &&
-        route.submenu == null &&
-        route.tap_action == null &&
-        route.hold_action == null &&
-        route.url == null &&
-        route.double_tap_action == null
-      ) {
-        throw new Error(
-          'Each route must have either "url", "popup", "tap_action", "hold_action" or "double_tap_action" property configured',
-        );
-      }
-      // Validate specific action types if defined
-      if (route.tap_action && route.tap_action.action == null) {
-        throw new Error('"tap_action" must have an "action" property');
-      }
-      if (route.hold_action && route.hold_action.action == null) {
-        throw new Error('"hold_action" must have an "action" property');
-      }
-      if (route.double_tap_action && route.double_tap_action.action == null) {
-        throw new Error('"double_tap_action" must have an "action" property');
-      }
-    });
+    // Validate configuration before rendering
+    validateConfig(config);
 
     // Store configuration
     this.config = config;
@@ -261,7 +231,7 @@ export class NavbarCard extends LitElement {
   };
 
   /**********************************************************************/
-  /* Navbar callbacks */
+  /* Popup management */
   /**********************************************************************/
 
   /**
@@ -442,9 +412,9 @@ export class NavbarCard extends LitElement {
     }, 400);
   };
 
-  /**********************************************************************/
-  /* Event listeners */
-  /**********************************************************************/
+  /**
+   * Handle the escape key press to close the popup.
+   */
   private _onPopupKeyDownListener = (e: KeyboardEvent) => {
     if (e.key === 'Escape' && this._popup) {
       e.preventDefault();
@@ -709,6 +679,9 @@ export class NavbarCard extends LitElement {
     `;
   }
 
+  /**********************************************************************/
+  /* Visual editor */
+  /**********************************************************************/
   static async getConfigElement() {
     await import('./navbar-card-editor');
     return document.createElement('navbar-card-editor');
