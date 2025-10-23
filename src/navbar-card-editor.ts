@@ -2,6 +2,7 @@
 // Reason: Dynamic dot-notation keys for deeply nested config editing in a generic editor.
 import { LitElement, PropertyValues, TemplateResult, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { loadHaComponents } from '@kipk/load-ha-components';
 import {
   DEFAULT_NAVBAR_CONFIG,
   DesktopPosition,
@@ -22,6 +23,10 @@ import {
   NestedType,
 } from './types';
 import {
+  ColorInputOptions,
+  TemplatableInputOptions,
+} from './navbar-card-editor.types';
+import {
   cleanTemplate,
   deepMergeKeepArrays,
   isTemplate,
@@ -29,9 +34,7 @@ import {
   wrapTemplate,
 } from './utils';
 import { getEditorStyles } from './styles';
-import { getNavbarTemplates } from './dom-utils';
-import { loadHaComponents } from '@kipk/load-ha-components';
-import { TemplatableInputOptions } from './navbar-card-editor.types';
+import { conditionallyRender, getNavbarTemplates } from './dom-utils';
 
 enum HAActions {
   tap_action = 'tap_action',
@@ -55,10 +58,20 @@ const BOOLEAN_JS_TEMPLATE_HELPER = html`${GENERIC_JS_TEMPLATE_HELPER}<br />Must
 const STRING_JS_TEMPLATE_HELPER = html`${GENERIC_JS_TEMPLATE_HELPER}<br />Must
   return a <strong>string</strong> value`;
 
+enum LazyLoadedEditorSections {
+  routes = 'routes',
+}
+
 @customElement('navbar-card-editor')
 export class NavbarCardEditor extends LitElement {
   @property({ attribute: false }) public hass: any;
   @state() private _config: NavbarCardConfig = { routes: [] };
+  @state() private _lazyLoadedSections: Record<
+    LazyLoadedEditorSections,
+    boolean
+  > = {
+    [LazyLoadedEditorSections.routes]: false,
+  };
 
   protected firstUpdated(_changedProperties: PropertyValues): void {
     super.firstUpdated(_changedProperties);
@@ -79,6 +92,17 @@ export class NavbarCardEditor extends LitElement {
       'ha-entity-picker',
       'ha-textarea',
     ]);
+  }
+
+  /**********************************************************************/
+  /* Lazy load sections */
+  /**********************************************************************/
+  private markSectionAsLazyLoaded(section: LazyLoadedEditorSections) {
+    if (this._lazyLoadedSections[section]) return;
+    this._lazyLoadedSections[section] = true;
+    setTimeout(() => {
+      this.requestUpdate();
+    }, 200);
   }
 
   /**********************************************************************/
@@ -230,6 +254,15 @@ export class NavbarCardEditor extends LitElement {
     `;
   }
 
+  makeColorPicker(options: Omit<ColorInputOptions, 'inputType'>) {
+    // TODO: for now, the color picker is not supported in the editor,
+    // we need a way to handle empty color values
+    return this.makeTextInput({
+      ...options,
+      type: 'text',
+    });
+  }
+
   makeTemplatable(options: TemplatableInputOptions) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { label, inputType, ...rest } = options;
@@ -244,7 +277,7 @@ export class NavbarCardEditor extends LitElement {
 
     // Handler to toggle between template and text
     const toggleMode = () => {
-      let newValue: string = value ? value.toString() : '';
+      let newValue: string | null = value ? value.toString() : '';
       if (isTemplate) {
         // Remove template delimiters
         newValue = cleanTemplate(newValue);
@@ -310,10 +343,15 @@ export class NavbarCardEditor extends LitElement {
                         label: '',
                         ...rest,
                       })
-                    : this.makeTextInput({
-                        label: '',
-                        ...rest,
-                      })}
+                    : options.inputType === 'color'
+                      ? this.makeColorPicker({
+                          label: '',
+                          ...rest,
+                        })
+                      : this.makeTextInput({
+                          label: '',
+                          ...rest,
+                        })}
       </div>
     `;
   }
@@ -519,6 +557,12 @@ export class NavbarCardEditor extends LitElement {
               templateHelper: STRING_JS_TEMPLATE_HELPER,
             })}
             ${this.makeTemplatable({
+              inputType: 'string',
+              label: 'Selected color',
+              configKey: `${baseConfigKey}.selected_color` as any,
+              templateHelper: STRING_JS_TEMPLATE_HELPER,
+            })}
+            ${this.makeTemplatable({
               inputType: 'icon',
               label: 'Icon',
               configKey: `${baseConfigKey}.icon` as any,
@@ -527,6 +571,11 @@ export class NavbarCardEditor extends LitElement {
               inputType: 'icon',
               label: 'Icon selected',
               configKey: `${baseConfigKey}.icon_selected` as any,
+            })}
+            ${this.makeTemplatable({
+              inputType: 'color',
+              label: 'Icon color',
+              configKey: `${baseConfigKey}.icon_color` as any,
             })}
             ${this.makeTemplatable({
               inputType: 'string',
@@ -596,8 +645,9 @@ export class NavbarCardEditor extends LitElement {
                             let parsedPopup = [];
                             try {
                               parsedPopup = JSON.parse(
-                                cleanTemplate((item as RouteItem).popup) ??
-                                  '[]',
+                                cleanTemplate(
+                                  (item as RouteItem).popup?.toString(),
+                                ) ?? '[]',
                               );
                             } catch (_e) {
                               parsedPopup = [];
@@ -672,14 +722,12 @@ export class NavbarCardEditor extends LitElement {
                   configKey: `${baseConfigKey}.hidden` as any,
                   helper: BOOLEAN_JS_TEMPLATE_HELPER,
                 })}
-                ${!isPopup
-                  ? this.makeTemplateEditor({
-                      // TODO JLAQ maybe replace with a templateSwitchEditor
-                      label: 'Selected',
-                      configKey: `${baseConfigKey}.selected` as any,
-                      helper: BOOLEAN_JS_TEMPLATE_HELPER,
-                    })
-                  : html``}
+                ${this.makeTemplateEditor({
+                  // TODO JLAQ maybe replace with a templateSwitchEditor
+                  label: 'Selected',
+                  configKey: `${baseConfigKey}.selected` as any,
+                  helper: BOOLEAN_JS_TEMPLATE_HELPER,
+                })}
               </div>
             </ha-expansion-panel>
 
@@ -801,6 +849,15 @@ export class NavbarCardEditor extends LitElement {
           Layout
         </h4>
         <div class="editor-section">
+          <label class="editor-label">Reflect child state</label>
+          ${this.makeSwitch({
+            label:
+              'Display routes as selected if any of its popup items is selected',
+            configKey: 'layout.reflect_child_state',
+            defaultValue: DEFAULT_NAVBAR_CONFIG.layout?.reflect_child_state,
+          })}
+        </div>
+        <div class="editor-section">
           <label class="editor-label">Auto padding</label>
           ${this.makeSwitch({
             label: 'Enable auto padding',
@@ -827,7 +884,8 @@ export class NavbarCardEditor extends LitElement {
               DEFAULT_NAVBAR_CONFIG.layout?.auto_padding?.mobile_px?.toString(),
             helper: 'Padding for mobile mode. 0 to disable.',
           })}
-        </div></ha-expansion-panel
+        </div>
+      </ha-expansion-panel>
     `;
   }
 
@@ -894,6 +952,33 @@ export class NavbarCardEditor extends LitElement {
             label: 'Show media player',
             configKey: 'media_player.show',
             helper: BOOLEAN_JS_TEMPLATE_HELPER,
+          })}
+          ${Object.values(HAActions).map(type => {
+            const key =
+              `media_player.${type}` as DotNotationKeys<NavbarCardConfig>;
+            const actionValue = genericGetProperty(this._config, key);
+            const label = this._chooseLabelForAction(type as HAActions);
+
+            return html`
+              ${actionValue != null
+                ? this.makeActionSelector({
+                    actionType: type as HAActions,
+                    configKey: key,
+                  })
+                : html`
+                    <ha-button
+                      @click=${() =>
+                        this.updateConfigByKey(key, {
+                          action: 'none',
+                        })}
+                      style="margin-bottom: 1em;"
+                      outlined
+                      hasTrailingIcon>
+                      <ha-icon slot="start" icon="mdi:plus"></ha-icon>
+                      <span>Add ${label}</span>
+                    </ha-button>
+                  `}
+            `;
           })}
         </div>
       </ha-expansion-panel>
@@ -1015,17 +1100,28 @@ export class NavbarCardEditor extends LitElement {
 
   renderRoutesEditor() {
     return html`
-      <ha-expansion-panel outlined>
+      <ha-expansion-panel
+        outlined
+        @expanded-changed=${e => {
+          if (e.target.expanded) {
+            this.markSectionAsLazyLoaded(LazyLoadedEditorSections.routes);
+          }
+        }}>
         <h4 slot="header">
           <ha-icon icon="mdi:routes"></ha-icon>
           Routes
         </h4>
         <div class="editor-section">
-          <div class="routes-container">
-            ${(this._config.routes ?? []).map((route, i) => {
-              return this.makeDraggableRouteEditor(route, i);
-            })}
-          </div>
+          ${conditionallyRender(
+            this._lazyLoadedSections[LazyLoadedEditorSections.routes],
+            () => html`
+              <div class="routes-container">
+                ${(this._config.routes ?? []).map((route, i) => {
+                  return this.makeDraggableRouteEditor(route, i);
+                })}
+              </div>
+            `,
+          )}
           ${this.makeButton({
             text: 'Add Route',
             icon: 'mdi:plus',
@@ -1062,7 +1158,8 @@ export class NavbarCardEditor extends LitElement {
   }
 
   isCustomAction(value: string) {
-    return !['none', 'hass_action'].includes(value);
+    if (value === 'none') return false;
+    return Object.values(NavbarCustomActions).includes(value as any);
   }
 
   makeActionSelector(options: {
@@ -1080,6 +1177,7 @@ export class NavbarCardEditor extends LitElement {
       { label: 'Toggle Menu', value: NavbarCustomActions.toggleMenu },
       { label: 'Quickbar', value: NavbarCustomActions.quickbar },
       { label: 'Open Edit Mode', value: NavbarCustomActions.openEditMode },
+      { label: 'Logout current user', value: NavbarCustomActions.logout },
       { label: 'Custom JS Action', value: NavbarCustomActions.customJSAction },
       {
         label: 'Show Notifications',

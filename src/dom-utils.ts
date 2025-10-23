@@ -1,4 +1,4 @@
-import { CSSResult } from 'lit';
+import { CSSResult, html, TemplateResult } from 'lit';
 import {
   NavbarCardConfig,
   AutoPaddingConfig,
@@ -272,4 +272,23 @@ export const injectStyles = (
 ) => {
   createStyleElement(root, DEFAULT_STYLES_ID, defaultStyles);
   createStyleElement(root, USER_STYLES_ID, userStyles);
+};
+
+/**
+ * Conditionally render a content based on a condition.
+ *
+ * @param condition - The condition to render the content based on.
+ * @param renderContent - The content to render if the condition is true.
+ * @returns The rendered content or a loader if the condition is false.
+ */
+export const conditionallyRender = (
+  condition: boolean,
+  renderContent: () => TemplateResult,
+) => {
+  if (condition) {
+    return renderContent();
+  }
+  return html`<div class="loader-container">
+    <span class="loader"></span>
+  </div>`;
 };

@@ -1,6 +1,7 @@
 import { NavbarCard } from '../navbar-card';
+import { hapticFeedback } from '../utils';
 
-export const shouldTriggerHaptic = (
+const shouldTriggerHaptic = (
   context: NavbarCard,
   actionType: 'tap' | 'hold' | 'double_tap',
   isNavigation = false,
@@ -32,5 +33,18 @@ export const shouldTriggerHaptic = (
       return hapticConfig.double_tap_action ?? false;
     default:
       return false;
+  }
+};
+
+/**
+ * Trigger haptic feedback if the action type is configured to trigger haptic feedback.
+ */
+export const triggerHaptic = (
+  context: NavbarCard,
+  actionType: 'tap' | 'hold' | 'double_tap',
+  isNavigation = false,
+) => {
+  if (shouldTriggerHaptic(context, actionType, isNavigation)) {
+    hapticFeedback();
   }
 };

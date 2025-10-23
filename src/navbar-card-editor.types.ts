@@ -1,6 +1,6 @@
 import { TemplateResult } from 'lit';
-import { NavbarCardConfig } from './config';
 import { DotNotationKeys } from './types';
+import { NavbarCardConfig } from './config';
 
 type BaseInputOptions = {
   configKey: DotNotationKeys<NavbarCardConfig>;
@@ -37,9 +37,14 @@ type SwitchInputOptions = BaseInputOptions & {
   defaultValue?: boolean;
 };
 
+export type ColorInputOptions = BaseInputOptions & {
+  inputType: 'color';
+};
+
 export type TemplatableInputOptions =
   | StringInputOptions
   | EntityInputOptions
   | IconInputOptions
   | NumberInputOptions
-  | SwitchInputOptions;
+  | SwitchInputOptions
+  | ColorInputOptions;

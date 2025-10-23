@@ -9,9 +9,9 @@ import {
   forceOpenEditMode,
   forceResetRipple,
 } from '../dom-utils';
-import { hapticFeedback, processTemplate } from '../utils';
+import { processTemplate } from '../utils';
 import { NavbarCard } from '../navbar-card';
-import { shouldTriggerHaptic } from './haptic';
+import { triggerHaptic } from './haptic';
 
 const chooseKeyForQuickbar = (action: QuickbarActionConfig) => {
   switch (action.mode) {
@@ -57,18 +57,14 @@ export const executeAction = (
             `[navbar-card] No popup items found for route: ${route.label}`,
           );
         } else {
-          if (shouldTriggerHaptic(context, actionType)) {
-            hapticFeedback();
-          }
+          triggerHaptic(context, actionType);
           context.openPopup(route, target);
         }
       }
       break;
 
     case NavbarCustomActions.toggleMenu:
-      if (shouldTriggerHaptic(context, actionType)) {
-        hapticFeedback();
-      }
+      triggerHaptic(context, actionType);
       fireDOMEvent(context, 'hass-toggle-menu', {
         bubbles: true,
         composed: true,
@@ -76,9 +72,7 @@ export const executeAction = (
       break;
 
     case NavbarCustomActions.quickbar:
-      if (shouldTriggerHaptic(context, actionType)) {
-        hapticFeedback();
-      }
+      triggerHaptic(context, actionType);
       fireDOMEvent<'KeyboardEvent'>(
         context,
         'keydown',
@@ -93,9 +87,7 @@ export const executeAction = (
       break;
 
     case NavbarCustomActions.showNotifications:
-      if (shouldTriggerHaptic(context, actionType)) {
-        hapticFeedback();
-      }
+      triggerHaptic(context, actionType);
       fireDOMEvent(context, 'hass-show-notifications', {
         bubbles: true,
         composed: true,
@@ -103,31 +95,28 @@ export const executeAction = (
       break;
 
     case NavbarCustomActions.navigateBack:
-      if (shouldTriggerHaptic(context, actionType, true)) {
-        hapticFeedback();
-      }
+      triggerHaptic(context, actionType, true);
       window.history.back();
       break;
 
     case NavbarCustomActions.openEditMode:
-      if (shouldTriggerHaptic(context, actionType)) {
-        hapticFeedback();
-      }
+      triggerHaptic(context, actionType);
       forceOpenEditMode();
       break;
 
     case NavbarCustomActions.customJSAction:
-      if (shouldTriggerHaptic(context, actionType)) {
-        hapticFeedback();
-      }
+      triggerHaptic(context, actionType);
       processTemplate<string>(context.hass, context, action.code);
+      break;
+
+    case NavbarCustomActions.logout:
+      triggerHaptic(context, actionType);
+      context.hass.auth.revoke();
       break;
 
     default:
       if (action != null) {
-        if (shouldTriggerHaptic(context, actionType)) {
-          hapticFeedback();
-        }
+        triggerHaptic(context, actionType);
         setTimeout(() => {
           fireDOMEvent(
             context,
@@ -143,9 +132,7 @@ export const executeAction = (
         }, 10);
       } else if (actionType === 'tap' && route.url) {
         // Handle default navigation for tap action if no specific action is defined
-        if (shouldTriggerHaptic(context, actionType, true)) {
-          hapticFeedback();
-        }
+        triggerHaptic(context, actionType, true);
         navigate(context, route.url);
       }
       break;
