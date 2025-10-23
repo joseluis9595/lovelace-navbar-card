@@ -72,7 +72,8 @@ type RouteItemBase = {
     color?: JSTemplatable<string>;
     show?: JSTemplatable<boolean>;
     count?: JSTemplatable<number>;
-    textColor?: JSTemplatable<string>;
+    textColor?: JSTemplatable<string>; // TODO deprecate
+    text_color?: JSTemplatable<string>;
   };
   hidden?: JSTemplatable<boolean>;
   selected?: JSTemplatable<boolean>;

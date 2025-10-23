@@ -327,7 +327,7 @@ export class NavbarCard extends LitElement {
     const textColor = processTemplate<string>(
       this._hass,
       this,
-      route.badge.textColor,
+      route.badge.text_color ?? route.badge.textColor, // TODO deprecate the camelCase property
     );
 
     // Only create Color object if textColor is not provided, using cached version

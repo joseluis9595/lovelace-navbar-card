@@ -572,7 +572,7 @@ export class NavbarCardEditor extends LitElement {
                 ${this.makeTemplatable({
                   inputType: 'string',
                   label: 'TextColor',
-                  configKey: `${baseConfigKey}.badge.textColor` as any,
+                  configKey: `${baseConfigKey}.badge.text_color` as any,
                   templateHelper: STRING_JS_TEMPLATE_HELPER,
                 })}
               </div>
