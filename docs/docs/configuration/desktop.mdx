@@ -1,0 +1,34 @@
+---
+id: desktop
+title: Desktop
+---
+
+import { AlignedImage } from '@site/src/components';
+
+Specific configuration for desktop mode.
+
+<AlignedImage
+  imageURL={'/img/configuration/navbar-card_desktop.png'}
+  alt="Desktop mode image"
+  alignment="center"
+/>
+
+| Name                           | Type                                          | Default  | Description                                                                |
+| ------------------------------ | --------------------------------------------- | -------- | -------------------------------------------------------------------------- |
+| `show_labels`                  | boolean \| `popup_only` \| `routes_only`      | `false`  | Whether or not to display labels under each route                          |
+| `show_popup_label_backgrounds` | boolean                                       | `false`  | Whether or not to display label backgrounds for popup items                |
+| `min_width`                    | number                                        | `768`    | Screen size from which the navbar will be displayed as its desktop variant |
+| `position`                     | `top` \| `bottom` \| `left` \| `right`        | `bottom` | Position of the navbar on desktop devices                                  |
+| `hidden`                       | boolean \| [JSTemplate](../types/js-template) | `false`  | Set to true to hide the navbar on desktop devices                          |
+
+<br />
+
+---
+
+#### Example of `navbar-card` with popup labels turned off and on.
+
+<AlignedImage
+  imageURL={'/img/configuration/navbar-card_popuplabels.png'}
+  alt="Mobile mode image"
+  alignment="center"
+/>

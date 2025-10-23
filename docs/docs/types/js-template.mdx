@@ -1,0 +1,105 @@
+---
+id: js-template
+title: JavaScript Templates
+---
+
+# JavaScript Templates
+
+JavaScript templates provide powerful customization capabilities for your Navbar Card. They allow you to create dynamic content, conditional rendering, and interactive features based on your Home Assistant state and user context.
+
+Check the [**configuration**](../configuration/all-options) to see which fields support JavaScript templates.
+
+## Template Syntax
+
+To use JavaScript templates in your configuration:
+
+1. In YAML editor, wrap your JavaScript code in `[[[` and `]]]`:
+
+   ```yaml
+   field: |
+     [[[ your_javascript_code_here ]]]
+   ```
+
+2. In visual editor, simply write your JavaScript code:
+
+   ```javascript
+   your_javascript_code_here;
+   ```
+
+---
+
+## Available Context
+
+Your JavaScript templates have access to these predefined variables:
+
+| Variable | Description                     | Content                                                                           |
+| -------- | ------------------------------- | --------------------------------------------------------------------------------- |
+| `states` | Global state of all HA entities | [HA states](https://developers.home-assistant.io/docs/frontend/data#hassstates)   |
+| `user`   | Current user information        | [HA user state](https://developers.home-assistant.io/docs/frontend/data#hassuser) |
+| `hass`   | Home Assistant instance         | [HA `hass` object](https://developers.home-assistant.io/docs/frontend/data)       |
+| `navbar` | Navbar card internal state      | `{isDesktop: boolean}`                                                            |
+
+### States Object
+
+Access entity states and attributes:
+
+```javascript
+// Get entity state
+states['light.kitchen'].state;
+
+// Get entity attributes
+states['light.kitchen'].attributes.brightness;
+
+// Check if entity exists
+states['sensor.temperature'] !== undefined;
+```
+
+### User Object
+
+Access user information:
+
+```javascript
+// User properties
+user.name; // Username
+user.is_admin; // Admin status
+user.is_owner; // Owner status
+user.id; // User ID
+```
+
+### Navbar Object
+
+Access navbar-specific information:
+
+```javascript
+// Navbar properties
+navbar.isDesktop; // Desktop/mobile mode
+```
+
+---
+
+## Debugging Tips
+
+1. **Use Console Logging**. Open the browser console (F12) to debug your templates.
+
+   ```javascript
+   [[[
+     console.log('States:', states);
+     console.log('User:', user);
+     console.log('Navbar:', navbar);
+     return 'Debug Mode';
+   ]]]
+   ```
+
+2. **Error Handling**. Use try/catch to handle errors in your templates.
+
+   ```javascript
+   [[[
+     try {
+       // Your code here
+       return 'Success';
+     } catch (error) {
+       console.error('Template Error:', error);
+       return 'Error';
+     }
+   ]]]
+   ```

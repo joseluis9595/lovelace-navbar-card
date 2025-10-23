@@ -1,0 +1,90 @@
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.tab {
+  padding: 12px 24px;
+  border: none;
+  border-radius: var(--ifm-card-border-radius);
+  background: var(--ifm-color-emphasis-100);
+  color: var(--ifm-color-emphasis-700);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.tab:hover {
+  background: var(--ifm-color-emphasis-200);
+}
+
+.tabActive {
+  background: var(--ifm-color-primary);
+  color: var(--ifm-color-white);
+}
+
+.tabActive:hover {
+  background: var(--ifm-color-primary-darker);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.exampleCard {
+  background: var(--ifm-card-background-color);
+  border-radius: var(--ifm-card-border-radius);
+  box-shadow: var(--ifm-global-shadow-lw);
+  overflow: hidden;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
+  border: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.exampleCard:hover {
+  box-shadow: var(--ifm-global-shadow-lw-2);
+}
+
+.exampleImage {
+  width: 100%;
+  height: 130px;
+  object-fit: cover;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.exampleContent {
+  padding: 16px;
+}
+
+.exampleTitle {
+  font-size: 1.1em;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.exampleDescription {
+  font-size: 0.9em;
+  color: var(--ifm-color-emphasis-600);
+  margin: 0 0 8px 0;
+}
+
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: 1fr;
+    padding: 0px;
+  }
+
+  .tabs {
+    width: 100%;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 12px;
+  }
+}
