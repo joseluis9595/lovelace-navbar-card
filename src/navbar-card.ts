@@ -8,34 +8,31 @@ import {
   unsafeCSS,
 } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 import { version } from '../package.json';
-import { HomeAssistant, navigate } from 'custom-card-helpers';
+import { HomeAssistant } from 'custom-card-helpers';
 import {
   DEFAULT_NAVBAR_CONFIG,
   DesktopPosition,
   NavbarCardConfig,
-  NavbarCustomActions,
   PopupItem,
-  QuickbarActionConfig,
   RouteItem,
   STUB_CONFIG,
 } from './config';
-import { RippleElement } from './types';
-import { hapticFeedback, mapStringToEnum, processTemplate } from './utils';
+import { mapStringToEnum, processTemplate } from './utils';
 import {
   fireDOMEvent,
   forceDashboardPadding,
-  forceOpenEditMode,
   forceResetRipple,
   getNavbarTemplates,
   injectStyles,
   removeDashboardPadding,
 } from './dom-utils';
 import { getDefaultStyles } from './styles';
-import { renderRouteIcon } from './render/route-icon';
-import { renderBadge } from './render/badge';
 import { shouldShowLabelBackground, shouldShowLabels } from './logic/labels';
 import { checkDesktop } from './logic/device';
+import { renderRoute } from './render/route';
+import { renderPopupItem } from './render/popup-item';
 
 declare global {
   interface Window {
@@ -53,10 +50,6 @@ window.customCards.push({
     'Card with a full-width bottom nav on mobile and a flexible nav on desktop that can be placed on any side of the screen.',
 });
 
-const DEFAULT_DESKTOP_POSITION = DesktopPosition.bottom;
-const DOUBLE_TAP_DELAY = 250;
-const HOLD_ACTION_DELAY = 500;
-
 @customElement('navbar-card')
 export class NavbarCard extends LitElement {
   @property({ attribute: false }) private _hass!: HomeAssistant;
@@ -67,19 +60,6 @@ export class NavbarCard extends LitElement {
   @state() private _inPreviewMode?: boolean;
   @state() private _popup?: TemplateResult | null;
   @state() private _showMediaPlayer?: boolean;
-
-  // hold_action state variables
-  private holdTimeoutId: number | null = null;
-  private holdTriggered: boolean = false;
-  private pointerStartX: number = 0;
-  private pointerStartY: number = 0;
-
-  // double_tap_action state variables
-  private lastTapTime: number = 0;
-  private lastTapTarget: EventTarget | null = null;
-
-  // tap_action state variables
-  private tapTimeoutId: number | null = null;
 
   /**********************************************************************/
   /* Lit native callbacks */
@@ -281,94 +261,13 @@ export class NavbarCard extends LitElement {
   };
 
   /**********************************************************************/
-  /* Utils */
-  /**********************************************************************/
-  private _shouldTriggerHaptic(
-    actionType: 'tap' | 'hold' | 'double_tap',
-    isNavigation = false,
-  ): boolean {
-    const hapticConfig = this.config?.haptic;
-
-    // If haptic is a boolean, use it as a global setting
-    if (typeof hapticConfig === 'boolean') {
-      return hapticConfig;
-    }
-
-    // If no haptic config is provided, return default values
-    if (!hapticConfig) {
-      return !isNavigation;
-    }
-
-    // Check navigation first
-    if (isNavigation) {
-      return hapticConfig.url ?? false;
-    }
-
-    // Check specific action types
-    switch (actionType) {
-      case 'tap':
-        return hapticConfig.tap_action ?? false;
-      case 'hold':
-        return hapticConfig.hold_action ?? false;
-      case 'double_tap':
-        return hapticConfig.double_tap_action ?? false;
-      default:
-        return false;
-    }
-  }
-
-  /**********************************************************************/
   /* Navbar callbacks */
   /**********************************************************************/
 
   /**
-   * Render route item
-   */
-  private _renderRoute = (route: RouteItem) => {
-    // Cache template evaluations to avoid redundant processing
-    const isActive =
-      route.selected != null
-        ? processTemplate<boolean>(this._hass, this, route.selected)
-        : window.location.pathname == route.url;
-
-    const isHidden = processTemplate<boolean>(this._hass, this, route.hidden);
-    if (isHidden) {
-      return null;
-    }
-
-    // Cache label processing
-    const label = shouldShowLabels(this, false)
-      ? (processTemplate<string>(this._hass, this, route.label) ?? null)
-      : null;
-
-    return html`
-      <div
-        class="route ${isActive ? 'active' : ''}"
-        @mouseenter=${(e: PointerEvent) => this._handleMouseEnter(e, route)}
-        @mousemove=${(e: PointerEvent) => this._handleMouseMove(e, route)}
-        @mouseleave=${(e: PointerEvent) => this._handleMouseLeave(e, route)}
-        @pointerdown=${(e: PointerEvent) => this._handlePointerDown(e, route)}
-        @pointermove=${(e: PointerEvent) => this._handlePointerMove(e, route)}
-        @pointerup=${(e: PointerEvent) => this._handlePointerUp(e, route)}
-        @pointercancel=${(e: PointerEvent) =>
-          this._handlePointerMove(e, route)}>
-        <div class="button ${isActive ? 'active' : ''}">
-          ${renderRouteIcon(this, route, isActive)}
-          <ha-ripple></ha-ripple>
-        </div>
-
-        ${label
-          ? html`<div class="label ${isActive ? 'active' : ''}">${label}</div>`
-          : html``}
-        ${renderBadge(this, route, isActive)}
-      </div>
-    `;
-  };
-
-  /**
    * Handle gracefully closing the popup.
    */
-  private _closePopup = () => {
+  public closePopup = () => {
     const popup = this.shadowRoot?.querySelector('.navbar-popup');
     const backdrop = this.shadowRoot?.querySelector('.navbar-popup-backdrop');
 
@@ -456,7 +355,7 @@ export class NavbarCard extends LitElement {
   /**
    * Open the popup menu for a given popupConfig and anchor element.
    */
-  private _openPopup = (route: RouteItem, target: HTMLElement) => {
+  public openPopup = (route: RouteItem, target: HTMLElement) => {
     const popupItems =
       processTemplate<PopupItem[]>(this._hass, this, route.popup) ??
       route.popup ??
@@ -483,7 +382,8 @@ export class NavbarCard extends LitElement {
         anchorRect,
         !this.isDesktop
           ? 'mobile'
-          : (this.config?.desktop?.position ?? DEFAULT_DESKTOP_POSITION),
+          : (this.config?.desktop?.position ??
+              DEFAULT_NAVBAR_CONFIG.desktop.position),
       );
 
     const showLabelBackground = shouldShowLabelBackground(this);
@@ -500,53 +400,17 @@ export class NavbarCard extends LitElement {
           ${showLabelBackground ? 'popuplabelbackground' : ''}
         "
         style="${style}">
-        ${popupItems
-          .map((popupItem, index) => {
-            const isActive =
-              popupItem.selected != null
-                ? processTemplate<boolean>(this._hass, this, popupItem.selected)
-                : window.location.pathname == popupItem.url;
-            const isHidden = processTemplate<boolean>(
-              this._hass,
-              this,
-              popupItem.hidden,
-            );
-            if (isHidden) {
-              return null;
-            }
-
-            const label = showLabels
-              ? (processTemplate<string>(this._hass, this, popupItem.label) ??
-                ' ')
-              : null;
-
-            return html`<div
-              class="
-              popup-item 
-              ${popupDirectionClassName}
-              ${labelPositionClassName}
-              ${isActive ? 'active' : ''}
-              "
-              style="--index: ${index}"
-              @click=${(e: MouseEvent) =>
-                this._handlePointerUp(e as PointerEvent, popupItem, true)}>
-              <div
-                class="button ${showLabelBackground
-                  ? 'popuplabelbackground'
-                  : ''}">
-                ${renderRouteIcon(this, popupItem, isActive)}
-                <md-ripple></md-ripple>
-                ${renderBadge(this, popupItem, false)}
-                ${showLabelBackground && label
-                  ? html`<div class="label">${label}</div>`
-                  : html``}
-              </div>
-              ${!showLabelBackground && label
-                ? html`<div class="label">${label}</div>`
-                : html``}
-            </div>`;
-          })
-          .filter(x => x != null)}
+        ${repeat(popupItems, (popupItem, index) => {
+          return renderPopupItem(
+            this,
+            popupItem,
+            index,
+            popupDirectionClassName,
+            labelPositionClassName,
+            showLabelBackground,
+            showLabels,
+          );
+        })}
       </div>
     `;
 
@@ -572,7 +436,7 @@ export class NavbarCard extends LitElement {
         backdrop.addEventListener('click', (e: Event) => {
           e.preventDefault();
           e.stopPropagation();
-          this._closePopup();
+          this.closePopup();
         });
       }
     }, 400);
@@ -584,290 +448,7 @@ export class NavbarCard extends LitElement {
   private _onPopupKeyDownListener = (e: KeyboardEvent) => {
     if (e.key === 'Escape' && this._popup) {
       e.preventDefault();
-      this._closePopup();
-    }
-  };
-
-  /**********************************************************************/
-  /* Pointer event listenrs */
-  /**********************************************************************/
-  private _handleMouseEnter = (e: MouseEvent, _route: RouteItem) => {
-    const ripple = (e.currentTarget as HTMLElement).querySelector(
-      'ha-ripple',
-    ) as RippleElement;
-    if (ripple) ripple.hovered = true;
-  };
-
-  private _handleMouseMove = (e: MouseEvent, _route: RouteItem) => {
-    const ripple = (e.currentTarget as HTMLElement).querySelector(
-      'ha-ripple',
-    ) as RippleElement;
-    if (ripple) ripple.hovered = true;
-  };
-
-  private _handleMouseLeave = (e: MouseEvent, _route: RouteItem) => {
-    const ripple = (e.currentTarget as HTMLElement).querySelector(
-      'ha-ripple',
-    ) as RippleElement;
-    if (ripple) ripple.hovered = false;
-  };
-
-  private _handlePointerDown = (e: PointerEvent, route: RouteItem) => {
-    // Store the starting position for movement detection
-    this.pointerStartX = e.clientX;
-    this.pointerStartY = e.clientY;
-
-    if (route.hold_action) {
-      this.holdTriggered = false;
-      this.holdTimeoutId = window.setTimeout(() => {
-        if (this._shouldTriggerHaptic('hold')) {
-          hapticFeedback();
-        }
-        this.holdTriggered = true;
-      }, HOLD_ACTION_DELAY);
-    }
-  };
-
-  private _handlePointerMove = (e: PointerEvent, _route: RouteItem) => {
-    if (!this.holdTimeoutId) {
-      return;
-    }
-
-    // Calculate movement distance to prevent accidental hold triggers
-    const moveX = Math.abs(e.clientX - this.pointerStartX);
-    const moveY = Math.abs(e.clientY - this.pointerStartY);
-
-    // If moved more than 10px in any direction, cancel the hold action
-    if (moveX > 10 || moveY > 10) {
-      if (this.holdTimeoutId !== null) {
-        clearTimeout(this.holdTimeoutId);
-        this.holdTimeoutId = null;
-      }
-    }
-  };
-
-  private _handlePointerUp = (
-    e: PointerEvent,
-    route: RouteItem,
-    isPopup = false,
-  ) => {
-    if (this.holdTimeoutId !== null) {
-      clearTimeout(this.holdTimeoutId);
-      this.holdTimeoutId = null;
-    }
-
-    // Capture current target from the original event
-    const currentTarget = e.currentTarget as HTMLElement;
-
-    // Check for double tap
-    const currentTime = new Date().getTime();
-    const timeDiff = currentTime - this.lastTapTime;
-    const isDoubleTap =
-      timeDiff < DOUBLE_TAP_DELAY && e.target === this.lastTapTarget;
-
-    if (isDoubleTap && route.double_tap_action) {
-      // Clear pending tap action if double tap is detected
-      if (this.tapTimeoutId !== null) {
-        clearTimeout(this.tapTimeoutId);
-        this.tapTimeoutId = null;
-      }
-      this._handleDoubleTapAction(currentTarget, route, isPopup);
-      this.lastTapTime = 0;
-      this.lastTapTarget = null;
-    } else if (this.holdTriggered && route.hold_action) {
-      this._handleHoldAction(currentTarget, route, isPopup);
-      this.lastTapTime = 0;
-      this.lastTapTarget = null;
-    } else {
-      this.lastTapTime = currentTime;
-      this.lastTapTarget = e.target;
-
-      this._handleTapAction(currentTarget, route, isPopup);
-    }
-
-    this.holdTriggered = false;
-  };
-
-  private _handleHoldAction = (
-    target: HTMLElement,
-    route: RouteItem,
-    isPopupItem = false,
-  ) => {
-    this._executeAction(target, route, route.hold_action, 'hold', isPopupItem);
-  };
-
-  private _handleDoubleTapAction = (
-    target: HTMLElement,
-    route: RouteItem,
-    isPopupItem = false,
-  ) => {
-    this._executeAction(
-      target,
-      route,
-      route.double_tap_action,
-      'double_tap',
-      isPopupItem,
-    );
-  };
-
-  private _handleTapAction = (
-    target: HTMLElement,
-    route: RouteItem,
-    isPopupItem = false,
-  ) => {
-    // Set timeout for tap action to allow for potential double tap
-    if (route.double_tap_action) {
-      this.tapTimeoutId = window.setTimeout(() => {
-        // this._handleTapAction(currentTarget, route, false);
-        this._executeAction(
-          target,
-          route,
-          route.tap_action,
-          'tap',
-          isPopupItem,
-        );
-      }, DOUBLE_TAP_DELAY);
-    } else {
-      // this._handleTapAction(currentTarget, route, false);
-      this._executeAction(target, route, route.tap_action, 'tap', isPopupItem);
-    }
-  };
-
-  private _chooseKeyForQuickbar = (action: QuickbarActionConfig) => {
-    switch (action.mode) {
-      case 'devices':
-        return 'd';
-      case 'entities':
-        return 'e';
-      case 'commands':
-      default:
-        return 'c';
-    }
-  };
-
-  /**
-   * Generic handler for tap, hold, and double tap actions.
-   */
-  private _executeAction = (
-    target: HTMLElement,
-    route: RouteItem,
-    action:
-      | RouteItem['tap_action']
-      | RouteItem['hold_action']
-      | RouteItem['double_tap_action'],
-    actionType: 'tap' | 'hold' | 'double_tap',
-    isPopupItem = false,
-  ) => {
-    // Force reset ripple status to prevent UI bugs
-    forceResetRipple(target);
-
-    // Close popup for any action unless it's opening a new popup
-    if (action?.action !== NavbarCustomActions.openPopup && isPopupItem) {
-      this._closePopup();
-    }
-
-    // Handle different action types
-    switch (action?.action) {
-      case NavbarCustomActions.openPopup:
-        if (!isPopupItem) {
-          const popupItems = route.popup ?? route.submenu;
-          if (!popupItems) {
-            console.error(
-              `[navbar-card] No popup items found for route: ${route.label}`,
-            );
-          } else {
-            if (this._shouldTriggerHaptic(actionType)) {
-              hapticFeedback();
-            }
-            this._openPopup(route, target);
-          }
-        }
-        break;
-
-      case NavbarCustomActions.toggleMenu:
-        if (this._shouldTriggerHaptic(actionType)) {
-          hapticFeedback();
-        }
-        fireDOMEvent(this, 'hass-toggle-menu', {
-          bubbles: true,
-          composed: true,
-        });
-        break;
-
-      case NavbarCustomActions.quickbar:
-        if (this._shouldTriggerHaptic(actionType)) {
-          hapticFeedback();
-        }
-        fireDOMEvent<'KeyboardEvent'>(
-          this,
-          'keydown',
-          {
-            bubbles: true,
-            composed: true,
-            key: this._chooseKeyForQuickbar(action),
-          },
-          undefined,
-          KeyboardEvent,
-        );
-        break;
-
-      case NavbarCustomActions.showNotifications:
-        if (this._shouldTriggerHaptic(actionType)) {
-          hapticFeedback();
-        }
-        fireDOMEvent(this, 'hass-show-notifications', {
-          bubbles: true,
-          composed: true,
-        });
-        break;
-
-      case NavbarCustomActions.navigateBack:
-        if (this._shouldTriggerHaptic(actionType, true)) {
-          hapticFeedback();
-        }
-        window.history.back();
-        break;
-
-      case NavbarCustomActions.openEditMode:
-        if (this._shouldTriggerHaptic(actionType)) {
-          hapticFeedback();
-        }
-        forceOpenEditMode();
-        break;
-
-      case NavbarCustomActions.customJSAction:
-        if (this._shouldTriggerHaptic(actionType)) {
-          hapticFeedback();
-        }
-        processTemplate<string>(this._hass, this, action.code);
-        break;
-
-      default:
-        if (action != null) {
-          if (this._shouldTriggerHaptic(actionType)) {
-            hapticFeedback();
-          }
-          setTimeout(() => {
-            fireDOMEvent(
-              this,
-              'hass-action',
-              { bubbles: true, composed: true },
-              {
-                action: actionType,
-                config: {
-                  [`${actionType}_action`]: action,
-                },
-              },
-            );
-          }, 10);
-        } else if (actionType === 'tap' && route.url) {
-          // Handle default navigation for tap action if no specific action is defined
-          if (this._shouldTriggerHaptic(actionType, true)) {
-            hapticFeedback();
-          }
-          navigate(this, route.url);
-        }
-        break;
+      this.closePopup();
     }
   };
 
@@ -1089,7 +670,7 @@ export class NavbarCard extends LitElement {
     // Choose css classnames
     const desktopPositionClassname =
       mapStringToEnum(DesktopPosition, desktopPosition as string) ??
-      DEFAULT_DESKTOP_POSITION;
+      DEFAULT_NAVBAR_CONFIG.desktop.position;
     const deviceModeClassName = this.isDesktop ? 'desktop' : 'mobile';
     const editModeClassname = isEditMode ? 'edit-mode' : '';
     const mobileModeClassname = mobile?.mode === 'floating' ? 'floating' : '';
@@ -1121,7 +702,7 @@ export class NavbarCard extends LitElement {
         ${this._renderMediaPlayer()}
         <ha-card
           class="navbar-card ${deviceModeClassName} ${desktopPositionClassname} ${mobileModeClassname}">
-          ${routes?.map(this._renderRoute).filter(x => x != null)}
+          ${repeat(routes, route => renderRoute(this, route))}
         </ha-card>
       </div>
       ${this._popup}

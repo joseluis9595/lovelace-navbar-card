@@ -142,7 +142,7 @@ export type NavbarCardConfig = {
   haptic?: boolean | HapticConfig;
 };
 
-export const DEFAULT_NAVBAR_CONFIG: NavbarCardConfig = {
+export const DEFAULT_NAVBAR_CONFIG = {
   routes: [],
   template: undefined,
   layout: {
@@ -164,7 +164,7 @@ export const DEFAULT_NAVBAR_CONFIG: NavbarCardConfig = {
     show_popup_label_backgrounds: false,
     mode: 'docked',
   },
-};
+} as const satisfies NavbarCardConfig;
 
 export const STUB_CONFIG: NavbarCardConfig = {
   routes: [

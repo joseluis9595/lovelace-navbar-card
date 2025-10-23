@@ -1,4 +1,4 @@
-import { html } from 'lit';
+import { html, TemplateResult } from 'lit';
 import { PopupItem, RouteItem } from '../config';
 import { NavbarCard } from '../navbar-card';
 import { processBadgeTemplate, processTemplate } from '../utils';
@@ -8,7 +8,7 @@ export const renderBadge = (
   context: NavbarCard,
   route: RouteItem | PopupItem,
   isRouteActive: boolean,
-) => {
+): TemplateResult => {
   // Early return if no badge configuration
   if (!route.badge) {
     return html``;

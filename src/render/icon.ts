@@ -1,13 +1,13 @@
 import { PopupItem, RouteItem } from '../config';
-import { html } from 'lit';
+import { html, TemplateResult } from 'lit';
 import { processTemplate } from '../utils';
 import { NavbarCard } from '../navbar-card';
 
-export const renderRouteIcon = (
+export const renderIcon = (
   context: NavbarCard,
   route: RouteItem | PopupItem,
   isActive: boolean,
-) => {
+): TemplateResult => {
   const icon = processTemplate<string>(context.hass, context, route.icon);
   const image = processTemplate<string>(context.hass, context, route.image);
   const iconSelected = processTemplate<string>(
