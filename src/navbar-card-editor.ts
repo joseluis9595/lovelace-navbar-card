@@ -997,10 +997,10 @@ export class NavbarCardEditor extends LitElement {
           })}
           ${this.makeSwitch({
             label: 'Show popup label backgrounds',
-            configKey: 'desktop.show_popup_label_backgrounds',
+            configKey: 'mobile.show_popup_label_backgrounds',
             disabled: ![true, 'popup_only'].includes(labelVisibility),
             defaultValue:
-              DEFAULT_NAVBAR_CONFIG.desktop?.show_popup_label_backgrounds,
+              DEFAULT_NAVBAR_CONFIG.mobile?.show_popup_label_backgrounds,
           })}
           ${this.makeTemplateEditor({
             // TODO JLAQ maybe replace with a templateSwitchEditor
