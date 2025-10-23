@@ -21,12 +21,7 @@ import {
   STUB_CONFIG,
 } from './config';
 import { RippleElement } from './types';
-import {
-  hapticFeedback,
-  mapStringToEnum,
-  processBadgeTemplate,
-  processTemplate,
-} from './utils';
+import { hapticFeedback, mapStringToEnum, processTemplate } from './utils';
 import {
   fireDOMEvent,
   forceDashboardPadding,
@@ -37,7 +32,10 @@ import {
   removeDashboardPadding,
 } from './dom-utils';
 import { getDefaultStyles } from './styles';
-import { Color } from './color';
+import { renderRouteIcon } from './render/route-icon';
+import { renderBadge } from './render/badge';
+import { shouldShowLabelBackground, shouldShowLabels } from './logic/labels';
+import { checkDesktop } from './logic/device';
 
 declare global {
   interface Window {
@@ -61,8 +59,8 @@ const HOLD_ACTION_DELAY = 500;
 
 @customElement('navbar-card')
 export class NavbarCard extends LitElement {
-  @property({ attribute: false }) public _hass!: HomeAssistant;
-  @state() private _config?: NavbarCardConfig;
+  @property({ attribute: false }) private _hass!: HomeAssistant;
+  @state() config?: NavbarCardConfig;
   @state() isDesktop?: boolean;
   @state() private _inEditDashboardMode?: boolean;
   @state() private _inEditCardMode?: boolean;
@@ -94,8 +92,8 @@ export class NavbarCard extends LitElement {
     forceResetRipple(this);
 
     // Initialize screen size listener
-    window.addEventListener('resize', this._checkDesktop);
-    this._checkDesktop();
+    window.addEventListener('resize', this._updateDesktopState);
+    this._updateDesktopState();
 
     const homeAssistantRoot = document.querySelector('body > home-assistant');
 
@@ -117,14 +115,14 @@ export class NavbarCard extends LitElement {
     injectStyles(
       this,
       getDefaultStyles(),
-      this._config?.styles ? unsafeCSS(this._config.styles) : css``,
+      this.config?.styles ? unsafeCSS(this.config.styles) : css``,
     );
 
     // Force dashboard padding
     forceDashboardPadding({
-      desktop: this._config?.desktop ?? DEFAULT_NAVBAR_CONFIG.desktop,
-      mobile: this._config?.mobile ?? DEFAULT_NAVBAR_CONFIG.mobile,
-      auto_padding: this._config?.layout?.auto_padding,
+      desktop: this.config?.desktop ?? DEFAULT_NAVBAR_CONFIG.desktop,
+      mobile: this.config?.mobile ?? DEFAULT_NAVBAR_CONFIG.mobile,
+      auto_padding: this.config?.layout?.auto_padding,
       show_media_player: this._showMediaPlayer ?? false,
     });
   }
@@ -133,7 +131,7 @@ export class NavbarCard extends LitElement {
     super.disconnectedCallback();
 
     // Remove screen size listener
-    window.removeEventListener('resize', this._checkDesktop);
+    window.removeEventListener('resize', this._updateDesktopState);
 
     // Remove dashboard padding styles
     removeDashboardPadding();
@@ -152,6 +150,13 @@ export class NavbarCard extends LitElement {
     if (this._showMediaPlayer !== visible) {
       this._showMediaPlayer = visible;
     }
+  }
+
+  /**
+   * Get the Home Assistant instance
+   */
+  get hass() {
+    return this._hass;
   }
 
   /**
@@ -217,7 +222,7 @@ export class NavbarCard extends LitElement {
     });
 
     // Store configuration
-    this._config = config;
+    this.config = config;
   }
 
   /**
@@ -230,9 +235,9 @@ export class NavbarCard extends LitElement {
     if (_changedProperties.has('_showMediaPlayer')) {
       // Force dashboard padding
       forceDashboardPadding({
-        desktop: this._config?.desktop ?? DEFAULT_NAVBAR_CONFIG.desktop,
-        mobile: this._config?.mobile ?? DEFAULT_NAVBAR_CONFIG.mobile,
-        auto_padding: this._config?.layout?.auto_padding,
+        desktop: this.config?.desktop ?? DEFAULT_NAVBAR_CONFIG.desktop,
+        mobile: this.config?.mobile ?? DEFAULT_NAVBAR_CONFIG.mobile,
+        auto_padding: this.config?.layout?.auto_padding,
         show_media_player: this._showMediaPlayer ?? false,
       });
     }
@@ -265,83 +270,15 @@ export class NavbarCard extends LitElement {
   }
 
   /**********************************************************************/
-  /* Subcomponents */
+  /* State */
   /**********************************************************************/
-  private _getRouteIcon(route: RouteItem | PopupItem, isActive: boolean) {
-    const icon = processTemplate<string>(this._hass, this, route.icon);
-    const image = processTemplate<string>(this._hass, this, route.image);
-    const iconSelected = processTemplate<string>(
-      this._hass,
-      this,
-      route.icon_selected,
-    );
-    const imageSelected = processTemplate<string>(
-      this._hass,
-      this,
-      route.image_selected,
-    );
-
-    return image
-      ? html`<img
-          class="image ${isActive ? 'active' : ''}"
-          src="${isActive && imageSelected ? imageSelected : image}"
-          alt="${route.label || ''}" />`
-      : html`<ha-icon
-          class="icon ${isActive ? 'active' : ''}"
-          icon="${isActive && iconSelected ? iconSelected : icon}"></ha-icon>`;
-  }
-
-  private _shouldShowLabelBackground = (): boolean => {
-    const enabled = this.isDesktop
-      ? this._config?.desktop?.show_popup_label_backgrounds
-      : this._config?.mobile?.show_popup_label_backgrounds;
-    return !!enabled;
+  private _updateDesktopState = () => {
+    const isDesktop = checkDesktop(this);
+    if (this.isDesktop === isDesktop) {
+      return;
+    }
+    this.isDesktop = isDesktop;
   };
-
-  private _renderBadge(route: RouteItem | PopupItem, isRouteActive: boolean) {
-    // Early return if no badge configuration
-    if (!route.badge) {
-      return html``;
-    }
-
-    // Cache template evaluations
-    let showBadge = false;
-    if (route.badge.show !== undefined) {
-      showBadge = processTemplate<boolean>(this._hass, this, route.badge.show);
-    } else if (route.badge.template) {
-      // TODO deprecate this
-      showBadge = processBadgeTemplate(this._hass, route.badge.template);
-    }
-
-    if (!showBadge) {
-      return html``;
-    }
-
-    const count =
-      processTemplate<number | null>(this._hass, this, route.badge.count) ??
-      null;
-    const hasCount = count != null;
-
-    const backgroundColor =
-      processTemplate<string>(this._hass, this, route.badge.color) ?? 'red';
-    const textColor = processTemplate<string>(
-      this._hass,
-      this,
-      route.badge.text_color ?? route.badge.textColor, // TODO deprecate the camelCase property
-    );
-
-    // Only create Color object if textColor is not provided, using cached version
-    const contrastingColor =
-      textColor ?? Color.from(backgroundColor).contrastingColor().hex();
-
-    return html`<div
-      class="badge ${isRouteActive ? 'active' : ''} ${hasCount
-        ? 'with-counter'
-        : ''}"
-      style="background-color: ${backgroundColor}; color: ${contrastingColor}">
-      ${count}
-    </div>`;
-  }
 
   /**********************************************************************/
   /* Utils */
@@ -350,7 +287,7 @@ export class NavbarCard extends LitElement {
     actionType: 'tap' | 'hold' | 'double_tap',
     isNavigation = false,
   ): boolean {
-    const hapticConfig = this._config?.haptic;
+    const hapticConfig = this.config?.haptic;
 
     // If haptic is a boolean, use it as a global setting
     if (typeof hapticConfig === 'boolean') {
@@ -385,30 +322,6 @@ export class NavbarCard extends LitElement {
   /**********************************************************************/
 
   /**
-   * Label visibility evaluator
-   */
-  private _shouldShowLabels = (isSubmenu: boolean): boolean => {
-    const config = this.isDesktop
-      ? this._config?.desktop?.show_labels
-      : this._config?.mobile?.show_labels;
-
-    if (typeof config === 'boolean') return config;
-
-    return (
-      (config === 'popup_only' && isSubmenu) ||
-      (config === 'routes_only' && !isSubmenu)
-    );
-  };
-
-  /**
-   * Check if we are on a desktop device
-   */
-  private _checkDesktop = () => {
-    this.isDesktop =
-      (window.innerWidth ?? 0) >= (this._config?.desktop?.min_width ?? 768);
-  };
-
-  /**
    * Render route item
    */
   private _renderRoute = (route: RouteItem) => {
@@ -424,7 +337,7 @@ export class NavbarCard extends LitElement {
     }
 
     // Cache label processing
-    const label = this._shouldShowLabels(false)
+    const label = shouldShowLabels(this, false)
       ? (processTemplate<string>(this._hass, this, route.label) ?? null)
       : null;
 
@@ -440,14 +353,14 @@ export class NavbarCard extends LitElement {
         @pointercancel=${(e: PointerEvent) =>
           this._handlePointerMove(e, route)}>
         <div class="button ${isActive ? 'active' : ''}">
-          ${this._getRouteIcon(route, isActive)}
+          ${renderRouteIcon(this, route, isActive)}
           <ha-ripple></ha-ripple>
         </div>
 
         ${label
           ? html`<div class="label ${isActive ? 'active' : ''}">${label}</div>`
           : html``}
-        ${this._renderBadge(route, isActive)}
+        ${renderBadge(this, route, isActive)}
       </div>
     `;
   };
@@ -570,8 +483,11 @@ export class NavbarCard extends LitElement {
         anchorRect,
         !this.isDesktop
           ? 'mobile'
-          : (this._config?.desktop?.position ?? DEFAULT_DESKTOP_POSITION),
+          : (this.config?.desktop?.position ?? DEFAULT_DESKTOP_POSITION),
       );
+
+    const showLabelBackground = shouldShowLabelBackground(this);
+    const showLabels = shouldShowLabels(this, true);
 
     this._popup = html`
       <div class="navbar-popup-backdrop"></div>
@@ -581,7 +497,7 @@ export class NavbarCard extends LitElement {
           ${popupDirectionClassName}
           ${labelPositionClassName}
           ${this.isDesktop ? 'desktop' : 'mobile'}
-          ${this._shouldShowLabelBackground() ? 'popuplabelbackground' : ''}
+          ${showLabelBackground ? 'popuplabelbackground' : ''}
         "
         style="${style}">
         ${popupItems
@@ -599,12 +515,11 @@ export class NavbarCard extends LitElement {
               return null;
             }
 
-            const label = this._shouldShowLabels(true)
+            const label = showLabels
               ? (processTemplate<string>(this._hass, this, popupItem.label) ??
                 ' ')
               : null;
 
-            const showLabelBackground = this._shouldShowLabelBackground();
             return html`<div
               class="
               popup-item 
@@ -619,9 +534,9 @@ export class NavbarCard extends LitElement {
                 class="button ${showLabelBackground
                   ? 'popuplabelbackground'
                   : ''}">
-                ${this._getRouteIcon(popupItem, isActive)}
+                ${renderRouteIcon(this, popupItem, isActive)}
                 <md-ripple></md-ripple>
-                ${this._renderBadge(popupItem, false)}
+                ${renderBadge(this, popupItem, false)}
                 ${showLabelBackground && label
                   ? html`<div class="label">${label}</div>`
                   : html``}
@@ -966,9 +881,9 @@ export class NavbarCard extends LitElement {
   private _shouldShowMediaPlayer = (): { visible: boolean; error?: string } => {
     // If the media player is not configured, don't show it
     if (
-      !this._config ||
-      !this._config.media_player ||
-      !this._config.media_player.entity
+      !this.config ||
+      !this.config.media_player ||
+      !this.config.media_player.entity
     ) {
       return { visible: false };
     }
@@ -980,7 +895,7 @@ export class NavbarCard extends LitElement {
     const entity = processTemplate<string>(
       this._hass,
       this,
-      this._config.media_player.entity,
+      this.config.media_player.entity,
     );
 
     // Get the media player state
@@ -994,11 +909,11 @@ export class NavbarCard extends LitElement {
       };
 
     // If the media player visibility is manually configured, use the configured value
-    if (this._config.media_player.show != null) {
+    if (this.config.media_player.show != null) {
       const show = processTemplate<boolean>(
         this._hass,
         this,
-        this._config.media_player.show,
+        this.config.media_player.show,
       );
       return { visible: show };
     }
@@ -1018,7 +933,7 @@ export class NavbarCard extends LitElement {
     const entity = processTemplate<string>(
       this._hass,
       this,
-      this._config?.media_player?.entity,
+      this.config?.media_player?.entity,
     );
     if (!entity) return;
 
@@ -1045,7 +960,7 @@ export class NavbarCard extends LitElement {
     const entity = processTemplate<string>(
       this._hass,
       this,
-      this._config?.media_player?.entity,
+      this.config?.media_player?.entity,
     );
     if (!entity) return;
     this._hass.callService('media_player', 'media_next_track', {
@@ -1062,7 +977,7 @@ export class NavbarCard extends LitElement {
     const entity = processTemplate<string>(
       this._hass,
       this,
-      this._config?.media_player?.entity,
+      this.config?.media_player?.entity,
     );
     if (!entity) return;
     const mediaPlayerState = this._hass.states[entity];
@@ -1093,7 +1008,7 @@ export class NavbarCard extends LitElement {
     const entity = processTemplate<string>(
       this._hass,
       this,
-      this._config!.media_player!.entity,
+      this.config!.media_player!.entity,
     );
 
     if (error) {
@@ -1113,7 +1028,7 @@ export class NavbarCard extends LitElement {
       <ha-card class="media-player" @click=${this._handleMediaPlayerClick}>
         <div
           class="media-player-bg"
-          style=${this._config?.media_player?.album_cover_background
+          style=${this.config?.media_player?.album_cover_background
             ? `background-image: url(${
                 mediaPlayerState.attributes.entity_picture
               });`
@@ -1159,11 +1074,11 @@ export class NavbarCard extends LitElement {
   };
 
   protected render() {
-    if (!this._config) {
+    if (!this.config) {
       return html``;
     }
 
-    const { routes, desktop, mobile } = this._config;
+    const { routes, desktop, mobile } = this.config;
     const { position: desktopPosition, hidden: desktopHidden } = desktop ?? {};
     const { hidden: mobileHidden } = mobile ?? {};
 
