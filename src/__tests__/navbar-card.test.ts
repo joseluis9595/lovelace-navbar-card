@@ -70,7 +70,7 @@ describe('NavbarCard', () => {
     await element.updateComplete;
 
     // Set up the element
-    element._hass = hass;
+    element.hass = hass;
     element.setConfig(DEFAULT_CONFIG);
     await element.updateComplete;
   });

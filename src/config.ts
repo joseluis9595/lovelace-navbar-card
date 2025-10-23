@@ -68,8 +68,9 @@ type RouteItemBase = {
   hold_action?: ExtendedActionConfig;
   double_tap_action?: ExtendedActionConfig;
   icon?: JSTemplatable<string>;
-  image?: JSTemplatable<string>;
   icon_selected?: JSTemplatable<string>;
+  icon_color?: JSTemplatable<string>;
+  image?: JSTemplatable<string>;
   image_selected?: JSTemplatable<string>;
   label?: JSTemplatable<string>;
   badge?: {
@@ -82,6 +83,7 @@ type RouteItemBase = {
   };
   hidden?: JSTemplatable<boolean>;
   selected?: JSTemplatable<boolean>;
+  selected_color?: JSTemplatable<string>;
 };
 
 // Type for popup menu items (don't include popup property to avoid circular references)

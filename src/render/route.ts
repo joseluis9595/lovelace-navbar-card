@@ -20,6 +20,12 @@ export const renderRoute = (
       ? processTemplate<boolean>(context.hass, context, route.selected)
       : window.location.pathname == route.url;
 
+  const selectedColor = processTemplate<string>(
+    context.hass,
+    context,
+    route.selected_color,
+  );
+
   const isHidden = processTemplate<boolean>(
     context.hass,
     context,
@@ -48,7 +54,11 @@ export const renderRoute = (
         hold: route.hold_action,
         doubleTap: route.double_tap_action,
       })}>
-      <div class="button ${isActive ? 'active' : ''}">
+      <div
+        class="button ${isActive ? 'active' : ''}"
+        style=${selectedColor
+          ? `--navbar-primary-color: ${selectedColor}`
+          : ''}>
         ${renderIcon(context, route, isActive)}
         <ha-ripple></ha-ripple>
       </div>
