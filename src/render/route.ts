@@ -16,8 +16,16 @@ export const renderRoute = (
   context: NavbarCard,
   route: RouteItem,
 ): TemplateResult => {
-  // Cache template evaluations to avoid redundant processing
-  const isActive =
+  const isHidden = processTemplate<boolean>(
+    context.hass,
+    context,
+    route.hidden,
+  );
+  if (isHidden) {
+    return html``;
+  }
+
+  const isSelectedProp =
     route.selected != null
       ? processTemplate<boolean>(context.hass, context, route.selected)
       : window.location.pathname == route.url;
@@ -28,14 +36,11 @@ export const renderRoute = (
     route.selected_color,
   );
 
-  const isHidden = processTemplate<boolean>(
-    context.hass,
-    context,
-    route.hidden,
-  );
-  if (isHidden) {
-    return html``;
-  }
+  const isSelfOrChildSelected =
+    context.config?.layout?.reflect_child_state && !isSelectedProp
+      ? // TODO this is a problem. if popupItem.selected is a string template, this will return true
+        (route.popup?.some(popupItem => popupItem.selected) ?? false)
+      : isSelectedProp;
 
   // Cache label processing
   const label = shouldShowLabels(context, false)
@@ -46,7 +51,7 @@ export const renderRoute = (
     <div
       class="${classMap({
         route: true,
-        active: isActive,
+        active: isSelfOrChildSelected,
       })}"
       ${eventDetection({
         context,
@@ -62,12 +67,12 @@ export const renderRoute = (
       <div
         class="${classMap({
           button: true,
-          active: isActive,
+          active: isSelfOrChildSelected,
         })}"
         style=${styleMap({
           '--navbar-primary-color': selectedColor,
         })}>
-        ${renderIcon(context, route, isActive)}
+        ${renderIcon(context, route, isSelfOrChildSelected)}
         <ha-ripple></ha-ripple>
       </div>
 
@@ -75,12 +80,12 @@ export const renderRoute = (
         ? html`<div
             class="${classMap({
               label: true,
-              active: isActive,
+              active: isSelfOrChildSelected,
             })}">
             ${label}
           </div>`
         : html``}
-      ${renderBadge(context, route, isActive)}
+      ${renderBadge(context, route, isSelfOrChildSelected)}
     </div>
   `;
 };
