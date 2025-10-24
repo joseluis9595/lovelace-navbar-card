@@ -72,6 +72,7 @@ export const renderRoute = (
           '--navbar-primary-color': selectedColor,
         })}>
         ${renderIcon(context, route, isSelfOrChildSelected)}
+        ${renderBadge(context, route, isSelfOrChildSelected)}
         <ha-ripple></ha-ripple>
       </div>
 
@@ -84,7 +85,6 @@ export const renderRoute = (
             ${label}
           </div>`
         : html``}
-      ${renderBadge(context, route, isSelfOrChildSelected)}
     </div>
   `;
 };
