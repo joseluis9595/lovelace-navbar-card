@@ -566,6 +566,7 @@ export class NavbarCard extends LitElement {
     }
 
     const mediaPlayerState = this._hass.states[entity];
+    const mediaPlayerImage = mediaPlayerState.attributes.entity_picture;
     const progress =
       mediaPlayerState.attributes.media_position != null
         ? mediaPlayerState.attributes.media_position /
@@ -588,10 +589,14 @@ export class NavbarCard extends LitElement {
                 style="width: ${progress * 100}%"></div>
             </div>`
           : html``}
-        <img
-          class="media-player-image"
-          src=${mediaPlayerState.attributes.entity_picture}
-          alt=${mediaPlayerState.attributes.media_title} />
+        ${mediaPlayerImage
+          ? html`<img
+              class="media-player-image"
+              src=${mediaPlayerImage}
+              alt=${mediaPlayerState.attributes.media_title} />`
+          : html`<ha-icon
+              class="media-player-image media-player-icon-fallback"
+              icon="mdi:music"></ha-icon>`}
         <div class="media-player-info">
           <span class="media-player-title"
             >${mediaPlayerState.attributes.media_title}</span
