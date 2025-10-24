@@ -20,7 +20,7 @@ import {
   STUB_CONFIG,
   validateConfig,
 } from './config';
-import { mapStringToEnum, processTemplate } from './utils';
+import { deepMergeKeepArrays, mapStringToEnum, processTemplate } from './utils';
 import {
   fireDOMEvent,
   forceDashboardPadding,
@@ -160,10 +160,7 @@ export class NavbarCard extends LitElement {
         // Merge template configuration with the card configuration, giving priority to the card
         const templateConfig = templates[config.template];
         if (templateConfig) {
-          config = {
-            ...templateConfig,
-            ...config,
-          };
+          config = deepMergeKeepArrays(templateConfig, config);
         }
       }
     }
