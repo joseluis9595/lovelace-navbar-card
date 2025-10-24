@@ -1,4 +1,6 @@
 import { html, TemplateResult } from 'lit';
+import { classMap } from 'lit/directives/class-map.js';
+import { styleMap } from 'lit/directives/style-map.js';
 import { PopupItem, RouteItem } from '../config';
 import { NavbarCard } from '../navbar-card';
 import { processBadgeTemplate, processTemplate } from '../utils';
@@ -49,10 +51,15 @@ export const renderBadge = (
     textColor ?? Color.from(backgroundColor).contrastingColor().hex();
 
   return html`<div
-    class="badge ${isRouteActive ? 'active' : ''} ${hasCount
-      ? 'with-counter'
-      : ''}"
-    style="background-color: ${backgroundColor}; color: ${contrastingColor}">
+    class="${classMap({
+      badge: true,
+      active: isRouteActive,
+      'with-counter': hasCount,
+    })}"
+    style=${styleMap({
+      'background-color': backgroundColor,
+      color: contrastingColor,
+    })}>
     ${count}
   </div>`;
 };

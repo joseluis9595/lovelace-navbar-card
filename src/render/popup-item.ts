@@ -1,4 +1,5 @@
 import { html, TemplateResult } from 'lit';
+import { classMap } from 'lit/directives/class-map.js';
 import { PopupItem } from '../config';
 import { NavbarCard } from '../navbar-card';
 import { processTemplate } from '../utils';
@@ -33,10 +34,13 @@ export const renderPopupItem = (
     : null;
 
   return html`<div
-    class="popup-item ${popupDirectionClassName} ${labelPositionClassName} ${isActive
-      ? 'active'
-      : ''}
-    "
+    class="${classMap({
+      'popup-item': true,
+      [popupDirectionClassName]: !!popupDirectionClassName,
+      [labelPositionClassName]: !!labelPositionClassName,
+      active: isActive,
+      popuplabelbackground: showLabelBackground,
+    })}"
     style="--index: ${index}"
     ${eventDetection({
       context,
@@ -49,7 +53,11 @@ export const renderPopupItem = (
       hold: popupItem.hold_action,
       doubleTap: popupItem.double_tap_action,
     })}>
-    <div class="button ${showLabelBackground ? 'popuplabelbackground' : ''}">
+    <div
+      class="${classMap({
+        button: true,
+        popuplabelbackground: showLabelBackground,
+      })}">
       ${renderIcon(context, popupItem, isActive)}
       <md-ripple></md-ripple>
       ${renderBadge(context, popupItem, false)}

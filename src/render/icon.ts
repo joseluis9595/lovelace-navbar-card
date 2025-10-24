@@ -1,5 +1,8 @@
-import { PopupItem, RouteItem } from '../config';
 import { html, TemplateResult } from 'lit';
+import { classMap } from 'lit/directives/class-map.js';
+import { styleMap } from 'lit/directives/style-map.js';
+import { ifDefined } from 'lit/directives/if-defined.js';
+import { PopupItem, RouteItem } from '../config';
 import { isTemplate, processTemplate } from '../utils';
 import { NavbarCard } from '../navbar-card';
 import { Color } from '../color';
@@ -45,11 +48,19 @@ export const renderIcon = (
 
   return image
     ? html`<img
-        class="image ${isActive ? 'active' : ''}"
+        class="${classMap({
+          image: true,
+          active: isActive,
+        })}"
         src="${isActive && imageSelected ? imageSelected : image}"
-        alt="${route.label || ''}" />`
+        alt="${ifDefined(route.label)}" />`
     : html`<ha-icon
-        class="icon ${isActive ? 'active' : ''}"
-        style="--icon-primary-color: ${iconColor ?? 'inherit'}"
+        class="${classMap({
+          icon: true,
+          active: isActive,
+        })}"
+        style=${styleMap({
+          '--icon-primary-color': iconColor ?? 'inherit',
+        })}
         icon="${isActive && iconSelected ? iconSelected : icon}"></ha-icon>`;
 };

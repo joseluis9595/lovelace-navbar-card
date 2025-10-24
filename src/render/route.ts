@@ -1,4 +1,6 @@
 import { html, TemplateResult } from 'lit';
+import { classMap } from 'lit/directives/class-map.js';
+import { styleMap } from 'lit/directives/style-map.js';
 import { RouteItem } from '../config';
 import { NavbarCard } from '../navbar-card';
 import { processTemplate } from '../utils';
@@ -42,7 +44,10 @@ export const renderRoute = (
 
   return html`
     <div
-      class="route ${isActive ? 'active' : ''}"
+      class="${classMap({
+        route: true,
+        active: isActive,
+      })}"
       ${eventDetection({
         context,
         route,
@@ -55,16 +60,25 @@ export const renderRoute = (
         doubleTap: route.double_tap_action,
       })}>
       <div
-        class="button ${isActive ? 'active' : ''}"
-        style=${selectedColor
-          ? `--navbar-primary-color: ${selectedColor}`
-          : ''}>
+        class="${classMap({
+          button: true,
+          active: isActive,
+        })}"
+        style=${styleMap({
+          '--navbar-primary-color': selectedColor,
+        })}>
         ${renderIcon(context, route, isActive)}
         <ha-ripple></ha-ripple>
       </div>
 
       ${label
-        ? html`<div class="label ${isActive ? 'active' : ''}">${label}</div>`
+        ? html`<div
+            class="${classMap({
+              label: true,
+              active: isActive,
+            })}">
+            ${label}
+          </div>`
         : html``}
       ${renderBadge(context, route, isActive)}
     </div>
