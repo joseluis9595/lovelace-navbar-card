@@ -44,8 +44,7 @@ export const renderPopupItem = (
     style="--index: ${index}"
     ${eventDetection({
       context,
-      route: popupItem,
-      // TODO review if this fallback tap_action should be handled inside the eventDetection directive
+      popupItem,
       tap: popupItem.tap_action ?? {
         action: 'navigate',
         navigation_path: popupItem.url ?? '',

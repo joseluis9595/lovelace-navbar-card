@@ -1,23 +1,15 @@
 import { Directive, directive, PartInfo, PartType } from 'lit/directive.js';
-import { RouteItem } from '../config';
+import { ExtendedActionConfig, PopupItem, RouteItem } from '../config';
 import { executeAction } from './action-handler';
 import { NavbarCard } from '../navbar-card';
 
 interface EventDetectionConfig {
   context: NavbarCard;
-  route: RouteItem;
-  tap?:
-    | RouteItem['tap_action']
-    | RouteItem['hold_action']
-    | RouteItem['double_tap_action'];
-  hold?:
-    | RouteItem['tap_action']
-    | RouteItem['hold_action']
-    | RouteItem['double_tap_action'];
-  doubleTap?:
-    | RouteItem['tap_action']
-    | RouteItem['hold_action']
-    | RouteItem['double_tap_action'];
+  route?: RouteItem;
+  popupItem?: PopupItem;
+  tap?: ExtendedActionConfig;
+  hold?: ExtendedActionConfig;
+  doubleTap?: ExtendedActionConfig;
 }
 
 const LONG_PRESS_DELAY = 500;
@@ -61,35 +53,38 @@ class EventDetectionDirective extends Directive {
     // --- Set up bound handlers ---
     this.boundHandlers.tap = config.tap
       ? (ev: Event) =>
-          executeAction(
-            config.context,
-            ev.currentTarget as HTMLElement,
-            config.route,
-            config.tap,
-            'tap',
-          )
+          executeAction({
+            context: config.context,
+            target: ev.currentTarget as HTMLElement,
+            action: config.tap,
+            actionType: 'tap',
+            route: config.route,
+            popupItem: config.popupItem,
+          })
       : undefined;
 
     this.boundHandlers.hold = config.hold
       ? (ev: Event) =>
-          executeAction(
-            config.context,
-            ev.currentTarget as HTMLElement,
-            config.route,
-            config.hold,
-            'hold',
-          )
+          executeAction({
+            context: config.context,
+            target: ev.currentTarget as HTMLElement,
+            action: config.hold,
+            actionType: 'hold',
+            route: config.route,
+            popupItem: config.popupItem,
+          })
       : undefined;
 
     this.boundHandlers.doubleTap = config.doubleTap
       ? (ev: Event) =>
-          executeAction(
-            config.context,
-            ev.currentTarget as HTMLElement,
-            config.route,
-            config.doubleTap,
-            'double_tap',
-          )
+          executeAction({
+            context: config.context,
+            target: ev.currentTarget as HTMLElement,
+            action: config.doubleTap,
+            actionType: 'double_tap',
+            route: config.route,
+            popupItem: config.popupItem,
+          })
       : undefined;
 
     // --- Long press ---

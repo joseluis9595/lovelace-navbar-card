@@ -56,7 +56,6 @@ export const renderRoute = (
       ${eventDetection({
         context,
         route,
-        // TODO review if this fallback tap_action should be handled inside the eventDetection directive
         tap: route.tap_action ?? {
           action: 'navigate',
           navigation_path: route.url ?? '',

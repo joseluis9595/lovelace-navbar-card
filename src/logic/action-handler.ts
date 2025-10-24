@@ -1,6 +1,7 @@
 import { navigate } from 'custom-card-helpers';
 import {
   NavbarCustomActions,
+  PopupItem,
   QuickbarActionConfig,
   RouteItem,
 } from '../config';
@@ -13,6 +14,9 @@ import { processTemplate } from '../utils';
 import { NavbarCard } from '../navbar-card';
 import { triggerHaptic } from './haptic';
 
+/**
+ * Choose the key needed for the KeyboardEvent to open the native HA quickbar.
+ */
 const chooseKeyForQuickbar = (action: QuickbarActionConfig) => {
   switch (action.mode) {
     case 'devices':
@@ -28,40 +32,42 @@ const chooseKeyForQuickbar = (action: QuickbarActionConfig) => {
 /**
  * Generic handler for tap, hold, and double tap actions.
  */
-export const executeAction = (
-  context: NavbarCard,
-  target: HTMLElement,
-  route: RouteItem,
+export const executeAction = (params: {
+  context: NavbarCard;
+  target: HTMLElement;
   action:
     | RouteItem['tap_action']
     | RouteItem['hold_action']
-    | RouteItem['double_tap_action'],
-  actionType: 'tap' | 'hold' | 'double_tap',
-  isPopupItem = false,
-) => {
+    | RouteItem['double_tap_action'];
+  actionType: 'tap' | 'hold' | 'double_tap';
+  route?: RouteItem;
+  popupItem?: PopupItem;
+}) => {
+  const { context, target, action, actionType, route, popupItem } = params;
+
   // Force reset ripple status to prevent UI bugs
   forceResetRipple(target);
 
   // Close popup for any action unless it's opening a new popup
-  if (action?.action !== NavbarCustomActions.openPopup && isPopupItem) {
+  if (action?.action !== NavbarCustomActions.openPopup) {
     context.closePopup();
   }
 
   // Handle different action types
   switch (action?.action) {
-    case NavbarCustomActions.openPopup:
-      if (!isPopupItem) {
-        const popupItems = route.popup ?? route.submenu;
-        if (!popupItems) {
-          console.error(
-            `[navbar-card] No popup items found for route: ${route.label}`,
-          );
-        } else {
-          triggerHaptic(context, actionType);
-          context.openPopup(route, target);
-        }
+    case NavbarCustomActions.openPopup: {
+      if (!route) return;
+      const popupItems = route.popup ?? route.submenu;
+      if (!popupItems) {
+        console.error(
+          `[navbar-card] No popup items found for route: ${route.label}`,
+        );
+      } else {
+        triggerHaptic(context, actionType);
+        context.openPopup(route, target);
       }
       break;
+    }
 
     case NavbarCustomActions.toggleMenu:
       triggerHaptic(context, actionType);
@@ -130,10 +136,10 @@ export const executeAction = (
             },
           );
         }, 10);
-      } else if (actionType === 'tap' && route.url) {
+      } else if (actionType === 'tap' && (route?.url || popupItem?.url)) {
         // Handle default navigation for tap action if no specific action is defined
         triggerHaptic(context, actionType, true);
-        navigate(context, route.url);
+        navigate(context, route?.url ?? popupItem?.url ?? '');
       }
       break;
   }
