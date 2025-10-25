@@ -232,6 +232,15 @@ export class NavbarCard extends LitElement {
     this.isDesktop = isDesktop;
   };
 
+  public changeWidgetVisibility = (
+    widget: keyof typeof this.widgetVisibility,
+    visible: boolean,
+  ) => {
+    if (this.widgetVisibility[widget] !== visible) {
+      this.widgetVisibility[widget] = visible;
+    }
+  };
+
   /**********************************************************************/
   /* Popup management */
   /**********************************************************************/
