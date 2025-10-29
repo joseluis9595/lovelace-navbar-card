@@ -25,7 +25,7 @@ export const renderRoute = (
     return html``;
   }
 
-  const isSelectedProp =
+  const isRouteSelected =
     route.selected != null
       ? processTemplate<boolean>(context.hass, context, route.selected)
       : window.location.pathname == route.url;
@@ -37,10 +37,12 @@ export const renderRoute = (
   );
 
   const isSelfOrChildSelected =
-    context.config?.layout?.reflect_child_state && !isSelectedProp
-      ? // TODO this is a problem. if popupItem.selected is a string template, this will return true
-        (route.popup?.some(popupItem => popupItem.selected) ?? false)
-      : isSelectedProp;
+    context.config?.layout?.reflect_child_state && !isRouteSelected
+      ? (route.popup?.some(popupItem => {
+          const v = processTemplate(context.hass, context, popupItem.selected);
+          return v === true; // only true marks selected
+        }) ?? false)
+      : isRouteSelected;
 
   // Cache label processing
   const label = shouldShowLabels(context, false)
