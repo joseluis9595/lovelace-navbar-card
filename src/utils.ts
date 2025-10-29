@@ -164,7 +164,7 @@ export const wrapTemplate = (template: string) => {
  * @returns The created and dispatched event
  */
 export const hapticFeedback = (hapticType: string = 'selection') => {
-  return fireDOMEvent(window, 'haptic', undefined, hapticType);
+  return fireDOMEvent(window, 'haptic', { detailOverride: hapticType });
 };
 
 /**

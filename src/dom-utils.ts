@@ -39,7 +39,7 @@ export const getNavbarTemplates = (): Record<
 export const forceResetRipple = (target: HTMLElement) => {
   const rippleElements = target?.querySelectorAll('ha-ripple');
 
-  rippleElements.forEach((ripple: RippleElement) => {
+  rippleElements?.forEach((ripple: RippleElement) => {
     setTimeout(() => {
       ripple.hovered = false;
       ripple.pressed = false;
@@ -217,13 +217,16 @@ type EventConstructorMap = {
 export function fireDOMEvent<T extends keyof EventConstructorMap = 'Event'>(
   node: HTMLElement | Window,
   type: string,
-  options?: EventConstructorMap[T][1],
-  detailOverride?: unknown,
+  data?: {
+    options?: EventConstructorMap[T][1];
+    detailOverride?: unknown;
+  },
   EventConstructor?: new (
     type: string,
     options?: EventConstructorMap[T][1],
   ) => EventConstructorMap[T][0],
 ): EventConstructorMap[T][0] {
+  const { options, detailOverride } = data ?? {};
   const constructor = EventConstructor || Event;
   const event = new constructor(type, options) as EventConstructorMap[T][0];
 

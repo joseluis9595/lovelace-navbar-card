@@ -15,6 +15,11 @@ import { NavbarCard } from '../navbar-card';
 import { triggerHaptic } from './haptic';
 
 /**
+ * List of HA actions where we manually append `entity` field
+ */
+export const ACTIONS_WITH_CUSTOM_ENTITY = ['more-info', 'toggle'];
+
+/**
  * Choose the key needed for the KeyboardEvent to open the native HA quickbar.
  */
 const chooseKeyForQuickbar = (action: QuickbarActionConfig) => {
@@ -40,10 +45,13 @@ export const executeAction = (params: {
     | RouteItem['hold_action']
     | RouteItem['double_tap_action'];
   actionType: 'tap' | 'hold' | 'double_tap';
-  route?: RouteItem;
-  popupItem?: PopupItem;
+  data: {
+    route?: RouteItem;
+    popupItem?: PopupItem;
+  };
 }) => {
-  const { context, target, action, actionType, route, popupItem } = params;
+  const { context, target, action, actionType, data } = params;
+  const { route, popupItem } = data;
 
   // Force reset ripple status to prevent UI bugs
   forceResetRipple(target);
@@ -72,8 +80,10 @@ export const executeAction = (params: {
     case NavbarCustomActions.toggleMenu:
       triggerHaptic(context, actionType);
       fireDOMEvent(context, 'hass-toggle-menu', {
-        bubbles: true,
-        composed: true,
+        options: {
+          bubbles: true,
+          composed: true,
+        },
       });
       break;
 
@@ -83,11 +93,12 @@ export const executeAction = (params: {
         context,
         'keydown',
         {
-          bubbles: true,
-          composed: true,
-          key: chooseKeyForQuickbar(action),
+          options: {
+            bubbles: true,
+            composed: true,
+            key: chooseKeyForQuickbar(action),
+          },
         },
-        undefined,
         KeyboardEvent,
       );
       break;
@@ -95,8 +106,10 @@ export const executeAction = (params: {
     case NavbarCustomActions.showNotifications:
       triggerHaptic(context, actionType);
       fireDOMEvent(context, 'hass-show-notifications', {
-        bubbles: true,
-        composed: true,
+        options: {
+          bubbles: true,
+          composed: true,
+        },
       });
       break;
 
@@ -123,18 +136,26 @@ export const executeAction = (params: {
     default:
       if (action != null) {
         triggerHaptic(context, actionType);
+
+        // For `more-info` and `toggle` actions, extract the entity id manually configured
+        const extractedEntity = ACTIONS_WITH_CUSTOM_ENTITY.includes(
+          action.action,
+        )
+          ? // @ts-expect-error: `entity` and `entity_id` are not defined in the generic ActionConfig
+            (action.entity ?? action.entity_id)
+          : undefined;
+
         setTimeout(() => {
-          fireDOMEvent(
-            context,
-            'hass-action',
-            { bubbles: true, composed: true },
-            {
+          fireDOMEvent(context, 'hass-action', {
+            options: { bubbles: true, composed: true },
+            detailOverride: {
               action: actionType,
               config: {
                 [`${actionType}_action`]: action,
+                entity: extractedEntity,
               },
             },
-          );
+          });
         }, 10);
       } else if (actionType === 'tap' && (route?.url || popupItem?.url)) {
         // Handle default navigation for tap action if no specific action is defined

@@ -58,8 +58,7 @@ class EventDetectionDirective extends Directive {
             target: ev.currentTarget as HTMLElement,
             action: config.tap,
             actionType: 'tap',
-            route: config.route,
-            popupItem: config.popupItem,
+            data: { route: config.route, popupItem: config.popupItem },
           })
       : undefined;
 
@@ -70,8 +69,7 @@ class EventDetectionDirective extends Directive {
             target: ev.currentTarget as HTMLElement,
             action: config.hold,
             actionType: 'hold',
-            route: config.route,
-            popupItem: config.popupItem,
+            data: { route: config.route, popupItem: config.popupItem },
           })
       : undefined;
 
@@ -82,8 +80,7 @@ class EventDetectionDirective extends Directive {
             target: ev.currentTarget as HTMLElement,
             action: config.doubleTap,
             actionType: 'double_tap',
-            route: config.route,
-            popupItem: config.popupItem,
+            data: { route: config.route, popupItem: config.popupItem },
           })
       : undefined;
 
