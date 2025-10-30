@@ -81,7 +81,7 @@ export const processTemplate = <T = unknown>(
   try {
     const clean = cleanTemplate(template);
     if (clean === null) {
-      console.error(`NavbarCard: Invalid template format: ${template}`);
+      console.error(`[navbar-card] Invalid template format: ${template}`);
       return template as T;
     }
 
@@ -110,13 +110,15 @@ export const processTemplate = <T = unknown>(
     }) as T;
 
     if (result === undefined) {
-      console.error(`NavbarCard: Template did not return a value: ${template}`);
+      console.error(
+        `[navbar-card] Template did not return a value: ${template}`,
+      );
       return template as T;
     }
 
     return result;
   } catch (err) {
-    console.error(`NavbarCard: Error evaluating template: ${err}`);
+    console.error(`[navbar-card] Error evaluating template: ${err}`);
     return template as T;
   }
 };
@@ -138,7 +140,7 @@ export const processBadgeTemplate = (
     const func = new Function('states', `return ${template}`);
     return Boolean(func(hass.states));
   } catch (err) {
-    console.error('NavbarCard: Error evaluating badge template:', err);
+    console.error('[navbar-card] Error evaluating badge template:', err);
     return false;
   }
 };
