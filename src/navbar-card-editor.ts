@@ -34,6 +34,7 @@ import {
   conditionallyRender,
 } from '@/utils';
 import { getEditorStyles } from './styles';
+import { ACTIONS_WITH_CUSTOM_ENTITY } from '@/lib/action-handler';
 
 enum HAActions {
   tap_action = 'tap_action',
@@ -1322,6 +1323,14 @@ export class NavbarCardEditor extends LitElement {
                     );
                   }}></ha-form>
               `
+            : html``}
+          ${selected === 'hass_action' &&
+          ACTIONS_WITH_CUSTOM_ENTITY.includes(raw?.action)
+            ? this.makeEntityPicker({
+                label: '',
+                configKey: `${options.configKey}.entity` as any,
+                disabled: options.disabled,
+              })
             : html``}
         </div>
       </ha-expansion-panel>
