@@ -191,12 +191,12 @@ describe('NavbarCard', () => {
       // Second route: selected -> selected icon
       expect(icons?.[1].getAttribute('icon')).toBe('mdi:cog-outline');
 
-      // icon_color applied via CSS var
+      // icon_color applied via CSS var (hex in current implementation)
       expect(icons?.[0].getAttribute('style')).toContain(
-        '--icon-primary-color: rgba(255, 0, 0, 255)',
+        '--icon-primary-color: #ff0000',
       );
       expect(icons?.[1].getAttribute('style')).toContain(
-        '--icon-primary-color: rgba(0, 255, 0, 255)',
+        '--icon-primary-color: #00ff00',
       );
     });
   });

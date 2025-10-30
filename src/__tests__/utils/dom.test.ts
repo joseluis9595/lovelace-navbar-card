@@ -8,7 +8,6 @@ import {
   forceDashboardPadding,
   fireDOMEvent,
   injectStyles,
-  hapticFeedback,
   preventEventDefault,
 } from '../../utils/dom';
 import { NavbarCardConfig, DesktopPosition } from '@/types/config';
@@ -499,28 +498,6 @@ describe('DOM utilities', () => {
       ) as HTMLStyleElement;
       expect(defaultStyleEl.textContent).not.toContain('old default styles');
       expect(defaultStyleEl.textContent).toContain('margin: 0');
-    });
-  });
-
-  describe('hapticFeedback', () => {
-    it('should fire haptic event with default type', () => {
-      const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
-
-      const event = hapticFeedback();
-
-      expect(dispatchSpy).toHaveBeenCalledWith(event);
-      expect(event.type).toBe('haptic');
-      expect((event as MockEvent).detail).toBe('selection');
-    });
-
-    it('should fire haptic event with custom type', () => {
-      const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
-
-      const event = hapticFeedback('impact');
-
-      expect(dispatchSpy).toHaveBeenCalledWith(event);
-      expect(event.type).toBe('haptic');
-      expect((event as MockEvent).detail).toBe('impact');
     });
   });
 
