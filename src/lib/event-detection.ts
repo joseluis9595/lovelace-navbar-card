@@ -33,7 +33,10 @@ class EventDetectionDirective extends Directive {
   private clickTimeout?: number;
   private abortController?: AbortController;
   private boundHandlers: Partial<
-    Record<'tap' | 'hold' | 'doubleTap', (ev: Event) => void>
+    Record<
+      'tap' | 'hold' | 'doubleTap',
+      (ev: Event, target?: HTMLElement) => void
+    >
   > = {};
 
   constructor(partInfo: PartInfo) {
@@ -63,10 +66,10 @@ class EventDetectionDirective extends Directive {
 
     // --- Set up bound handlers ---
     this.boundHandlers.tap = config.tap
-      ? (ev: Event) =>
+      ? (ev: Event, target?: HTMLElement) =>
           executeAction({
             context: config.context,
-            target: ev.currentTarget as HTMLElement,
+            target: target ?? (ev.currentTarget as HTMLElement),
             action: config.tap,
             actionType: 'tap',
             data: { route: config.route, popupItem: config.popupItem },
@@ -74,10 +77,10 @@ class EventDetectionDirective extends Directive {
       : undefined;
 
     this.boundHandlers.hold = config.hold
-      ? (ev: Event) =>
+      ? (ev: Event, target?: HTMLElement) =>
           executeAction({
             context: config.context,
-            target: ev.currentTarget as HTMLElement,
+            target: target ?? (ev.currentTarget as HTMLElement),
             action: config.hold,
             actionType: 'hold',
             data: { route: config.route, popupItem: config.popupItem },
@@ -85,10 +88,10 @@ class EventDetectionDirective extends Directive {
       : undefined;
 
     this.boundHandlers.doubleTap = config.doubleTap
-      ? (ev: Event) =>
+      ? (ev: Event, target?: HTMLElement) =>
           executeAction({
             context: config.context,
-            target: ev.currentTarget as HTMLElement,
+            target: target ?? (ev.currentTarget as HTMLElement),
             action: config.doubleTap,
             actionType: 'double_tap',
             data: { route: config.route, popupItem: config.popupItem },
@@ -131,6 +134,10 @@ class EventDetectionDirective extends Directive {
   private handleClick(ev: Event, doubleTapDelay: number) {
     if (this.holdTriggered) return; // skip if hold already triggered
 
+    // Store the target element for the event
+    const targetElement = ev.currentTarget as HTMLElement;
+
+    // Calculate the time difference between the current and last tap
     const now = Date.now();
     const delta = now - this.lastTapTime;
     this.lastTapTime = now;
@@ -141,7 +148,7 @@ class EventDetectionDirective extends Directive {
     if (hasDoubleTap && delta < doubleTapDelay) {
       clearTimeout(this.clickTimeout);
       this.lastTapTime = 0;
-      this.boundHandlers.doubleTap?.(ev);
+      this.boundHandlers.doubleTap?.(ev, targetElement);
       return;
     }
 
@@ -149,10 +156,10 @@ class EventDetectionDirective extends Directive {
       if (hasDoubleTap) {
         clearTimeout(this.clickTimeout);
         this.clickTimeout = window.setTimeout(() => {
-          this.boundHandlers.tap?.(ev);
+          this.boundHandlers.tap?.(ev, targetElement);
         }, doubleTapDelay);
       } else {
-        this.boundHandlers.tap?.(ev);
+        this.boundHandlers.tap?.(ev, targetElement);
       }
     }
   }
