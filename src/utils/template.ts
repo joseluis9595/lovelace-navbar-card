@@ -23,11 +23,9 @@ const templateFunctionCache = new Map<string, TemplateFunction>();
  * @returns True if the value is a template string, false otherwise.
  */
 export const isTemplate = (value: unknown): value is string => {
-  return (
-    typeof value === 'string' &&
-    value.trim().startsWith('[[[') &&
-    value.trim().endsWith(']]]')
-  );
+  if (typeof value !== 'string') return false;
+  const trimmed = value.trim();
+  return trimmed.startsWith('[[[') && trimmed.endsWith(']]]');
 };
 
 /**
@@ -40,7 +38,7 @@ export const cleanTemplate = (
   value: string | null | undefined,
 ): string | null => {
   if (!isTemplate(value)) return null;
-  return value.replace(/\[\[\[|\]\]\]/g, '').trim();
+  return value.trim().slice(3, -3).trim();
 };
 
 /**
