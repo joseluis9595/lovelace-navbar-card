@@ -73,6 +73,9 @@ export const processTemplate = <T = unknown>(
   hass: HomeAssistant,
   navbar?: NavbarCard,
   template?: unknown,
+  options?: {
+    returnNullIfInvalid?: boolean;
+  },
 ): T => {
   if (template == null || !isTemplate(template)) {
     return template as T;
@@ -82,6 +85,8 @@ export const processTemplate = <T = unknown>(
     const clean = cleanTemplate(template);
     if (clean === null) {
       console.error(`[navbar-card] Invalid template format: ${template}`);
+      // TODO add proper typing for null return
+      if (options?.returnNullIfInvalid) return null as T;
       return template as T;
     }
 
@@ -113,12 +118,16 @@ export const processTemplate = <T = unknown>(
       console.error(
         `[navbar-card] Template did not return a value: ${template}`,
       );
+      // TODO add proper typing for null return
+      if (options?.returnNullIfInvalid) return null as T;
       return template as T;
     }
 
     return result;
   } catch (err) {
     console.error(`[navbar-card] Error evaluating template: ${err}`);
+    // TODO add proper typing for null return
+    if (options?.returnNullIfInvalid) return null as T;
     return template as T;
   }
 };

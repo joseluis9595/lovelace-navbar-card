@@ -1,4 +1,6 @@
 import { css, CSSResult, html } from 'lit';
+import { classMap } from 'lit/directives/class-map.js';
+
 import { NavbarCard } from '@/navbar-card';
 import { PopupItem } from '@/components/navbar';
 import { DesktopPosition, PopupItem as PopupItemDef } from '@/types';
@@ -16,17 +18,6 @@ export class Popup {
         new PopupItem(this._navbarCard, this, _itemData, _index),
       );
     });
-  }
-
-  public destroy(): void {
-    if (this._backdropClickListener && this.backdrop) {
-      this.backdrop.removeEventListener('click', this._backdropClickListener);
-      this._backdropClickListener = undefined;
-    }
-    this._popupItems.forEach(item => item.destroy?.());
-    this._popupItems = [];
-    // @ts-expect-error: This is a workaround to break the circular reference
-    this._navbarCard = undefined;
   }
 
   get items(): PopupItem[] {
@@ -55,13 +46,14 @@ export class Popup {
     this._navbarCard.focusedPopup = html`
       <div class="navbar-popup-backdrop"></div>
       <div
-        class="
-          navbar-popup
-          ${popupDirectionClassName}
-          ${labelPositionClassName}
-          ${this._navbarCard.isDesktop ? 'desktop' : 'mobile'}
-          ${this._shouldShowLabelBackground() ? 'popuplabelbackground' : ''}
-        "
+        class=${classMap({
+          'navbar-popup': true,
+          [popupDirectionClassName]: true,
+          [labelPositionClassName]: true,
+          desktop: this._navbarCard.isDesktop ?? false,
+          mobile: !this._navbarCard.isDesktop,
+          popuplabelbackground: this._shouldShowLabelBackground(),
+        })}
         style="${style}">
         ${this.items
           .map(popupItem =>

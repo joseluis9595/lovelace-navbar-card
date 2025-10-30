@@ -1,4 +1,6 @@
 import { html } from 'lit';
+import { classMap } from 'lit/directives/class-map.js';
+
 import { NavbarCard } from '@/navbar-card';
 import { BaseRoute } from '@/components/navbar';
 import { processTemplate } from '@/utils';
@@ -9,13 +11,6 @@ export class Icon {
     private _navbarCard: NavbarCard,
     private readonly _route: BaseRoute,
   ) {}
-
-  public destroy(): void {
-    // @ts-expect-error: This is a workaround to break the circular reference
-    this._navbarCard = null;
-    // @ts-expect-error: This is a workaround to break the circular reference
-    this._route = null;
-  }
 
   get icon(): string {
     return processTemplate<string>(
@@ -81,13 +76,19 @@ export class Icon {
 
     return resolvedImage
       ? html` <img
-          class="image ${isSelected ? 'active' : ''}"
+          class=${classMap({
+            image: true,
+            active: isSelected,
+          })}
           src="${isSelected && resolvedImageSelected
             ? resolvedImageSelected
             : resolvedImage}"
           alt="${this._route.label || ''}" />`
       : html` <ha-icon
-          class="icon ${isSelected ? 'active' : ''}"
+          class=${classMap({
+            icon: true,
+            active: isSelected,
+          })}
           style="--icon-primary-color: ${resolvedIconColor ?? 'inherit'}"
           icon="${isSelected && resolvedIconSelected
             ? resolvedIconSelected

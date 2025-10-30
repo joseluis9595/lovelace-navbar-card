@@ -1,13 +1,13 @@
 import { html, TemplateResult } from 'lit';
+import { classMap } from 'lit/directives/class-map.js';
+import { styleMap } from 'lit/directives/style-map.js';
+
 import { NavbarCard } from '@/navbar-card';
 import { BaseRoute, Popup } from '@/components/navbar';
-import { ActionEvents } from '@/components/action-events';
 import { PopupItem as PopupItemDef } from '@/types';
-import { preventEventDefault } from '@/utils';
+import { eventDetection } from '@/lib/event-detection';
 
 export class PopupItem extends BaseRoute {
-  private readonly _events = new ActionEvents();
-
   constructor(
     _navbarCard: NavbarCard,
     private readonly _parentPopup: Popup,
@@ -16,11 +16,6 @@ export class PopupItem extends BaseRoute {
     private readonly _index: number,
   ) {
     super(_navbarCard, _data);
-  }
-
-  public destroy(): void {
-    this._events.destroy();
-    super.destroy();
   }
 
   public closeParentPopup(): void {
@@ -35,26 +30,31 @@ export class PopupItem extends BaseRoute {
 
     const showLabelBackground = this._shouldShowLabelBackground();
     return html`<div
-      class="
-        popup-item
-        ${popupDirectionClassName}
-        ${labelPositionClassName}
-        ${showLabelBackground ? 'popuplabelbackground' : ''}
-        ${this.selected ? 'active' : ''}
-      "
-      style="--index: ${this._index}"
-      @click=${preventEventDefault}
-      @mouseenter=${(e: MouseEvent) => this._events.handleMouseEnter(e, this)}
-      @mousemove=${(e: MouseEvent) => this._events.handleMouseMove(e, this)}
-      @mouseleave=${(e: MouseEvent) => this._events.handleMouseLeave(e, this)}
-      @pointerdown=${(e: PointerEvent) =>
-        this._events.handlePointerDown(e, this)}
-      @pointermove=${(e: PointerEvent) =>
-        this._events.handlePointerMove(e, this)}
-      @pointerup=${(e: PointerEvent) => this._events.handlePointerUp(e, this)}
-      @pointercancel=${(e: PointerEvent) =>
-        this._events.handlePointerMove(e, this)}>
-      <div class="button ${showLabelBackground ? 'popuplabelbackground' : ''}">
+      class=${classMap({
+        'popup-item': true,
+        [popupDirectionClassName]: true,
+        [labelPositionClassName]: true,
+        popuplabelbackground: showLabelBackground,
+        active: this.selected,
+      })}
+      style=${styleMap({
+        '--index': this._index,
+      })}
+      ${eventDetection({
+        context: this._navbarCard,
+        popupItem: this,
+        tap: this.tap_action ?? {
+          action: 'navigate',
+          navigation_path: this.url ?? '',
+        },
+        hold: this.hold_action,
+        doubleTap: this.double_tap_action,
+      })}>
+      <div
+        class=${classMap({
+          button: true,
+          popuplabelbackground: showLabelBackground,
+        })}>
         ${this.icon.render()}
         <md-ripple></md-ripple>
         ${this.badge.render()}

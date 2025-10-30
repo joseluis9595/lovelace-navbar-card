@@ -387,12 +387,10 @@ describe('DOM utilities', () => {
       const mockNode = document.createElement('div');
       const dispatchSpy = vi.spyOn(mockNode, 'dispatchEvent');
 
-      const event = fireDOMEvent(
-        mockNode,
-        'test-event',
-        { bubbles: true },
-        'test-detail',
-      );
+      const event = fireDOMEvent(mockNode, 'test-event', {
+        options: { bubbles: true },
+        detailOverride: 'test-detail',
+      });
 
       expect(dispatchSpy).toHaveBeenCalledWith(event);
       expect((event as MockEvent).detail).toBe('test-detail');
@@ -406,8 +404,7 @@ describe('DOM utilities', () => {
       const event = fireDOMEvent(
         mockNode,
         'click',
-        { clientX: 100, clientY: 200 } as MouseEventInit,
-        undefined,
+        { options: { clientX: 100, clientY: 200 } as MouseEventInit },
         MouseEvent,
       );
 
@@ -424,8 +421,7 @@ describe('DOM utilities', () => {
       const event = fireDOMEvent(
         mockNode,
         'keydown',
-        { key: 'Enter' } as KeyboardEventInit,
-        undefined,
+        { options: { key: 'Enter' } as KeyboardEventInit },
         KeyboardEvent,
       );
 

@@ -154,7 +154,7 @@ export class Color {
     this.r = colorArray[0];
     this.g = colorArray[1];
     this.b = colorArray[2];
-    this.a = colorArray.at(3) ?? this.a;
+    this.a = colorArray.length > 3 ? colorArray[3] : this.a;
   }
 
   _parseRGBString(data: string) {
