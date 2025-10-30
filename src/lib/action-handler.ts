@@ -53,8 +53,12 @@ export const executeAction = (params: {
   forceResetRipple(target);
 
   // Close popup for any action unless it's opening a new popup
-  if (action?.action !== NavbarCustomActions.openPopup && route != null) {
-    route.popup.close();
+  if (action?.action !== NavbarCustomActions.openPopup) {
+    if (route != null) {
+      route.popup.close();
+    } else if (popupItem != null) {
+      popupItem.closeParentPopup();
+    }
   }
 
   // Handle different action types
