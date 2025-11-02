@@ -23,11 +23,9 @@ const templateFunctionCache = new Map<string, TemplateFunction>();
  * @returns True if the value is a template string, false otherwise.
  */
 export const isTemplate = (value: unknown): value is string => {
-  return (
-    typeof value === 'string' &&
-    value.trim().startsWith('[[[') &&
-    value.trim().endsWith(']]]')
-  );
+  if (typeof value !== 'string') return false;
+  const trimmed = value.trim();
+  return trimmed.startsWith('[[[') && trimmed.endsWith(']]]');
 };
 
 /**
@@ -40,7 +38,7 @@ export const cleanTemplate = (
   value: string | null | undefined,
 ): string | null => {
   if (!isTemplate(value)) return null;
-  return value.replace(/\[\[\[|\]\]\]/g, '').trim();
+  return value.trim().slice(3, -3).trim();
 };
 
 /**
@@ -75,6 +73,10 @@ export const processTemplate = <T = unknown>(
   hass: HomeAssistant,
   navbar?: NavbarCard,
   template?: unknown,
+  options?: {
+    returnNullIfInvalid?: boolean;
+    disableEmptyReturnCheck?: boolean;
+  },
 ): T => {
   if (template == null || !isTemplate(template)) {
     return template as T;
@@ -83,7 +85,9 @@ export const processTemplate = <T = unknown>(
   try {
     const clean = cleanTemplate(template);
     if (clean === null) {
-      console.error(`NavbarCard: Invalid template format: ${template}`);
+      console.error(`[navbar-card] Invalid template format: ${template}`);
+      // TODO add proper typing for null return
+      if (options?.returnNullIfInvalid) return null as T;
       return template as T;
     }
 
@@ -112,13 +116,21 @@ export const processTemplate = <T = unknown>(
     }) as T;
 
     if (result === undefined) {
-      console.error(`NavbarCard: Template did not return a value: ${template}`);
+      if (!options?.disableEmptyReturnCheck) {
+        console.error(
+          `[navbar-card] Template did not return a value: ${template}`,
+        );
+      }
+      // TODO add proper typing for null return
+      if (options?.returnNullIfInvalid) return null as T;
       return template as T;
     }
 
     return result;
   } catch (err) {
-    console.error(`NavbarCard: Error evaluating template: ${err}`);
+    console.error(`[navbar-card] Error evaluating template: ${err}`);
+    // TODO add proper typing for null return
+    if (options?.returnNullIfInvalid) return null as T;
     return template as T;
   }
 };
@@ -140,7 +152,7 @@ export const processBadgeTemplate = (
     const func = new Function('states', `return ${template}`);
     return Boolean(func(hass.states));
   } catch (err) {
-    console.error('NavbarCard: Error evaluating badge template:', err);
+    console.error('[navbar-card] Error evaluating badge template:', err);
     return false;
   }
 };

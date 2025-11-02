@@ -8,7 +8,6 @@ import {
   forceDashboardPadding,
   fireDOMEvent,
   injectStyles,
-  hapticFeedback,
   preventEventDefault,
 } from '../../utils/dom';
 import { NavbarCardConfig, DesktopPosition } from '@/types/config';
@@ -387,12 +386,10 @@ describe('DOM utilities', () => {
       const mockNode = document.createElement('div');
       const dispatchSpy = vi.spyOn(mockNode, 'dispatchEvent');
 
-      const event = fireDOMEvent(
-        mockNode,
-        'test-event',
-        { bubbles: true },
-        'test-detail',
-      );
+      const event = fireDOMEvent(mockNode, 'test-event', {
+        options: { bubbles: true },
+        detailOverride: 'test-detail',
+      });
 
       expect(dispatchSpy).toHaveBeenCalledWith(event);
       expect((event as MockEvent).detail).toBe('test-detail');
@@ -406,8 +403,7 @@ describe('DOM utilities', () => {
       const event = fireDOMEvent(
         mockNode,
         'click',
-        { clientX: 100, clientY: 200 } as MouseEventInit,
-        undefined,
+        { options: { clientX: 100, clientY: 200 } as MouseEventInit },
         MouseEvent,
       );
 
@@ -424,8 +420,7 @@ describe('DOM utilities', () => {
       const event = fireDOMEvent(
         mockNode,
         'keydown',
-        { key: 'Enter' } as KeyboardEventInit,
-        undefined,
+        { options: { key: 'Enter' } as KeyboardEventInit },
         KeyboardEvent,
       );
 
@@ -503,28 +498,6 @@ describe('DOM utilities', () => {
       ) as HTMLStyleElement;
       expect(defaultStyleEl.textContent).not.toContain('old default styles');
       expect(defaultStyleEl.textContent).toContain('margin: 0');
-    });
-  });
-
-  describe('hapticFeedback', () => {
-    it('should fire haptic event with default type', () => {
-      const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
-
-      const event = hapticFeedback();
-
-      expect(dispatchSpy).toHaveBeenCalledWith(event);
-      expect(event.type).toBe('haptic');
-      expect((event as MockEvent).detail).toBe('selection');
-    });
-
-    it('should fire haptic event with custom type', () => {
-      const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
-
-      const event = hapticFeedback('impact');
-
-      expect(dispatchSpy).toHaveBeenCalledWith(event);
-      expect(event.type).toBe('haptic');
-      expect((event as MockEvent).detail).toBe('impact');
     });
   });
 

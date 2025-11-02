@@ -157,4 +157,76 @@ describe('NavbarCard', () => {
       expect(element.isDesktop).toBe(false);
     });
   });
+
+  describe('Icon rendering', () => {
+    it('renders icon, selected_icon and applies icon_color', async () => {
+      const config: NavbarCardConfig = {
+        desktop: { show_labels: true },
+        routes: [
+          {
+            icon: 'mdi:home',
+            label: 'Home',
+            url: '/',
+            icon_color: '#ff0000',
+          },
+          {
+            icon: 'mdi:cog',
+            icon_selected: 'mdi:cog-outline',
+            label: 'Settings',
+            url: '/config',
+            selected: true,
+            icon_color: '#00ff00',
+          },
+        ],
+      };
+
+      element.setConfig(config);
+      await element.updateComplete;
+
+      const icons = element.shadowRoot?.querySelectorAll('ha-icon');
+      expect(icons?.length).toBe(2);
+
+      // First route: not selected -> base icon
+      expect(icons?.[0].getAttribute('icon')).toBe('mdi:home');
+      // Second route: selected -> selected icon
+      expect(icons?.[1].getAttribute('icon')).toBe('mdi:cog-outline');
+
+      // icon_color applied via CSS var (hex in current implementation)
+      expect(icons?.[0].getAttribute('style')).toContain(
+        '--icon-primary-color: #ff0000',
+      );
+      expect(icons?.[1].getAttribute('style')).toContain(
+        '--icon-primary-color: #00ff00',
+      );
+    });
+  });
+
+  describe('Selected state styles', () => {
+    it('applies selected class and selected_color', async () => {
+      const config: NavbarCardConfig = {
+        desktop: { show_labels: true },
+        routes: [
+          {
+            icon: 'mdi:star',
+            label: 'Fav',
+            url: '/fav',
+            selected: true,
+            selected_color: '[[[ return "#00ff00"]]]',
+          },
+        ],
+      };
+
+      element.setConfig(config);
+      await element.updateComplete;
+
+      const route = element.shadowRoot?.querySelector('.route');
+      const button = element.shadowRoot?.querySelector('.button');
+
+      expect(route?.classList.contains('active')).toBe(true);
+      // selected_color is applied as --navbar-primary-color on the button
+      expect(button?.getAttribute('style') || '').toContain(
+        '--navbar-primary-color: #00ff00',
+      );
+    });
+  });
 });

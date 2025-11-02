@@ -18,21 +18,56 @@ describe('Template utilities', () => {
 
     mockHass = {
       states: {
-        'light.kitchen': { entity_id: 'light.kitchen', state: 'on', attributes: {}, context: {}, last_changed: '', last_updated: '' },
-        'light.living_room': { entity_id: 'light.living_room', state: 'off', attributes: {}, context: {}, last_changed: '', last_updated: '' },
-        'sensor.temperature': { entity_id: 'sensor.temperature', state: '22.5', attributes: {}, context: {}, last_changed: '', last_updated: '' },
+        'light.kitchen': {
+          entity_id: 'light.kitchen',
+          state: 'on',
+          attributes: {},
+          context: {},
+          last_changed: '',
+          last_updated: '',
+        },
+        'light.living_room': {
+          entity_id: 'light.living_room',
+          state: 'off',
+          attributes: {},
+          context: {},
+          last_changed: '',
+          last_updated: '',
+        },
+        'sensor.temperature': {
+          entity_id: 'sensor.temperature',
+          state: '22.5',
+          attributes: {},
+          context: {},
+          last_changed: '',
+          last_updated: '',
+        },
       },
       areas: {
         area1: { area_id: 'area1', name: 'Kitchen', icon: 'mdi:kitchen' },
         area2: { area_id: 'area2', name: 'Living Room', icon: 'mdi:sofa' },
       },
-      user: { id: 'user1', name: 'User', is_admin: true, is_owner: true, credentials: [], mfa_modules: [] },
+      user: {
+        id: 'user1',
+        name: 'User',
+        is_admin: true,
+        is_owner: true,
+        credentials: [],
+        mfa_modules: [],
+      },
       config: {},
       themes: {},
       selectedTheme: null,
       panels: {},
       services: {},
-      auth: { data: { access_token: '', expires_in: 0, refresh_token: '', token_type: '' } },
+      auth: {
+        data: {
+          access_token: '',
+          expires_in: 0,
+          refresh_token: '',
+          token_type: '',
+        },
+      },
     } as unknown as HomeAssistant;
 
     mockNavbar = { isDesktop: true } as NavbarCard;
@@ -40,7 +75,9 @@ describe('Template utilities', () => {
 
   describe('isTemplate', () => {
     it('Correctly identifies valid JSTemplates', () => {
-      expect(isTemplate('[[[ return states["light.kitchen"].state ]]]')).toBe(true);
+      expect(isTemplate('[[[ return states["light.kitchen"].state ]]]')).toBe(
+        true,
+      );
       expect(isTemplate('[[[ const x = 1; ]]]')).toBe(true);
       expect(isTemplate('[[[ ]]]')).toBe(true);
     });
@@ -61,7 +98,9 @@ describe('Template utilities', () => {
 
   describe('cleanTemplate', () => {
     it('Removes delimiters and trims whitespace for single-line templates', () => {
-      expect(cleanTemplate('[[[ return states["light.kitchen"].state ]]]')).toBe('return states["light.kitchen"].state');
+      expect(
+        cleanTemplate('[[[ return states["light.kitchen"].state ]]]'),
+      ).toBe('return states["light.kitchen"].state');
     });
 
     it('Removes delimiters and trims whitespace for multi-line templates', () => {
@@ -70,7 +109,9 @@ describe('Template utilities', () => {
           return states["light.kitchen"].state
         ]]]
       `;
-      expect(cleanTemplate(template)).toBe('return states["light.kitchen"].state');
+      expect(cleanTemplate(template)).toBe(
+        'return states["light.kitchen"].state',
+      );
     });
 
     it('Returns null for invalid templates', () => {
@@ -108,7 +149,11 @@ describe('Template utilities', () => {
         ]]]
       `;
 
-      const result = processTemplate<RouteItem[]>(mockHass, mockNavbar, template);
+      const result = processTemplate<RouteItem[]>(
+        mockHass,
+        mockNavbar,
+        template,
+      );
       expect(result).toEqual([
         { label: 'Kitchen', url: '/d-bubble/home#area1', icon: 'mdi:kitchen' },
         { label: 'Living Room', url: '/d-bubble/home#area2', icon: 'mdi:sofa' },
@@ -149,13 +194,19 @@ describe('Template utilities', () => {
 
       expect(result).toBe(template);
       expect(spy).toHaveBeenCalledWith(
-        expect.stringContaining('NavbarCard: Template did not return a value')
+        expect.stringContaining(
+          '[navbar-card] Template did not return a value',
+        ),
       );
     });
 
     it('Returns original value as template is invalid', () => {
       const invalidTemplate = 'Not a template';
-      const result = processTemplate<string>(mockHass, mockNavbar, invalidTemplate);
+      const result = processTemplate<string>(
+        mockHass,
+        mockNavbar,
+        invalidTemplate,
+      );
 
       expect(result).toBe(invalidTemplate);
     });
@@ -163,11 +214,17 @@ describe('Template utilities', () => {
     it('Handles empty templates gracefully', () => {
       const emptyTemplate = '[[[ ]]]';
       const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      const result = processTemplate<string>(mockHass, mockNavbar, emptyTemplate);
+      const result = processTemplate<string>(
+        mockHass,
+        mockNavbar,
+        emptyTemplate,
+      );
 
       expect(result).toBe(emptyTemplate);
       expect(spy).toHaveBeenCalledWith(
-        expect.stringContaining('NavbarCard: Template did not return a value')
+        expect.stringContaining(
+          '[navbar-card] Template did not return a value',
+        ),
       );
     });
 

@@ -2,12 +2,20 @@
 /node_modules/
 /dist
 
+docs_old/
+
 # Testing
 coverage/
 
 # Misc
 *.log
 TODO.txt
+TODO.md
 
 # OS specifics
 .DS_Store
+
+# Docs
+docs/.docusaurus/
+docs/build/
+docs/node_modules/

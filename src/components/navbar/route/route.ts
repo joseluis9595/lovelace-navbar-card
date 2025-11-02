@@ -1,12 +1,14 @@
 import { html, TemplateResult } from 'lit';
+import { classMap } from 'lit/directives/class-map.js';
+import { styleMap } from 'lit/directives/style-map.js';
+
 import { NavbarCard } from '@/navbar-card';
 import { Popup, BaseRoute } from '@/components/navbar';
 import { PopupItem, RouteItem } from '@/types';
-import { preventEventDefault, processTemplate } from '@/utils';
-import { ActionEvents } from '@/components/action-events';
+import { processTemplate } from '@/utils';
+import { eventDetection } from '@/lib/event-detection';
 
 export class Route extends BaseRoute {
-  private readonly _events = new ActionEvents();
   private _popupInstance?: Popup;
 
   constructor(
@@ -50,25 +52,41 @@ export class Route extends BaseRoute {
 
     return html`
       <div
-        class="route ${isActive ? 'active' : ''}"
-        @click=${preventEventDefault}
-        @mouseenter=${(e: MouseEvent) => this._events.handleMouseEnter(e, this)}
-        @mousemove=${(e: MouseEvent) => this._events.handleMouseMove(e, this)}
-        @mouseleave=${(e: MouseEvent) => this._events.handleMouseLeave(e, this)}
-        @pointerdown=${(e: PointerEvent) =>
-          this._events.handlePointerDown(e, this)}
-        @pointermove=${(e: PointerEvent) =>
-          this._events.handlePointerMove(e, this)}
-        @pointerup=${(e: PointerEvent) => this._events.handlePointerUp(e, this)}
-        @pointercancel=${(e: PointerEvent) =>
-          this._events.handlePointerMove(e, this)}>
-        <div class="button ${isActive ? 'active' : ''}">
+        class=${classMap({
+          route: true,
+          active: isActive,
+        })}
+        style=${styleMap({
+          '--navbar-primary-color': this.selected_color ?? null,
+        })}
+        ${eventDetection({
+          context: this._navbarCard,
+          route: this,
+          tap: this.tap_action ?? {
+            action: 'navigate',
+            navigation_path: this.url ?? '',
+          },
+          hold: this.hold_action,
+          doubleTap: this.double_tap_action,
+        })}>
+        <div
+          class=${classMap({
+            button: true,
+            active: isActive,
+          })}
+          style=${styleMap({
+            '--navbar-primary-color': this.selected_color ?? null,
+          })}>
           ${this.icon.render()}
           <ha-ripple></ha-ripple>
           ${this.badge.render()}
         </div>
         ${this.label
-          ? html`<div class="label ${isActive ? 'active' : ''}">
+          ? html`<div
+              class=${classMap({
+                label: true,
+                active: isActive,
+              })}>
               ${this.label}
             </div>`
           : html``}

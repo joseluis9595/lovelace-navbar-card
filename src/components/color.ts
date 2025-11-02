@@ -154,7 +154,7 @@ export class Color {
     this.r = colorArray[0];
     this.g = colorArray[1];
     this.b = colorArray[2];
-    this.a = colorArray.at(3) ?? this.a;
+    this.a = colorArray.length > 3 ? colorArray[3] : this.a;
   }
 
   _parseRGBString(data: string) {
@@ -343,3 +343,15 @@ export class Color {
     return [this.r, this.g, this.b, this.a];
   }
 }
+
+// Cache option generation for performance
+const option = new Option();
+
+/**
+ * Check if a given value is a valid color string.
+ */
+export const isColor = (value: unknown): value is string => {
+  if (typeof value !== 'string') return false;
+  option.style.color = value;
+  return option.style.color !== '';
+};

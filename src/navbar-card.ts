@@ -26,8 +26,8 @@ import {
   processTemplate,
   removeDashboardPadding,
 } from '@/utils';
-import { getDefaultStyles } from './styles';
-import { MediaPlayer } from './components/media-player';
+import { getDefaultStyles } from '@/styles';
+import { MediaPlayer } from '@/components/media-player';
 
 declare global {
   interface Window {
@@ -100,6 +100,7 @@ export class NavbarCard extends LitElement {
 
     // Quick fix for ripple effects
     forceResetRipple(this);
+    window.removeEventListener('resize', this._checkDesktop);
     window.addEventListener('resize', this._checkDesktop);
 
     this._detectModes();

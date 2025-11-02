@@ -1,8 +1,10 @@
 import { html } from 'lit';
+import { classMap } from 'lit/directives/class-map.js';
+
 import { NavbarCard } from '@/navbar-card';
 import { BaseRoute } from '@/components/navbar';
-import { isTemplate, processTemplate } from '@/utils';
-import { Color } from '@/components/color';
+import { processTemplate } from '@/utils';
+import { isColor } from '@/components/color';
 
 export class Icon {
   constructor(
@@ -52,10 +54,8 @@ export class Icon {
         this._route.data.icon_color,
       );
       // If the template was not properly processed, return null
-      if (isTemplate(rawValue)) {
-        return null;
-      }
-      return new Color(rawValue).rgbaString();
+      if (!isColor(rawValue)) return null;
+      return rawValue;
     } catch (_err) {
       return null;
     }
@@ -76,13 +76,19 @@ export class Icon {
 
     return resolvedImage
       ? html` <img
-          class="image ${isSelected ? 'active' : ''}"
+          class=${classMap({
+            image: true,
+            active: isSelected,
+          })}
           src="${isSelected && resolvedImageSelected
             ? resolvedImageSelected
             : resolvedImage}"
           alt="${this._route.label || ''}" />`
       : html` <ha-icon
-          class="icon ${isSelected ? 'active' : ''}"
+          class=${classMap({
+            icon: true,
+            active: isSelected,
+          })}
           style="--icon-primary-color: ${resolvedIconColor ?? 'inherit'}"
           icon="${isSelected && resolvedIconSelected
             ? resolvedIconSelected

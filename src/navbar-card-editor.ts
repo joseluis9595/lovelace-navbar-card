@@ -34,6 +34,7 @@ import {
   conditionallyRender,
 } from '@/utils';
 import { getEditorStyles } from './styles';
+import { ACTIONS_WITH_CUSTOM_ENTITY } from '@/lib/action-handler';
 
 enum HAActions {
   tap_action = 'tap_action',
@@ -556,6 +557,12 @@ export class NavbarCardEditor extends LitElement {
               templateHelper: STRING_JS_TEMPLATE_HELPER,
             })}
             ${this.makeTemplatable({
+              inputType: 'string',
+              label: 'Selected color',
+              configKey: `${baseConfigKey}.selected_color` as any,
+              templateHelper: STRING_JS_TEMPLATE_HELPER,
+            })}
+            ${this.makeTemplatable({
               inputType: 'icon',
               label: 'Icon',
               configKey: `${baseConfigKey}.icon` as any,
@@ -613,8 +620,8 @@ export class NavbarCardEditor extends LitElement {
                 })}
                 ${this.makeTemplatable({
                   inputType: 'string',
-                  label: 'TextColor',
-                  configKey: `${baseConfigKey}.badge.textColor` as any,
+                  label: 'Text color',
+                  configKey: `${baseConfigKey}.badge.text_color` as any,
                   templateHelper: STRING_JS_TEMPLATE_HELPER,
                 })}
               </div>
@@ -959,6 +966,7 @@ export class NavbarCardEditor extends LitElement {
                 ? this.makeActionSelector({
                     actionType: type as HAActions,
                     configKey: key,
+                    disabledActions: [NavbarCustomActions.openPopup],
                   })
                 : html`
                     <ha-button
@@ -1077,10 +1085,10 @@ export class NavbarCardEditor extends LitElement {
           })}
           ${this.makeSwitch({
             label: 'Show popup label backgrounds',
-            configKey: 'desktop.show_popup_label_backgrounds',
+            configKey: 'mobile.show_popup_label_backgrounds',
             disabled: ![true, 'popup_only'].includes(labelVisibility),
             defaultValue:
-              DEFAULT_NAVBAR_CONFIG.desktop?.show_popup_label_backgrounds,
+              DEFAULT_NAVBAR_CONFIG.mobile?.show_popup_label_backgrounds,
           })}
           ${this.makeTemplateEditor({
             // TODO JLAQ maybe replace with a templateSwitchEditor
@@ -1161,24 +1169,30 @@ export class NavbarCardEditor extends LitElement {
     configKey: DotNotationKeys<NavbarCardConfig>;
     disabled?: boolean;
     actionType: HAActions;
+    disabledActions?: (NavbarCustomActions | 'hass_action')[];
   }) {
-    const ACTIONS: {
-      label: string;
-      value: NavbarCustomActions | 'hass_action';
-    }[] = [
-      { label: 'Home Assistant action', value: 'hass_action' },
-      { label: 'Open Popup', value: NavbarCustomActions.openPopup },
-      { label: 'Navigate Back', value: NavbarCustomActions.navigateBack },
-      { label: 'Toggle Menu', value: NavbarCustomActions.toggleMenu },
-      { label: 'Quickbar', value: NavbarCustomActions.quickbar },
-      { label: 'Open Edit Mode', value: NavbarCustomActions.openEditMode },
-      { label: 'Logout current user', value: NavbarCustomActions.logout },
-      { label: 'Custom JS Action', value: NavbarCustomActions.customJSAction },
-      {
-        label: 'Show Notifications',
-        value: NavbarCustomActions.showNotifications,
-      },
-    ];
+    const ACTIONS = (
+      [
+        { label: 'Home Assistant action', value: 'hass_action' },
+        { label: 'Open Popup', value: NavbarCustomActions.openPopup },
+        { label: 'Navigate Back', value: NavbarCustomActions.navigateBack },
+        { label: 'Toggle Menu', value: NavbarCustomActions.toggleMenu },
+        { label: 'Quickbar', value: NavbarCustomActions.quickbar },
+        { label: 'Open Edit Mode', value: NavbarCustomActions.openEditMode },
+        { label: 'Logout current user', value: NavbarCustomActions.logout },
+        {
+          label: 'Custom JS Action',
+          value: NavbarCustomActions.customJSAction,
+        },
+        {
+          label: 'Show Notifications',
+          value: NavbarCustomActions.showNotifications,
+        },
+      ] as {
+        label: string;
+        value: NavbarCustomActions | 'hass_action';
+      }[]
+    ).filter(action => !options.disabledActions?.includes(action.value));
 
     const raw = genericGetProperty(
       this._config,
@@ -1316,6 +1330,14 @@ export class NavbarCardEditor extends LitElement {
                     );
                   }}></ha-form>
               `
+            : html``}
+          ${selected === 'hass_action' &&
+          ACTIONS_WITH_CUSTOM_ENTITY.includes(raw?.action)
+            ? this.makeEntityPicker({
+                label: '',
+                configKey: `${options.configKey}.entity` as any,
+                disabled: options.disabled,
+              })
             : html``}
         </div>
       </ha-expansion-panel>

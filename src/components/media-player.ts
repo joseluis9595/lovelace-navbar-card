@@ -1,12 +1,10 @@
 import { html } from 'lit';
 import { NavbarCard } from '@/navbar-card';
-import { fireDOMEvent, preventEventDefault, processTemplate } from '@/utils';
-import { ActionEvents, ActionableElement } from '@/components/action-events';
+import { preventEventDefault, processTemplate } from '@/utils';
 import { ExtendedActionConfig } from '@/types';
+import { ActionableElement, eventDetection } from '@/lib/event-detection';
 
 export class MediaPlayer implements ActionableElement {
-  private readonly _events = new ActionEvents();
-
   constructor(private readonly _navbarCard: NavbarCard) {}
 
   get tap_action(): ExtendedActionConfig | undefined {
@@ -20,37 +18,6 @@ export class MediaPlayer implements ActionableElement {
   get double_tap_action(): ExtendedActionConfig | undefined {
     return this._navbarCard.config?.media_player?.double_tap_action;
   }
-
-  public executeAction = (
-    _target: HTMLElement,
-    _element: ActionableElement,
-    action: ExtendedActionConfig | undefined,
-    actionType: 'tap' | 'hold' | 'double_tap',
-  ) => {
-    const entity = this._getEntity();
-    if (action) {
-      // Dispatch the action event for Home Assistant to handle
-      fireDOMEvent(
-        this._navbarCard,
-        'hass-action',
-        { bubbles: true, composed: true },
-        {
-          action: actionType,
-          config: { [`${actionType}_action`]: action, entity: entity },
-        },
-      );
-    } else if (actionType === 'tap') {
-      // Default tap action: open media player more-info dialog
-      if (entity) {
-        fireDOMEvent(
-          this._navbarCard,
-          'hass-more-info',
-          { bubbles: true, composed: true },
-          { entityId: entity },
-        );
-      }
-    }
-  };
 
   /**
    * Check if the media player should be shown.
@@ -142,14 +109,15 @@ export class MediaPlayer implements ActionableElement {
     return html`
       <ha-card
         class="media-player"
-        @pointerdown=${(e: PointerEvent) =>
-          this._events.handlePointerDown(e, this)}
-        @pointermove=${(e: PointerEvent) =>
-          this._events.handlePointerMove(e, this)}
-        @pointerup=${(e: PointerEvent) => this._events.handlePointerUp(e, this)}
-        @mouseenter=${(e: MouseEvent) => this._events.handleMouseEnter(e, this)}
-        @mouseleave=${(e: MouseEvent) =>
-          this._events.handleMouseLeave(e, this)}>
+        ${eventDetection({
+          context: this._navbarCard,
+          tap: this.tap_action ?? {
+            action: 'more-info',
+            entity,
+          },
+          hold: this.hold_action,
+          doubleTap: this.double_tap_action,
+        })}>
         <div
           class="media-player-bg"
           style=${this._navbarCard.config?.media_player?.album_cover_background

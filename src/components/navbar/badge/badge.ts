@@ -15,11 +15,13 @@ export class Badge {
     if (!badge) return false;
 
     if (badge.show) {
-      return processTemplate<boolean>(
-        this._navbarCard._hass,
-        this._navbarCard,
-        badge.show,
-      ) ?? false;
+      return (
+        processTemplate<boolean>(
+          this._navbarCard._hass,
+          this._navbarCard,
+          badge.show,
+        ) ?? false
+      );
     }
 
     if (badge.template) {
@@ -55,7 +57,7 @@ export class Badge {
       processTemplate<string>(
         this._navbarCard._hass,
         this._navbarCard,
-        this._route.data.badge?.textColor,
+        this._route.data.badge?.text_color ?? this._route.data.badge?.textColor,
       ) ?? null
     );
   }

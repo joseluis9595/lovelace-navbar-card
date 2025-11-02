@@ -1,0 +1,61 @@
+---
+id: template
+title: Template
+---
+
+Templates allow you to predefine a custom configuration for `navbar-card` and reuse it across multiple dashboards. This approach saves time and simplifies maintenance — any change to the template will automatically apply to all cards using it.
+
+#### Defining Templates
+
+To define templates in the visual editor, go to your dashboard, click on the three dots in the top right corner and select "Edit YAML". There, add your template configuration as so:
+
+```yaml
+navbar-templates:
+   your_template_name:
+      # Your navbar config
+      routes:
+         - label: Home
+           icon: mdi:home
+           url: /lovelace/home
+         ...
+# Your normal lovelace configuration
+views:
+...
+```
+
+#### Referencing Templates
+
+You can reference a template from your `navbar-card` using the template property:
+
+```yaml
+type: custom:navbar-card
+template: your_template_name
+```
+
+#### Overriding props
+
+Card properties defined directly in the card will take priority over those inherited from the template.
+
+For example, if you want to use a template called `your_template_name` but have one specific dashboard with a different primary color, your configurations might look like this:
+
+- Default Navbar for Most Views:
+
+```yaml
+type: custom:navbar-card
+template: your_template_name
+```
+
+- Customized Navbar for a Specific View:
+
+```yaml
+type: custom:navbar-card
+template: your_template_name
+styles: |
+  .navbar {
+    --navbar-primary-color: red;
+  }
+```
+
+### Visual editor
+
+Right now, using the visual editor only applies properties to the card itself, not the template. This means that if you want to change a property of the template, you need to follow the steps mentioned in the [Defining Templates](#defining-templates) section.
