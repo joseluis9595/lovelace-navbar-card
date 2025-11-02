@@ -125,12 +125,14 @@ export const executeAction = (params: {
 
     case NavbarCustomActions.customJSAction:
       triggerHaptic(context, actionType);
-      processTemplate<string>(context.hass, context, action.code);
+      processTemplate<string>(context._hass, context, action.code, {
+        disableEmptyReturnCheck: true,
+      });
       break;
 
     case NavbarCustomActions.logout:
       triggerHaptic(context, actionType);
-      context.hass.auth.revoke();
+      context._hass.auth.revoke();
       break;
 
     default:

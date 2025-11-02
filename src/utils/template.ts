@@ -75,6 +75,7 @@ export const processTemplate = <T = unknown>(
   template?: unknown,
   options?: {
     returnNullIfInvalid?: boolean;
+    disableEmptyReturnCheck?: boolean;
   },
 ): T => {
   if (template == null || !isTemplate(template)) {
@@ -115,9 +116,11 @@ export const processTemplate = <T = unknown>(
     }) as T;
 
     if (result === undefined) {
-      console.error(
-        `[navbar-card] Template did not return a value: ${template}`,
-      );
+      if (!options?.disableEmptyReturnCheck) {
+        console.error(
+          `[navbar-card] Template did not return a value: ${template}`,
+        );
+      }
       // TODO add proper typing for null return
       if (options?.returnNullIfInvalid) return null as T;
       return template as T;
