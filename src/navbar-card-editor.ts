@@ -966,6 +966,7 @@ export class NavbarCardEditor extends LitElement {
                 ? this.makeActionSelector({
                     actionType: type as HAActions,
                     configKey: key,
+                    disabledActions: [NavbarCustomActions.openPopup],
                   })
                 : html`
                     <ha-button
@@ -1168,24 +1169,30 @@ export class NavbarCardEditor extends LitElement {
     configKey: DotNotationKeys<NavbarCardConfig>;
     disabled?: boolean;
     actionType: HAActions;
+    disabledActions?: (NavbarCustomActions | 'hass_action')[];
   }) {
-    const ACTIONS: {
-      label: string;
-      value: NavbarCustomActions | 'hass_action';
-    }[] = [
-      { label: 'Home Assistant action', value: 'hass_action' },
-      { label: 'Open Popup', value: NavbarCustomActions.openPopup },
-      { label: 'Navigate Back', value: NavbarCustomActions.navigateBack },
-      { label: 'Toggle Menu', value: NavbarCustomActions.toggleMenu },
-      { label: 'Quickbar', value: NavbarCustomActions.quickbar },
-      { label: 'Open Edit Mode', value: NavbarCustomActions.openEditMode },
-      { label: 'Logout current user', value: NavbarCustomActions.logout },
-      { label: 'Custom JS Action', value: NavbarCustomActions.customJSAction },
-      {
-        label: 'Show Notifications',
-        value: NavbarCustomActions.showNotifications,
-      },
-    ];
+    const ACTIONS = (
+      [
+        { label: 'Home Assistant action', value: 'hass_action' },
+        { label: 'Open Popup', value: NavbarCustomActions.openPopup },
+        { label: 'Navigate Back', value: NavbarCustomActions.navigateBack },
+        { label: 'Toggle Menu', value: NavbarCustomActions.toggleMenu },
+        { label: 'Quickbar', value: NavbarCustomActions.quickbar },
+        { label: 'Open Edit Mode', value: NavbarCustomActions.openEditMode },
+        { label: 'Logout current user', value: NavbarCustomActions.logout },
+        {
+          label: 'Custom JS Action',
+          value: NavbarCustomActions.customJSAction,
+        },
+        {
+          label: 'Show Notifications',
+          value: NavbarCustomActions.showNotifications,
+        },
+      ] as {
+        label: string;
+        value: NavbarCustomActions | 'hass_action';
+      }[]
+    ).filter(action => !options.disabledActions?.includes(action.value));
 
     const raw = genericGetProperty(
       this._config,
