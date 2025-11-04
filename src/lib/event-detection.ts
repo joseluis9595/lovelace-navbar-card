@@ -101,11 +101,13 @@ class EventDetectionDirective extends Directive {
     // --- Long press ---
     if (this.boundHandlers.hold) {
       const startHold = (ev: Event) => {
+        // Store the target element for the event
+        const targetElement = ev.currentTarget as HTMLElement;
         this.holdTriggered = false;
         clearTimeout(this.holdTimeout);
         this.holdTimeout = window.setTimeout(() => {
           this.holdTriggered = true;
-          this.boundHandlers.hold?.(ev);
+          this.boundHandlers.hold?.(ev, targetElement);
         }, LONG_PRESS_DELAY);
       };
       const cancelHold = () => {

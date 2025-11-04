@@ -211,10 +211,6 @@ const MEDIA_PLAYER_STYLES = css`
   }
 
   .media-player .media-player-button {
-    width: 38px;
-    flex-shrink: 0;
-    --ha-button-height: 38px;
-    --ha-button-border-radius: 999px;
   }
 
   .media-player .media-player-button.media-player-button-play-pause {
@@ -775,6 +771,29 @@ export const ROUTES_EDITOR_DND_STYLES = css`
   }
 `;
 
+export const COMPONENTS_STYLES = css`
+  .navbar-icon-button {
+    position: relative;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--primary-text-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    outline: none;
+  }
+
+  .navbar-icon-button.primary {
+    background-color: var(--navbar-primary-color);
+    color: var(--text-primary-color, #fff);
+  }
+`;
+
 /**
  * Custom function to apply default styles instead of using lit's static
  * styles(), so that we can prioritize user custom styles over the default
@@ -788,6 +807,7 @@ export const getDefaultStyles = (): CSSResult => {
     ${MEDIA_PLAYER_STYLES}
     ${ROUTE_STYLES}
     ${POPUP_STYLES}
+    ${COMPONENTS_STYLES}
   `;
 };
 
