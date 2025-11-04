@@ -148,8 +148,8 @@ export class MediaPlayer implements ActionableElement {
             >${mediaPlayerState.attributes.media_artist}</span
           >
         </div>
-        <ha-button
-          class="media-player-button media-player-button-play-pause"
+        <button
+          class="navbar-icon-button media-player-button media-player-button-play-pause primary"
           appearance="accent"
           variant="brand"
           @click=${this._handleMediaPlayerPlayPauseClick}
@@ -159,16 +159,16 @@ export class MediaPlayer implements ActionableElement {
             icon=${mediaPlayerState.state === 'playing'
               ? 'mdi:pause'
               : 'mdi:play'}></ha-icon>
-        </ha-button>
-        <ha-button
-          class="media-player-button media-player-button-skip"
+        </button>
+        <button
+          class="navbar-icon-button media-player-button media-player-button-skip"
           appearance="plain"
           variant="neutral"
           @click=${this._handleMediaPlayerSkipNextClick}
           @pointerdown=${preventEventDefault}
           @pointerup=${preventEventDefault}>
           <ha-icon icon="mdi:skip-next"></ha-icon>
-        </ha-button>
+        </button>
       </ha-card>
     `;
   };
