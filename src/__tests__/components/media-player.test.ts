@@ -323,7 +323,7 @@ describe('MediaPlayer', () => {
       await render(result, container);
 
       const playButton = container.querySelector(
-        'ha-button.media-player-button-play-pause',
+        '.media-player-button-play-pause',
       );
       expect(playButton).toBeTruthy();
       const playIcon = playButton?.querySelector('ha-icon');
@@ -338,7 +338,7 @@ describe('MediaPlayer', () => {
       await render(result, container);
 
       const pauseButton = container.querySelector(
-        'ha-button.media-player-button-play-pause',
+        '.media-player-button-play-pause',
       );
       expect(pauseButton).toBeTruthy();
       const pauseIcon = pauseButton?.querySelector('ha-icon');
@@ -351,9 +351,7 @@ describe('MediaPlayer', () => {
       const container = document.createElement('div');
       await render(result, container);
 
-      const skipButton = container.querySelector(
-        'ha-button.media-player-button-skip',
-      );
+      const skipButton = container.querySelector('.media-player-button-skip');
       expect(skipButton).toBeTruthy();
       const skipIcon = skipButton?.querySelector('ha-icon');
       expect(skipIcon?.getAttribute('icon')).toBe('mdi:skip-next');
