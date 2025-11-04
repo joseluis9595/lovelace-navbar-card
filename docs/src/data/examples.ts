@@ -7,6 +7,10 @@ export interface Example {
   authorUrl?: string;
 }
 
+/*************************************/
+/* CONFIGURATION EXAMPLES */
+/*************************************/
+
 export const configurationExamples: Example[] = [
   {
     title: 'Basic Example',
@@ -129,7 +133,52 @@ routes:
     selected: true       # hardcoded to true for demo purposes
 `,
   },
+  {
+    title: 'Badge with number of lights on',
+    description:
+      'Navigation bar with a badge showing the number of lights that are currently on',
+    screenshot: '/img/examples/lights-on-badge.png',
+    code: `type: custom:navbar-card
+routes:
+  - url: /lovelace/home
+    icon: mdi:home
+    label: Home
+  - url: /lovelace/home/devices
+    icon: mdi:devices
+    label: Devices
+    badge:
+      show: >-
+        [[[
+          // Store the light entities in a variable to avoid recomputing them on each render
+          if (!this._lightEntities) {
+            this._lightEntities = Object.keys(hass.states).filter(id => id.startsWith('light.'));
+          }
+          return this._lightEntities.filter(id => hass.states[id].state === 'on').length > 0;
+        ]]]
+      count: >-
+        [[[
+          // Store the light entities in a variable to avoid recomputing them on each render
+          if (!this._lightEntities) {
+            this._lightEntities = Object.keys(hass.states).filter(id => id.startsWith('light.'));
+          }
+          return this._lightEntities.filter(id => hass.states[id].state === 'on').length;
+        ]]]
+  - url: /lovelace/home/control
+    icon: mdi:creation
+    label: Automations
+  - url: /config/dashboard
+    icon: mdi:cog
+    label: Settings
+  - icon: mdi:information
+    label: More
+    url: /config/info
+`,
+  },
 ];
+
+/*************************************/
+/* STYLING EXAMPLES */
+/*************************************/
 
 export const stylingExamples: Example[] = [
   {
