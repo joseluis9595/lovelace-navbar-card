@@ -202,13 +202,17 @@ export class NavbarCard extends LitElement {
     const editClass = this.isInEditMode ? 'edit-mode' : '';
     const mobileModeClass =
       this.config.mobile?.mode === 'floating' ? 'floating' : '';
+    const desktopModeClass =
+      this.isDesktop && this.config.desktop?.mode === 'docked'
+        ? 'docked'
+        : '';
 
     return html`
       <div
-        class="navbar ${editClass} ${deviceClass} ${desktopPosition} ${mobileModeClass}">
+        class="navbar ${editClass} ${deviceClass} ${desktopPosition} ${mobileModeClass} ${desktopModeClass}">
         ${this._mediaPlayer.render()}
         <ha-card
-          class="navbar-card ${deviceClass} ${desktopPosition} ${mobileModeClass}">
+          class="navbar-card ${deviceClass} ${desktopPosition} ${mobileModeClass} ${desktopModeClass}">
           ${this._routes.map(route => route.render()).filter(Boolean)}
         </ha-card>
       </div>

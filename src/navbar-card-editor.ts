@@ -8,7 +8,6 @@ import {
   DesktopPosition,
   ExtendedActionConfig,
   LabelVisibilityConfig,
-  MobileMode,
   NavbarCardConfig,
   NavbarCustomActions,
   PopupItem,
@@ -19,6 +18,7 @@ import {
   genericGetProperty,
   genericSetProperty,
   NestedType,
+  NavbarDisplayMode,
 } from '@/types';
 import {
   ColorInputOptions,
@@ -1001,6 +1001,16 @@ export class NavbarCardEditor extends LitElement {
           Desktop options
         </h4>
         <div class="editor-section">
+          ${this.makeComboBox<NavbarDisplayMode>({
+            configKey: 'desktop.mode',
+            defaultValue: DEFAULT_NAVBAR_CONFIG.desktop?.mode,
+            hideClearIcon: true,
+            items: [
+              { label: 'Floating', value: 'floating' },
+              { label: 'Docked', value: 'docked' },
+            ],
+            label: 'Mode',
+          })}
           <div class="editor-row">
             <div class="editor-row-item">
               ${this.makeComboBox<DesktopPosition>({
@@ -1064,7 +1074,7 @@ export class NavbarCardEditor extends LitElement {
           Mobile options
         </h4>
         <div class="editor-section">
-          ${this.makeComboBox<MobileMode>({
+          ${this.makeComboBox<NavbarDisplayMode>({
             label: 'Mode',
             items: [
               { label: 'Floating', value: 'floating' },
