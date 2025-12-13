@@ -91,6 +91,7 @@ export class NavbarCardEditor extends LitElement {
       'ha-icon-picker',
       'ha-entity-picker',
       'ha-textarea',
+      'ha-navigation-picker',
     ]);
   }
 
@@ -173,6 +174,21 @@ export class NavbarCardEditor extends LitElement {
           this.updateConfigByKey(options.configKey, e.detail.value);
         }}" />
     `;
+  }
+
+  makeNavigationPicker(options: {
+    label: string;
+    configKey: DotNotationKeys<NavbarCardConfig>;
+    disabled?: boolean;
+  }) {
+    return html`<ha-navigation-picker
+      label=${options.label}
+      .value=${genericGetProperty(this._config, options.configKey) ?? ''}
+      .disabled=${options.disabled}
+      .hass=${this.hass}
+      @value-changed="${e => {
+        this.updateConfigByKey(options.configKey, e.detail.value);
+      }}" /> `;
   }
 
   makeTextInput(options: {
@@ -541,11 +557,9 @@ export class NavbarCardEditor extends LitElement {
           <div class="route-editor route-editor-bg">
             <div class="editor-row">
               <div class="editor-row-item">
-                ${this.makeTextInput({
+                ${this.makeNavigationPicker({
                   label: 'URL',
                   configKey: `${baseConfigKey}.url` as any,
-                  type: 'text',
-                  placeholder: '/path/to/your/dashboard',
                 })}
               </div>
             </div>
