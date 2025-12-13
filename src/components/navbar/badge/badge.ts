@@ -1,7 +1,8 @@
 import { html } from 'lit';
-import { NavbarCard } from '@/navbar-card';
+
 import { Color } from '@/components';
-import { BaseRoute } from '@/components/navbar';
+import type { BaseRoute } from '@/components/navbar';
+import type { NavbarCard } from '@/navbar-card';
 import { processBadgeTemplate, processTemplate } from '@/utils';
 
 export class Badge {
@@ -71,17 +72,18 @@ export class Badge {
   }
 
   public render() {
-    if (!this._route.badge || !this.show) return html``;
+    if (!(this._route.badge && this.show)) return html``;
 
     const hasCounter = this.count != null;
 
     return html`
       <div
-        class="badge ${this._route.selected ? 'active' : ''} ${hasCounter
-          ? 'with-counter'
-          : ''}"
-        style="background-color:${this.backgroundColor}; color:${this
-          .contrastingColor}">
+        class="badge ${this._route.selected ? 'active' : ''} ${
+          hasCounter ? 'with-counter' : ''
+        }"
+        style="background-color:${this.backgroundColor}; color:${
+          this.contrastingColor
+        }">
         ${this.count ?? ''}
       </div>
     `;

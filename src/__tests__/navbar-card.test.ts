@@ -1,8 +1,10 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { fixture, html } from '@open-wc/testing';
+import type { HomeAssistant } from 'custom-card-helpers';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import type { NavbarCardConfig } from '@/types';
+
 import { NavbarCard } from '../navbar-card';
-import { HomeAssistant } from 'custom-card-helpers';
-import { NavbarCardConfig } from '@/types';
 
 const DEFAULT_CONFIG: NavbarCardConfig = {
   desktop: {
@@ -34,13 +36,6 @@ describe('NavbarCard', () => {
   beforeEach(async () => {
     // Mock Home Assistant object
     hass = {
-      states: {},
-      config: {},
-      themes: {},
-      selectedTheme: null,
-      panels: {},
-      services: {},
-      user: {},
       auth: {
         data: {
           access_token: '',
@@ -50,19 +45,26 @@ describe('NavbarCard', () => {
         },
         wsUrl: '',
       },
+      callApi: vi.fn(),
+      callService: vi.fn(),
+      config: {},
+      connected: true,
       connection: {
+        close: vi.fn(),
         connected: true,
-        subscribeEvents: vi.fn(),
-        subscribeMessage: vi.fn(),
         sendMessage: vi.fn(),
         sendMessagePromise: vi.fn(),
-        close: vi.fn(),
+        subscribeEvents: vi.fn(),
+        subscribeMessage: vi.fn(),
       },
-      connected: true,
-      panelUrl: '',
-      callService: vi.fn(),
-      callApi: vi.fn(),
       fetchWithAuth: vi.fn(),
+      panels: {},
+      panelUrl: '',
+      selectedTheme: null,
+      services: {},
+      states: {},
+      themes: {},
+      user: {},
     } as unknown as HomeAssistant;
 
     // Create and setup the element
@@ -130,9 +132,9 @@ describe('NavbarCard', () => {
     it('detects desktop mode correctly', async () => {
       // Mock window.innerWidth
       Object.defineProperty(window, 'innerWidth', {
-        writable: true,
         configurable: true,
         value: 1024,
+        writable: true,
       });
 
       // Trigger resize event
@@ -145,9 +147,9 @@ describe('NavbarCard', () => {
     it('detects mobile mode correctly', async () => {
       // Mock window.innerWidth
       Object.defineProperty(window, 'innerWidth', {
-        writable: true,
         configurable: true,
         value: 375,
+        writable: true,
       });
 
       // Trigger resize event
@@ -165,17 +167,17 @@ describe('NavbarCard', () => {
         routes: [
           {
             icon: 'mdi:home',
+            icon_color: '#ff0000',
             label: 'Home',
             url: '/',
-            icon_color: '#ff0000',
           },
           {
             icon: 'mdi:cog',
+            icon_color: '#00ff00',
             icon_selected: 'mdi:cog-outline',
             label: 'Settings',
-            url: '/config',
             selected: true,
-            icon_color: '#00ff00',
+            url: '/config',
           },
         ],
       };
@@ -209,9 +211,9 @@ describe('NavbarCard', () => {
           {
             icon: 'mdi:star',
             label: 'Fav',
-            url: '/fav',
             selected: true,
             selected_color: '[[[ return "#00ff00"]]]',
+            url: '/fav',
           },
         ],
       };

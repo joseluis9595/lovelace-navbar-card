@@ -1,9 +1,9 @@
-import { css, CSSResult, html } from 'lit';
+import { type CSSResult, css, html } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 
-import { NavbarCard } from '@/navbar-card';
 import { PopupItem } from '@/components/navbar';
-import { DesktopPosition, PopupItem as PopupItemDef } from '@/types';
+import type { NavbarCard } from '@/navbar-card';
+import { DesktopPosition, type PopupItem as PopupItemDef } from '@/types';
 
 export class Popup {
   private _popupItems: PopupItem[] = [];
@@ -143,39 +143,39 @@ export class Popup {
       typeof position,
       { style: CSSResult; label: string; dir: string } | null
     > = {
-      top: {
-        style: css`
-          top: ${top + height}px;
-          left: ${x}px;
-        `,
-        label: 'label-right',
-        dir: 'open-bottom',
-      },
+      bottom: null,
       left: {
+        dir: 'open-right',
+        label: 'label-bottom',
         style: css`
           top: ${top}px;
           left: ${x + width}px;
         `,
-        label: 'label-bottom',
-        dir: 'open-right',
       },
+      mobile: null,
       right: {
+        dir: 'open-left',
+        label: 'label-bottom',
         style: css`
           top: ${top}px;
           right: ${windowWidth - x}px;
         `,
-        label: 'label-bottom',
-        dir: 'open-left',
       },
-      bottom: null,
-      mobile: null,
+      top: {
+        dir: 'open-bottom',
+        label: 'label-right',
+        style: css`
+          top: ${top + height}px;
+          left: ${x}px;
+        `,
+      },
     };
 
     if (positions[position]) {
       return {
-        style: positions[position].style,
         labelPositionClassName: positions[position].label,
         popupDirectionClassName: positions[position].dir,
+        style: positions[position].style,
       };
     }
 
@@ -183,20 +183,20 @@ export class Popup {
     const isRightSide = x > windowWidth / 2;
     return isRightSide
       ? {
+          labelPositionClassName: 'label-left',
+          popupDirectionClassName: 'open-up',
           style: css`
             top: ${top}px;
             right: ${windowWidth - x - width}px;
           `,
-          labelPositionClassName: 'label-left',
-          popupDirectionClassName: 'open-up',
         }
       : {
+          labelPositionClassName: 'label-right',
+          popupDirectionClassName: 'open-up',
           style: css`
             top: ${top}px;
             left: ${left}px;
           `,
-          labelPositionClassName: 'label-right',
-          popupDirectionClassName: 'open-up',
         };
   }
 

@@ -1,12 +1,12 @@
-import { html, TemplateResult } from 'lit';
+import { html, type TemplateResult } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { NavbarCard } from '@/navbar-card';
-import { Popup, BaseRoute } from '@/components/navbar';
-import { PopupItem, RouteItem } from '@/types';
-import { processTemplate } from '@/utils';
+import { BaseRoute, Popup } from '@/components/navbar';
 import { eventDetection } from '@/lib/event-detection';
+import type { NavbarCard } from '@/navbar-card';
+import type { PopupItem, RouteItem } from '@/types';
+import { processTemplate } from '@/utils';
 
 export class Route extends BaseRoute {
   private _popupInstance?: Popup;
@@ -53,26 +53,26 @@ export class Route extends BaseRoute {
     return html`
       <div
         class=${classMap({
-          route: true,
           active: isActive,
+          route: true,
         })}
         style=${styleMap({
           '--navbar-primary-color': this.selected_color ?? null,
         })}
         ${eventDetection({
           context: this._navbarCard,
+          doubleTap: this.double_tap_action,
+          hold: this.hold_action,
           route: this,
           tap: this.tap_action ?? {
             action: 'navigate',
             navigation_path: this.url ?? '',
           },
-          hold: this.hold_action,
-          doubleTap: this.double_tap_action,
         })}>
         <div
           class=${classMap({
-            button: true,
             active: isActive,
+            button: true,
           })}
           style=${styleMap({
             '--navbar-primary-color': this.selected_color ?? null,
@@ -81,32 +81,36 @@ export class Route extends BaseRoute {
           <ha-ripple></ha-ripple>
           ${this.badge.render()}
         </div>
-        ${this.label
-          ? html`<div
+        ${
+          this.label
+            ? html`<div
               class=${classMap({
-                label: true,
                 active: isActive,
+                label: true,
               })}>
               ${this.label}
             </div>`
-          : html``}
+            : html``
+        }
       </div>
     `;
   }
 
   private _validateRoute(): void {
-    if (!this.data.icon && !this.data.image) {
+    if (!(this.data.icon || this.data.image)) {
       throw new Error(
         'Each route must have either an "icon" or "image" property configured',
       );
     }
 
     if (
-      !this._routeData.popup &&
-      !this.tap_action &&
-      !this.hold_action &&
-      !this.url &&
-      !this.double_tap_action
+      !(
+        this._routeData.popup ||
+        this.tap_action ||
+        this.hold_action ||
+        this.url ||
+        this.double_tap_action
+      )
     ) {
       throw new Error(
         'Each route must have at least one actionable property (url, popup, tap_action, hold_action, double_tap_action)',

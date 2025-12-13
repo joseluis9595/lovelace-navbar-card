@@ -1,4 +1,4 @@
-import { NavbarCard } from '@/navbar-card';
+import type { NavbarCard } from '@/navbar-card';
 import { fireDOMEvent } from '@/utils';
 
 const shouldTriggerHaptic = (

@@ -1,10 +1,12 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { fixture, html } from '@open-wc/testing';
+import type { HomeAssistant } from 'custom-card-helpers';
 import { render } from 'lit';
-import { NavbarCard } from '../../navbar-card';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import type { NavbarCardConfig } from '@/types';
+
 import { MediaPlayer } from '../../components/media-player';
-import { HomeAssistant } from 'custom-card-helpers';
-import { NavbarCardConfig } from '@/types';
+import { NavbarCard } from '../../navbar-card';
 
 // Register the custom element
 if (!customElements.get('navbar-card')) {
@@ -20,40 +22,31 @@ describe('MediaPlayer', () => {
     state: string,
     attributes: Record<string, unknown> = {},
   ) => ({
-    entity_id: 'media_player.test',
-    state,
     attributes: {
       entity_picture: 'https://example.com/album.jpg',
-      media_title: 'Test Song',
       media_artist: 'Test Artist',
-      media_position: 30,
       media_duration: 180,
+      media_position: 30,
+      media_title: 'Test Song',
       ...attributes,
     },
+    context: { id: 'test', parent_id: null, user_id: null },
+    entity_id: 'media_player.test',
     last_changed: '2023-01-01T00:00:00.000Z',
     last_updated: '2023-01-01T00:00:00.000Z',
-    context: { id: 'test', user_id: null, parent_id: null },
+    state,
   });
 
   beforeEach(async () => {
     // Mock window.innerWidth to ensure mobile mode
     Object.defineProperty(window, 'innerWidth', {
-      writable: true,
       configurable: true,
       value: 375,
+      writable: true,
     });
 
     // Mock Home Assistant object
     hass = {
-      states: {
-        'media_player.test': createMediaPlayerState('playing'),
-      },
-      config: {},
-      themes: {},
-      selectedTheme: null,
-      panels: {},
-      services: {},
-      user: {},
       auth: {
         data: {
           access_token: '',
@@ -63,23 +56,36 @@ describe('MediaPlayer', () => {
         },
         wsUrl: '',
       },
+      callApi: vi.fn(),
+      callService: vi.fn(),
+      config: {},
+      connected: true,
       connection: {
+        close: vi.fn(),
         connected: true,
-        subscribeEvents: vi.fn(),
-        subscribeMessage: vi.fn(),
         sendMessage: vi.fn(),
         sendMessagePromise: vi.fn(),
-        close: vi.fn(),
+        subscribeEvents: vi.fn(),
+        subscribeMessage: vi.fn(),
       },
-      connected: true,
-      panelUrl: '',
-      callService: vi.fn(),
-      callApi: vi.fn(),
       fetchWithAuth: vi.fn(),
+      panels: {},
+      panelUrl: '',
+      selectedTheme: null,
+      services: {},
+      states: {
+        'media_player.test': createMediaPlayerState('playing'),
+      },
+      themes: {},
+      user: {},
     } as unknown as HomeAssistant;
 
     // Create navbar card with media player config
     const config: NavbarCardConfig = {
+      media_player: {
+        album_cover_background: true,
+        entity: 'media_player.test',
+      },
       routes: [
         {
           icon: 'mdi:home',
@@ -87,10 +93,6 @@ describe('MediaPlayer', () => {
           url: '/',
         },
       ],
-      media_player: {
-        entity: 'media_player.test',
-        album_cover_background: true,
-      },
     };
 
     navbarCard = await fixture<NavbarCard>(html`<navbar-card></navbar-card>`);
@@ -122,13 +124,13 @@ describe('MediaPlayer', () => {
 
     it('should have action getters when configured', () => {
       const configWithActions: NavbarCardConfig = {
-        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
         media_player: {
-          entity: 'media_player.test',
-          tap_action: { action: 'call-service', service: 'test.service' },
-          hold_action: { action: 'navigate', navigation_path: '/test' },
           double_tap_action: { action: 'more-info' },
+          entity: 'media_player.test',
+          hold_action: { action: 'navigate', navigation_path: '/test' },
+          tap_action: { action: 'call-service', service: 'test.service' },
         },
+        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
       };
 
       navbarCard.setConfig(configWithActions);
@@ -151,10 +153,10 @@ describe('MediaPlayer', () => {
   describe('Visibility Logic', () => {
     it('should not show media player when no entity is configured', () => {
       const configWithoutEntity: NavbarCardConfig = {
-        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
         media_player: {
           entity: '',
         },
+        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
       };
 
       navbarCard.setConfig(configWithoutEntity);
@@ -203,11 +205,11 @@ describe('MediaPlayer', () => {
 
     it('should respect show template configuration', () => {
       const configWithShow: NavbarCardConfig = {
-        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
         media_player: {
           entity: 'media_player.test',
           show: '[[[ return states["media_player.test"].state == "playing" ]]]',
         },
+        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
       };
 
       navbarCard.setConfig(configWithShow);
@@ -228,11 +230,11 @@ describe('MediaPlayer', () => {
   describe('Action Execution', () => {
     it('should execute custom tap action', async () => {
       const configWithTapAction: NavbarCardConfig = {
-        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
         media_player: {
           entity: 'media_player.test',
           tap_action: { action: 'call-service', service: 'test.service' },
         },
+        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
       };
 
       navbarCard.setConfig(configWithTapAction);
@@ -253,7 +255,6 @@ describe('MediaPlayer', () => {
 
       expect(dispatchEventSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 'hass-action',
           bubbles: true,
           composed: true,
           detail: {
@@ -263,6 +264,7 @@ describe('MediaPlayer', () => {
               // entity can be provided or undefined depending on handler; don't assert exact
             },
           },
+          type: 'hass-action',
         }),
       );
     });
@@ -282,7 +284,6 @@ describe('MediaPlayer', () => {
 
       expect(dispatchEventSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 'hass-action',
           bubbles: true,
           composed: true,
           detail: expect.objectContaining({
@@ -291,6 +292,7 @@ describe('MediaPlayer', () => {
               tap_action: expect.objectContaining({ action: 'more-info' }),
             }),
           }),
+          type: 'hass-action',
         }),
       );
     });
@@ -417,8 +419,8 @@ describe('MediaPlayer', () => {
 
     it('should render progress bar when position and duration are available', async () => {
       hass.states['media_player.test'] = createMediaPlayerState('playing', {
-        media_position: 30,
         media_duration: 180,
+        media_position: 30,
       });
       const result = mediaPlayer.render();
 
@@ -439,8 +441,8 @@ describe('MediaPlayer', () => {
 
     it('should not render progress bar when position is not available', async () => {
       hass.states['media_player.test'] = createMediaPlayerState('playing', {
-        media_position: null,
         media_duration: 180,
+        media_position: null,
       });
       const result = mediaPlayer.render();
 
@@ -453,11 +455,11 @@ describe('MediaPlayer', () => {
 
     it('should render album cover background when enabled', async () => {
       const configWithBackground: NavbarCardConfig = {
-        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
         media_player: {
-          entity: 'media_player.test',
           album_cover_background: true,
+          entity: 'media_player.test',
         },
+        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
       };
 
       navbarCard.setConfig(configWithBackground);
@@ -512,10 +514,10 @@ describe('MediaPlayer', () => {
 
     it('should not render when entity is not configured', async () => {
       const configWithoutEntity: NavbarCardConfig = {
-        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
         media_player: {
           entity: '',
         },
+        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
       };
 
       navbarCard.setConfig(configWithoutEntity);
@@ -533,10 +535,10 @@ describe('MediaPlayer', () => {
   describe('Template Processing', () => {
     it('should process entity template', () => {
       const configWithTemplate: NavbarCardConfig = {
-        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
         media_player: {
           entity: '[[[ return "media_player." + "test" ]]]',
         },
+        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
       };
 
       navbarCard.setConfig(configWithTemplate);
@@ -547,10 +549,10 @@ describe('MediaPlayer', () => {
 
     it('should handle invalid entity template', () => {
       const configWithInvalidTemplate: NavbarCardConfig = {
-        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
         media_player: {
           entity: '[[[ return invalid_template ]]]',
         },
+        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
       };
 
       navbarCard.setConfig(configWithInvalidTemplate);

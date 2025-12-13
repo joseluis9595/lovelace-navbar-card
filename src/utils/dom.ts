@@ -1,10 +1,11 @@
-import { CSSResult, html, TemplateResult } from 'lit';
+import { type CSSResult, html, type TemplateResult } from 'lit';
+
 import {
-  NavbarCardConfig,
-  AutoPaddingConfig,
+  type AutoPaddingConfig,
   DEFAULT_NAVBAR_CONFIG,
+  type NavbarCardConfig,
 } from '@/types/config';
-import { RippleElement } from '@/types/types';
+import type { RippleElement } from '@/types/types';
 
 const DASHBOARD_PADDING_STYLE_ID = 'navbar-card-forced-padding-styles';
 const DEFAULT_STYLES_ID = 'navbar-card-default-styles';

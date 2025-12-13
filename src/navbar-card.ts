@@ -1,21 +1,23 @@
-import { version } from '../package.json';
-import { HomeAssistant } from 'custom-card-helpers';
+import type { HomeAssistant } from 'custom-card-helpers';
 import {
   css,
   html,
   LitElement,
-  PropertyValues,
-  TemplateResult,
+  type PropertyValues,
+  type TemplateResult,
   unsafeCSS,
 } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+
+import { MediaPlayer } from '@/components/media-player';
+import { Route } from '@/components/navbar';
+import { getDefaultStyles } from '@/styles';
 import {
   DEFAULT_NAVBAR_CONFIG,
   DesktopPosition,
-  NavbarCardConfig,
+  type NavbarCardConfig,
   STUB_CONFIG,
 } from '@/types';
-import { Route } from '@/components/navbar';
 import {
   deepMergeKeepArrays,
   forceDashboardPadding,
@@ -26,8 +28,8 @@ import {
   processTemplate,
   removeDashboardPadding,
 } from '@/utils';
-import { getDefaultStyles } from '@/styles';
-import { MediaPlayer } from '@/components/media-player';
+
+import { version } from '../package.json';
 
 declare global {
   interface Window {
@@ -38,11 +40,11 @@ declare global {
 // Register in HA card list
 window.customCards = window.customCards || [];
 window.customCards.push({
-  type: 'navbar-card',
-  name: 'Navbar card',
-  preview: true,
   description:
     'Full-width bottom nav on mobile and flexible desktop nav that can be placed on any side.',
+  name: 'Navbar card',
+  preview: true,
+  type: 'navbar-card',
 });
 
 @customElement('navbar-card')
@@ -115,9 +117,9 @@ export class NavbarCard extends LitElement {
 
     // Force dashboard padding
     forceDashboardPadding({
+      auto_padding: this.config?.layout?.auto_padding,
       desktop: this.config?.desktop ?? DEFAULT_NAVBAR_CONFIG.desktop,
       mobile: this.config?.mobile ?? DEFAULT_NAVBAR_CONFIG.mobile,
-      auto_padding: this.config?.layout?.auto_padding,
       show_media_player: this._showMediaPlayer ?? false,
     });
   }
@@ -180,9 +182,9 @@ export class NavbarCard extends LitElement {
     if (_changedProperties.has('_showMediaPlayer')) {
       // Force dashboard padding
       forceDashboardPadding({
+        auto_padding: this.config?.layout?.auto_padding,
         desktop: this.config?.desktop ?? DEFAULT_NAVBAR_CONFIG.desktop,
         mobile: this.config?.mobile ?? DEFAULT_NAVBAR_CONFIG.mobile,
-        auto_padding: this.config?.layout?.auto_padding,
         show_media_player: this._showMediaPlayer ?? false,
       });
     }

@@ -1,16 +1,15 @@
 // eslint.config.js
-import { defineConfig, globalIgnores } from 'eslint/config';
-import { includeIgnoreFile } from '@eslint/compat';
 
-import js from '@eslint/js';
-import tsEslint from 'typescript-eslint';
-import tsEslintPlugin from '@typescript-eslint/eslint-plugin';
-import tsParser from '@typescript-eslint/parser';
-import eslintConfigPrettier from 'eslint-config-prettier/flat';
-
-import importPlugin from 'eslint-plugin-import';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { includeIgnoreFile } from '@eslint/compat';
+import js from '@eslint/js';
+import tsEslintPlugin from '@typescript-eslint/eslint-plugin';
+import tsParser from '@typescript-eslint/parser';
+import { defineConfig, globalIgnores } from 'eslint/config';
+import eslintConfigPrettier from 'eslint-config-prettier/flat';
+import importPlugin from 'eslint-plugin-import';
+import tsEslint from 'typescript-eslint';
 
 // Read ignored files from .gitignore
 const __filename = fileURLToPath(import.meta.url);
@@ -29,30 +28,29 @@ export default defineConfig([
     'docs/**/*',
   ]),
   {
-    // Language options
-    languageOptions: {
-      parser: tsParser,
-
-      parserOptions: {
-        project: './tsconfig.json',
-        ecmaVersion: 2021,
-        sourceType: 'module',
-      },
-    },
-
-    // Plugins
-    plugins: {
-      js,
-      '@typescript-eslint': tsEslintPlugin,
-      import: importPlugin,
-    },
-
     // Extends
     extends: [
       'js/recommended',
       tsEslint.configs.recommended,
       eslintConfigPrettier,
     ],
+    // Language options
+    languageOptions: {
+      parser: tsParser,
+
+      parserOptions: {
+        ecmaVersion: 2021,
+        project: './tsconfig.json',
+        sourceType: 'module',
+      },
+    },
+
+    // Plugins
+    plugins: {
+      '@typescript-eslint': tsEslintPlugin,
+      import: importPlugin,
+      js,
+    },
 
     // Rules
     rules: {
@@ -60,8 +58,8 @@ export default defineConfig([
         'error',
         {
           argsIgnorePattern: '^_',
-          varsIgnorePattern: '_',
           caughtErrorsIgnorePattern: '^_',
+          varsIgnorePattern: '_',
         },
       ],
     },
