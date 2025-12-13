@@ -7,35 +7,23 @@
           "level": "on",
           "options": {
             "groups": [
-              ["react"],
-              ":BLANK_LINE:",
               [":BUN:", ":NODE:", ":PACKAGE_WITH_PROTOCOL:", ":PACKAGE:"],
               ":BLANK_LINE:",
-              ["**/*Slice"],
+              ["@/**"],
               ":BLANK_LINE:",
-              ["@/components/**"],
-              ":BLANK_LINE:",
-              [":ALIAS:", ":PATH:"],
-              ":BLANK_LINE:",
-              ["**/*.css"]
+              [":ALIAS:", ":PATH:"]
             ]
           }
         },
         "useSortedKeys": "on"
       }
     },
-    "enabled": true,
-    "includes": [
-      "**",
-      "!package.json",
-      "!tsconfig.json",
-      "!**/dist",
-      "!**/build",
-      "!**/*.gen.ts",
-      "!**/src/codegen"
-    ]
+    "enabled": true
   },
-  "files": { "ignoreUnknown": false },
+  "files": {
+    "ignoreUnknown": false,
+    "includes": ["src/**/*.ts", "src/**/*.js", "*.ts", "*.js"]
+  },
   "formatter": {
     "attributePosition": "auto",
     "enabled": true,
@@ -47,16 +35,16 @@
   },
   "javascript": {
     "formatter": {
-      "arrowParentheses": "always",
-      "attributePosition": "auto",
-      "bracketSameLine": false,
+      "arrowParentheses": "asNeeded",
+      "bracketSameLine": true,
       "bracketSpacing": true,
       "jsxQuoteStyle": "double",
       "quoteProperties": "asNeeded",
-      "quoteStyle": "double",
+      "quoteStyle": "single",
       "semicolons": "always",
       "trailingCommas": "all"
-    }
+    },
+    "globals": []
   },
   "json": {
     "formatter": {
@@ -69,11 +57,46 @@
   "linter": {
     "enabled": true,
     "rules": {
+      "complexity": {
+        "noForEach": "off",
+        "useSimplifiedLogicExpression": "warn"
+      },
+      "correctness": {
+        "noUnusedVariables": {
+          "level": "error",
+          "options": {
+            "ignoreRestSiblings": true
+          }
+        },
+        "useExhaustiveDependencies": "warn"
+      },
       "nursery": {
         "useSortedClasses": "error"
       },
-      "recommended": true
+      "performance": {
+        "noDelete": "error"
+      },
+      "recommended": true,
+      "security": {
+        "noDangerouslySetInnerHtml": "off"
+      },
+      "style": {
+        "noParameterAssign": "error",
+        "useConst": "error",
+        "useTemplate": "error"
+      },
+      "suspicious": {
+        "noArrayIndexKey": "warn",
+        "noAssignInExpressions": "error",
+        "noDoubleEquals": "error",
+        "noExplicitAny": "warn",
+        "noImplicitAnyLet": "error"
+      }
     }
   },
-  "vcs": { "clientKind": "git", "enabled": true, "useIgnoreFile": true }
+  "vcs": {
+    "clientKind": "git",
+    "enabled": true,
+    "useIgnoreFile": true
+  }
 }
