@@ -906,23 +906,26 @@ export class NavbarCardEditor extends LitElement {
           ${this.makeSwitch({
             label: 'When pressing routes with URL configured',
             configKey: 'haptic.url',
-            defaultValue: hapticValue,
+            defaultValue: hapticValue ?? DEFAULT_NAVBAR_CONFIG.haptic.url,
           })}
           ${this.makeSwitch({
             label: "When executing the 'tap_action' configured for a route",
             configKey: 'haptic.tap_action',
-            defaultValue: hapticValue,
+            defaultValue:
+              hapticValue ?? DEFAULT_NAVBAR_CONFIG.haptic.tap_action,
           })}
           ${this.makeSwitch({
             label: "When executing the 'hold_action' configured for a route",
             configKey: 'haptic.hold_action',
-            defaultValue: hapticValue,
+            defaultValue:
+              hapticValue ?? DEFAULT_NAVBAR_CONFIG.haptic.hold_action,
           })}
           ${this.makeSwitch({
             label:
               "When executing the 'double_tap_action' configured for a route",
             configKey: 'haptic.double_tap_action',
-            defaultValue: hapticValue,
+            defaultValue:
+              hapticValue ?? DEFAULT_NAVBAR_CONFIG.haptic.double_tap_action,
           })}
         </div>
       </ha-expansion-panel>

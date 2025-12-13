@@ -176,6 +176,12 @@ export const DEFAULT_NAVBAR_CONFIG = {
     show_popup_label_backgrounds: false,
     mode: 'docked',
   },
+  haptic: {
+    url: false,
+    tap_action: false,
+    hold_action: true,
+    double_tap_action: true,
+  },
 } as const satisfies NavbarCardConfig;
 
 export const STUB_CONFIG: NavbarCardConfig = {

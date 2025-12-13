@@ -1,4 +1,5 @@
 import { NavbarCard } from '@/navbar-card';
+import { DEFAULT_NAVBAR_CONFIG } from '@/types';
 import { fireDOMEvent } from '@/utils';
 
 const shouldTriggerHaptic = (
@@ -6,31 +7,31 @@ const shouldTriggerHaptic = (
   actionType: 'tap' | 'hold' | 'double_tap',
   isNavigation = false,
 ): boolean => {
-  const hapticConfig = context.config?.haptic;
+  const hapticConfig = context.config?.haptic ?? DEFAULT_NAVBAR_CONFIG.haptic;
 
   // If haptic is a boolean, use it as a global setting
   if (typeof hapticConfig === 'boolean') {
     return hapticConfig;
   }
 
-  // If no haptic config is provided, return default values
-  if (!hapticConfig) {
-    return !isNavigation;
-  }
-
   // Check navigation first
   if (isNavigation) {
-    return hapticConfig.url ?? false;
+    return hapticConfig.url ?? DEFAULT_NAVBAR_CONFIG.haptic.url;
   }
 
   // Check specific action types
   switch (actionType) {
     case 'tap':
-      return hapticConfig.tap_action ?? false;
+      return hapticConfig.tap_action ?? DEFAULT_NAVBAR_CONFIG.haptic.tap_action;
     case 'hold':
-      return hapticConfig.hold_action ?? false;
+      return (
+        hapticConfig.hold_action ?? DEFAULT_NAVBAR_CONFIG.haptic.hold_action
+      );
     case 'double_tap':
-      return hapticConfig.double_tap_action ?? false;
+      return (
+        hapticConfig.double_tap_action ??
+        DEFAULT_NAVBAR_CONFIG.haptic.double_tap_action
+      );
     default:
       return false;
   }
