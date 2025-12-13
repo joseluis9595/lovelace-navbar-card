@@ -28,6 +28,7 @@ import {
 } from '@/utils';
 import { getDefaultStyles } from '@/styles';
 import { MediaPlayer } from '@/components/media-player';
+import { DOCS_LINKS } from '@/utils/docs-links';
 
 declare global {
   interface Window {
@@ -154,7 +155,7 @@ export class NavbarCard extends LitElement {
         console.warn(
           '[navbar-card] No templates configured in this dashboard. Please refer to "templates" documentation for more information.' +
             '\n\n' +
-            'https://github.com/joseluis9595/lovelace-navbar-card?tab=readme-ov-file#templates\n',
+            `${DOCS_LINKS.template}\n`,
         );
       }
     }
