@@ -7,9 +7,9 @@
   "type": "module",
   "scripts": {
     "build": "NODE_ENV=production bun build src/navbar-card.ts --outfile=dist/navbar-card.js --target=browser",
-    "lint": "eslint --fix",
-    "lint:check": "eslint",
-    "format": "prettier --write src/**/*.ts",
+    "lint": "biome check --write",
+    "lint:check": "biome check",
+    "format": "biome format --write src/**/*.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
