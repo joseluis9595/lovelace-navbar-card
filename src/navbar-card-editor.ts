@@ -8,7 +8,6 @@ import {
   DesktopPosition,
   ExtendedActionConfig,
   LabelVisibilityConfig,
-  MobileMode,
   NavbarCardConfig,
   NavbarCustomActions,
   PopupItem,
@@ -19,6 +18,7 @@ import {
   genericGetProperty,
   genericSetProperty,
   NestedType,
+  NavbarDisplayMode,
 } from '@/types';
 import {
   ColorInputOptions,
@@ -35,6 +35,7 @@ import {
 } from '@/utils';
 import { getEditorStyles } from './styles';
 import { ACTIONS_WITH_CUSTOM_ENTITY } from '@/lib/action-handler';
+import { DOCS_LINKS } from '@/utils/docs-links';
 
 enum HAActions {
   tap_action = 'tap_action',
@@ -45,7 +46,7 @@ enum HAActions {
 const GENERIC_JS_TEMPLATE_HELPER = html`Insert valid Javascript code without [[[
   ]]].
   <a
-    href="https://github.com/joseluis9595/lovelace-navbar-card?tab=readme-ov-file#jstemplate"
+    href="${DOCS_LINKS.jsTemplate}"
     target="_blank"
     rel="noopener"
     >See documentation</a
@@ -802,7 +803,7 @@ export class NavbarCardEditor extends LitElement {
             })),
             helper: html`Reusable template name used for this card.
               <a
-                href="https://github.com/joseluis9595/lovelace-navbar-card?tab=readme-ov-file#template"
+                href="${DOCS_LINKS.template}"
                 target="_blank"
                 rel="noopener"
                 >Check the documentation</a
@@ -828,7 +829,7 @@ export class NavbarCardEditor extends LitElement {
             Enter your CSS code here (no <code>"styles: |"</code> prefix
             needed).<br />
             <a
-              href="https://github.com/joseluis9595/lovelace-navbar-card?tab=readme-ov-file#styles"
+              href="${DOCS_LINKS.styles}"
               target="_blank"
               rel="noopener"
               >See documentation</a
@@ -1017,6 +1018,16 @@ export class NavbarCardEditor extends LitElement {
           Desktop options
         </h4>
         <div class="editor-section">
+          ${this.makeComboBox<NavbarDisplayMode>({
+            configKey: 'desktop.mode',
+            defaultValue: DEFAULT_NAVBAR_CONFIG.desktop?.mode,
+            hideClearIcon: true,
+            items: [
+              { label: 'Floating', value: 'floating' },
+              { label: 'Docked', value: 'docked' },
+            ],
+            label: 'Mode',
+          })}
           <div class="editor-row">
             <div class="editor-row-item">
               ${this.makeComboBox<DesktopPosition>({
@@ -1080,7 +1091,7 @@ export class NavbarCardEditor extends LitElement {
           Mobile options
         </h4>
         <div class="editor-section">
-          ${this.makeComboBox<MobileMode>({
+          ${this.makeComboBox<NavbarDisplayMode>({
             label: 'Mode',
             items: [
               { label: 'Floating', value: 'floating' },
@@ -1376,7 +1387,7 @@ export class NavbarCardEditor extends LitElement {
               defined in your dashboard.
               <br />
               <a
-                href="https://github.com/joseluis9595/lovelace-navbar-card?tab=readme-ov-file#template"
+                href="${DOCS_LINKS.template}"
                 target="_blank"
                 rel="noopener"
                 >Check the documentation</a

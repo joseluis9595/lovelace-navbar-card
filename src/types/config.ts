@@ -124,8 +124,8 @@ type MediaPlayerConfig = {
   double_tap_action?: ExtendedActionConfig;
 };
 
-// Mobile mode configuration
-export type MobileMode = 'floating' | 'docked';
+// Display mode configuration
+export type NavbarDisplayMode = 'floating' | 'docked';
 
 // Main card configuration
 export type NavbarCardConfig = {
@@ -137,6 +137,7 @@ export type NavbarCardConfig = {
     reflect_child_state?: boolean;
   };
   desktop?: {
+    mode?: NavbarDisplayMode;
     show_labels?: LabelVisibilityConfig;
     show_popup_label_backgrounds?: boolean;
     min_width?: number;
@@ -144,7 +145,7 @@ export type NavbarCardConfig = {
     hidden?: JSTemplatable<boolean>;
   };
   mobile?: {
-    mode?: MobileMode;
+    mode?: NavbarDisplayMode;
     show_labels?: LabelVisibilityConfig;
     show_popup_label_backgrounds?: boolean;
     hidden?: JSTemplatable<boolean>;
@@ -166,6 +167,7 @@ export const DEFAULT_NAVBAR_CONFIG = {
     reflect_child_state: false,
   },
   desktop: {
+    mode: 'floating',
     show_labels: false,
     show_popup_label_backgrounds: false,
     min_width: 768,
