@@ -1,5 +1,7 @@
 import type { ActionConfig } from 'custom-card-helpers';
 
+import type { DeepPartial } from '@/types/types';
+
 export enum DesktopPosition {
   top = 'top',
   left = 'left',
@@ -177,12 +179,16 @@ export const DEFAULT_NAVBAR_CONFIG = {
     },
     reflect_child_state: false,
   },
+  media_player: {
+    album_cover_background: false,
+    entity: '',
+  },
   mobile: {
     mode: 'docked',
     show_labels: false,
     show_popup_label_backgrounds: false,
   },
-} as const satisfies Partial<NavbarCardConfig>;
+} as const satisfies DeepPartial<NavbarCardConfig>;
 
 export const STUB_CONFIG: NavbarCardConfig = {
   routes: [

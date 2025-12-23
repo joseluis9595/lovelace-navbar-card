@@ -238,7 +238,7 @@ export class NavbarCardEditor extends LitElement {
               e.target.value?.trim() == ''
                 ? null
                 : options.type == 'number'
-                  ? parseInt(e.target.value)
+                  ? parseInt(e.target.value, 10)
                   : e.target.value,
             );
           }}"></ha-textfield>
@@ -441,7 +441,7 @@ export class NavbarCardEditor extends LitElement {
           .disabled=${options.disabled}
           @change=${(e: Event) => {
             const checked = (e.target as HTMLInputElement).checked;
-            this.updateConfigByKey(options.configKey, checked as any);
+            this.updateConfigByKey(options.configKey, checked);
           }}></ha-switch>
         ${
           options.tooltip
@@ -793,10 +793,10 @@ export class NavbarCardEditor extends LitElement {
                       })
                     : html`
                       <ha-button
-                        @click=${() =>
-                          this.updateConfigByKey(key, {
-                            action: 'none',
-                          })}
+                      @click=${() =>
+                        this.updateConfigByKey(key, {
+                          action: 'none',
+                        } as any)}
                         style="margin-bottom: 1em;"
                         outlined
                         hasTrailingIcon>
@@ -953,21 +953,25 @@ export class NavbarCardEditor extends LitElement {
           ${this.makeSwitch({
             configKey: 'haptic.url',
             defaultValue: hapticValue ?? DEFAULT_NAVBAR_CONFIG.haptic.url,
+            label: 'URL',
           })}
           ${this.makeSwitch({
             configKey: 'haptic.tap_action',
             defaultValue:
               hapticValue ?? DEFAULT_NAVBAR_CONFIG.haptic.tap_action,
+            label: 'Tap action',
           })}
           ${this.makeSwitch({
             configKey: 'haptic.hold_action',
             defaultValue:
               hapticValue ?? DEFAULT_NAVBAR_CONFIG.haptic.hold_action,
+            label: 'Hold action',
           })}
           ${this.makeSwitch({
             configKey: 'haptic.double_tap_action',
             defaultValue:
               hapticValue ?? DEFAULT_NAVBAR_CONFIG.haptic.double_tap_action,
+            label: 'Double tap action',
           })}
         </div>
       </ha-expansion-panel>
@@ -1019,7 +1023,7 @@ export class NavbarCardEditor extends LitElement {
                       @click=${() =>
                         this.updateConfigByKey(key, {
                           action: 'none',
-                        })}
+                        } as any)}
                       style="margin-bottom: 1em;"
                       outlined
                       hasTrailingIcon>
@@ -1121,11 +1125,11 @@ export class NavbarCardEditor extends LitElement {
         </h4>
         <div class="editor-section">
           ${this.makeComboBox<NavbarDisplayMode>({
+            configKey: 'mobile.mode',
             items: [
               { label: 'Floating', value: 'floating' },
               { label: 'Docked', value: 'docked' },
             ],
-            label: 'Mode',
             label: 'Mode',
           })}
           ${this.makeComboBox<LabelVisibilityConfig>({
@@ -1289,11 +1293,13 @@ export class NavbarCardEditor extends LitElement {
 
               if (newSel === 'hass_action') {
                 // By default, start with action: "none"
-                this.updateConfigByKey(options.configKey, { action: 'none' });
+                this.updateConfigByKey(options.configKey, {
+                  action: 'none',
+                } as any);
               } else {
                 this.updateConfigByKey(options.configKey, {
                   action: newSel,
-                });
+                } as any);
               }
             }}></ha-combo-box>
 
@@ -1313,7 +1319,7 @@ export class NavbarCardEditor extends LitElement {
                         this.updateConfigByKey(options.configKey, {
                           action: NavbarCustomActions.quickbar,
                           mode: 'devices',
-                        });
+                        } as any);
                       }}></ha-radio>
                   </ha-formfield>
                   <ha-formfield label="Entities">
@@ -1328,7 +1334,7 @@ export class NavbarCardEditor extends LitElement {
                         this.updateConfigByKey(options.configKey, {
                           action: NavbarCustomActions.quickbar,
                           mode: 'entities',
-                        });
+                        } as any);
                       }}></ha-radio>
                   </ha-formfield>
                   <ha-formfield label="Commands">
@@ -1343,7 +1349,7 @@ export class NavbarCardEditor extends LitElement {
                         this.updateConfigByKey(options.configKey, {
                           action: NavbarCustomActions.quickbar,
                           mode: 'commands',
-                        });
+                        } as any);
                       }}></ha-radio>
                   </ha-formfield>
                 </div>

@@ -235,8 +235,7 @@ export function fireDOMEvent<T extends keyof EventConstructorMap = 'Event'>(
   ) as EventConstructorMap[T][0];
 
   if (detailOverride !== undefined) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (event as any).detail = detailOverride;
+    (event as { detail: unknown }).detail = detailOverride;
   }
 
   node.dispatchEvent(event);

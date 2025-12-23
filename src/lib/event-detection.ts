@@ -1,6 +1,7 @@
 import {
   Directive,
   directive,
+  type ElementPart,
   type PartInfo,
   PartType,
 } from 'lit/directive.js';
@@ -58,8 +59,7 @@ class EventDetectionDirective extends Directive {
     return;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  update(part: any, [config]: [EventDetectionConfig]) {
+  update(part: ElementPart, [config]: [EventDetectionConfig]) {
     const element = part.element as HTMLElement;
 
     // Clean up previous listeners

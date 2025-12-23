@@ -11,7 +11,7 @@ export class Popup {
 
   constructor(
     private _navbarCard: NavbarCard,
-    private readonly _popupItemData: PopupItemDef[],
+    _popupItemData: PopupItemDef[],
   ) {
     _popupItemData.forEach((_itemData, _index) => {
       this._popupItems.push(

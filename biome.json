@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.3.8/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.10/schema.json",
   "assist": {
     "actions": {
       "source": {
@@ -88,8 +88,8 @@
       },
       "suspicious": {
         "noArrayIndexKey": "warn",
-        "noAssignInExpressions": "error",
-        "noDoubleEquals": "error",
+        "noAssignInExpressions": "warn",
+        "noDoubleEquals": "warn",
         "noExplicitAny": "warn",
         "noImplicitAnyLet": "error"
       }

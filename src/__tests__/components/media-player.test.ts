@@ -197,6 +197,7 @@ describe('MediaPlayer', () => {
     });
 
     it('should show error when entity is not found', () => {
+      // biome-ignore lint/performance/noDelete: Testing purposes
       delete hass.states['media_player.test'];
       const result = mediaPlayer.shouldShowMediaPlayer();
       expect(result.visible).toBe(true);
@@ -298,6 +299,7 @@ describe('MediaPlayer', () => {
     });
 
     it('should not execute default tap action when entity is not found', async () => {
+      // biome-ignore lint/performance/noDelete: Testing purposes
       delete hass.states['media_player.test'];
       const dispatchEventSpy = vi.spyOn(navbarCard, 'dispatchEvent');
 
@@ -479,6 +481,7 @@ describe('MediaPlayer', () => {
 
   describe('Error Handling', () => {
     it('should render error card when entity is not found', async () => {
+      // biome-ignore lint/performance/noDelete: Testing purposes
       delete hass.states['media_player.test'];
       const result = mediaPlayer.render();
 

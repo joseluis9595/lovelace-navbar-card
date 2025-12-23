@@ -56,6 +56,7 @@ describe('mapStringToEnum', () => {
   enum MixedEnum {
     STRING_VALUE = 'string',
     NUMERIC_VALUE = 42,
+    // @ts-expect-error testing purposes
     // biome-ignore lint/style/useLiteralEnumMembers: testing purposes
     BOOLEAN_VALUE = true,
   }

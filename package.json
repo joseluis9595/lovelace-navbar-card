@@ -6,7 +6,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "NODE_ENV=production bun build src/navbar-card.ts --outfile=dist/navbar-card.js --target=browser",
+    "build": "tsc -b && NODE_ENV=production bun build src/navbar-card.ts --outfile=dist/navbar-card.js --target=browser",
     "lint": "biome check --write",
     "lint:check": "biome check",
     "format": "biome format --write src/**/*.ts",

@@ -7,7 +7,10 @@ import type { DeepPartial } from '@/types/types';
  * @param item Original item
  * @param newData New data to deepmerge and override
  */
-export function deepMergeKeepArrays<T>(item: T, newData: DeepPartial<T>): T {
+export function deepMergeKeepArrays<T>(
+  item: T,
+  newData?: DeepPartial<T> | null,
+): T {
   if (Array.isArray(newData)) {
     // Replace arrays entirely
     return newData as T;

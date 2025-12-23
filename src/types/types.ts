@@ -91,7 +91,8 @@ export function genericSetProperty<T, K extends DotNotationKeys<T>>(
     ) {
       // Determine if next key is a number (for arrays)
       const nextKey = paths[i + 1];
-      const isArrayIndex = nextKey !== undefined && !isNaN(Number(nextKey));
+      const isArrayIndex =
+        nextKey !== undefined && !Number.isNaN(Number(nextKey));
       currentObj[p] = isArrayIndex ? [] : {};
     } else {
       // Copy each level
@@ -116,5 +117,5 @@ export function genericSetProperty<T, K extends DotNotationKeys<T>>(
  * @template T - The object type to apply deep partiality to.
  */
 export type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
+  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> | null : T[P] | null;
 };

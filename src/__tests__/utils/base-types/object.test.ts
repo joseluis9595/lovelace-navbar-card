@@ -102,7 +102,7 @@ describe('object utilities', () => {
       const original = 'hello';
       const newData = 'world';
 
-      const result = deepMergeKeepArrays(original, newData);
+      const result = deepMergeKeepArrays<string>(original, newData);
 
       expect(result).toBe('world');
     });
@@ -235,7 +235,7 @@ describe('object utilities', () => {
         name: 'John',
       };
 
-      const result = deepMergeKeepArrays(original, newData);
+      const result = deepMergeKeepArrays<unknown>(original, newData);
 
       expect(result).toEqual({
         name: 'John',
