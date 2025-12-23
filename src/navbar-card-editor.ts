@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// Reason: Dynamic dot-notation keys for deeply nested config editing in a generic editor.
-
+/** biome-ignore-all lint/suspicious/noExplicitAny: TODO - `any` keywords are used when calling `updateConfigByKey` */
 import { loadHaComponents } from '@kipk/load-ha-components';
 import {
   html,
@@ -293,7 +291,6 @@ export class NavbarCardEditor extends LitElement {
   }
 
   makeTemplatable(options: TemplatableInputOptions) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { label, inputType, ...rest } = options;
 
     const value = genericGetProperty(this._config, options.configKey) as

@@ -90,13 +90,13 @@ We follow the **GitFlow** workflow, which helps organize development and release
 
 ## 5. Code Style & Linting
 
-* We use **ESLint** + **Prettier**; configuration files are included in the repo.
+* We use **Biome** for linting and formatting; configuration is included in the repo.
 
 * To lint & format your changes:
 
   ```bash
-  bun lint
-  bun format
+  bun run lint
+  bun run format
   ```
 
 * CI will block merges if linting or formatting issues are detected.
