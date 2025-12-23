@@ -424,8 +424,8 @@ styles: |-
 `,
   },
   {
-    title: 'Media player desktop',
-    description: 'Navigation bar with a media player on desktop placed at the bottom right',
+    title: 'Media player displayed only on desktop',
+    description: 'Navigation bar with a media player displayed only on desktop, placed at the bottom right',
     screenshot: '/img/examples/media-player-desktop.png',
     tags: [ EXAMPLE_TAG.MEDIA_PLAYER],
     code: `type: custom:navbar-card
@@ -453,7 +453,7 @@ routes:
 media_player:
   entity: media_player.test_media_player
   album_cover_background: true
-  show: "[[[return true]]]"
+  show: "[[[return !navbar.isDesktop]]]"
   desktop_position: bottom-right`
   },
   {
