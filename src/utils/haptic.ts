@@ -1,4 +1,4 @@
-import { NavbarCard } from '@/navbar-card';
+import type { NavbarCard } from '@/navbar-card';
 import { DEFAULT_NAVBAR_CONFIG } from '@/types';
 import { fireDOMEvent } from '@/utils';
 

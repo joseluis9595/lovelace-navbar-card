@@ -1,16 +1,18 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { css } from 'lit';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { DesktopPosition, type NavbarCardConfig } from '@/types/config';
+
 import {
-  getNavbarTemplates,
-  forceResetRipple,
-  forceOpenEditMode,
-  removeDashboardPadding,
-  forceDashboardPadding,
   fireDOMEvent,
+  forceDashboardPadding,
+  forceOpenEditMode,
+  forceResetRipple,
+  getNavbarTemplates,
   injectStyles,
   preventEventDefault,
+  removeDashboardPadding,
 } from '../../utils/dom';
-import { NavbarCardConfig, DesktopPosition } from '@/types/config';
 
 // Type definitions for test mocks
 interface MockLovelacePanel extends HTMLElement {
@@ -242,9 +244,9 @@ describe('DOM utilities', () => {
       mockHuiRoot.shadowRoot?.appendChild(mockStyle);
 
       const options = {
+        auto_padding: { enabled: false },
         desktop: {},
         mobile: {},
-        auto_padding: { enabled: false },
         show_media_player: false,
       };
 
@@ -259,9 +261,9 @@ describe('DOM utilities', () => {
 
     it('should add desktop left/right padding styles', () => {
       const options = {
-        desktop: { position: DesktopPosition.left, min_width: 768 },
+        auto_padding: { desktop_px: 100, enabled: true },
+        desktop: { min_width: 768, position: DesktopPosition.left },
         mobile: {},
-        auto_padding: { enabled: true, desktop_px: 100 },
         show_media_player: false,
       };
 
@@ -277,9 +279,9 @@ describe('DOM utilities', () => {
 
     it('should add desktop top padding styles', () => {
       const options = {
-        desktop: { position: DesktopPosition.top, min_width: 768 },
+        auto_padding: { desktop_px: 100, enabled: true },
+        desktop: { min_width: 768, position: DesktopPosition.top },
         mobile: {},
-        auto_padding: { enabled: true, desktop_px: 100 },
         show_media_player: false,
       };
 
@@ -296,9 +298,9 @@ describe('DOM utilities', () => {
 
     it('should add desktop bottom padding styles', () => {
       const options = {
-        desktop: { position: DesktopPosition.bottom, min_width: 768 },
+        auto_padding: { desktop_px: 100, enabled: true },
+        desktop: { min_width: 768, position: DesktopPosition.bottom },
         mobile: {},
-        auto_padding: { enabled: true, desktop_px: 100 },
         show_media_player: false,
       };
 
@@ -315,9 +317,9 @@ describe('DOM utilities', () => {
 
     it('should add mobile padding styles', () => {
       const options = {
+        auto_padding: { enabled: true, mobile_px: 80 },
         desktop: { min_width: 768 },
         mobile: {},
-        auto_padding: { enabled: true, mobile_px: 80 },
         show_media_player: false,
       };
 
@@ -333,9 +335,9 @@ describe('DOM utilities', () => {
 
     it('should add media player padding to mobile when enabled', () => {
       const options = {
+        auto_padding: { enabled: true, media_player_px: 20, mobile_px: 80 },
         desktop: { min_width: 768 },
         mobile: {},
-        auto_padding: { enabled: true, mobile_px: 80, media_player_px: 20 },
         show_media_player: true,
       };
 
@@ -355,9 +357,9 @@ describe('DOM utilities', () => {
       mockHuiRoot.shadowRoot?.appendChild(existingStyle);
 
       const options = {
+        auto_padding: { enabled: true, mobile_px: 80 },
         desktop: {},
         mobile: {},
-        auto_padding: { enabled: true, mobile_px: 80 },
         show_media_player: false,
       };
 
@@ -387,8 +389,8 @@ describe('DOM utilities', () => {
       const dispatchSpy = vi.spyOn(mockNode, 'dispatchEvent');
 
       const event = fireDOMEvent(mockNode, 'test-event', {
-        options: { bubbles: true },
         detailOverride: 'test-detail',
+        options: { bubbles: true },
       });
 
       expect(dispatchSpy).toHaveBeenCalledWith(event);

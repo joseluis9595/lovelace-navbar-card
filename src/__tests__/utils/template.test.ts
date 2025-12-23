@@ -1,12 +1,13 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { HomeAssistant } from 'custom-card-helpers';
-import { NavbarCard } from '@/navbar-card';
-import { RouteItem } from '@/types/config';
+import type { HomeAssistant } from 'custom-card-helpers';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import type { NavbarCard } from '@/navbar-card';
+import type { RouteItem } from '@/types/config';
 import {
   cleanTemplate,
   isTemplate,
-  wrapTemplate,
   processTemplate,
+  wrapTemplate,
 } from '@/utils';
 
 describe('Template utilities', () => {
@@ -17,49 +18,10 @@ describe('Template utilities', () => {
     vi.clearAllMocks();
 
     mockHass = {
-      states: {
-        'light.kitchen': {
-          entity_id: 'light.kitchen',
-          state: 'on',
-          attributes: {},
-          context: {},
-          last_changed: '',
-          last_updated: '',
-        },
-        'light.living_room': {
-          entity_id: 'light.living_room',
-          state: 'off',
-          attributes: {},
-          context: {},
-          last_changed: '',
-          last_updated: '',
-        },
-        'sensor.temperature': {
-          entity_id: 'sensor.temperature',
-          state: '22.5',
-          attributes: {},
-          context: {},
-          last_changed: '',
-          last_updated: '',
-        },
-      },
       areas: {
-        area1: { area_id: 'area1', name: 'Kitchen', icon: 'mdi:kitchen' },
-        area2: { area_id: 'area2', name: 'Living Room', icon: 'mdi:sofa' },
+        area1: { area_id: 'area1', icon: 'mdi:kitchen', name: 'Kitchen' },
+        area2: { area_id: 'area2', icon: 'mdi:sofa', name: 'Living Room' },
       },
-      user: {
-        id: 'user1',
-        name: 'User',
-        is_admin: true,
-        is_owner: true,
-        credentials: [],
-        mfa_modules: [],
-      },
-      config: {},
-      themes: {},
-      selectedTheme: null,
-      panels: {},
-      services: {},
       auth: {
         data: {
           access_token: '',
@@ -67,6 +29,45 @@ describe('Template utilities', () => {
           refresh_token: '',
           token_type: '',
         },
+      },
+      config: {},
+      panels: {},
+      selectedTheme: null,
+      services: {},
+      states: {
+        'light.kitchen': {
+          attributes: {},
+          context: {},
+          entity_id: 'light.kitchen',
+          last_changed: '',
+          last_updated: '',
+          state: 'on',
+        },
+        'light.living_room': {
+          attributes: {},
+          context: {},
+          entity_id: 'light.living_room',
+          last_changed: '',
+          last_updated: '',
+          state: 'off',
+        },
+        'sensor.temperature': {
+          attributes: {},
+          context: {},
+          entity_id: 'sensor.temperature',
+          last_changed: '',
+          last_updated: '',
+          state: '22.5',
+        },
+      },
+      themes: {},
+      user: {
+        credentials: [],
+        id: 'user1',
+        is_admin: true,
+        is_owner: true,
+        mfa_modules: [],
+        name: 'User',
       },
     } as unknown as HomeAssistant;
 
@@ -155,8 +156,8 @@ describe('Template utilities', () => {
         template,
       );
       expect(result).toEqual([
-        { label: 'Kitchen', url: '/d-bubble/home#area1', icon: 'mdi:kitchen' },
-        { label: 'Living Room', url: '/d-bubble/home#area2', icon: 'mdi:sofa' },
+        { icon: 'mdi:kitchen', label: 'Kitchen', url: '/d-bubble/home#area1' },
+        { icon: 'mdi:sofa', label: 'Living Room', url: '/d-bubble/home#area2' },
       ]);
     });
 
