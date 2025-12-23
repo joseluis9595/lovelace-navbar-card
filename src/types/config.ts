@@ -1,12 +1,19 @@
 import type { ActionConfig } from 'custom-card-helpers';
 
-import type { DeepPartial } from '@/types/types';
-
 export enum DesktopPosition {
   top = 'top',
   left = 'left',
   bottom = 'bottom',
   right = 'right',
+}
+
+export enum WidgetPosition {
+  topLeft = 'top-left',
+  topCenter = 'top-center',
+  topRight = 'top-right',
+  bottomLeft = 'bottom-left',
+  bottomCenter = 'bottom-center',
+  bottomRight = 'bottom-right',
 }
 
 export enum NavbarCustomActions {
@@ -118,9 +125,10 @@ export type AutoPaddingConfig = {
 
 // Media player configuration
 type MediaPlayerConfig = {
-  entity: JSTemplatable<string>;
+  entity?: JSTemplatable<string>;
   show?: JSTemplatable<boolean>;
   album_cover_background?: boolean;
+  desktop_position?: WidgetPosition;
   tap_action?: ExtendedActionConfig;
   hold_action?: ExtendedActionConfig;
   double_tap_action?: ExtendedActionConfig;
@@ -181,14 +189,16 @@ export const DEFAULT_NAVBAR_CONFIG = {
   },
   media_player: {
     album_cover_background: false,
-    entity: '',
+    desktop_position: WidgetPosition.bottomCenter,
   },
   mobile: {
     mode: 'docked',
     show_labels: false,
     show_popup_label_backgrounds: false,
   },
-} as const satisfies DeepPartial<NavbarCardConfig>;
+  routes: [],
+  template: undefined,
+} as const satisfies NavbarCardConfig;
 
 export const STUB_CONFIG: NavbarCardConfig = {
   routes: [

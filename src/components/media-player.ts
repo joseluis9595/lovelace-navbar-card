@@ -1,8 +1,13 @@
 import { html } from 'lit';
+import { classMap } from 'lit/directives/class-map.js';
 
 import { type ActionableElement, eventDetection } from '@/lib/event-detection';
 import type { NavbarCard } from '@/navbar-card';
-import type { ExtendedActionConfig } from '@/types';
+import {
+  DEFAULT_NAVBAR_CONFIG,
+  type ExtendedActionConfig,
+  type WidgetPosition,
+} from '@/types';
 import { preventEventDefault, processTemplate } from '@/utils';
 
 export class MediaPlayer implements ActionableElement {
@@ -20,18 +25,26 @@ export class MediaPlayer implements ActionableElement {
     return this._navbarCard.config?.media_player?.double_tap_action;
   }
 
+  get desktop_position(): WidgetPosition {
+    return (
+      this._navbarCard.config?.media_player?.desktop_position ??
+      DEFAULT_NAVBAR_CONFIG.media_player.desktop_position
+    );
+  }
+
   /**
    * Check if the media player should be shown.
    */
-  public shouldShowMediaPlayer = (): { visible: boolean; error?: string } => {
+  public isVisible = (): { visible: boolean; error?: string } => {
     const config = this._navbarCard.config?.media_player;
     if (!config?.entity) return { visible: false };
-    if (this._navbarCard.isDesktop) return { visible: false };
 
     const entity = this._getEntity();
     const state = this._navbarCard._hass.states[entity ?? ''];
 
-    if (!state) return { error: `Entity not found "${entity}"`, visible: true };
+    if (!(state && entity)) {
+      return { error: `Entity not found "${entity}"`, visible: true };
+    }
 
     if (config.show != null) {
       return {
@@ -86,12 +99,10 @@ export class MediaPlayer implements ActionableElement {
     });
   };
 
-  public render = () => {
-    const { visible, error } = this.shouldShowMediaPlayer();
-    if (!visible) return html``;
+  public render = (options: { isInsideNavbar: boolean }) => {
+    const { visible, error } = this.isVisible();
 
-    const entity = this._getEntity();
-    if (!entity) return html``;
+    if (!visible) return html``;
 
     if (error) {
       return html`<ha-card class="media-player error">
@@ -99,6 +110,8 @@ export class MediaPlayer implements ActionableElement {
       </ha-card>`;
     }
 
+    // `isVisible` guarantees that the entity is not null
+    const entity = this._getEntity()!;
     const mediaPlayerState = this._navbarCard._hass.states[entity];
     const mediaPlayerImage = mediaPlayerState.attributes.entity_picture;
     const progress =
@@ -107,9 +120,19 @@ export class MediaPlayer implements ActionableElement {
           mediaPlayerState.attributes.media_duration
         : null;
 
+    const deviceClass = this._navbarCard.isDesktop ? 'desktop' : 'mobile';
+
     return html`
       <ha-card
-        class="media-player"
+        class="${classMap({
+          'media-player': true,
+          'position-absolute': !options.isInsideNavbar,
+          [(
+            this.desktop_position ??
+            DEFAULT_NAVBAR_CONFIG.media_player.desktop_position
+          ).toString()]: true,
+          [deviceClass]: true,
+        })}"
         ${eventDetection({
           context: this._navbarCard,
           doubleTap: this.double_tap_action,

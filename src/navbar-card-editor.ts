@@ -25,6 +25,7 @@ import {
   type PopupItem,
   type QuickbarActionConfig,
   type RouteItem,
+  WidgetPosition,
 } from '@/types';
 import {
   cleanTemplate,
@@ -949,26 +950,24 @@ export class NavbarCardEditor extends LitElement {
         <div class="editor-section">
           ${this.makeSwitch({
             configKey: 'haptic.url',
-            defaultValue: hapticValue ?? DEFAULT_NAVBAR_CONFIG.haptic.url,
-            label: 'URL',
+            defaultValue: hapticValue,
+            label: 'When pressing routes with URL configured',
           })}
           ${this.makeSwitch({
             configKey: 'haptic.tap_action',
-            defaultValue:
-              hapticValue ?? DEFAULT_NAVBAR_CONFIG.haptic.tap_action,
-            label: 'Tap action',
+            defaultValue: hapticValue,
+            label: "When executing the 'tap_action' configured for a route",
           })}
           ${this.makeSwitch({
             configKey: 'haptic.hold_action',
-            defaultValue:
-              hapticValue ?? DEFAULT_NAVBAR_CONFIG.haptic.hold_action,
-            label: 'Hold action',
+            defaultValue: hapticValue,
+            label: "When executing the 'hold_action' configured for a route",
           })}
           ${this.makeSwitch({
             configKey: 'haptic.double_tap_action',
-            defaultValue:
-              hapticValue ?? DEFAULT_NAVBAR_CONFIG.haptic.double_tap_action,
-            label: 'Double tap action',
+            defaultValue: hapticValue,
+            label:
+              "When executing the 'double_tap_action' configured for a route",
           })}
         </div>
       </ha-expansion-panel>
@@ -994,6 +993,18 @@ export class NavbarCardEditor extends LitElement {
             defaultValue:
               DEFAULT_NAVBAR_CONFIG.media_player?.album_cover_background,
             label: 'Show album cover background',
+          })}
+          ${this.makeComboBox<WidgetPosition>({
+            configKey: 'media_player.desktop_position',
+            items: [
+              { label: 'Top left', value: WidgetPosition.topLeft },
+              { label: 'Top center', value: WidgetPosition.topCenter },
+              { label: 'Top right', value: WidgetPosition.topRight },
+              { label: 'Bottom left', value: WidgetPosition.bottomLeft },
+              { label: 'Bottom center', value: WidgetPosition.bottomCenter },
+              { label: 'Bottom right', value: WidgetPosition.bottomRight },
+            ],
+            label: 'Desktop position',
           })}
           ${this.makeTemplateEditor({
             configKey: 'media_player.show',
@@ -1123,6 +1134,8 @@ export class NavbarCardEditor extends LitElement {
         <div class="editor-section">
           ${this.makeComboBox<NavbarDisplayMode>({
             configKey: 'mobile.mode',
+            defaultValue: DEFAULT_NAVBAR_CONFIG.mobile?.mode,
+            hideClearIcon: true,
             items: [
               { label: 'Floating', value: 'floating' },
               { label: 'Docked', value: 'docked' },
