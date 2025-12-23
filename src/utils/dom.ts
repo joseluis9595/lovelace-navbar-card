@@ -1,10 +1,11 @@
-import { CSSResult, html, TemplateResult } from 'lit';
+import { type CSSResult, html, type TemplateResult } from 'lit';
+
 import {
-  NavbarCardConfig,
-  AutoPaddingConfig,
+  type AutoPaddingConfig,
   DEFAULT_NAVBAR_CONFIG,
+  type NavbarCardConfig,
 } from '@/types/config';
-import { RippleElement } from '@/types/types';
+import type { RippleElement } from '@/types/types';
 
 const DASHBOARD_PADDING_STYLE_ID = 'navbar-card-forced-padding-styles';
 const DEFAULT_STYLES_ID = 'navbar-card-default-styles';
@@ -227,12 +228,14 @@ export function fireDOMEvent<T extends keyof EventConstructorMap = 'Event'>(
   ) => EventConstructorMap[T][0],
 ): EventConstructorMap[T][0] {
   const { options, detailOverride } = data ?? {};
-  const constructor = EventConstructor || Event;
-  const event = new constructor(type, options) as EventConstructorMap[T][0];
+  const eventConstructor = EventConstructor || Event;
+  const event = new eventConstructor(
+    type,
+    options,
+  ) as EventConstructorMap[T][0];
 
   if (detailOverride !== undefined) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (event as any).detail = detailOverride;
+    (event as { detail: unknown }).detail = detailOverride;
   }
 
   node.dispatchEvent(event);

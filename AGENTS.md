@@ -16,8 +16,7 @@ Lovelace Navbar Card is a custom card for Home Assistant's Lovelace UI, built wi
   - [@testing-library/dom](https://testing-library.com/) - DOM testing utilities
 - **Documentation**: [Docusaurus](https://docusaurus.io/) - Documentation website framework
 - **Code Quality**:
-  - ESLint - Linting with TypeScript support
-  - Prettier - Code formatting
+  - Biome - Linting & formatting with TypeScript support
   - TypeScript compiler - Static type checking
 
 ## Development Workflow
@@ -110,7 +109,7 @@ Before committing code, ensure:
 
 - Follow TypeScript best practices
 - Maintain strict type safety
-- Use ESLint and Prettier configurations
+- Use the Biome configuration for linting/formatting
 - Keep components modular and reusable
 - Follow Home Assistant's custom card guidelines
 

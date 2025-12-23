@@ -1,11 +1,11 @@
-import { html, TemplateResult } from 'lit';
+import { html, type TemplateResult } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { NavbarCard } from '@/navbar-card';
-import { BaseRoute, Popup } from '@/components/navbar';
-import { PopupItem as PopupItemDef } from '@/types';
+import { BaseRoute, type Popup } from '@/components/navbar';
 import { eventDetection } from '@/lib/event-detection';
+import type { NavbarCard } from '@/navbar-card';
+import type { PopupItem as PopupItemDef } from '@/types';
 
 export class PopupItem extends BaseRoute {
   constructor(
@@ -34,21 +34,21 @@ export class PopupItem extends BaseRoute {
         'popup-item': true,
         [popupDirectionClassName]: true,
         [labelPositionClassName]: true,
-        popuplabelbackground: showLabelBackground,
         active: this.selected,
+        popuplabelbackground: showLabelBackground,
       })}
       style=${styleMap({
         '--index': this._index,
       })}
       ${eventDetection({
         context: this._navbarCard,
+        doubleTap: this.double_tap_action,
+        hold: this.hold_action,
         popupItem: this,
         tap: this.tap_action ?? {
           action: 'navigate',
           navigation_path: this.url ?? '',
         },
-        hold: this.hold_action,
-        doubleTap: this.double_tap_action,
       })}>
       <div
         class=${classMap({
@@ -58,13 +58,17 @@ export class PopupItem extends BaseRoute {
         ${this.icon.render()}
         <md-ripple></md-ripple>
         ${this.badge.render()}
-        ${showLabelBackground && this.label
-          ? html`<div class="label">${this.label}</div>`
-          : html``}
+        ${
+          showLabelBackground && this.label
+            ? html`<div class="label">${this.label}</div>`
+            : html``
+        }
       </div>
-      ${!showLabelBackground && this.label
-        ? html`<div class="label">${this.label}</div>`
-        : html``}
+      ${
+        !showLabelBackground && this.label
+          ? html`<div class="label">${this.label}</div>`
+          : html``
+      }
     </div>`;
   }
 }

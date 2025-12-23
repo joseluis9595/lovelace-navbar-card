@@ -21,8 +21,8 @@ const decimalToHex = (decimal: number) => decimal.toString(16).padStart(2, '0');
 
 const isValidInt = (value: string) => {
   try {
-    const parsedValue = parseInt(value);
-    if (isNaN(parsedValue)) return false;
+    const parsedValue = parseInt(value, 10);
+    if (Number.isNaN(parsedValue)) return false;
   } catch {
     return false;
   }
@@ -30,55 +30,64 @@ const isValidInt = (value: string) => {
 };
 
 const hue2rgb = (p: number, q: number, t: number) => {
-  if (t < 0) t += 1;
-  if (t > 1) t -= 1;
-  if (t < 1 / 6) return p + (q - p) * 6 * t;
-  if (t < 1 / 2) return q;
-  if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+  let adjustedT = t;
+  if (adjustedT < 0) adjustedT += 1;
+  if (adjustedT > 1) adjustedT -= 1;
+  if (adjustedT < 1 / 6) return p + (q - p) * 6 * adjustedT;
+  if (adjustedT < 1 / 2) return q;
+  if (adjustedT < 2 / 3) return p + (q - p) * (2 / 3 - adjustedT) * 6;
   return p;
 };
 
 const complementaryRGBColor = (r: number, g: number, b: number) => {
-  if (Math.max(r, g, b) == Math.min(r, g, b)) {
-    return { r: 255 - r, g: 255 - g, b: 255 - b };
-  } else {
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    ((r /= 255), (g /= 255), (b /= 255));
-    const max = Math.max(r, g, b),
-      min = Math.min(r, g, b);
-    let h = 0;
-    const l = (max + min) / 2;
-    const d = max - min;
-    const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-
-    switch (max) {
-      case r:
-        h = (g - b) / d + (g < b ? 6 : 0);
-        break;
-      case g:
-        h = (b - r) / d + 2;
-        break;
-      case b:
-        h = (r - g) / d + 4;
-        break;
-    }
-
-    h = Math.round(h * 60 + 180) % 360;
-    h /= 360;
-
-    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-    const p = 2 * l - q;
-
-    r = hue2rgb(p, q, h + 1 / 3);
-    g = hue2rgb(p, q, h);
-    b = hue2rgb(p, q, h - 1 / 3);
-
-    return {
-      r: Math.round(r * 255),
-      g: Math.round(g * 255),
-      b: Math.round(b * 255),
-    };
+  // Handle grayscale colors (when R=G=B)
+  if (Math.max(r, g, b) === Math.min(r, g, b)) {
+    return { b: 255 - b, g: 255 - g, r: 255 - r };
   }
+
+  // Normalize RGB values to 0-1 range
+  let rNorm = r / 255;
+  let gNorm = g / 255;
+  let bNorm = b / 255;
+
+  const max = Math.max(rNorm, gNorm, bNorm);
+  const min = Math.min(rNorm, gNorm, bNorm);
+  const d = max - min;
+
+  // Calculate lightness and saturation
+  const l = (max + min) / 2;
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+  // Calculate hue
+  let h = 0;
+  switch (max) {
+    case rNorm:
+      h = (gNorm - bNorm) / d + (gNorm < bNorm ? 6 : 0);
+      break;
+    case gNorm:
+      h = (bNorm - rNorm) / d + 2;
+      break;
+    case bNorm:
+      h = (rNorm - gNorm) / d + 4;
+      break;
+  }
+
+  // Add 180 degrees for complementary color and normalize
+  h = (Math.round(h * 60 + 180) % 360) / 360;
+
+  // Convert HSL back to RGB
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+
+  rNorm = hue2rgb(p, q, h + 1 / 3);
+  gNorm = hue2rgb(p, q, h);
+  bNorm = hue2rgb(p, q, h - 1 / 3);
+
+  return {
+    b: Math.round(bNorm * 255),
+    g: Math.round(gNorm * 255),
+    r: Math.round(rNorm * 255),
+  };
 };
 
 /*****************************************
@@ -126,10 +135,15 @@ export class Color {
    */
   static from(color: string): Color {
     const normalizedColor = color.toLowerCase().trim();
-    if (!this.colorCache.has(normalizedColor)) {
-      this.colorCache.set(normalizedColor, new Color(normalizedColor));
+
+    const cached = Color.colorCache.get(normalizedColor);
+    if (cached) {
+      return cached;
     }
-    return this.colorCache.get(normalizedColor)!;
+
+    const newColor = new Color(normalizedColor);
+    Color.colorCache.set(normalizedColor, newColor);
+    return newColor;
   }
 
   ////////////////////////////
@@ -145,7 +159,7 @@ export class Color {
   }
 
   _parseColorArray(data: unknown[]) {
-    const colorArray = data.map(x => parseInt(x as string));
+    const colorArray = data.map(x => parseInt(x as string, 10));
     if (colorArray.length < 3) {
       throw Error(
         `Invalid array format color string: "${data}"\nSupported formats: [r,g,b] | [r,g,b,a]`,
@@ -163,9 +177,9 @@ export class Color {
     if (data.indexOf('rgb(') == -1 || colorComponents.length != 3) {
       throw Error(`Invalid 'rgb(r,g,b)' format for color string: "${data}"`);
     }
-    this.r = parseInt(colorComponents[0]);
-    this.g = parseInt(colorComponents[1]);
-    this.b = parseInt(colorComponents[2]);
+    this.r = parseInt(colorComponents[0], 10);
+    this.g = parseInt(colorComponents[1], 10);
+    this.b = parseInt(colorComponents[2], 10);
   }
 
   _parseRGBAString(data: string) {
@@ -174,10 +188,10 @@ export class Color {
     if (data.indexOf('rgba(') == -1 || colorComponents.length != 4) {
       throw Error(`Invalid 'rgba(r,g,b,a)' format for color string: "${data}"`);
     }
-    this.r = parseInt(colorComponents[0]);
-    this.g = parseInt(colorComponents[1]);
-    this.b = parseInt(colorComponents[2]);
-    this.a = parseInt(colorComponents[3]);
+    this.r = parseInt(colorComponents[0], 10);
+    this.g = parseInt(colorComponents[1], 10);
+    this.b = parseInt(colorComponents[2], 10);
+    this.a = parseInt(colorComponents[3], 10);
   }
 
   _parseHexString(data: string) {
@@ -295,7 +309,7 @@ export class Color {
    * @returns An object containing the red, green, and blue components of the color.
    */
   rgb(): RGB {
-    return { r: this.r, g: this.g, b: this.b };
+    return { b: this.b, g: this.g, r: this.r };
   }
 
   /**
@@ -304,7 +318,7 @@ export class Color {
    * @returns An object containing the red, green, blue, and alpha (opacity) components of the color.
    */
   rgba(): RGBA {
-    return { r: this.r, g: this.g, b: this.b, a: this.a };
+    return { a: this.a, b: this.b, g: this.g, r: this.r };
   }
 
   /**

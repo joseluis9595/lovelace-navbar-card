@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
 import { generateHash, mapStringToEnum } from '@/utils';
 
 describe('generateHash', () => {
@@ -55,6 +56,8 @@ describe('mapStringToEnum', () => {
   enum MixedEnum {
     STRING_VALUE = 'string',
     NUMERIC_VALUE = 42,
+    // @ts-expect-error testing purposes
+    // biome-ignore lint/style/useLiteralEnumMembers: testing purposes
     BOOLEAN_VALUE = true,
   }
 

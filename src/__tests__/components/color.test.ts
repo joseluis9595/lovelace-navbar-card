@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { Color } from '../../components/color';
 
 // Type definitions for test mocks
@@ -21,17 +22,17 @@ describe('Color class', () => {
     describe('hex string parsing', () => {
       it('should parse 3-digit hex colors', () => {
         const color = new Color('#abc');
-        expect(color.rgb()).toEqual({ r: 170, g: 187, b: 204 });
+        expect(color.rgb()).toEqual({ b: 204, g: 187, r: 170 });
       });
 
       it('should parse 6-digit hex colors', () => {
         const color = new Color('#ff0000');
-        expect(color.rgb()).toEqual({ r: 255, g: 0, b: 0 });
+        expect(color.rgb()).toEqual({ b: 0, g: 0, r: 255 });
       });
 
       it('should parse 8-digit hex colors with alpha', () => {
         const color = new Color('#ff000080');
-        expect(color.rgba()).toEqual({ r: 255, g: 0, b: 0, a: 128 });
+        expect(color.rgba()).toEqual({ a: 128, b: 0, g: 0, r: 255 });
       });
 
       it('should handle hex without # prefix', () => {
@@ -45,20 +46,20 @@ describe('Color class', () => {
         });
 
         const color = new Color('ff0000');
-        expect(color.rgb()).toEqual({ r: 255, g: 0, b: 0 });
+        expect(color.rgb()).toEqual({ b: 0, g: 0, r: 255 });
       });
 
       it('should handle numeric string as hex', () => {
         const color = new Color('255');
-        expect(color.rgb()).toEqual({ r: 34, g: 85, b: 85 }); // #255 = #225555
+        expect(color.rgb()).toEqual({ b: 85, g: 85, r: 34 }); // #255 = #225555
       });
 
       it('should handle edge cases in isValidInt', () => {
         // Test various edge cases that might trigger different code paths
         const testCases = [
-          { input: '000', expected: { r: 0, g: 0, b: 0 } },
-          { input: '111', expected: { r: 17, g: 17, b: 17 } },
-          { input: '123', expected: { r: 17, g: 34, b: 51 } }, // This should be treated as hex
+          { expected: { b: 0, g: 0, r: 0 }, input: '000' },
+          { expected: { b: 17, g: 17, r: 17 }, input: '111' },
+          { expected: { b: 51, g: 34, r: 17 }, input: '123' }, // This should be treated as hex
         ];
 
         testCases.forEach(({ input, expected }) => {
@@ -80,12 +81,12 @@ describe('Color class', () => {
     describe('RGB string parsing', () => {
       it('should parse RGB strings', () => {
         const color = new Color('rgb(255, 0, 0)');
-        expect(color.rgb()).toEqual({ r: 255, g: 0, b: 0 });
+        expect(color.rgb()).toEqual({ b: 0, g: 0, r: 255 });
       });
 
       it('should parse RGB strings with spaces', () => {
         const color = new Color('rgb( 100 , 150 , 200 )');
-        expect(color.rgb()).toEqual({ r: 100, g: 150, b: 200 });
+        expect(color.rgb()).toEqual({ b: 200, g: 150, r: 100 });
       });
 
       it('should throw error for invalid RGB format', () => {
@@ -104,12 +105,12 @@ describe('Color class', () => {
     describe('RGBA string parsing', () => {
       it('should parse RGBA strings', () => {
         const color = new Color('rgba(255, 0, 0, 0.5)');
-        expect(color.rgba()).toEqual({ r: 255, g: 0, b: 0, a: 0 });
+        expect(color.rgba()).toEqual({ a: 0, b: 0, g: 0, r: 255 });
       });
 
       it('should parse RGBA strings with spaces', () => {
         const color = new Color('rgba( 100 , 150 , 200 , 128 )');
-        expect(color.rgba()).toEqual({ r: 100, g: 150, b: 200, a: 128 });
+        expect(color.rgba()).toEqual({ a: 128, b: 200, g: 150, r: 100 });
       });
 
       it('should throw error for invalid RGBA format', () => {
@@ -125,17 +126,17 @@ describe('Color class', () => {
     describe('array parsing', () => {
       it('should parse RGB arrays', () => {
         const color = new Color([255, 0, 0]);
-        expect(color.rgb()).toEqual({ r: 255, g: 0, b: 0 });
+        expect(color.rgb()).toEqual({ b: 0, g: 0, r: 255 });
       });
 
       it('should parse RGBA arrays', () => {
         const color = new Color([255, 0, 0, 128]);
-        expect(color.rgba()).toEqual({ r: 255, g: 0, b: 0, a: 128 });
+        expect(color.rgba()).toEqual({ a: 128, b: 0, g: 0, r: 255 });
       });
 
       it('should use default alpha when not provided', () => {
         const color = new Color([255, 0, 0]);
-        expect(color.rgba()).toEqual({ r: 255, g: 0, b: 0, a: 255 });
+        expect(color.rgba()).toEqual({ a: 255, b: 0, g: 0, r: 255 });
       });
 
       it('should throw error for invalid array length', () => {
@@ -169,7 +170,7 @@ describe('Color class', () => {
         });
 
         const color = new Color('red');
-        expect(color.rgb()).toEqual({ r: 255, g: 0, b: 0 });
+        expect(color.rgb()).toEqual({ b: 0, g: 0, r: 255 });
         expect(mockGetComputedStyle).toHaveBeenCalled();
       });
 
@@ -206,7 +207,7 @@ describe('Color class', () => {
   describe('static from method', () => {
     it('should create new Color instance', () => {
       const color = Color.from('#ff0000');
-      expect(color.rgb()).toEqual({ r: 255, g: 0, b: 0 });
+      expect(color.rgb()).toEqual({ b: 0, g: 0, r: 255 });
     });
 
     it('should use cache for same color', () => {
@@ -260,13 +261,13 @@ describe('Color class', () => {
       it('should return complementary color', () => {
         const color = new Color('#ff0000'); // Red
         const complementary = color.complementary();
-        expect(complementary.rgb()).toEqual({ r: 0, g: 255, b: 255 }); // Cyan
+        expect(complementary.rgb()).toEqual({ b: 255, g: 255, r: 0 }); // Cyan
       });
 
       it('should handle gray colors', () => {
         const color = new Color('#808080'); // Gray
         const complementary = color.complementary();
-        expect(complementary.rgb()).toEqual({ r: 127, g: 127, b: 127 }); // Inverted gray
+        expect(complementary.rgb()).toEqual({ b: 127, g: 127, r: 127 }); // Inverted gray
       });
 
       it('should preserve alpha channel', () => {
@@ -278,13 +279,13 @@ describe('Color class', () => {
       it('should handle blue-dominant colors', () => {
         const color = new Color('#0000ff'); // Blue
         const complementary = color.complementary();
-        expect(complementary.rgb()).toEqual({ r: 255, g: 255, b: 0 }); // Yellow
+        expect(complementary.rgb()).toEqual({ b: 0, g: 255, r: 255 }); // Yellow
       });
 
       it('should handle green-dominant colors', () => {
         const color = new Color('#00ff00'); // Green
         const complementary = color.complementary();
-        expect(complementary.rgb()).toEqual({ r: 255, g: 0, b: 255 }); // Magenta
+        expect(complementary.rgb()).toEqual({ b: 255, g: 0, r: 255 }); // Magenta
       });
 
       it('should handle complex color calculations', () => {
@@ -351,7 +352,7 @@ describe('Color class', () => {
         const color = new Color('#000000'); // Black
         const result = color.shade(50);
         // Black has brightness 0, so it should return complementary color
-        expect(result.rgb()).toEqual({ r: 255, g: 255, b: 255 }); // Should return complementary (white)
+        expect(result.rgb()).toEqual({ b: 255, g: 255, r: 255 }); // Should return complementary (white)
       });
 
       it('should recursively lighten very dark colors', () => {
@@ -366,25 +367,25 @@ describe('Color class', () => {
       it('should return black for light colors', () => {
         const color = new Color('#ffffff'); // White
         const contrasting = color.contrastingColor();
-        expect(contrasting.rgb()).toEqual({ r: 0, g: 0, b: 0 }); // Black
+        expect(contrasting.rgb()).toEqual({ b: 0, g: 0, r: 0 }); // Black
       });
 
       it('should return white for dark colors', () => {
         const color = new Color('#000000'); // Black
         const contrasting = color.contrastingColor();
-        expect(contrasting.rgb()).toEqual({ r: 255, g: 255, b: 255 }); // White
+        expect(contrasting.rgb()).toEqual({ b: 255, g: 255, r: 255 }); // White
       });
 
       it('should return black for medium-light colors', () => {
         const color = new Color('#cccccc'); // Light gray
         const contrasting = color.contrastingColor();
-        expect(contrasting.rgb()).toEqual({ r: 0, g: 0, b: 0 }); // Black
+        expect(contrasting.rgb()).toEqual({ b: 0, g: 0, r: 0 }); // Black
       });
 
       it('should return white for medium-dark colors', () => {
         const color = new Color('#333333'); // Dark gray
         const contrasting = color.contrastingColor();
-        expect(contrasting.rgb()).toEqual({ r: 255, g: 255, b: 255 }); // White
+        expect(contrasting.rgb()).toEqual({ b: 255, g: 255, r: 255 }); // White
       });
     });
   });
@@ -417,7 +418,7 @@ describe('Color class', () => {
     describe('rgb', () => {
       it('should return RGB object', () => {
         const rgb = testColor.rgb();
-        expect(rgb).toEqual({ r: 255, g: 128, b: 0 });
+        expect(rgb).toEqual({ b: 0, g: 128, r: 255 });
         expect(typeof rgb.r).toBe('number');
         expect(typeof rgb.g).toBe('number');
         expect(typeof rgb.b).toBe('number');
@@ -427,7 +428,7 @@ describe('Color class', () => {
     describe('rgba', () => {
       it('should return RGBA object', () => {
         const rgba = testColor.rgba();
-        expect(rgba).toEqual({ r: 255, g: 128, b: 0, a: 255 });
+        expect(rgba).toEqual({ a: 255, b: 0, g: 128, r: 255 });
         expect(typeof rgba.r).toBe('number');
         expect(typeof rgba.g).toBe('number');
         expect(typeof rgba.b).toBe('number');
@@ -488,13 +489,13 @@ describe('Color class', () => {
   describe('edge cases and error handling', () => {
     it('should handle zero values', () => {
       const color = new Color('#000000');
-      expect(color.rgb()).toEqual({ r: 0, g: 0, b: 0 });
+      expect(color.rgb()).toEqual({ b: 0, g: 0, r: 0 });
       expect(color.luma()).toBe(0);
     });
 
     it('should handle maximum values', () => {
       const color = new Color('#ffffff');
-      expect(color.rgb()).toEqual({ r: 255, g: 255, b: 255 });
+      expect(color.rgb()).toEqual({ b: 255, g: 255, r: 255 });
       expect(color.luma()).toBeCloseTo(255, 0);
     });
 
@@ -518,8 +519,8 @@ describe('Color class', () => {
 
       const color1 = new Color('rgb(255, 0, 0');
       const color2 = new Color('rgb(255, 0, 0))');
-      expect(color1.rgb()).toEqual({ r: 255, g: 0, b: 0 });
-      expect(color2.rgb()).toEqual({ r: 255, g: 0, b: 0 });
+      expect(color1.rgb()).toEqual({ b: 0, g: 0, r: 255 });
+      expect(color2.rgb()).toEqual({ b: 0, g: 0, r: 255 });
     });
 
     it('should handle malformed RGBA strings', () => {
@@ -534,8 +535,8 @@ describe('Color class', () => {
 
       const color1 = new Color('rgba(255, 0, 0, 0.5');
       const color2 = new Color('rgba(255, 0, 0, 0.5))');
-      expect(color1.rgb()).toEqual({ r: 255, g: 0, b: 0 });
-      expect(color2.rgb()).toEqual({ r: 255, g: 0, b: 0 });
+      expect(color1.rgb()).toEqual({ b: 0, g: 0, r: 255 });
+      expect(color2.rgb()).toEqual({ b: 0, g: 0, r: 255 });
     });
   });
 

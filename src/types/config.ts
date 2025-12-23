@@ -1,4 +1,6 @@
-import { ActionConfig } from 'custom-card-helpers';
+import type { ActionConfig } from 'custom-card-helpers';
+
+import type { DeepPartial } from '@/types/types';
 
 export enum DesktopPosition {
   top = 'top',
@@ -155,61 +157,60 @@ export type NavbarCardConfig = {
 };
 
 export const DEFAULT_NAVBAR_CONFIG = {
-  routes: [],
-  template: undefined,
+  desktop: {
+    min_width: 768,
+    mode: 'floating',
+    position: DesktopPosition.bottom,
+    show_labels: false,
+    show_popup_label_backgrounds: false,
+  },
+  haptic: {
+    double_tap_action: true,
+    hold_action: true,
+    tap_action: false,
+    url: false,
+  },
   layout: {
     auto_padding: {
-      enabled: true,
       desktop_px: 100,
-      mobile_px: 80,
+      enabled: true,
       media_player_px: 100,
+      mobile_px: 80,
     },
     reflect_child_state: false,
   },
-  desktop: {
-    mode: 'floating',
-    show_labels: false,
-    show_popup_label_backgrounds: false,
-    min_width: 768,
-    position: DesktopPosition.bottom,
+  media_player: {
+    album_cover_background: false,
+    entity: '',
   },
   mobile: {
+    mode: 'docked',
     show_labels: false,
     show_popup_label_backgrounds: false,
-    mode: 'docked',
   },
-  haptic: {
-    url: false,
-    tap_action: false,
-    hold_action: true,
-    double_tap_action: true,
-  },
-} as const satisfies NavbarCardConfig;
+} as const satisfies DeepPartial<NavbarCardConfig>;
 
 export const STUB_CONFIG: NavbarCardConfig = {
   routes: [
-    { url: window.location.pathname, icon: 'mdi:home', label: 'Home' },
+    { icon: 'mdi:home', label: 'Home', url: window.location.pathname },
     {
-      url: `${window.location.pathname}/devices`,
-      icon: 'mdi:devices',
-      label: 'Devices',
       hold_action: {
         action: 'navigate',
         navigation_path: '/config/devices/dashboard',
       },
+      icon: 'mdi:devices',
+      label: 'Devices',
+      url: `${window.location.pathname}/devices`,
     },
     {
-      url: '/config/automation/dashboard',
       icon: 'mdi:creation',
       label: 'Automations',
+      url: '/config/automation/dashboard',
     },
-    { url: '/config/dashboard', icon: 'mdi:cog', label: 'Settings' },
+    { icon: 'mdi:cog', label: 'Settings', url: '/config/dashboard' },
     {
       icon: 'mdi:dots-horizontal',
       label: 'More',
-      tap_action: {
-        action: NavbarCustomActions.openPopup,
-      },
       popup: [
         { icon: 'mdi:cog', url: '/config/dashboard' },
         {
@@ -220,14 +221,17 @@ export const STUB_CONFIG: NavbarCardConfig = {
           icon: 'mdi:power',
           tap_action: {
             action: 'call-service',
-            service: 'homeassistant.restart',
-            service_data: {},
             confirmation: {
               text: 'Are you sure you want to restart Home Assistant?',
             },
+            service: 'homeassistant.restart',
+            service_data: {},
           },
         },
       ],
+      tap_action: {
+        action: NavbarCustomActions.openPopup,
+      },
     },
   ],
 };

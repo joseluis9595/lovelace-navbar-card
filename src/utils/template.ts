@@ -1,6 +1,7 @@
-import { HomeAssistant } from 'custom-card-helpers';
-import { NavbarCardPublicState } from '@/types/types';
-import { NavbarCard } from '@/navbar-card';
+import type { HomeAssistant } from 'custom-card-helpers';
+
+import type { NavbarCard } from '@/navbar-card';
+import type { NavbarCardPublicState } from '@/types/types';
 import { generateHash } from '@/utils';
 
 export type TemplateFunction<T = unknown> = (
@@ -146,7 +147,7 @@ export const processBadgeTemplate = (
   hass: HomeAssistant,
   template?: string,
 ): boolean => {
-  if (!hass || !template) return false;
+  if (!(hass && template)) return false;
 
   try {
     const func = new Function('states', `return ${template}`);
