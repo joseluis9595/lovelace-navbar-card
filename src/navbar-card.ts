@@ -28,6 +28,7 @@ import {
   processTemplate,
   removeDashboardPadding,
 } from '@/utils';
+import { DOCS_LINKS } from '@/utils/docs-links';
 
 import { version } from '../package.json';
 
@@ -139,6 +140,7 @@ export class NavbarCard extends LitElement {
    * @param config Card configuration
    */
   setConfig(config: NavbarCardConfig): void {
+    let mergedConfig = config;
     // Check if the configuration has an template defined.
     // If so, merge the template configuration with the card configuration,
     // giving priority to the card configuration.
@@ -150,26 +152,26 @@ export class NavbarCard extends LitElement {
         const templateConfig = templates[config.template];
 
         if (templateConfig) {
-          config = deepMergeKeepArrays(templateConfig, config);
+          mergedConfig = deepMergeKeepArrays(templateConfig, config);
         }
       } else {
         console.warn(
           '[navbar-card] No templates configured in this dashboard. Please refer to "templates" documentation for more information.' +
             '\n\n' +
-            'https://github.com/joseluis9595/lovelace-navbar-card?tab=readme-ov-file#templates\n',
+            `${DOCS_LINKS.template}\n`,
         );
       }
     }
 
-    if (!config.routes) {
+    if (!mergedConfig.routes) {
       throw new Error('"routes" param is required for navbar card');
     }
 
     // Skip if unchanged (avoid rerenders)
-    if (JSON.stringify(config) === JSON.stringify(this.config)) return;
+    if (JSON.stringify(mergedConfig) === JSON.stringify(this.config)) return;
 
-    this._routes = config.routes.map(route => new Route(this, route));
-    this.config = config;
+    this._routes = mergedConfig.routes.map(route => new Route(this, route));
+    this.config = mergedConfig;
   }
 
   /**
@@ -203,13 +205,15 @@ export class NavbarCard extends LitElement {
     const editClass = this.isInEditMode ? 'edit-mode' : '';
     const mobileModeClass =
       this.config.mobile?.mode === 'floating' ? 'floating' : '';
+    const desktopModeClass =
+      this.isDesktop && this.config.desktop?.mode === 'docked' ? 'docked' : '';
 
     return html`
       <div
-        class="navbar ${editClass} ${deviceClass} ${desktopPosition} ${mobileModeClass}">
+        class="navbar ${editClass} ${deviceClass} ${desktopPosition} ${mobileModeClass} ${desktopModeClass}">
         ${this._mediaPlayer.render()}
         <ha-card
-          class="navbar-card ${deviceClass} ${desktopPosition} ${mobileModeClass}">
+          class="navbar-card ${deviceClass} ${desktopPosition} ${mobileModeClass} ${desktopModeClass}">
           ${this._routes.map(route => route.render()).filter(Boolean)}
         </ha-card>
       </div>

@@ -228,8 +228,11 @@ export function fireDOMEvent<T extends keyof EventConstructorMap = 'Event'>(
   ) => EventConstructorMap[T][0],
 ): EventConstructorMap[T][0] {
   const { options, detailOverride } = data ?? {};
-  const constructor = EventConstructor || Event;
-  const event = new constructor(type, options) as EventConstructorMap[T][0];
+  const eventConstructor = EventConstructor || Event;
+  const event = new eventConstructor(
+    type,
+    options,
+  ) as EventConstructorMap[T][0];
 
   if (detailOverride !== undefined) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

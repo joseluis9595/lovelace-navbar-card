@@ -20,9 +20,9 @@ import {
   genericGetProperty,
   genericSetProperty,
   type LabelVisibilityConfig,
-  type MobileMode,
   type NavbarCardConfig,
   NavbarCustomActions,
+  type NavbarDisplayMode,
   type NestedType,
   type PopupItem,
   type QuickbarActionConfig,
@@ -37,6 +37,7 @@ import {
   processTemplate,
   wrapTemplate,
 } from '@/utils';
+import { DOCS_LINKS } from '@/utils/docs-links';
 
 import type {
   ColorInputOptions,
@@ -53,7 +54,7 @@ enum HAActions {
 const GENERIC_JS_TEMPLATE_HELPER = html`Insert valid Javascript code without [[[
   ]]].
   <a
-    href="https://github.com/joseluis9595/lovelace-navbar-card?tab=readme-ov-file#jstemplate"
+    href="${DOCS_LINKS.jsTemplate}"
     target="_blank"
     rel="noopener"
     >See documentation</a
@@ -99,6 +100,7 @@ export class NavbarCardEditor extends LitElement {
       'ha-icon-picker',
       'ha-entity-picker',
       'ha-textarea',
+      'ha-navigation-picker',
     ]);
   }
 
@@ -183,6 +185,21 @@ export class NavbarCardEditor extends LitElement {
           this.updateConfigByKey(options.configKey, e.detail.value);
         }}" />
     `;
+  }
+
+  makeNavigationPicker(options: {
+    label: string;
+    configKey: DotNotationKeys<NavbarCardConfig>;
+    disabled?: boolean;
+  }) {
+    return html`<ha-navigation-picker
+      label=${options.label}
+      .value=${genericGetProperty(this._config, options.configKey) ?? ''}
+      .disabled=${options.disabled}
+      .hass=${this.hass}
+      @value-changed="${e => {
+        this.updateConfigByKey(options.configKey, e.detail.value);
+      }}" /> `;
   }
 
   makeTextInput(options: {
@@ -565,11 +582,9 @@ export class NavbarCardEditor extends LitElement {
           <div class="route-editor route-editor-bg">
             <div class="editor-row">
               <div class="editor-row-item">
-                ${this.makeTextInput({
+                ${this.makeNavigationPicker({
                   configKey: `${baseConfigKey}.url` as any,
                   label: 'URL',
-                  placeholder: '/path/to/your/dashboard',
-                  type: 'text',
                 })}
               </div>
             </div>
@@ -815,7 +830,7 @@ export class NavbarCardEditor extends LitElement {
             configKey: 'template',
             helper: html`Reusable template name used for this card.
               <a
-                href="https://github.com/joseluis9595/lovelace-navbar-card?tab=readme-ov-file#template"
+                href="${DOCS_LINKS.template}"
                 target="_blank"
                 rel="noopener"
                 >Check the documentation</a
@@ -846,7 +861,7 @@ export class NavbarCardEditor extends LitElement {
             Enter your CSS code here (no <code>"styles: |"</code> prefix
             needed).<br />
             <a
-              href="https://github.com/joseluis9595/lovelace-navbar-card?tab=readme-ov-file#styles"
+              href="${DOCS_LINKS.styles}"
               target="_blank"
               rel="noopener"
               >See documentation</a
@@ -937,24 +952,22 @@ export class NavbarCardEditor extends LitElement {
         <div class="editor-section">
           ${this.makeSwitch({
             configKey: 'haptic.url',
-            defaultValue: hapticValue,
-            label: 'When pressing routes with URL configured',
+            defaultValue: hapticValue ?? DEFAULT_NAVBAR_CONFIG.haptic.url,
           })}
           ${this.makeSwitch({
             configKey: 'haptic.tap_action',
-            defaultValue: hapticValue,
-            label: "When executing the 'tap_action' configured for a route",
+            defaultValue:
+              hapticValue ?? DEFAULT_NAVBAR_CONFIG.haptic.tap_action,
           })}
           ${this.makeSwitch({
             configKey: 'haptic.hold_action',
-            defaultValue: hapticValue,
-            label: "When executing the 'hold_action' configured for a route",
+            defaultValue:
+              hapticValue ?? DEFAULT_NAVBAR_CONFIG.haptic.hold_action,
           })}
           ${this.makeSwitch({
             configKey: 'haptic.double_tap_action',
-            defaultValue: hapticValue,
-            label:
-              "When executing the 'double_tap_action' configured for a route",
+            defaultValue:
+              hapticValue ?? DEFAULT_NAVBAR_CONFIG.haptic.double_tap_action,
           })}
         </div>
       </ha-expansion-panel>
@@ -1034,6 +1047,16 @@ export class NavbarCardEditor extends LitElement {
           Desktop options
         </h4>
         <div class="editor-section">
+          ${this.makeComboBox<NavbarDisplayMode>({
+            configKey: 'desktop.mode',
+            defaultValue: DEFAULT_NAVBAR_CONFIG.desktop?.mode,
+            hideClearIcon: true,
+            items: [
+              { label: 'Floating', value: 'floating' },
+              { label: 'Docked', value: 'docked' },
+            ],
+            label: 'Mode',
+          })}
           <div class="editor-row">
             <div class="editor-row-item">
               ${this.makeComboBox<DesktopPosition>({
@@ -1097,14 +1120,12 @@ export class NavbarCardEditor extends LitElement {
           Mobile options
         </h4>
         <div class="editor-section">
-          ${this.makeComboBox<MobileMode>({
-            configKey: 'mobile.mode',
-            defaultValue: DEFAULT_NAVBAR_CONFIG.mobile?.mode,
-            hideClearIcon: true,
+          ${this.makeComboBox<NavbarDisplayMode>({
             items: [
               { label: 'Floating', value: 'floating' },
               { label: 'Docked', value: 'docked' },
             ],
+            label: 'Mode',
             label: 'Mode',
           })}
           ${this.makeComboBox<LabelVisibilityConfig>({
@@ -1405,7 +1426,7 @@ export class NavbarCardEditor extends LitElement {
               defined in your dashboard.
               <br />
               <a
-                href="https://github.com/joseluis9595/lovelace-navbar-card?tab=readme-ov-file#template"
+                href="${DOCS_LINKS.template}"
                 target="_blank"
                 rel="noopener"
                 >Check the documentation</a
