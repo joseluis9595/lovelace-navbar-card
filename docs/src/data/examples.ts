@@ -23,6 +23,7 @@ layout:
     enabled: true
     desktop_px: 100
     mobile_px: 80
+    media_player_px: 100
 desktop:
   position: left
   min_width: 768
