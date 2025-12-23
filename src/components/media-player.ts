@@ -1,8 +1,9 @@
 import { html } from 'lit';
-import { NavbarCard } from '@/navbar-card';
+
+import { type ActionableElement, eventDetection } from '@/lib/event-detection';
+import type { NavbarCard } from '@/navbar-card';
+import type { ExtendedActionConfig } from '@/types';
 import { preventEventDefault, processTemplate } from '@/utils';
-import { ExtendedActionConfig } from '@/types';
-import { ActionableElement, eventDetection } from '@/lib/event-detection';
 
 export class MediaPlayer implements ActionableElement {
   constructor(private readonly _navbarCard: NavbarCard) {}
@@ -30,7 +31,7 @@ export class MediaPlayer implements ActionableElement {
     const entity = this._getEntity();
     const state = this._navbarCard._hass.states[entity ?? ''];
 
-    if (!state) return { visible: true, error: `Entity not found "${entity}"` };
+    if (!state) return { error: `Entity not found "${entity}"`, visible: true };
 
     if (config.show != null) {
       return {
@@ -111,35 +112,41 @@ export class MediaPlayer implements ActionableElement {
         class="media-player"
         ${eventDetection({
           context: this._navbarCard,
+          doubleTap: this.double_tap_action,
+          hold: this.hold_action,
           tap: this.tap_action ?? {
             action: 'more-info',
             entity,
           },
-          hold: this.hold_action,
-          doubleTap: this.double_tap_action,
         })}>
         <div
           class="media-player-bg"
-          style=${this._navbarCard.config?.media_player?.album_cover_background
-            ? `background-image: url(${
-                mediaPlayerState.attributes.entity_picture
-              });`
-            : ''}></div>
-        ${progress != null
-          ? html` <div class="media-player-progress-bar">
+          style=${
+            this._navbarCard.config?.media_player?.album_cover_background
+              ? `background-image: url(${
+                  mediaPlayerState.attributes.entity_picture
+                });`
+              : ''
+          }></div>
+        ${
+          progress != null
+            ? html` <div class="media-player-progress-bar">
               <div
                 class="media-player-progress-bar-fill"
                 style="width: ${progress * 100}%"></div>
             </div>`
-          : html``}
-        ${mediaPlayerImage
-          ? html`<img
+            : html``
+        }
+        ${
+          mediaPlayerImage
+            ? html`<img
               class="media-player-image"
               src=${mediaPlayerImage}
               alt=${mediaPlayerState.attributes.media_title} />`
-          : html`<ha-icon
+            : html`<ha-icon
               class="media-player-image media-player-icon-fallback"
-              icon="mdi:music"></ha-icon>`}
+              icon="mdi:music"></ha-icon>`
+        }
         <div class="media-player-info">
           <span class="media-player-title"
             >${mediaPlayerState.attributes.media_title}</span
@@ -156,9 +163,9 @@ export class MediaPlayer implements ActionableElement {
           @pointerdown=${preventEventDefault}
           @pointerup=${preventEventDefault}>
           <ha-icon
-            icon=${mediaPlayerState.state === 'playing'
-              ? 'mdi:pause'
-              : 'mdi:play'}></ha-icon>
+            icon=${
+              mediaPlayerState.state === 'playing' ? 'mdi:pause' : 'mdi:play'
+            }></ha-icon>
         </button>
         <button
           class="navbar-icon-button media-player-button media-player-button-skip"

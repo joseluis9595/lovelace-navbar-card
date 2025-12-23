@@ -1,4 +1,4 @@
-import { css, CSSResult } from 'lit';
+import { type CSSResult, css } from 'lit';
 
 const HOST_STYLES = css`
   :host {
@@ -86,6 +86,8 @@ const NAVBAR_CONTAINER_STYLES = css`
     border-radius: var(--navbar-border-radius);
     box-shadow: var(--navbar-box-shadow-desktop);
     padding: 12px 8px;
+    justify-content: center;
+    gap: 10px;
   }
 
   .navbar.desktop.bottom {
@@ -125,7 +127,7 @@ const NAVBAR_CONTAINER_STYLES = css`
 
   .navbar-card.desktop.left {
     flex-direction: column;
-    gap: 10px;
+    align-items: center;
   }
 
   .navbar.desktop.right {
@@ -139,7 +141,66 @@ const NAVBAR_CONTAINER_STYLES = css`
 
   .navbar-card.desktop.right {
     flex-direction: column;
-    gap: 10px;
+    align-items: center;
+  }
+
+  /* Desktop docked mode styles */
+  .navbar-card.desktop.docked {
+    border-radius: 0px;
+  }
+
+  .navbar.desktop.docked.bottom {
+    bottom: 0px;
+    left: var(--mdc-drawer-width, 0px);
+    right: 0px;
+    width: auto;
+    transform: none;
+  }
+
+  .navbar-card.desktop.docked.bottom {
+    width: 100%;
+    border-radius: 0px;
+  }
+
+  .navbar.desktop.docked.top {
+    top: 0px;
+    left: var(--mdc-drawer-width, 0px);
+    right: 0px;
+    width: auto;
+    transform: none;
+  }
+
+  .navbar-card.desktop.docked.top {
+    width: 100%;
+    border-radius: 0px;
+  }
+
+  .navbar.desktop.docked.left {
+    left: var(--mdc-drawer-width, 0px);
+    top: 0px;
+    bottom: 0px;
+    height: 100%;
+    width: auto;
+    transform: none;
+  }
+
+  .navbar-card.desktop.docked.left {
+    height: 100%;
+    border-radius: 0px;
+  }
+
+  .navbar.desktop.docked.right {
+    right: 0px;
+    top: 0px;
+    bottom: 0px;
+    height: 100%;
+    width: auto;
+    transform: none;
+  }
+
+  .navbar-card.desktop.docked.right {
+    height: 100%;
+    border-radius: 0px;
   }
 `;
 

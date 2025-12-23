@@ -59,6 +59,7 @@
     "rules": {
       "complexity": {
         "noForEach": "off",
+        "noUselessSwitchCase": "off",
         "useSimplifiedLogicExpression": "warn"
       },
       "correctness": {
@@ -87,8 +88,8 @@
       },
       "suspicious": {
         "noArrayIndexKey": "warn",
-        "noAssignInExpressions": "error",
-        "noDoubleEquals": "error",
+        "noAssignInExpressions": "warn",
+        "noDoubleEquals": "warn",
         "noExplicitAny": "warn",
         "noImplicitAnyLet": "error"
       }

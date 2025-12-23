@@ -1,21 +1,23 @@
-import { version } from '../package.json';
-import { HomeAssistant } from 'custom-card-helpers';
+import type { HomeAssistant } from 'custom-card-helpers';
 import {
   css,
   html,
   LitElement,
-  PropertyValues,
-  TemplateResult,
+  type PropertyValues,
+  type TemplateResult,
   unsafeCSS,
 } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+
+import { MediaPlayer } from '@/components/media-player';
+import { Route } from '@/components/navbar';
+import { getDefaultStyles } from '@/styles';
 import {
   DEFAULT_NAVBAR_CONFIG,
   DesktopPosition,
-  NavbarCardConfig,
+  type NavbarCardConfig,
   STUB_CONFIG,
 } from '@/types';
-import { Route } from '@/components/navbar';
 import {
   deepMergeKeepArrays,
   forceDashboardPadding,
@@ -26,8 +28,9 @@ import {
   processTemplate,
   removeDashboardPadding,
 } from '@/utils';
-import { getDefaultStyles } from '@/styles';
-import { MediaPlayer } from '@/components/media-player';
+import { DOCS_LINKS } from '@/utils/docs-links';
+
+import { version } from '../package.json';
 
 declare global {
   interface Window {
@@ -38,11 +41,11 @@ declare global {
 // Register in HA card list
 window.customCards = window.customCards || [];
 window.customCards.push({
-  type: 'navbar-card',
-  name: 'Navbar card',
-  preview: true,
   description:
     'Full-width bottom nav on mobile and flexible desktop nav that can be placed on any side.',
+  name: 'Navbar card',
+  preview: true,
+  type: 'navbar-card',
 });
 
 @customElement('navbar-card')
@@ -115,9 +118,9 @@ export class NavbarCard extends LitElement {
 
     // Force dashboard padding
     forceDashboardPadding({
+      auto_padding: this.config?.layout?.auto_padding,
       desktop: this.config?.desktop ?? DEFAULT_NAVBAR_CONFIG.desktop,
       mobile: this.config?.mobile ?? DEFAULT_NAVBAR_CONFIG.mobile,
-      auto_padding: this.config?.layout?.auto_padding,
       show_media_player: this._showMediaPlayer ?? false,
     });
   }
@@ -137,6 +140,7 @@ export class NavbarCard extends LitElement {
    * @param config Card configuration
    */
   setConfig(config: NavbarCardConfig): void {
+    let mergedConfig = config;
     // Check if the configuration has an template defined.
     // If so, merge the template configuration with the card configuration,
     // giving priority to the card configuration.
@@ -148,26 +152,26 @@ export class NavbarCard extends LitElement {
         const templateConfig = templates[config.template];
 
         if (templateConfig) {
-          config = deepMergeKeepArrays(templateConfig, config);
+          mergedConfig = deepMergeKeepArrays(templateConfig, config);
         }
       } else {
         console.warn(
           '[navbar-card] No templates configured in this dashboard. Please refer to "templates" documentation for more information.' +
             '\n\n' +
-            'https://github.com/joseluis9595/lovelace-navbar-card?tab=readme-ov-file#templates\n',
+            `${DOCS_LINKS.template}\n`,
         );
       }
     }
 
-    if (!config.routes) {
+    if (!mergedConfig.routes) {
       throw new Error('"routes" param is required for navbar card');
     }
 
     // Skip if unchanged (avoid rerenders)
-    if (JSON.stringify(config) === JSON.stringify(this.config)) return;
+    if (JSON.stringify(mergedConfig) === JSON.stringify(this.config)) return;
 
-    this._routes = config.routes.map(route => new Route(this, route));
-    this.config = config;
+    this._routes = mergedConfig.routes.map(route => new Route(this, route));
+    this.config = mergedConfig;
   }
 
   /**
@@ -180,9 +184,9 @@ export class NavbarCard extends LitElement {
     if (_changedProperties.has('_showMediaPlayer')) {
       // Force dashboard padding
       forceDashboardPadding({
+        auto_padding: this.config?.layout?.auto_padding,
         desktop: this.config?.desktop ?? DEFAULT_NAVBAR_CONFIG.desktop,
         mobile: this.config?.mobile ?? DEFAULT_NAVBAR_CONFIG.mobile,
-        auto_padding: this.config?.layout?.auto_padding,
         show_media_player: this._showMediaPlayer ?? false,
       });
     }
@@ -201,13 +205,15 @@ export class NavbarCard extends LitElement {
     const editClass = this.isInEditMode ? 'edit-mode' : '';
     const mobileModeClass =
       this.config.mobile?.mode === 'floating' ? 'floating' : '';
+    const desktopModeClass =
+      this.isDesktop && this.config.desktop?.mode === 'docked' ? 'docked' : '';
 
     return html`
       <div
-        class="navbar ${editClass} ${deviceClass} ${desktopPosition} ${mobileModeClass}">
+        class="navbar ${editClass} ${deviceClass} ${desktopPosition} ${mobileModeClass} ${desktopModeClass}">
         ${this._mediaPlayer.render()}
         <ha-card
-          class="navbar-card ${deviceClass} ${desktopPosition} ${mobileModeClass}">
+          class="navbar-card ${deviceClass} ${desktopPosition} ${mobileModeClass} ${desktopModeClass}">
           ${this._routes.map(route => route.render()).filter(Boolean)}
         </ha-card>
       </div>
