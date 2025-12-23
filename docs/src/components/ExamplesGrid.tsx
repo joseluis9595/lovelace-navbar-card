@@ -1,19 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import styles from './ExamplesGrid.module.css';
 import useBaseUrl from '@docusaurus/useBaseUrl';
-import {
-  configurationExamples,
-  Example,
-  stylingExamples,
-} from '../data/examples';
+import { EXAMPLE_TAG, type Example, examples } from '../data/examples';
 import { AuthorText } from './AuthorText';
 import { ExampleDialog } from './ExampleDialog';
 
-type Category = 'configuration' | 'styling';
 
 export function ExamplesGrid() {
   const [selectedExample, setSelectedExample] = useState<Example | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<Category>('styling');
+  const [selectedCategory, setSelectedCategory] = useState<EXAMPLE_TAG | null>(null);
   const baseUrl = useBaseUrl('/');
   const openedWithClick = useRef(false);
 
@@ -27,16 +22,13 @@ export function ExamplesGrid() {
       }
 
       // Find example by title in URL
-      const allExamples = [...configurationExamples, ...stylingExamples];
-      const example = allExamples.find(
+      const example = examples.find(
         ex => ex.title.toLowerCase().replace(/\s+/g, '-') === hash,
       );
 
       if (example) {
         setSelectedExample(example);
-        setSelectedCategory(
-          configurationExamples.includes(example) ? 'configuration' : 'styling',
-        );
+        setSelectedCategory((example.tags[0] as EXAMPLE_TAG) ?? null);
       }
     };
 
@@ -49,28 +41,38 @@ export function ExamplesGrid() {
   }, []);
 
   const currentExamples =
-    selectedCategory === 'configuration'
-      ? configurationExamples
-      : stylingExamples;
+    selectedCategory === null
+      ? examples
+      : examples.filter(example =>
+          example.tags.includes(selectedCategory as EXAMPLE_TAG),
+        );
 
   return (
-    <div>
-      <div className={styles.tabs}>
-        <button
-          className={`${styles.tab} ${
-            selectedCategory === 'styling' ? styles.tabActive : ''
-          }`}
-          onClick={() => setSelectedCategory('styling')}>
-          Styling Examples
-        </button>
-        <button
-          className={`${styles.tab} ${
-            selectedCategory === 'configuration' ? styles.tabActive : ''
-          }`}
-          onClick={() => setSelectedCategory('configuration')}>
-          Configuration Examples
-        </button>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <div className={styles.tabs}>
+          <button
+            type="button"
+            className={`${styles.tab} ${
+              selectedCategory === null ? styles.tabActive : ''
+            }`}
+            onClick={() => setSelectedCategory(null)}>
+            All examples
+          </button>
+          {Object.values(EXAMPLE_TAG).map(tag => (
+            <button
+              key={tag}
+              type="button"
+              className={`${styles.tab} ${
+                selectedCategory === tag ? styles.tabActive : ''
+              }`}
+              onClick={() => setSelectedCategory(tag)}>
+              {tag}
+            </button>
+          ))}
+        </div>
       </div>
+
       <div className={styles.grid}>
         {currentExamples.map((example, index) => (
           <div
