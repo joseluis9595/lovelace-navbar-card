@@ -110,7 +110,7 @@ export class MediaPlayer implements ActionableElement {
       </ha-card>`;
     }
 
-    // `isVisible` guarantees that the entity is not null
+    // biome-ignore lint/style/noNonNullAssertion: `isVisible` guarantees that the entity is not null
     const entity = this._getEntity()!;
     const mediaPlayerState = this._navbarCard._hass.states[entity];
     const mediaPlayerImage = mediaPlayerState.attributes.entity_picture;
