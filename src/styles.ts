@@ -11,7 +11,11 @@ const HOST_STYLES = css`
     --navbar-box-shadow-desktop: var(--material-shadow-elevation-2dp);
     --navbar-box-shadow-mobile-floating: var(--material-shadow-elevation-2dp);
 
+    /* TODO rename this CSS variable */
+    --navbar-lateral-margin: 16px;
+
     --navbar-z-index: 3;
+    --navbar-media-player-z-index: 4;
     --navbar-popup-backdrop-z-index: 900;
     --navbar-popup-z-index: 901;
   }
@@ -94,7 +98,7 @@ const NAVBAR_CONTAINER_STYLES = css`
     flex-direction: column;
     top: unset;
     right: unset;
-    bottom: 16px;
+    bottom: var(--navbar-lateral-margin);
     left: calc(50% + var(--mdc-drawer-width, 0px) / 2);
     transform: translate(-50%, 0);
   }
@@ -107,7 +111,7 @@ const NAVBAR_CONTAINER_STYLES = css`
     flex-direction: column;
     bottom: unset;
     right: unset;
-    top: 16px;
+    top: var(--navbar-lateral-margin);
     left: calc(50% + var(--mdc-drawer-width, 0px) / 2);
     transform: translate(-50%, 0);
   }
@@ -118,7 +122,7 @@ const NAVBAR_CONTAINER_STYLES = css`
 
   .navbar.desktop.left {
     flex-direction: row-reverse;
-    left: calc(var(--mdc-drawer-width, 0px) + 16px);
+    left: calc(var(--mdc-drawer-width, 0px) + var(--navbar-lateral-margin));
     right: unset;
     bottom: unset;
     top: 50%;
@@ -132,7 +136,7 @@ const NAVBAR_CONTAINER_STYLES = css`
 
   .navbar.desktop.right {
     flex-direction: row;
-    right: 16px;
+    right: var(--navbar-lateral-margin);
     left: unset;
     bottom: unset;
     top: 50%;
@@ -218,11 +222,52 @@ const MEDIA_PLAYER_STYLES = css`
     width: 90%;
     overflow: hidden;
     position: relative;
-    border: none;
     box-shadow: var(--navbar-box-shadow-mobile-floating);
     border-radius: var(--navbar-border-radius);
     display: flex;
     flex-direction: row;
+  }
+
+  .media-player.mobile {
+    border: none;
+  }
+
+  .media-player.desktop {
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .media-player.desktop.position-absolute {
+    position: fixed;
+    width: 400px;
+    z-index: var(--navbar-media-player-z-index);
+  }
+
+  .media-player.desktop.position-absolute.top-left {
+    left: var(--navbar-lateral-margin);
+    top: calc(var(--header-height) + var(--navbar-lateral-margin));
+  }
+  .media-player.desktop.position-absolute.top-center {
+    left: 50%;
+    top: calc(var(--header-height) + var(--navbar-lateral-margin));
+    transform: translateX(-50%);
+  }
+  .media-player.desktop.position-absolute.top-right {
+    right: var(--navbar-lateral-margin);
+    top: calc(var(--header-height) + var(--navbar-lateral-margin));
+  }
+  .media-player.desktop.position-absolute.bottom-left {
+    left: var(--navbar-lateral-margin);
+    bottom: var(--navbar-lateral-margin);
+  }
+  .media-player.desktop.position-absolute.bottom-center {
+    left: 50%;
+    bottom: var(--navbar-lateral-margin);
+    transform: translateX(-50%);
+  }
+  .media-player.desktop.position-absolute.bottom-right {
+    right: var(--navbar-lateral-margin);
+    bottom: var(--navbar-lateral-margin);
   }
 
   .media-player .media-player-bg {

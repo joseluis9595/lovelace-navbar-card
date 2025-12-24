@@ -3,26 +3,38 @@ export interface Example {
   description: string;
   code: string;
   screenshot: string;
+  tags: EXAMPLE_TAG[];
   author?: string;
   authorUrl?: string;
+}
+
+export enum  EXAMPLE_TAG {
+  BASIC = 'Basic',
+  JS_TEMPLATES = 'JS Templates',
+  MEDIA_PLAYER = 'Media Player',
+  STYLING = 'Styling',
+  BADGE = 'Badge',
+  MOBILE = 'Mobile',
 }
 
 /*************************************/
 /* CONFIGURATION EXAMPLES */
 /*************************************/
 
-export const configurationExamples: Example[] = [
+export const examples: Example[] = [
   {
     title: 'Basic Example',
     description:
       'A simple navigation bar with the most common routes and options, and one useful popup menu',
     screenshot: '/img/examples/basic-example.png',
+    tags: [EXAMPLE_TAG.BASIC],
     code: `type: custom:navbar-card
 layout:
   auto_padding:
     enabled: true
     desktop_px: 100
     mobile_px: 80
+    media_player_px: 100
 desktop:
   position: left
   min_width: 768
@@ -50,6 +62,7 @@ routes:
     description:
       'Navigation bar with a "settings" route only displayed for the user "jose"',
     screenshot: '/img/examples/display-route-only-for-a-given-user.png',
+    tags: [EXAMPLE_TAG.JS_TEMPLATES],
     code: `type: custom:navbar-card
 routes:
   - url: /lovelace/home
@@ -76,6 +89,7 @@ routes:
     description:
       "Navigation bar with a route with no `url` property, so we'll manually choose when it should be selected",
     screenshot: '/img/examples/manually-control-when-a-route-is-selected.png',
+    tags: [EXAMPLE_TAG.JS_TEMPLATES],
     code: `type: custom:navbar-card
 routes:
   - url: /lovelace/home
@@ -104,6 +118,7 @@ routes:
     description:
       'Navigation bar with a custom different selected color for each route',
     screenshot: '/img/examples/route-selected-colors.png',
+    tags: [EXAMPLE_TAG.BASIC, EXAMPLE_TAG.STYLING],
     code: `type: custom:navbar-card
 routes:
   - url: /lovelace/home
@@ -138,6 +153,7 @@ routes:
     description:
       'Navigation bar with a badge showing the number of lights that are currently on',
     screenshot: '/img/examples/lights-on-badge.png',
+    tags: [EXAMPLE_TAG.JS_TEMPLATES, EXAMPLE_TAG.BADGE],
     code: `type: custom:navbar-card
 routes:
   - url: /lovelace/home
@@ -174,17 +190,11 @@ routes:
     url: /config/info
 `,
   },
-];
-
-/*************************************/
-/* STYLING EXAMPLES */
-/*************************************/
-
-export const stylingExamples: Example[] = [
   {
     title: 'Custom Primary Color',
     description: 'Navigation bar with a custom red primary color',
     screenshot: '/img/examples/custom-primary-color.png',
+    tags: [EXAMPLE_TAG.BASIC, EXAMPLE_TAG.STYLING],
     code: `type: custom:navbar-card
 routes:
   - url: /lovelace/home
@@ -212,6 +222,7 @@ styles: |
     title: 'Custom Background Color',
     description: 'Navigation bar with a black background',
     screenshot: '/img/examples/custom-background-color.png',
+    tags: [EXAMPLE_TAG.BASIC, EXAMPLE_TAG.STYLING],
     code: `type: custom:navbar-card
 routes:
   - url: /lovelace/home
@@ -239,6 +250,7 @@ styles: |
     title: 'Desktop specific styles',
     description: 'Navigation bar with no rounded corners only in desktop mode',
     screenshot: '/img/examples/desktop-specific-styles.png',
+    tags: [ EXAMPLE_TAG.STYLING ],
     code: `type: custom:navbar-card
 routes:
   - url: /lovelace/home
@@ -267,6 +279,7 @@ styles: |
     description:
       'Navigation bar with a "more" route with the current user\'s image rounded',
     screenshot: '/img/examples/route-with-rounded-user-image.png',
+    tags: [EXAMPLE_TAG.JS_TEMPLATES, EXAMPLE_TAG.STYLING],
     code: `type: custom:navbar-card
 routes:
   - url: /lovelace/home
@@ -310,6 +323,7 @@ styles: |
     title: 'iOS glass effect',
     description: 'Navigation bar with a iOS glassmorphism style',
     screenshot: '/img/examples/ios-glassmorphism-style.png',
+    tags: [EXAMPLE_TAG.STYLING],
     code: `type: custom:navbar-card
 routes:
   - url: /lovelace/home
@@ -344,6 +358,7 @@ styles: |
     title: 'Neumorphic style',
     description: 'Navigation bar with a neumorphic style',
     screenshot: '/img/examples/neumorphic-style.gif',
+    tags: [EXAMPLE_TAG.STYLING],
     code: `type: custom:navbar-card
 routes:
   - url: /lovelace/home
@@ -408,4 +423,84 @@ styles: |-
   }
 `,
   },
+  {
+    title: 'Media player displayed only on desktop',
+    description: 'Navigation bar with a media player displayed only on desktop, placed at the bottom right',
+    screenshot: '/img/examples/media-player-desktop.png',
+    tags: [ EXAMPLE_TAG.MEDIA_PLAYER],
+    code: `type: custom:navbar-card
+desktop:
+  position: left
+  show_labels: false
+routes:
+  - icon: mdi:home-outline
+    icon_selected: mdi:home-assistant
+    url: /lovelace/home
+    label: Home
+  - icon: mdi:devices
+    url: /lovelace/devices
+    label: Devices
+  - icon: mdi:thermometer
+    url: /lovelace/weather
+    label: Weather
+  - icon: mdi:creation-outline
+    icon_selected: mdi:creation
+    url: /lovelace/control
+    label: Control
+  - icon: mdi:information
+    label: More
+    url: /config/info
+media_player:
+  entity: media_player.test_media_player
+  album_cover_background: true
+  show: "[[[return !navbar.isDesktop]]]"
+  desktop_position: bottom-right`
+  },
+  {
+    title: 'Control when the media player is displayed',
+    description: 'Display media player only when it is playing or it\'s been paused for less than 5 minutes using the "show" property',
+    screenshot: '/img/examples/media-player-5-mins.png',
+    tags: [ EXAMPLE_TAG.MEDIA_PLAYER, EXAMPLE_TAG.JS_TEMPLATES],
+    code: `type: custom:navbar-card
+desktop:
+  position: left
+  show_labels: false
+routes:
+  - icon: mdi:home-outline
+    icon_selected: mdi:home-assistant
+    url: /lovelace/home
+    label: Home
+  - icon: mdi:devices
+    url: /lovelace/devices
+    label: Devices
+  - icon: mdi:thermometer
+    url: /lovelace/weather
+    label: Weather
+  - icon: mdi:creation-outline
+    icon_selected: mdi:creation
+    url: /lovelace/control
+    label: Control
+  - icon: mdi:information
+    label: More
+    url: /config/info
+media_player:
+  entity: media_player.test_media_player
+  album_cover_background: true
+  show: |-
+    [[[
+      const mediaPlayerState = states['media_player.test_media_player'];
+      const lastChanged = new Date(mediaPlayerState.last_changed);
+      const now = Date.now();
+      const fiveMinutes = 5 * 60 * 1000;
+
+      // Display media player if it's playing OR paused in the last 5 minutes
+      return (
+        mediaPlayerState.state == 'playing' ||
+        (mediaPlayerState.state == 'paused' &&
+          (now - lastChanged) <= fiveMinutes)
+      );
+    ]]]
+  desktop_position: bottom-right
+`
+  }
 ];
