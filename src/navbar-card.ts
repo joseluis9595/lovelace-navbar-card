@@ -17,6 +17,7 @@ import {
   DesktopPosition,
   type NavbarCardConfig,
   STUB_CONFIG,
+  WidgetPosition,
 } from '@/types';
 import {
   deepMergeKeepArrays,
@@ -63,18 +64,22 @@ export class NavbarCard extends LitElement {
 
   /** Runtime state */
   private readonly _mediaPlayer: MediaPlayer = new MediaPlayer(this);
-  @state() private _showMediaPlayer?: boolean;
   @state() private _routes: Route[] = [];
   @state() focusedPopup: TemplateResult<1> | null = null;
   @state() isDesktop?: boolean;
 
+  @state() private widgetVisibility: Record<string, WidgetPosition | null> = {};
+
   /** Set HA instance (called by HA runtime) */
   set hass(hass: HomeAssistant) {
     this._hass = hass;
-    const { visible } = this._mediaPlayer.shouldShowMediaPlayer();
 
-    if (this._showMediaPlayer !== visible) {
-      this._showMediaPlayer = visible;
+    const { visible } = this._mediaPlayer.isVisible();
+    // TODO JLAQ review if this provokes re-renders
+    if (visible) {
+      this.widgetVisibility.media_player = this._mediaPlayer.desktop_position;
+    } else {
+      this.widgetVisibility.media_player = null;
     }
   }
 
@@ -84,6 +89,15 @@ export class NavbarCard extends LitElement {
       !!this._inEditDashboardMode ||
       !!this._inEditCardMode ||
       !!this._inPreviewMode
+    );
+  }
+
+  get desktopPosition(): DesktopPosition {
+    return (
+      mapStringToEnum(
+        DesktopPosition,
+        this.config?.desktop?.position as string,
+      ) ?? DesktopPosition.bottom
     );
   }
 
@@ -118,10 +132,10 @@ export class NavbarCard extends LitElement {
 
     // Force dashboard padding
     forceDashboardPadding({
-      auto_padding: this.config?.layout?.auto_padding,
+      autoPadding: this.config?.layout?.auto_padding,
       desktop: this.config?.desktop ?? DEFAULT_NAVBAR_CONFIG.desktop,
       mobile: this.config?.mobile ?? DEFAULT_NAVBAR_CONFIG.mobile,
-      show_media_player: this._showMediaPlayer ?? false,
+      widgetPositions: this.widgetVisibility,
     });
   }
 
@@ -184,22 +198,16 @@ export class NavbarCard extends LitElement {
     if (_changedProperties.has('_showMediaPlayer')) {
       // Force dashboard padding
       forceDashboardPadding({
-        auto_padding: this.config?.layout?.auto_padding,
+        autoPadding: this.config?.layout?.auto_padding,
         desktop: this.config?.desktop ?? DEFAULT_NAVBAR_CONFIG.desktop,
         mobile: this.config?.mobile ?? DEFAULT_NAVBAR_CONFIG.mobile,
-        show_media_player: this._showMediaPlayer ?? false,
+        widgetPositions: this.widgetVisibility,
       });
     }
   }
 
   protected render() {
     if (!this.config || this._shouldHide()) return html``;
-
-    const desktopPosition =
-      mapStringToEnum(
-        DesktopPosition,
-        this.config.desktop?.position as string,
-      ) ?? DesktopPosition.bottom;
 
     const deviceClass = this.isDesktop ? 'desktop' : 'mobile';
     const editClass = this.isInEditMode ? 'edit-mode' : '';
@@ -208,12 +216,32 @@ export class NavbarCard extends LitElement {
     const desktopModeClass =
       this.isDesktop && this.config.desktop?.mode === 'docked' ? 'docked' : '';
 
+    const shouldRenderMediaPlayerInsideNavbar =
+      this._shouldRenderMediaPlayerInsideNavbar();
+
     return html`
+      ${
+        !shouldRenderMediaPlayerInsideNavbar
+          ? this._mediaPlayer.render({
+              isInsideNavbar: false,
+            })
+          : html``
+      }
       <div
-        class="navbar ${editClass} ${deviceClass} ${desktopPosition} ${mobileModeClass} ${desktopModeClass}">
-        ${this._mediaPlayer.render()}
+        class="navbar ${editClass} ${deviceClass} ${
+          this.desktopPosition
+        } ${mobileModeClass} ${desktopModeClass}">
+        ${
+          shouldRenderMediaPlayerInsideNavbar
+            ? this._mediaPlayer.render({
+                isInsideNavbar: true,
+              })
+            : html``
+        }
         <ha-card
-          class="navbar-card ${deviceClass} ${desktopPosition} ${mobileModeClass} ${desktopModeClass}">
+          class="navbar-card ${deviceClass} ${
+            this.desktopPosition
+          } ${mobileModeClass} ${desktopModeClass}">
           ${this._routes.map(route => route.render()).filter(Boolean)}
         </ha-card>
       </div>
@@ -222,6 +250,36 @@ export class NavbarCard extends LitElement {
   }
 
   // ---------- Private helpers ----------
+
+  /**
+   * Determines if media player should be rendered inside the navbar container.
+   * Media player should be inside navbar when:
+   * - Navbar is bottom AND media player is bottom-center, OR
+   * - Navbar is top AND media player is top-center
+   * Otherwise, it should be rendered separately to escape the transform container.
+   * Note: This method assumes navbar is not hidden (checked in render()).
+   */
+  private _shouldRenderMediaPlayerInsideNavbar(): boolean {
+    // Only applies to desktop mode - mobile always renders inside navbar
+    if (!this.isDesktop) return true;
+
+    // Always render inside navbar in edit mode
+    if (this.isInEditMode) return true;
+
+    // If navbar-card is hidden, media player should always have position absolute
+    if (this.hidden) return false;
+
+    const mediaPlayerDesktopPosition = this._mediaPlayer.desktop_position;
+    const navbarPosition = this.desktopPosition;
+
+    // Check if positions align - only render inside when positions match
+    return (
+      (navbarPosition === DesktopPosition.bottom &&
+        mediaPlayerDesktopPosition === WidgetPosition.bottomCenter) ||
+      (navbarPosition === DesktopPosition.top &&
+        mediaPlayerDesktopPosition === WidgetPosition.topCenter)
+    );
+  }
 
   /** Update desktop/mobile state based on window width */
   private _checkDesktop = (): void => {

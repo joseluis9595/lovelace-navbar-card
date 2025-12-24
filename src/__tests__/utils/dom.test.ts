@@ -1,9 +1,14 @@
-import { css } from 'lit';
+import { css, html } from 'lit';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { DesktopPosition, type NavbarCardConfig } from '@/types/config';
+import {
+  DesktopPosition,
+  type NavbarCardConfig,
+  WidgetPosition,
+} from '@/types/config';
 
 import {
+  conditionallyRender,
   fireDOMEvent,
   forceDashboardPadding,
   forceOpenEditMode,
@@ -139,6 +144,8 @@ describe('DOM utilities', () => {
 
   describe('forceResetRipple', () => {
     it('should reset ripple elements', () => {
+      vi.useFakeTimers();
+
       const mockTarget = document.createElement('div');
       const mockRipple1 = document.createElement(
         'ha-ripple',
@@ -158,13 +165,14 @@ describe('DOM utilities', () => {
 
       forceResetRipple(mockTarget);
 
-      // Use setTimeout to check after the delay
-      setTimeout(() => {
-        expect(mockRipple1.hovered).toBe(false);
-        expect(mockRipple1.pressed).toBe(false);
-        expect(mockRipple2.hovered).toBe(false);
-        expect(mockRipple2.pressed).toBe(false);
-      }, 20);
+      vi.runAllTimers();
+
+      expect(mockRipple1.hovered).toBe(false);
+      expect(mockRipple1.pressed).toBe(false);
+      expect(mockRipple2.hovered).toBe(false);
+      expect(mockRipple2.pressed).toBe(false);
+
+      vi.useRealTimers();
     });
 
     it('should handle target without ripple elements', () => {
@@ -244,10 +252,12 @@ describe('DOM utilities', () => {
       mockHuiRoot.shadowRoot?.appendChild(mockStyle);
 
       const options = {
-        auto_padding: { enabled: false },
+        autoPadding: { enabled: false },
         desktop: {},
         mobile: {},
-        show_media_player: false,
+        widgetPositions: {
+          media_player: null,
+        },
       };
 
       forceDashboardPadding(options);
@@ -261,10 +271,12 @@ describe('DOM utilities', () => {
 
     it('should add desktop left/right padding styles', () => {
       const options = {
-        auto_padding: { desktop_px: 100, enabled: true },
+        autoPadding: { desktop_px: 100, enabled: true },
         desktop: { min_width: 768, position: DesktopPosition.left },
         mobile: {},
-        show_media_player: false,
+        widgetPositions: {
+          media_player: null,
+        },
       };
 
       forceDashboardPadding(options);
@@ -279,10 +291,12 @@ describe('DOM utilities', () => {
 
     it('should add desktop top padding styles', () => {
       const options = {
-        auto_padding: { desktop_px: 100, enabled: true },
+        autoPadding: { desktop_px: 100, enabled: true },
         desktop: { min_width: 768, position: DesktopPosition.top },
         mobile: {},
-        show_media_player: false,
+        widgetPositions: {
+          media_player: null,
+        },
       };
 
       forceDashboardPadding(options);
@@ -298,10 +312,12 @@ describe('DOM utilities', () => {
 
     it('should add desktop bottom padding styles', () => {
       const options = {
-        auto_padding: { desktop_px: 100, enabled: true },
+        autoPadding: { desktop_px: 100, enabled: true },
         desktop: { min_width: 768, position: DesktopPosition.bottom },
         mobile: {},
-        show_media_player: false,
+        widgetPositions: {
+          media_player: null,
+        },
       };
 
       forceDashboardPadding(options);
@@ -317,10 +333,12 @@ describe('DOM utilities', () => {
 
     it('should add mobile padding styles', () => {
       const options = {
-        auto_padding: { enabled: true, mobile_px: 80 },
+        autoPadding: { enabled: true, mobile_px: 80 },
         desktop: { min_width: 768 },
         mobile: {},
-        show_media_player: false,
+        widgetPositions: {
+          media_player: null,
+        },
       };
 
       forceDashboardPadding(options);
@@ -335,10 +353,12 @@ describe('DOM utilities', () => {
 
     it('should add media player padding to mobile when enabled', () => {
       const options = {
-        auto_padding: { enabled: true, media_player_px: 20, mobile_px: 80 },
+        autoPadding: { enabled: true, media_player_px: 20, mobile_px: 80 },
         desktop: { min_width: 768 },
         mobile: {},
-        show_media_player: true,
+        widgetPositions: {
+          media_player: WidgetPosition.bottomRight,
+        },
       };
 
       forceDashboardPadding(options);
@@ -357,10 +377,12 @@ describe('DOM utilities', () => {
       mockHuiRoot.shadowRoot?.appendChild(existingStyle);
 
       const options = {
-        auto_padding: { enabled: true, mobile_px: 80 },
+        autoPadding: { enabled: true, mobile_px: 80 },
         desktop: {},
         mobile: {},
-        show_media_player: false,
+        widgetPositions: {
+          media_player: null,
+        },
       };
 
       forceDashboardPadding(options);
@@ -514,6 +536,27 @@ describe('DOM utilities', () => {
 
       expect(mockEvent.preventDefault).toHaveBeenCalled();
       expect(mockEvent.stopPropagation).toHaveBeenCalled();
+    });
+  });
+
+  describe('conditionallyRender', () => {
+    it('should render provided content when condition is true', () => {
+      const renderContent = vi.fn(() => html`<div>content</div>`);
+
+      const result = conditionallyRender(true, renderContent);
+
+      expect(renderContent).toHaveBeenCalledTimes(1);
+      expect(result.strings.join('')).toContain('content');
+    });
+
+    it('should render loader when condition is false', () => {
+      const renderContent = vi.fn();
+
+      const result = conditionallyRender(false, renderContent);
+
+      expect(renderContent).not.toHaveBeenCalled();
+      expect(result.strings.join('')).toContain('loader-container');
+      expect(result.strings.join('')).toContain('loader');
     });
   });
 });
