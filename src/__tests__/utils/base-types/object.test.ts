@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
 import { deepMergeKeepArrays } from '../../../utils/base-types/object';
 
 describe('object utilities', () => {
@@ -22,15 +23,15 @@ describe('object utilities', () => {
 
     it('should merge nested objects', () => {
       const original = {
+        active: true,
         user: {
-          name: 'John',
           age: 30,
+          name: 'John',
           settings: {
-            theme: 'dark',
             notifications: true,
+            theme: 'dark',
           },
         },
-        active: true,
       };
       const newData = {
         user: {
@@ -44,23 +45,23 @@ describe('object utilities', () => {
       const result = deepMergeKeepArrays(original, newData);
 
       expect(result).toEqual({
+        active: true,
         user: {
-          name: 'John',
           age: 31,
+          name: 'John',
           settings: {
-            theme: 'light',
             notifications: true,
+            theme: 'light',
           },
         },
-        active: true,
       });
     });
 
     it('should remove keys when newData value is null', () => {
       const original = {
-        name: 'John',
         age: 30,
         email: 'john@example.com',
+        name: 'John',
       };
       const newData = {
         age: null,
@@ -70,30 +71,30 @@ describe('object utilities', () => {
       const result = deepMergeKeepArrays(original, newData);
 
       expect(result).toEqual({
-        name: 'John',
         email: 'newemail@example.com',
+        name: 'John',
       });
       expect('age' in result).toBe(false);
     });
 
     it('should keep original values when newData value is undefined', () => {
       const original = {
-        name: 'John',
         age: 30,
         email: 'john@example.com',
+        name: 'John',
       };
       const newData = {
-        name: 'Jane',
         age: undefined,
         email: 'jane@example.com',
+        name: 'Jane',
       };
 
       const result = deepMergeKeepArrays(original, newData);
 
       expect(result).toEqual({
-        name: 'Jane',
         age: 30, // Kept original value
         email: 'jane@example.com',
+        name: 'Jane',
       });
     });
 
@@ -101,7 +102,7 @@ describe('object utilities', () => {
       const original = 'hello';
       const newData = 'world';
 
-      const result = deepMergeKeepArrays(original, newData);
+      const result = deepMergeKeepArrays<string>(original, newData);
 
       expect(result).toBe('world');
     });
@@ -122,8 +123,8 @@ describe('object utilities', () => {
 
     it('should handle undefined newData', () => {
       const original = {
-        name: 'John',
         age: 30,
+        name: 'John',
       };
       const newData = undefined;
 
@@ -134,33 +135,33 @@ describe('object utilities', () => {
 
     it('should handle mixed array and object updates', () => {
       const original = {
+        settings: {
+          language: 'en',
+          theme: 'dark',
+        },
+        tags: ['important', 'urgent'],
         users: [
           { id: 1, name: 'John' },
           { id: 2, name: 'Jane' },
         ],
-        settings: {
-          theme: 'dark',
-          language: 'en',
-        },
-        tags: ['important', 'urgent'],
       };
       const newData = {
-        users: [{ id: 3, name: 'Bob' }], // Replace entire array
         settings: {
           theme: 'light', // Update nested object
         },
         tags: ['new', 'updated'], // Replace entire array
+        users: [{ id: 3, name: 'Bob' }], // Replace entire array
       };
 
       const result = deepMergeKeepArrays(original, newData);
 
       expect(result).toEqual({
-        users: [{ id: 3, name: 'Bob' }],
         settings: {
-          theme: 'light',
           language: 'en',
+          theme: 'light',
         },
         tags: ['new', 'updated'],
+        users: [{ id: 3, name: 'Bob' }],
       });
     });
 
@@ -169,8 +170,8 @@ describe('object utilities', () => {
         level1: {
           level2: {
             level3: {
-              value: 'deep',
               other: 'keep',
+              value: 'deep',
             },
           },
           level2Other: 'keep',
@@ -193,8 +194,8 @@ describe('object utilities', () => {
         level1: {
           level2: {
             level3: {
-              value: 'updated',
               other: 'keep',
+              value: 'updated',
             },
           },
           level2Other: 'keep',
@@ -218,8 +219,8 @@ describe('object utilities', () => {
 
     it('should handle empty newData object', () => {
       const original = {
-        name: 'John',
         age: 30,
+        name: 'John',
       };
       const newData = {};
 
@@ -234,7 +235,7 @@ describe('object utilities', () => {
         name: 'John',
       };
 
-      const result = deepMergeKeepArrays(original, newData);
+      const result = deepMergeKeepArrays<unknown>(original, newData);
 
       expect(result).toEqual({
         name: 'John',
@@ -243,8 +244,8 @@ describe('object utilities', () => {
 
     it('should handle null newData', () => {
       const original = {
-        name: 'John',
         age: 30,
+        name: 'John',
       };
       const newData = null;
 
@@ -285,13 +286,13 @@ describe('object utilities', () => {
             { host: 'server2', port: 9090 },
           ],
           settings: {
-            timeout: 5000,
             retries: 3,
+            timeout: 5000,
           },
         },
         metadata: {
-          version: '1.0.0',
           tags: ['stable', 'production'],
+          version: '1.0.0',
         },
       };
       const newData = {
@@ -302,8 +303,8 @@ describe('object utilities', () => {
           },
         },
         metadata: {
-          version: '2.0.0',
           tags: ['beta', 'testing'],
+          version: '2.0.0',
         },
       };
 
@@ -313,13 +314,13 @@ describe('object utilities', () => {
         config: {
           servers: [{ host: 'newserver', port: 3000 }],
           settings: {
-            timeout: 10000,
             retries: 3,
+            timeout: 10000,
           },
         },
         metadata: {
-          version: '2.0.0',
           tags: ['beta', 'testing'],
+          version: '2.0.0',
         },
       });
     });

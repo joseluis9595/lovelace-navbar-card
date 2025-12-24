@@ -1,8 +1,14 @@
 import { html } from 'lit';
-import { NavbarCard } from '@/navbar-card';
+import { classMap } from 'lit/directives/class-map.js';
+
+import { type ActionableElement, eventDetection } from '@/lib/event-detection';
+import type { NavbarCard } from '@/navbar-card';
+import {
+  DEFAULT_NAVBAR_CONFIG,
+  type ExtendedActionConfig,
+  type WidgetPosition,
+} from '@/types';
 import { preventEventDefault, processTemplate } from '@/utils';
-import { ExtendedActionConfig } from '@/types';
-import { ActionableElement, eventDetection } from '@/lib/event-detection';
 
 export class MediaPlayer implements ActionableElement {
   constructor(private readonly _navbarCard: NavbarCard) {}
@@ -19,18 +25,26 @@ export class MediaPlayer implements ActionableElement {
     return this._navbarCard.config?.media_player?.double_tap_action;
   }
 
+  get desktop_position(): WidgetPosition {
+    return (
+      this._navbarCard.config?.media_player?.desktop_position ??
+      DEFAULT_NAVBAR_CONFIG.media_player.desktop_position
+    );
+  }
+
   /**
    * Check if the media player should be shown.
    */
-  public shouldShowMediaPlayer = (): { visible: boolean; error?: string } => {
+  public isVisible = (): { visible: boolean; error?: string } => {
     const config = this._navbarCard.config?.media_player;
     if (!config?.entity) return { visible: false };
-    if (this._navbarCard.isDesktop) return { visible: false };
 
     const entity = this._getEntity();
     const state = this._navbarCard._hass.states[entity ?? ''];
 
-    if (!state) return { visible: true, error: `Entity not found "${entity}"` };
+    if (!(state && entity)) {
+      return { error: `Entity not found "${entity}"`, visible: true };
+    }
 
     if (config.show != null) {
       return {
@@ -85,12 +99,10 @@ export class MediaPlayer implements ActionableElement {
     });
   };
 
-  public render = () => {
-    const { visible, error } = this.shouldShowMediaPlayer();
-    if (!visible) return html``;
+  public render = (options: { isInsideNavbar: boolean }) => {
+    const { visible, error } = this.isVisible();
 
-    const entity = this._getEntity();
-    if (!entity) return html``;
+    if (!visible) return html``;
 
     if (error) {
       return html`<ha-card class="media-player error">
@@ -98,6 +110,8 @@ export class MediaPlayer implements ActionableElement {
       </ha-card>`;
     }
 
+    // biome-ignore lint/style/noNonNullAssertion: `isVisible` guarantees that the entity is not null
+    const entity = this._getEntity()!;
     const mediaPlayerState = this._navbarCard._hass.states[entity];
     const mediaPlayerImage = mediaPlayerState.attributes.entity_picture;
     const progress =
@@ -106,40 +120,56 @@ export class MediaPlayer implements ActionableElement {
           mediaPlayerState.attributes.media_duration
         : null;
 
+    const deviceClass = this._navbarCard.isDesktop ? 'desktop' : 'mobile';
+
     return html`
       <ha-card
-        class="media-player"
+        class="${classMap({
+          'media-player': true,
+          'position-absolute': !options.isInsideNavbar,
+          [(
+            this.desktop_position ??
+            DEFAULT_NAVBAR_CONFIG.media_player.desktop_position
+          ).toString()]: true,
+          [deviceClass]: true,
+        })}"
         ${eventDetection({
           context: this._navbarCard,
+          doubleTap: this.double_tap_action,
+          hold: this.hold_action,
           tap: this.tap_action ?? {
             action: 'more-info',
             entity,
           },
-          hold: this.hold_action,
-          doubleTap: this.double_tap_action,
         })}>
         <div
           class="media-player-bg"
-          style=${this._navbarCard.config?.media_player?.album_cover_background
-            ? `background-image: url(${
-                mediaPlayerState.attributes.entity_picture
-              });`
-            : ''}></div>
-        ${progress != null
-          ? html` <div class="media-player-progress-bar">
+          style=${
+            this._navbarCard.config?.media_player?.album_cover_background
+              ? `background-image: url(${
+                  mediaPlayerState.attributes.entity_picture
+                });`
+              : ''
+          }></div>
+        ${
+          progress != null
+            ? html` <div class="media-player-progress-bar">
               <div
                 class="media-player-progress-bar-fill"
                 style="width: ${progress * 100}%"></div>
             </div>`
-          : html``}
-        ${mediaPlayerImage
-          ? html`<img
+            : html``
+        }
+        ${
+          mediaPlayerImage
+            ? html`<img
               class="media-player-image"
               src=${mediaPlayerImage}
               alt=${mediaPlayerState.attributes.media_title} />`
-          : html`<ha-icon
+            : html`<ha-icon
               class="media-player-image media-player-icon-fallback"
-              icon="mdi:music"></ha-icon>`}
+              icon="mdi:music"></ha-icon>`
+        }
         <div class="media-player-info">
           <span class="media-player-title"
             >${mediaPlayerState.attributes.media_title}</span
@@ -156,9 +186,9 @@ export class MediaPlayer implements ActionableElement {
           @pointerdown=${preventEventDefault}
           @pointerup=${preventEventDefault}>
           <ha-icon
-            icon=${mediaPlayerState.state === 'playing'
-              ? 'mdi:pause'
-              : 'mdi:play'}></ha-icon>
+            icon=${
+              mediaPlayerState.state === 'playing' ? 'mdi:pause' : 'mdi:play'
+            }></ha-icon>
         </button>
         <button
           class="navbar-icon-button media-player-button media-player-button-skip"

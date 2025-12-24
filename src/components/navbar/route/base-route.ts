@@ -1,8 +1,8 @@
-import { NavbarCard } from '@/navbar-card';
-import { Icon, Badge, PopupItem } from '@/components/navbar';
-import { RouteItemBase } from '@/types';
+import { Badge, Icon, PopupItem } from '@/components/navbar';
+import type { ActionableElement } from '@/lib/event-detection';
+import type { NavbarCard } from '@/navbar-card';
+import type { RouteItemBase } from '@/types';
 import { processTemplate } from '@/utils';
-import { ActionableElement } from '@/lib/event-detection';
 
 export class BaseRoute implements ActionableElement {
   private _iconInstance?: Icon;

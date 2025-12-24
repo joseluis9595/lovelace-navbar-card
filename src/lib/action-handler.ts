@@ -1,5 +1,12 @@
 import { navigate } from 'custom-card-helpers';
-import { NavbarCustomActions, QuickbarActionConfig, RouteItem } from '@/types';
+
+import type { PopupItem, Route } from '@/components/navbar';
+import type { NavbarCard } from '@/navbar-card';
+import {
+  NavbarCustomActions,
+  type QuickbarActionConfig,
+  type RouteItem,
+} from '@/types';
 import {
   fireDOMEvent,
   forceOpenEditMode,
@@ -7,8 +14,6 @@ import {
   processTemplate,
   triggerHaptic,
 } from '@/utils';
-import { NavbarCard } from '@/navbar-card';
-import { PopupItem, Route } from '@/components/navbar';
 
 /**
  * List of HA actions where we manually append `entity` field
@@ -149,7 +154,6 @@ export const executeAction = (params: {
 
         setTimeout(() => {
           fireDOMEvent(context, 'hass-action', {
-            options: { bubbles: true, composed: true },
             detailOverride: {
               action: actionType,
               config: {
@@ -157,6 +161,7 @@ export const executeAction = (params: {
                 entity: extractedEntity,
               },
             },
+            options: { bubbles: true, composed: true },
           });
         }, 10);
       } else if (actionType === 'tap' && (route?.url || popupItem?.url)) {

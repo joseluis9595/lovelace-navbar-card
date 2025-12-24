@@ -1,10 +1,13 @@
-import { CSSResult, html, TemplateResult } from 'lit';
+import { type CSSResult, html, type TemplateResult } from 'lit';
+
 import {
-  NavbarCardConfig,
-  AutoPaddingConfig,
+  type AutoPaddingConfig,
   DEFAULT_NAVBAR_CONFIG,
+  DesktopPosition,
+  type NavbarCardConfig,
+  WidgetPosition,
 } from '@/types/config';
-import { RippleElement } from '@/types/types';
+import type { RippleElement } from '@/types/types';
 
 const DASHBOARD_PADDING_STYLE_ID = 'navbar-card-forced-padding-styles';
 const DEFAULT_STYLES_ID = 'navbar-card-default-styles';
@@ -91,11 +94,11 @@ export const removeDashboardPadding = () => {
 export const forceDashboardPadding = (options?: {
   desktop: NavbarCardConfig['desktop'];
   mobile: NavbarCardConfig['mobile'];
-  auto_padding?: AutoPaddingConfig;
-  show_media_player: boolean;
+  autoPadding?: AutoPaddingConfig;
+  widgetPositions: Record<string, WidgetPosition | null>;
 }) => {
   const autoPaddingEnabled =
-    options?.auto_padding?.enabled ??
+    options?.autoPadding?.enabled ??
     DEFAULT_NAVBAR_CONFIG.layout?.auto_padding?.enabled;
 
   // Find hui-root element
@@ -106,6 +109,19 @@ export const forceDashboardPadding = (options?: {
     );
     return;
   }
+
+  // Store padding values for each side
+  const totalPaddings = {
+    desktop: {
+      [DesktopPosition.top]: 0,
+      [DesktopPosition.bottom]: 0,
+      [DesktopPosition.left]: 0,
+      [DesktopPosition.right]: 0,
+    },
+    mobile: {
+      bottom: 0,
+    },
+  };
 
   // Find existing style element
   let styleEl = huiRoot.shadowRoot.querySelector<HTMLStyleElement>(
@@ -122,69 +138,109 @@ export const forceDashboardPadding = (options?: {
 
   // Initialize variables
   const desktopMinWidth = options?.desktop?.min_width ?? 768;
+  const desktopPosition =
+    options?.desktop?.position ?? DEFAULT_NAVBAR_CONFIG.desktop.position;
   const mobileMaxWidth = desktopMinWidth - 1;
   let cssText = '';
 
   // Desktop padding
   const desktopPaddingPx =
-    options?.auto_padding?.desktop_px ??
+    options?.autoPadding?.desktop_px ??
     DEFAULT_NAVBAR_CONFIG.layout?.auto_padding?.desktop_px ??
     0;
 
-  if (
-    ['left', 'right'].includes(options?.desktop?.position ?? '') &&
-    desktopPaddingPx > 0
-  ) {
+  // Store desktop padding
+  totalPaddings.desktop[desktopPosition] += desktopPaddingPx;
+
+  // Mobile padding
+  const mobilePaddingPx =
+    options?.autoPadding?.mobile_px ??
+    DEFAULT_NAVBAR_CONFIG.layout?.auto_padding?.mobile_px ??
+    0;
+
+  totalPaddings.mobile.bottom += mobilePaddingPx;
+
+  // Media player padding
+  const mediaPlayerPaddingPx =
+    options?.autoPadding?.media_player_px ??
+    DEFAULT_NAVBAR_CONFIG.layout?.auto_padding?.media_player_px ??
+    0;
+  const mediaPlayerPosition =
+    options?.widgetPositions?.['media_player'] ?? null;
+
+  if (mediaPlayerPosition) {
+    switch (mediaPlayerPosition) {
+      case WidgetPosition.topLeft:
+      case WidgetPosition.topCenter:
+      case WidgetPosition.topRight:
+        totalPaddings.desktop[DesktopPosition.top] += mediaPlayerPaddingPx;
+        break;
+      case WidgetPosition.bottomCenter:
+      case WidgetPosition.bottomRight:
+      case WidgetPosition.bottomLeft:
+        totalPaddings.desktop[DesktopPosition.bottom] += mediaPlayerPaddingPx;
+        break;
+    }
+    totalPaddings.mobile.bottom += mediaPlayerPaddingPx;
+  }
+
+  // Build CSS text
+  if (totalPaddings.desktop[DesktopPosition.top] > 0) {
     cssText += `
       @media (min-width: ${desktopMinWidth}px) {
-       :not(.edit-mode) > #view {
-            padding-${options?.desktop?.position}: ${desktopPaddingPx}px !important;
-          }
-      }
-    `;
-  } else if (
-    (options?.desktop?.position === 'bottom' ||
-      options?.desktop?.position === 'top') &&
-    desktopPaddingPx > 0
-  ) {
-    cssText += `
-      @media (min-width: ${desktopMinWidth}px) {
-        :not(.edit-mode) > hui-view:${options?.desktop?.position === 'top' ? 'before' : 'after'} {
+        :not(.edit-mode) > hui-view:before {
           content: "";
           display: block;
-          height: ${desktopPaddingPx}px;  
+          height: ${totalPaddings.desktop[DesktopPosition.top]}px;
           width: 100%;
-          background-color: transparent; 
+          background-color: transparent;
         }
       }
     `;
   }
-
-  // Mobile padding
-  let mobilePaddingPx =
-    options?.auto_padding?.mobile_px ??
-    DEFAULT_NAVBAR_CONFIG.layout?.auto_padding?.mobile_px ??
-    0;
-  // Add media player padding if enabled
-  if (options?.show_media_player) {
-    mobilePaddingPx +=
-      options?.auto_padding?.media_player_px ??
-      DEFAULT_NAVBAR_CONFIG.layout?.auto_padding?.media_player_px ??
-      0;
-  }
-  // Add padding to the DOM
-  if (mobilePaddingPx > 0) {
+  if (totalPaddings.desktop[DesktopPosition.bottom] > 0) {
     cssText += `
-      @media (max-width: ${mobileMaxWidth}px) {
+      @media (min-width: ${desktopMinWidth}px) {
         :not(.edit-mode) > hui-view:after {
           content: "";
           display: block;
-          height: ${mobilePaddingPx}px;
+          height: ${totalPaddings.desktop[DesktopPosition.bottom]}px;
           width: 100%;
           background-color: transparent;
-          }
         }
-      `;
+      }
+    `;
+  }
+  if (totalPaddings.desktop[DesktopPosition.left] > 0) {
+    cssText += `
+      @media (min-width: ${desktopMinWidth}px) {
+       :not(.edit-mode) > #view {
+            padding-left: ${totalPaddings.desktop[DesktopPosition.left]}px !important;
+          }
+      }
+    `;
+  }
+  if (totalPaddings.desktop[DesktopPosition.right] > 0) {
+    cssText += `
+      @media (min-width: ${desktopMinWidth}px) {
+       :not(.edit-mode) > #view {
+            padding-right: ${totalPaddings.desktop[DesktopPosition.right]}px !important;
+          }
+      }
+    `;
+  }
+  if (totalPaddings.mobile.bottom > 0) {
+    cssText += `
+        @media (max-width: ${mobileMaxWidth}px) {
+          :not(.edit-mode) > hui-view:after {
+            content: "";
+            display: block;
+            height: ${totalPaddings.mobile.bottom}px;
+            width: 100%;
+            background-color: transparent;
+            }
+          }
+        `;
   }
 
   // Append styles to hui-root
@@ -227,12 +283,14 @@ export function fireDOMEvent<T extends keyof EventConstructorMap = 'Event'>(
   ) => EventConstructorMap[T][0],
 ): EventConstructorMap[T][0] {
   const { options, detailOverride } = data ?? {};
-  const constructor = EventConstructor || Event;
-  const event = new constructor(type, options) as EventConstructorMap[T][0];
+  const eventConstructor = EventConstructor || Event;
+  const event = new eventConstructor(
+    type,
+    options,
+  ) as EventConstructorMap[T][0];
 
   if (detailOverride !== undefined) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (event as any).detail = detailOverride;
+    (event as { detail: unknown }).detail = detailOverride;
   }
 
   node.dispatchEvent(event);

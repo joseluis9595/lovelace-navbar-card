@@ -1,10 +1,12 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { fixture, html } from '@open-wc/testing';
+import type { HomeAssistant } from 'custom-card-helpers';
 import { render } from 'lit';
-import { NavbarCard } from '../../navbar-card';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import type { NavbarCardConfig } from '@/types';
+
 import { MediaPlayer } from '../../components/media-player';
-import { HomeAssistant } from 'custom-card-helpers';
-import { NavbarCardConfig } from '@/types';
+import { NavbarCard } from '../../navbar-card';
 
 // Register the custom element
 if (!customElements.get('navbar-card')) {
@@ -20,40 +22,31 @@ describe('MediaPlayer', () => {
     state: string,
     attributes: Record<string, unknown> = {},
   ) => ({
-    entity_id: 'media_player.test',
-    state,
     attributes: {
       entity_picture: 'https://example.com/album.jpg',
-      media_title: 'Test Song',
       media_artist: 'Test Artist',
-      media_position: 30,
       media_duration: 180,
+      media_position: 30,
+      media_title: 'Test Song',
       ...attributes,
     },
+    context: { id: 'test', parent_id: null, user_id: null },
+    entity_id: 'media_player.test',
     last_changed: '2023-01-01T00:00:00.000Z',
     last_updated: '2023-01-01T00:00:00.000Z',
-    context: { id: 'test', user_id: null, parent_id: null },
+    state,
   });
 
   beforeEach(async () => {
     // Mock window.innerWidth to ensure mobile mode
     Object.defineProperty(window, 'innerWidth', {
-      writable: true,
       configurable: true,
       value: 375,
+      writable: true,
     });
 
     // Mock Home Assistant object
     hass = {
-      states: {
-        'media_player.test': createMediaPlayerState('playing'),
-      },
-      config: {},
-      themes: {},
-      selectedTheme: null,
-      panels: {},
-      services: {},
-      user: {},
       auth: {
         data: {
           access_token: '',
@@ -63,23 +56,36 @@ describe('MediaPlayer', () => {
         },
         wsUrl: '',
       },
+      callApi: vi.fn(),
+      callService: vi.fn(),
+      config: {},
+      connected: true,
       connection: {
+        close: vi.fn(),
         connected: true,
-        subscribeEvents: vi.fn(),
-        subscribeMessage: vi.fn(),
         sendMessage: vi.fn(),
         sendMessagePromise: vi.fn(),
-        close: vi.fn(),
+        subscribeEvents: vi.fn(),
+        subscribeMessage: vi.fn(),
       },
-      connected: true,
-      panelUrl: '',
-      callService: vi.fn(),
-      callApi: vi.fn(),
       fetchWithAuth: vi.fn(),
+      panels: {},
+      panelUrl: '',
+      selectedTheme: null,
+      services: {},
+      states: {
+        'media_player.test': createMediaPlayerState('playing'),
+      },
+      themes: {},
+      user: {},
     } as unknown as HomeAssistant;
 
     // Create navbar card with media player config
     const config: NavbarCardConfig = {
+      media_player: {
+        album_cover_background: true,
+        entity: 'media_player.test',
+      },
       routes: [
         {
           icon: 'mdi:home',
@@ -87,10 +93,6 @@ describe('MediaPlayer', () => {
           url: '/',
         },
       ],
-      media_player: {
-        entity: 'media_player.test',
-        album_cover_background: true,
-      },
     };
 
     navbarCard = await fixture<NavbarCard>(html`<navbar-card></navbar-card>`);
@@ -122,13 +124,13 @@ describe('MediaPlayer', () => {
 
     it('should have action getters when configured', () => {
       const configWithActions: NavbarCardConfig = {
-        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
         media_player: {
-          entity: 'media_player.test',
-          tap_action: { action: 'call-service', service: 'test.service' },
-          hold_action: { action: 'navigate', navigation_path: '/test' },
           double_tap_action: { action: 'more-info' },
+          entity: 'media_player.test',
+          hold_action: { action: 'navigate', navigation_path: '/test' },
+          tap_action: { action: 'call-service', service: 'test.service' },
         },
+        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
       };
 
       navbarCard.setConfig(configWithActions);
@@ -151,63 +153,53 @@ describe('MediaPlayer', () => {
   describe('Visibility Logic', () => {
     it('should not show media player when no entity is configured', () => {
       const configWithoutEntity: NavbarCardConfig = {
-        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
         media_player: {
           entity: '',
         },
+        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
       };
 
       navbarCard.setConfig(configWithoutEntity);
       const mediaPlayerWithoutEntity = new MediaPlayer(navbarCard);
-      const result = mediaPlayerWithoutEntity.shouldShowMediaPlayer();
+      const result = mediaPlayerWithoutEntity.isVisible();
 
-      expect(result.visible).toBe(false);
-    });
-
-    it('should not show media player on desktop', () => {
-      // Mock desktop mode
-      Object.defineProperty(navbarCard, 'isDesktop', {
-        value: true,
-        writable: true,
-      });
-
-      const result = mediaPlayer.shouldShowMediaPlayer();
       expect(result.visible).toBe(false);
     });
 
     it('should show media player when entity is playing', () => {
-      const result = mediaPlayer.shouldShowMediaPlayer();
+      const result = mediaPlayer.isVisible();
       expect(result.visible).toBe(true);
       expect(result.error).toBeUndefined();
     });
 
     it('should show media player when entity is paused', () => {
       hass.states['media_player.test'] = createMediaPlayerState('paused');
-      const result = mediaPlayer.shouldShowMediaPlayer();
+      const result = mediaPlayer.isVisible();
       expect(result.visible).toBe(true);
       expect(result.error).toBeUndefined();
     });
 
     it('should not show media player when entity is idle', () => {
       hass.states['media_player.test'] = createMediaPlayerState('idle');
-      const result = mediaPlayer.shouldShowMediaPlayer();
+      const result = mediaPlayer.isVisible();
       expect(result.visible).toBe(false);
     });
 
     it('should show error when entity is not found', () => {
+      // biome-ignore lint/performance/noDelete: Testing purposes
       delete hass.states['media_player.test'];
-      const result = mediaPlayer.shouldShowMediaPlayer();
+      const result = mediaPlayer.isVisible();
       expect(result.visible).toBe(true);
       expect(result.error).toBe('Entity not found "media_player.test"');
     });
 
     it('should respect show template configuration', () => {
       const configWithShow: NavbarCardConfig = {
-        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
         media_player: {
           entity: 'media_player.test',
           show: '[[[ return states["media_player.test"].state == "playing" ]]]',
         },
+        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
       };
 
       navbarCard.setConfig(configWithShow);
@@ -215,12 +207,12 @@ describe('MediaPlayer', () => {
 
       // Should show when playing
       hass.states['media_player.test'] = createMediaPlayerState('playing');
-      let result = mediaPlayerWithShow.shouldShowMediaPlayer();
+      let result = mediaPlayerWithShow.isVisible();
       expect(result.visible).toBe(true);
 
       // Should not show when paused
       hass.states['media_player.test'] = createMediaPlayerState('paused');
-      result = mediaPlayerWithShow.shouldShowMediaPlayer();
+      result = mediaPlayerWithShow.isVisible();
       expect(result.visible).toBe(false);
     });
   });
@@ -228,11 +220,11 @@ describe('MediaPlayer', () => {
   describe('Action Execution', () => {
     it('should execute custom tap action', async () => {
       const configWithTapAction: NavbarCardConfig = {
-        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
         media_player: {
           entity: 'media_player.test',
           tap_action: { action: 'call-service', service: 'test.service' },
         },
+        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
       };
 
       navbarCard.setConfig(configWithTapAction);
@@ -241,7 +233,7 @@ describe('MediaPlayer', () => {
       const dispatchEventSpy = vi.spyOn(navbarCard, 'dispatchEvent');
 
       // Render and simulate tap on card (eventDetection directive handles it)
-      const tpl = mediaPlayerWithAction.render();
+      const tpl = mediaPlayerWithAction.render({ isInsideNavbar: true });
       const container = document.createElement('div');
       await render(tpl, container);
       const card = container.querySelector('ha-card.media-player');
@@ -253,7 +245,6 @@ describe('MediaPlayer', () => {
 
       expect(dispatchEventSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 'hass-action',
           bubbles: true,
           composed: true,
           detail: {
@@ -263,6 +254,7 @@ describe('MediaPlayer', () => {
               // entity can be provided or undefined depending on handler; don't assert exact
             },
           },
+          type: 'hass-action',
         }),
       );
     });
@@ -270,7 +262,7 @@ describe('MediaPlayer', () => {
     it('should execute default tap action when no custom action is configured', async () => {
       const dispatchEventSpy = vi.spyOn(navbarCard, 'dispatchEvent');
 
-      const tpl = mediaPlayer.render();
+      const tpl = mediaPlayer.render({ isInsideNavbar: true });
       const container = document.createElement('div');
       await render(tpl, container);
       const card = container.querySelector('ha-card.media-player');
@@ -282,7 +274,6 @@ describe('MediaPlayer', () => {
 
       expect(dispatchEventSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 'hass-action',
           bubbles: true,
           composed: true,
           detail: expect.objectContaining({
@@ -291,15 +282,17 @@ describe('MediaPlayer', () => {
               tap_action: expect.objectContaining({ action: 'more-info' }),
             }),
           }),
+          type: 'hass-action',
         }),
       );
     });
 
     it('should not execute default tap action when entity is not found', async () => {
+      // biome-ignore lint/performance/noDelete: Testing purposes
       delete hass.states['media_player.test'];
       const dispatchEventSpy = vi.spyOn(navbarCard, 'dispatchEvent');
 
-      const tpl = mediaPlayer.render();
+      const tpl = mediaPlayer.render({ isInsideNavbar: true });
       const container = document.createElement('div');
       await render(tpl, container);
       const card = container.querySelector('ha-card.media-player');
@@ -317,7 +310,7 @@ describe('MediaPlayer', () => {
   describe('Media Player Controls', () => {
     it('should render play button when paused', async () => {
       hass.states['media_player.test'] = createMediaPlayerState('paused');
-      const result = mediaPlayer.render();
+      const result = mediaPlayer.render({ isInsideNavbar: true });
 
       const container = document.createElement('div');
       await render(result, container);
@@ -332,7 +325,7 @@ describe('MediaPlayer', () => {
 
     it('should render pause button when playing', async () => {
       hass.states['media_player.test'] = createMediaPlayerState('playing');
-      const result = mediaPlayer.render();
+      const result = mediaPlayer.render({ isInsideNavbar: true });
 
       const container = document.createElement('div');
       await render(result, container);
@@ -346,7 +339,7 @@ describe('MediaPlayer', () => {
     });
 
     it('should render skip next button', async () => {
-      const result = mediaPlayer.render();
+      const result = mediaPlayer.render({ isInsideNavbar: true });
 
       const container = document.createElement('div');
       await render(result, container);
@@ -358,7 +351,7 @@ describe('MediaPlayer', () => {
     });
 
     it('should render media information', async () => {
-      const result = mediaPlayer.render();
+      const result = mediaPlayer.render({ isInsideNavbar: true });
 
       const container = document.createElement('div');
       await render(result, container);
@@ -376,7 +369,7 @@ describe('MediaPlayer', () => {
       hass.states['media_player.test'] = createMediaPlayerState('playing', {
         entity_picture: 'https://example.com/album.jpg',
       });
-      const result = mediaPlayer.render();
+      const result = mediaPlayer.render({ isInsideNavbar: true });
 
       // Render the template to a container
       const container = document.createElement('div');
@@ -396,7 +389,7 @@ describe('MediaPlayer', () => {
       hass.states['media_player.test'] = createMediaPlayerState('playing', {
         entity_picture: null,
       });
-      const result = mediaPlayer.render();
+      const result = mediaPlayer.render({ isInsideNavbar: true });
 
       // Render the template to a container
       const container = document.createElement('div');
@@ -417,10 +410,10 @@ describe('MediaPlayer', () => {
 
     it('should render progress bar when position and duration are available', async () => {
       hass.states['media_player.test'] = createMediaPlayerState('playing', {
-        media_position: 30,
         media_duration: 180,
+        media_position: 30,
       });
-      const result = mediaPlayer.render();
+      const result = mediaPlayer.render({ isInsideNavbar: true });
 
       const container = document.createElement('div');
       await render(result, container);
@@ -439,10 +432,10 @@ describe('MediaPlayer', () => {
 
     it('should not render progress bar when position is not available', async () => {
       hass.states['media_player.test'] = createMediaPlayerState('playing', {
-        media_position: null,
         media_duration: 180,
+        media_position: null,
       });
-      const result = mediaPlayer.render();
+      const result = mediaPlayer.render({ isInsideNavbar: true });
 
       const container = document.createElement('div');
       await render(result, container);
@@ -453,16 +446,16 @@ describe('MediaPlayer', () => {
 
     it('should render album cover background when enabled', async () => {
       const configWithBackground: NavbarCardConfig = {
-        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
         media_player: {
-          entity: 'media_player.test',
           album_cover_background: true,
+          entity: 'media_player.test',
         },
+        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
       };
 
       navbarCard.setConfig(configWithBackground);
       const mediaPlayerWithBackground = new MediaPlayer(navbarCard);
-      const result = mediaPlayerWithBackground.render();
+      const result = mediaPlayerWithBackground.render({ isInsideNavbar: true });
 
       const container = document.createElement('div');
       await render(result, container);
@@ -477,8 +470,9 @@ describe('MediaPlayer', () => {
 
   describe('Error Handling', () => {
     it('should render error card when entity is not found', async () => {
+      // biome-ignore lint/performance/noDelete: Testing purposes
       delete hass.states['media_player.test'];
-      const result = mediaPlayer.render();
+      const result = mediaPlayer.render({ isInsideNavbar: true });
 
       const container = document.createElement('div');
       await render(result, container);
@@ -495,13 +489,16 @@ describe('MediaPlayer', () => {
     });
 
     it('should not render when not visible', async () => {
-      // Mock desktop mode to make it not visible
-      Object.defineProperty(navbarCard, 'isDesktop', {
-        value: true,
-        writable: true,
-      });
+      const configWithTapAction: NavbarCardConfig = {
+        media_player: {
+          show: false,
+        },
+        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
+      };
 
-      const result = mediaPlayer.render();
+      navbarCard.setConfig(configWithTapAction);
+
+      const result = mediaPlayer.render({ isInsideNavbar: true });
 
       const container = document.createElement('div');
       await render(result, container);
@@ -512,15 +509,15 @@ describe('MediaPlayer', () => {
 
     it('should not render when entity is not configured', async () => {
       const configWithoutEntity: NavbarCardConfig = {
-        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
         media_player: {
           entity: '',
         },
+        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
       };
 
       navbarCard.setConfig(configWithoutEntity);
       const mediaPlayerWithoutEntity = new MediaPlayer(navbarCard);
-      const result = mediaPlayerWithoutEntity.render();
+      const result = mediaPlayerWithoutEntity.render({ isInsideNavbar: true });
 
       const container = document.createElement('div');
       await render(result, container);
@@ -533,29 +530,29 @@ describe('MediaPlayer', () => {
   describe('Template Processing', () => {
     it('should process entity template', () => {
       const configWithTemplate: NavbarCardConfig = {
-        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
         media_player: {
           entity: '[[[ return "media_player." + "test" ]]]',
         },
+        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
       };
 
       navbarCard.setConfig(configWithTemplate);
       const mediaPlayerWithTemplate = new MediaPlayer(navbarCard);
-      const result = mediaPlayerWithTemplate.shouldShowMediaPlayer();
+      const result = mediaPlayerWithTemplate.isVisible();
       expect(result.visible).toBe(true);
     });
 
     it('should handle invalid entity template', () => {
       const configWithInvalidTemplate: NavbarCardConfig = {
-        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
         media_player: {
           entity: '[[[ return invalid_template ]]]',
         },
+        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
       };
 
       navbarCard.setConfig(configWithInvalidTemplate);
       const mediaPlayerWithInvalidTemplate = new MediaPlayer(navbarCard);
-      const result = mediaPlayerWithInvalidTemplate.shouldShowMediaPlayer();
+      const result = mediaPlayerWithInvalidTemplate.isVisible();
       expect(result.visible).toBe(true);
       expect(result.error).toContain('Entity not found');
     });
@@ -567,7 +564,7 @@ describe('MediaPlayer', () => {
 
       // We need to access the private method through the render method
       // and simulate a click event
-      const result = mediaPlayer.render();
+      const result = mediaPlayer.render({ isInsideNavbar: true });
       expect(result).toBeDefined();
 
       // The actual service call would be tested through integration tests
@@ -577,12 +574,12 @@ describe('MediaPlayer', () => {
     it('should call media_player.media_pause when playing', () => {
       hass.states['media_player.test'] = createMediaPlayerState('playing');
 
-      const result = mediaPlayer.render();
+      const result = mediaPlayer.render({ isInsideNavbar: true });
       expect(result).toBeDefined();
     });
 
     it('should call media_player.media_next_track for skip', () => {
-      const result = mediaPlayer.render();
+      const result = mediaPlayer.render({ isInsideNavbar: true });
       expect(result).toBeDefined();
     });
   });

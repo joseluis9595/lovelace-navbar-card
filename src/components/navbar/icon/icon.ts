@@ -1,10 +1,10 @@
 import { html } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 
-import { NavbarCard } from '@/navbar-card';
-import { BaseRoute } from '@/components/navbar';
-import { processTemplate } from '@/utils';
 import { isColor } from '@/components/color';
+import type { BaseRoute } from '@/components/navbar';
+import type { NavbarCard } from '@/navbar-card';
+import { processTemplate } from '@/utils';
 
 export class Icon {
   constructor(
@@ -70,28 +70,32 @@ export class Icon {
     const resolvedIconColor = this.iconColor;
 
     // If neither image nor icon resolve to a value, render nothing
-    if (!resolvedImage && !resolvedIcon) {
+    if (!(resolvedImage || resolvedIcon)) {
       return html``;
     }
 
     return resolvedImage
       ? html` <img
           class=${classMap({
-            image: true,
             active: isSelected,
+            image: true,
           })}
-          src="${isSelected && resolvedImageSelected
-            ? resolvedImageSelected
-            : resolvedImage}"
+          src="${
+            isSelected && resolvedImageSelected
+              ? resolvedImageSelected
+              : resolvedImage
+          }"
           alt="${this._route.label || ''}" />`
       : html` <ha-icon
           class=${classMap({
-            icon: true,
             active: isSelected,
+            icon: true,
           })}
           style="--icon-primary-color: ${resolvedIconColor ?? 'inherit'}"
-          icon="${isSelected && resolvedIconSelected
-            ? resolvedIconSelected
-            : resolvedIcon}"></ha-icon>`;
+          icon="${
+            isSelected && resolvedIconSelected
+              ? resolvedIconSelected
+              : resolvedIcon
+          }"></ha-icon>`;
   }
 }

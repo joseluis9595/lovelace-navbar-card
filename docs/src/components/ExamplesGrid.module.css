@@ -1,18 +1,32 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
 .tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 24px;
 }
 
 .tab {
-  padding: 12px 24px;
+  padding: 8px 16px;
   border: none;
-  border-radius: var(--ifm-card-border-radius);
+  border-radius: 999px;
   background: var(--ifm-color-emphasis-100);
   color: var(--ifm-color-emphasis-700);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  font-size: 0.9rem;
+  transition: all 0.15s ease-in-out;
 }
 
 .tab:hover {
@@ -26,6 +40,12 @@
 
 .tabActive:hover {
   background: var(--ifm-color-primary-darker);
+}
+
+.helperText {
+  margin: 0;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.9rem;
 }
 
 .grid {
@@ -44,6 +64,8 @@
     transform 0.2s ease-in-out,
     box-shadow 0.2s ease-in-out;
   border: 1px solid var(--ifm-color-emphasis-200);
+  display: flex;
+  flex-direction: column;
 }
 
 .exampleCard:hover {
@@ -51,10 +73,14 @@
 }
 
 .exampleImage {
+  display: block;
   width: 100%;
-  height: 130px;
-  object-fit: cover;
+  height: auto;
+  max-height: 220px;
+  object-fit: contain;
   border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  background: var(--ifm-color-emphasis-100);
+  flex: 1;
 }
 
 .exampleContent {
@@ -72,19 +98,9 @@
   color: var(--ifm-color-emphasis-600);
   margin: 0 0 8px 0;
 }
-
 @media (max-width: 600px) {
   .grid {
     grid-template-columns: 1fr;
     padding: 0px;
-  }
-
-  .tabs {
-    width: 100%;
-  }
-
-  .tab {
-    flex: 1;
-    padding: 12px;
   }
 }

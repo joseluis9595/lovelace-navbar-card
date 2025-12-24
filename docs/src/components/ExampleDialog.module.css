@@ -78,7 +78,7 @@
 
 .imageContainer {
   background: var(--ha-background-color);
-  padding: 32px;
+  padding: 12px;
   text-align: center;
   border-bottom: 1px solid var(--ifm-color-emphasis-200);
   flex-shrink: 0;
@@ -86,7 +86,7 @@
 
 .image {
   max-width: 100%;
-  max-height: 300px;
+  max-height: 35vh;
   object-fit: contain;
   border-radius: 12px;
 }
