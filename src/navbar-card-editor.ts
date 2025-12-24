@@ -73,6 +73,7 @@ enum LazyLoadedEditorSections {
 export class NavbarCardEditor extends LitElement {
   @property({ attribute: false }) public hass: any;
   @state() private _config: NavbarCardConfig = { routes: [] };
+  @state() private _loadingComponents: boolean = false;
   @state() private _lazyLoadedSections: Record<
     LazyLoadedEditorSections,
     boolean
@@ -82,6 +83,7 @@ export class NavbarCardEditor extends LitElement {
 
   protected firstUpdated(_changedProperties: PropertyValues): void {
     super.firstUpdated(_changedProperties);
+    this._loadingComponents = true;
     loadHaComponents([
       'ha-form',
       'ha-tooltip',
@@ -98,8 +100,10 @@ export class NavbarCardEditor extends LitElement {
       'ha-icon-picker',
       'ha-entity-picker',
       'ha-textarea',
-      'ha-navigation-picker',
-    ]);
+      'ha-selector',
+    ]).finally(() => {
+      this._loadingComponents = false;
+    });
   }
 
   /**********************************************************************/
@@ -190,14 +194,16 @@ export class NavbarCardEditor extends LitElement {
     configKey: DotNotationKeys<NavbarCardConfig>;
     disabled?: boolean;
   }) {
-    return html`<ha-navigation-picker
-      label=${options.label}
+    return html`
+    <ha-selector
+      .label=${options.label}
+      .selector=${{ navigation: {} }}
       .value=${genericGetProperty(this._config, options.configKey) ?? ''}
-      .disabled=${options.disabled}
       .hass=${this.hass}
-      @value-changed="${e => {
-        this.updateConfigByKey(options.configKey, e.detail.value);
-      }}" /> `;
+      @value-changed=${e =>
+        this.updateConfigByKey(options.configKey, e.detail.value)}
+    ></ha-selector>
+    `;
   }
 
   makeTextInput(options: {
@@ -1418,6 +1424,9 @@ export class NavbarCardEditor extends LitElement {
   /**********************************************************************/
   protected render() {
     return html`
+    ${conditionallyRender(
+      !this._loadingComponents,
+      () => html`
       <div class="navbar-editor">
         ${
           this._config.template != undefined &&
@@ -1443,7 +1452,8 @@ export class NavbarCardEditor extends LitElement {
         ${this.renderLayoutEditor()} ${this.renderMediaPlayerEditor()}
         ${this.renderHapticEditor()} ${this.renderStylesEditor()}
       </div>
-    `;
+    `,
+    )}`;
   }
 
   static styles = getEditorStyles();
