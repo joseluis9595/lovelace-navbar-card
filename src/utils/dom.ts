@@ -363,3 +363,13 @@ export const conditionallyRender = (
     <span class="loader"></span>
   </div>`;
 };
+
+/**
+ * Check if a given HA component is supported.
+ *
+ * @param component - The name of the component to check for.
+ * @returns True if the component is supported, false otherwise.
+ */
+export const supportsHAComponent = (component: string) => {
+  return customElements?.get(component) != null;
+};

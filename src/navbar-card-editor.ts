@@ -8,6 +8,10 @@ import {
 } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
+import {
+  type RenderDropdownOptions,
+  renderDropdown,
+} from '@/editor/ui/renderDropdown';
 import { ACTIONS_WITH_CUSTOM_ENTITY } from '@/lib/action-handler';
 import {
   DEFAULT_NAVBAR_CONFIG,
@@ -161,33 +165,17 @@ export class NavbarCardEditor extends LitElement {
     </ha-tooltip>`;
   }
 
-  makeComboBox<T>(options: {
-    label: string;
-    // TODO this type T should be replaced with the value of the key in the config
-    items: { label: string; value: T }[];
-    configKey: DotNotationKeys<NavbarCardConfig>;
-    disabled?: boolean;
-    helper?: string | TemplateResult;
-    helperPersistent?: boolean;
-    defaultValue?: T;
-    hideClearIcon?: boolean;
-  }) {
-    return html`
-      <ha-combo-box
-        helper=${options.helper}
-        helperPersistent=${options.helperPersistent}
-        label=${options.label}
-        .items=${options.items}
-        .value=${
-          genericGetProperty(this._config, options.configKey) ??
-          options.defaultValue
-        }
-        .disabled=${options.disabled}
-        .hideClearIcon=${options.hideClearIcon}
-        @value-changed="${e => {
-          this.updateConfigByKey(options.configKey, e.detail.value);
-        }}" />
-    `;
+  makeComboBox<T>(options: RenderDropdownOptions<T>) {
+    return renderDropdown(
+      genericGetProperty(this._config, options.configKey) ??
+        options.defaultValue ??
+        null,
+      value => {
+        this.updateConfigByKey(options.configKey, value);
+      },
+      // TODO: review this improper `any` typing
+      options as RenderDropdownOptions<any>,
+    );
   }
 
   makeNavigationPicker(options: {
@@ -1299,25 +1287,39 @@ export class NavbarCardEditor extends LitElement {
           </ha-icon-button>
         </h5>
         <div class="editor-section">
-          <ha-combo-box
-            label=${this._chooseLabelForAction(options.actionType)}
-            .items=${ACTIONS}
-            .value=${selected}
-            .disabled=${options.disabled}
-            @value-changed=${(e: CustomEvent) => {
-              const newSel = e.detail.value;
+          <div class="editor-select-field">
+            <label class="editor-label">
+              ${this._chooseLabelForAction(options.actionType)}
+            </label>
+            <select
+              class="editor-select"
+              .value=${selected}
+              ?disabled=${options.disabled}
+              @change=${(e: Event) => {
+                const newSel = (e.target as HTMLSelectElement).value as
+                  | 'hass_action'
+                  | NavbarCustomActions;
 
-              if (newSel === 'hass_action') {
-                // By default, start with action: "none"
-                this.updateConfigByKey(options.configKey, {
-                  action: 'none',
-                } as any);
-              } else {
-                this.updateConfigByKey(options.configKey, {
-                  action: newSel,
-                } as any);
-              }
-            }}></ha-combo-box>
+                if (newSel === 'hass_action') {
+                  // By default, start with action: "none"
+                  this.updateConfigByKey(options.configKey, {
+                    action: 'none',
+                  } as any);
+                } else {
+                  this.updateConfigByKey(options.configKey, {
+                    action: newSel,
+                  } as any);
+                }
+              }}>
+              ${ACTIONS.map(
+                action => html`<option
+                  value=${action.value}
+                  ?selected=${action.value === selected}>
+                  ${action.label}
+                </option>`,
+              )}
+            </select>
+          </div>
 
           ${
             selected === NavbarCustomActions.quickbar
