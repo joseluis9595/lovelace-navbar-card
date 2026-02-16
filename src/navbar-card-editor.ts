@@ -1008,6 +1008,24 @@ export class NavbarCardEditor extends LitElement {
             // TODO JLAQ maybe replace with a templateSwitchEditor
             label: 'Show media player',
           })}
+          ${this.makeTemplatable({
+            configKey: 'media_player.icon',
+            inputType: 'icon',
+            label: 'Icon',
+            templateHelper: STRING_JS_TEMPLATE_HELPER,
+          })}
+          ${this.makeTemplatable({
+            configKey: 'media_player.title',
+            inputType: 'string',
+            label: 'Title',
+            templateHelper: STRING_JS_TEMPLATE_HELPER,
+          })}
+          ${this.makeTemplatable({
+            configKey: 'media_player.subtitle',
+            inputType: 'string',
+            label: 'Subtitle',
+            templateHelper: STRING_JS_TEMPLATE_HELPER,
+          })}
           ${Object.values(HAActions).map(type => {
             const key =
               `media_player.${type}` as DotNotationKeys<NavbarCardConfig>;

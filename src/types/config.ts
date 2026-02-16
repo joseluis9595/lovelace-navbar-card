@@ -132,6 +132,9 @@ type MediaPlayerConfig = {
   tap_action?: ExtendedActionConfig;
   hold_action?: ExtendedActionConfig;
   double_tap_action?: ExtendedActionConfig;
+  icon?: JSTemplatable<string>;
+  title?: JSTemplatable<string>;
+  subtitle?: JSTemplatable<string>;
 };
 
 // Display mode configuration

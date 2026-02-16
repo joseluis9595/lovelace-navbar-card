@@ -67,6 +67,36 @@ export class MediaPlayer implements ActionableElement {
     );
   }
 
+  private _getIcon(): string | null {
+    return this._navbarCard.config?.media_player?.icon
+      ? processTemplate<string>(
+          this._navbarCard._hass,
+          this._navbarCard,
+          this._navbarCard.config?.media_player?.icon,
+        )
+      : null;
+  }
+
+  private _getTitle(mediaPlayerState): string {
+    return this._navbarCard.config?.media_player?.title
+      ? processTemplate<string>(
+          this._navbarCard._hass,
+          this._navbarCard,
+          this._navbarCard.config?.media_player?.title,
+        )
+      : mediaPlayerState.attributes.media_title;
+  }
+
+  private _getSubtitle(mediaPlayerState): string {
+    return this._navbarCard.config?.media_player?.subtitle
+      ? processTemplate<string>(
+          this._navbarCard._hass,
+          this._navbarCard,
+          this._navbarCard.config?.media_player?.subtitle,
+        )
+      : mediaPlayerState.attributes.media_artist;
+  }
+
   /**
    * Skip to next track.
    */
@@ -119,6 +149,9 @@ export class MediaPlayer implements ActionableElement {
         ? mediaPlayerState.attributes.media_position /
           mediaPlayerState.attributes.media_duration
         : null;
+    const icon = this._getIcon();
+    const title = this._getTitle(mediaPlayerState);
+    const subtitle = this._getSubtitle(mediaPlayerState);
 
     const deviceClass = this._navbarCard.isDesktop ? 'desktop' : 'mobile';
 
@@ -161,22 +194,18 @@ export class MediaPlayer implements ActionableElement {
             : html``
         }
         ${
-          mediaPlayerImage
+          mediaPlayerImage && !icon
             ? html`<img
-              class="media-player-image"
-              src=${mediaPlayerImage}
-              alt=${mediaPlayerState.attributes.media_title} />`
+                class="media-player-image"
+                src=${mediaPlayerImage}
+                alt=${title || ''} />`
             : html`<ha-icon
-              class="media-player-image media-player-icon-fallback"
-              icon="mdi:music"></ha-icon>`
+                class="media-player-image media-player-icon-fallback"
+                icon=${icon ?? 'mdi:music'}></ha-icon>`
         }
         <div class="media-player-info">
-          <span class="media-player-title"
-            >${mediaPlayerState.attributes.media_title}</span
-          >
-          <span class="media-player-artist"
-            >${mediaPlayerState.attributes.media_artist}</span
-          >
+          <span class="media-player-title">${title || ''}</span>
+          <span class="media-player-artist">${subtitle || ''}</span>
         </div>
         <button
           class="navbar-icon-button media-player-button media-player-button-play-pause primary"
