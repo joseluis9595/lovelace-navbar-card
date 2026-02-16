@@ -21,18 +21,49 @@ import {
 export const ACTIONS_WITH_CUSTOM_ENTITY = ['more-info', 'toggle'];
 
 /**
- * Choose the key needed for the KeyboardEvent to open the native HA quickbar.
+ * Opens Home Assistant's quickbar by simulating the keyboard shortcut.
+ * Uses Ctrl/Cmd + K for the standard quickbar, or mode-specific keys if specified.
  */
-const chooseKeyForQuickbar = (action: QuickbarActionConfig) => {
-  switch (action.mode) {
-    case 'devices':
-      return 'd';
-    case 'entities':
-      return 'e';
-    case 'commands':
-    default:
-      return 'c';
+const openQuickbar = (action: QuickbarActionConfig) => {
+  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+  let key: string;
+
+  if (action.mode) {
+    switch (action.mode) {
+      case 'devices':
+        key = 'd';
+        break;
+      case 'entities':
+        key = 'e';
+        break;
+      case 'commands':
+      default:
+        key = 'c';
+        break;
+    }
+  } else {
+    // Standard quickbar shortcut: Ctrl/Cmd + K
+    key = 'k';
   }
+
+  const eventInit: KeyboardEventInit = {
+    bubbles: true,
+    cancelable: true,
+    key,
+  };
+
+  // Set platform-specific modifier key, only for the standard quickbar
+  if (!action.mode) {
+    if (isMac) {
+      eventInit.metaKey = true;
+    } else {
+      eventInit.ctrlKey = true;
+    }
+  }
+
+  const event = new KeyboardEvent('keydown', eventInit);
+
+  document.dispatchEvent(event);
 };
 
 /**
@@ -94,18 +125,7 @@ export const executeAction = (params: {
 
     case NavbarCustomActions.quickbar:
       triggerHaptic(context, actionType);
-      fireDOMEvent<'KeyboardEvent'>(
-        context,
-        'keydown',
-        {
-          options: {
-            bubbles: true,
-            composed: true,
-            key: chooseKeyForQuickbar(action),
-          },
-        },
-        KeyboardEvent,
-      );
+      openQuickbar(action);
       break;
 
     case NavbarCustomActions.showNotifications:
