@@ -819,6 +819,7 @@ export class NavbarCardEditor extends LitElement {
         </h4>
         <div class="editor-section">
           ${this.makeComboBox({
+            allowEmptyValue: true,
             configKey: 'template',
             helper: html`Reusable template name used for this card.
               <a
@@ -990,6 +991,7 @@ export class NavbarCardEditor extends LitElement {
           })}
           ${this.makeComboBox<WidgetPosition>({
             configKey: 'media_player.desktop_position',
+            defaultValue: DEFAULT_NAVBAR_CONFIG.media_player?.desktop_position,
             items: [
               { label: 'Top left', value: WidgetPosition.topLeft },
               { label: 'Top center', value: WidgetPosition.topCenter },
@@ -1056,7 +1058,6 @@ export class NavbarCardEditor extends LitElement {
           ${this.makeComboBox<NavbarDisplayMode>({
             configKey: 'desktop.mode',
             defaultValue: DEFAULT_NAVBAR_CONFIG.desktop?.mode,
-            hideClearIcon: true,
             items: [
               { label: 'Floating', value: 'floating' },
               { label: 'Docked', value: 'docked' },
@@ -1067,6 +1068,7 @@ export class NavbarCardEditor extends LitElement {
             <div class="editor-row-item">
               ${this.makeComboBox<DesktopPosition>({
                 configKey: 'desktop.position',
+                defaultValue: DEFAULT_NAVBAR_CONFIG.desktop?.position,
                 items: [
                   { label: 'Top', value: DesktopPosition.top },
                   { label: 'Bottom', value: DesktopPosition.bottom },
@@ -1088,6 +1090,7 @@ export class NavbarCardEditor extends LitElement {
           </div>
           ${this.makeComboBox<LabelVisibilityConfig>({
             configKey: 'desktop.show_labels',
+            defaultValue: DEFAULT_NAVBAR_CONFIG.desktop?.show_labels,
             items: [
               { label: 'Always', value: true },
               { label: 'Never', value: false },
@@ -1129,7 +1132,6 @@ export class NavbarCardEditor extends LitElement {
           ${this.makeComboBox<NavbarDisplayMode>({
             configKey: 'mobile.mode',
             defaultValue: DEFAULT_NAVBAR_CONFIG.mobile?.mode,
-            hideClearIcon: true,
             items: [
               { label: 'Floating', value: 'floating' },
               { label: 'Docked', value: 'docked' },
@@ -1138,6 +1140,7 @@ export class NavbarCardEditor extends LitElement {
           })}
           ${this.makeComboBox<LabelVisibilityConfig>({
             configKey: 'mobile.show_labels',
+            defaultValue: DEFAULT_NAVBAR_CONFIG.mobile?.show_labels,
             items: [
               { label: 'Always', value: true },
               { label: 'Never', value: false },

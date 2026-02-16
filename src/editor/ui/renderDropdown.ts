@@ -13,7 +13,7 @@ export interface RenderDropdownOptions<T> {
   helper?: string | TemplateResult;
   helperPersistent?: boolean;
   defaultValue?: T;
-  hideClearIcon?: boolean;
+  allowEmptyValue?: boolean;
 }
 
 const renderHAComboBox = <T>(
@@ -29,7 +29,7 @@ const renderHAComboBox = <T>(
         .items=${options.items}
         .value=${value ?? options.defaultValue ?? null}
         .disabled=${options.disabled}
-        .hideClearIcon=${options.hideClearIcon}
+        .hideClearIcon=${!options.allowEmptyValue}
         @value-changed="${e => {
           onChange(e.detail.value ?? null);
         }}" />
@@ -66,7 +66,7 @@ const renderHTMLSelect = <T>(
             onChange((selectedItem?.value as T) ?? null);
           }}>
           ${
-            !options.hideClearIcon
+            options.allowEmptyValue
               ? html`<option value="">
             &ndash;
             </option>`
