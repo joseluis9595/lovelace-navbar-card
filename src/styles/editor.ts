@@ -226,7 +226,7 @@ export const EDITOR_STYLES = css`
     );
     background-position: right 12px center;
     background-repeat: no-repeat;
-    background-size: 8px 6px; /* slightly wider than tall for a crisp arrow */
+    background-size: 8px 6px;
   }
 
   .editor-select:hover:not(:disabled) {
