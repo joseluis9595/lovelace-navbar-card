@@ -408,6 +408,111 @@ describe('MediaPlayer', () => {
       expect(imgElement).toBeFalsy();
     });
 
+    it('should use configured icon instead of album cover', async () => {
+      const configWithIcon: NavbarCardConfig = {
+        media_player: {
+          entity: 'media_player.test',
+          icon: 'mdi:radio',
+        },
+        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
+      };
+
+      navbarCard.setConfig(configWithIcon);
+      const mediaPlayerWithIcon = new MediaPlayer(navbarCard);
+      hass.states['media_player.test'] = createMediaPlayerState('playing', {
+        entity_picture: 'https://example.com/album.jpg',
+      });
+      const result = mediaPlayerWithIcon.render({ isInsideNavbar: true });
+
+      const container = document.createElement('div');
+      await render(result, container);
+
+      // Should use icon instead of image when icon is configured
+      const iconElement = container.querySelector(
+        'ha-icon.media-player-icon-fallback',
+      );
+      expect(iconElement).toBeTruthy();
+      expect(iconElement?.getAttribute('icon')).toBe('mdi:radio');
+
+      const imgElement = container.querySelector('img.media-player-image');
+      expect(imgElement).toBeFalsy();
+    });
+
+    it('should use configured title instead of media_title', async () => {
+      const configWithTitle: NavbarCardConfig = {
+        media_player: {
+          entity: 'media_player.test',
+          title: 'Custom Title',
+        },
+        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
+      };
+
+      navbarCard.setConfig(configWithTitle);
+      const mediaPlayerWithTitle = new MediaPlayer(navbarCard);
+      const result = mediaPlayerWithTitle.render({ isInsideNavbar: true });
+
+      const container = document.createElement('div');
+      await render(result, container);
+
+      const titleElement = container.querySelector('.media-player-title');
+      expect(titleElement).toBeTruthy();
+      expect(titleElement?.textContent?.trim()).toBe('Custom Title');
+    });
+
+    it('should use configured subtitle instead of media_artist', async () => {
+      const configWithSubtitle: NavbarCardConfig = {
+        media_player: {
+          entity: 'media_player.test',
+          subtitle: 'Custom Subtitle',
+        },
+        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
+      };
+
+      navbarCard.setConfig(configWithSubtitle);
+      const mediaPlayerWithSubtitle = new MediaPlayer(navbarCard);
+      const result = mediaPlayerWithSubtitle.render({ isInsideNavbar: true });
+
+      const container = document.createElement('div');
+      await render(result, container);
+
+      const subtitleElement = container.querySelector('.media-player-artist');
+      expect(subtitleElement).toBeTruthy();
+      expect(subtitleElement?.textContent?.trim()).toBe('Custom Subtitle');
+    });
+
+    it('should process template for icon, title, and subtitle', async () => {
+      const configWithTemplates: NavbarCardConfig = {
+        media_player: {
+          entity: 'media_player.test',
+          icon: '[[[ return "mdi:radio" ]]]',
+          subtitle: '[[[ return "Template Subtitle" ]]]',
+          title: '[[[ return "Template Title" ]]]',
+        },
+        routes: [{ icon: 'mdi:home', label: 'Home', url: '/' }],
+      };
+
+      navbarCard.setConfig(configWithTemplates);
+      const mediaPlayerWithTemplates = new MediaPlayer(navbarCard);
+      hass.states['media_player.test'] = createMediaPlayerState('playing', {
+        entity_picture: 'https://example.com/album.jpg',
+      });
+      const result = mediaPlayerWithTemplates.render({ isInsideNavbar: true });
+
+      const container = document.createElement('div');
+      await render(result, container);
+
+      const iconElement = container.querySelector(
+        'ha-icon.media-player-icon-fallback',
+      );
+      expect(iconElement?.getAttribute('icon')).toBe('mdi:radio');
+
+      const titleElement = container.querySelector('.media-player-title');
+      expect(titleElement?.textContent?.trim()).toBe('Template Title');
+
+      const subtitleElement = container.querySelector('.media-player-artist');
+      expect(subtitleElement?.textContent?.trim()).toBe('Template Subtitle');
+    });
+
     it('should render progress bar when position and duration are available', async () => {
       hass.states['media_player.test'] = createMediaPlayerState('playing', {
         media_duration: 180,

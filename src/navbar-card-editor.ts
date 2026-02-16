@@ -8,6 +8,10 @@ import {
 } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
+import {
+  type RenderDropdownOptions,
+  renderDropdown,
+} from '@/editor/ui/renderDropdown';
 import { ACTIONS_WITH_CUSTOM_ENTITY } from '@/lib/action-handler';
 import {
   DEFAULT_NAVBAR_CONFIG,
@@ -161,33 +165,17 @@ export class NavbarCardEditor extends LitElement {
     </ha-tooltip>`;
   }
 
-  makeComboBox<T>(options: {
-    label: string;
-    // TODO this type T should be replaced with the value of the key in the config
-    items: { label: string; value: T }[];
-    configKey: DotNotationKeys<NavbarCardConfig>;
-    disabled?: boolean;
-    helper?: string | TemplateResult;
-    helperPersistent?: boolean;
-    defaultValue?: T;
-    hideClearIcon?: boolean;
-  }) {
-    return html`
-      <ha-combo-box
-        helper=${options.helper}
-        helperPersistent=${options.helperPersistent}
-        label=${options.label}
-        .items=${options.items}
-        .value=${
-          genericGetProperty(this._config, options.configKey) ??
-          options.defaultValue
-        }
-        .disabled=${options.disabled}
-        .hideClearIcon=${options.hideClearIcon}
-        @value-changed="${e => {
-          this.updateConfigByKey(options.configKey, e.detail.value);
-        }}" />
-    `;
+  makeComboBox<T>(options: RenderDropdownOptions<T>) {
+    return renderDropdown(
+      genericGetProperty(this._config, options.configKey) ??
+        options.defaultValue ??
+        null,
+      value => {
+        this.updateConfigByKey(options.configKey, value);
+      },
+      // TODO: review this improper `any` typing
+      options as RenderDropdownOptions<any>,
+    );
   }
 
   makeNavigationPicker(options: {
@@ -831,6 +819,7 @@ export class NavbarCardEditor extends LitElement {
         </h4>
         <div class="editor-section">
           ${this.makeComboBox({
+            allowEmptyValue: true,
             configKey: 'template',
             helper: html`Reusable template name used for this card.
               <a
@@ -1002,6 +991,7 @@ export class NavbarCardEditor extends LitElement {
           })}
           ${this.makeComboBox<WidgetPosition>({
             configKey: 'media_player.desktop_position',
+            defaultValue: DEFAULT_NAVBAR_CONFIG.media_player?.desktop_position,
             items: [
               { label: 'Top left', value: WidgetPosition.topLeft },
               { label: 'Top center', value: WidgetPosition.topCenter },
@@ -1017,6 +1007,24 @@ export class NavbarCardEditor extends LitElement {
             helper: BOOLEAN_JS_TEMPLATE_HELPER,
             // TODO JLAQ maybe replace with a templateSwitchEditor
             label: 'Show media player',
+          })}
+          ${this.makeTemplatable({
+            configKey: 'media_player.icon',
+            inputType: 'icon',
+            label: 'Icon',
+            templateHelper: STRING_JS_TEMPLATE_HELPER,
+          })}
+          ${this.makeTemplatable({
+            configKey: 'media_player.title',
+            inputType: 'string',
+            label: 'Title',
+            templateHelper: STRING_JS_TEMPLATE_HELPER,
+          })}
+          ${this.makeTemplatable({
+            configKey: 'media_player.subtitle',
+            inputType: 'string',
+            label: 'Subtitle',
+            templateHelper: STRING_JS_TEMPLATE_HELPER,
           })}
           ${Object.values(HAActions).map(type => {
             const key =
@@ -1068,7 +1076,6 @@ export class NavbarCardEditor extends LitElement {
           ${this.makeComboBox<NavbarDisplayMode>({
             configKey: 'desktop.mode',
             defaultValue: DEFAULT_NAVBAR_CONFIG.desktop?.mode,
-            hideClearIcon: true,
             items: [
               { label: 'Floating', value: 'floating' },
               { label: 'Docked', value: 'docked' },
@@ -1079,6 +1086,7 @@ export class NavbarCardEditor extends LitElement {
             <div class="editor-row-item">
               ${this.makeComboBox<DesktopPosition>({
                 configKey: 'desktop.position',
+                defaultValue: DEFAULT_NAVBAR_CONFIG.desktop?.position,
                 items: [
                   { label: 'Top', value: DesktopPosition.top },
                   { label: 'Bottom', value: DesktopPosition.bottom },
@@ -1100,6 +1108,7 @@ export class NavbarCardEditor extends LitElement {
           </div>
           ${this.makeComboBox<LabelVisibilityConfig>({
             configKey: 'desktop.show_labels',
+            defaultValue: DEFAULT_NAVBAR_CONFIG.desktop?.show_labels,
             items: [
               { label: 'Always', value: true },
               { label: 'Never', value: false },
@@ -1141,7 +1150,6 @@ export class NavbarCardEditor extends LitElement {
           ${this.makeComboBox<NavbarDisplayMode>({
             configKey: 'mobile.mode',
             defaultValue: DEFAULT_NAVBAR_CONFIG.mobile?.mode,
-            hideClearIcon: true,
             items: [
               { label: 'Floating', value: 'floating' },
               { label: 'Docked', value: 'docked' },
@@ -1150,6 +1158,7 @@ export class NavbarCardEditor extends LitElement {
           })}
           ${this.makeComboBox<LabelVisibilityConfig>({
             configKey: 'mobile.show_labels',
+            defaultValue: DEFAULT_NAVBAR_CONFIG.mobile?.show_labels,
             items: [
               { label: 'Always', value: true },
               { label: 'Never', value: false },
@@ -1299,25 +1308,39 @@ export class NavbarCardEditor extends LitElement {
           </ha-icon-button>
         </h5>
         <div class="editor-section">
-          <ha-combo-box
-            label=${this._chooseLabelForAction(options.actionType)}
-            .items=${ACTIONS}
-            .value=${selected}
-            .disabled=${options.disabled}
-            @value-changed=${(e: CustomEvent) => {
-              const newSel = e.detail.value;
+          <div class="editor-select-field">
+            <label class="editor-label">
+              ${this._chooseLabelForAction(options.actionType)}
+            </label>
+            <select
+              class="editor-select"
+              .value=${selected}
+              ?disabled=${options.disabled}
+              @change=${(e: Event) => {
+                const newSel = (e.target as HTMLSelectElement).value as
+                  | 'hass_action'
+                  | NavbarCustomActions;
 
-              if (newSel === 'hass_action') {
-                // By default, start with action: "none"
-                this.updateConfigByKey(options.configKey, {
-                  action: 'none',
-                } as any);
-              } else {
-                this.updateConfigByKey(options.configKey, {
-                  action: newSel,
-                } as any);
-              }
-            }}></ha-combo-box>
+                if (newSel === 'hass_action') {
+                  // By default, start with action: "none"
+                  this.updateConfigByKey(options.configKey, {
+                    action: 'none',
+                  } as any);
+                } else {
+                  this.updateConfigByKey(options.configKey, {
+                    action: newSel,
+                  } as any);
+                }
+              }}>
+              ${ACTIONS.map(
+                action => html`<option
+                  value=${action.value}
+                  ?selected=${action.value === selected}>
+                  ${action.label}
+                </option>`,
+              )}
+            </select>
+          </div>
 
           ${
             selected === NavbarCustomActions.quickbar
