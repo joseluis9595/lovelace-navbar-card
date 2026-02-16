@@ -1,5 +1,6 @@
-import { EDITOR_STYLES, ROUTES_EDITOR_DND_STYLES } from '@/styles/editor';
 import { type CSSResult, css } from 'lit';
+
+import { EDITOR_STYLES, ROUTES_EDITOR_DND_STYLES } from '@/styles/editor';
 
 const HOST_STYLES = css`
   :host {
