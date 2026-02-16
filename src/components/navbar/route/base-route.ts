@@ -60,7 +60,30 @@ export class BaseRoute implements ActionableElement {
           this._navbarCard,
           this.data.selected,
         )
-      : window.location.pathname === this.url;
+      : this._browserMatchesURL(this.url);
+  }
+
+  /**
+   * Checks if the current pathname matches the configured URL.
+   * Handles both absolute URLs (starting with "/") and relative URLs (without leading slash).
+   *
+   * @param url - The configured URL (can be absolute or relative)
+   * @returns true if the pathname matches the URL
+   */
+  private _browserMatchesURL(url: string | undefined): boolean {
+    const pathname = window.location.pathname;
+    if (!url) return false;
+
+    if (url.startsWith('/')) {
+      return pathname === url;
+    }
+
+    const normalizedPathname = pathname.endsWith('/')
+      ? pathname.slice(0, -1)
+      : pathname;
+    const normalizedUrl = url.endsWith('/') ? url.slice(0, -1) : url;
+
+    return normalizedPathname.endsWith(`/${normalizedUrl}`);
   }
 
   get tap_action() {
