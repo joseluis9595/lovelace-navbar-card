@@ -718,6 +718,7 @@ export class NavbarCardEditor extends LitElement {
                       ${
                         usesTemplate
                           ? this.makeTemplateEditor({
+                              allowNull: true,
                               configKey: `${baseConfigKey}.popup` as any,
                               helper: GENERIC_JS_TEMPLATE_HELPER,
                               label: 'Popup',
@@ -752,6 +753,7 @@ export class NavbarCardEditor extends LitElement {
               </h5>
               <div class="editor-section">
                 ${this.makeTemplateEditor({
+                  allowNull: true,
                   configKey: `${baseConfigKey}.hidden` as any,
                   helper: BOOLEAN_JS_TEMPLATE_HELPER,
                   // TODO JLAQ maybe replace with a templateSwitchEditor
@@ -760,6 +762,7 @@ export class NavbarCardEditor extends LitElement {
                 ${
                   !isPopup
                     ? this.makeTemplateEditor({
+                        allowNull: true,
                         configKey: `${baseConfigKey}.selected` as any,
                         helper: BOOLEAN_JS_TEMPLATE_HELPER,
                         // TODO JLAQ maybe replace with a templateSwitchEditor
@@ -806,11 +809,47 @@ export class NavbarCardEditor extends LitElement {
   }
 
   /**********************************************************************/
+  /* Template management helpers */
+  /**********************************************************************/
+
+  /**
+   * Check if the config has manual overrides beyond the template property
+   */
+  private hasManualOverrides(config: NavbarCardConfig): boolean {
+    // @ts-expect-error - property `type` is not defined in the type `NavbarCardConfig`
+    const { type, template, routes, ...rest } = config;
+    // Check if there are any properties other than template
+    const hasOtherProperties = Object.keys(rest).length > 0;
+    // Check if routes array has items (manual configuration)
+    // Empty routes array means minimal config, non-empty means manual routes
+    const hasCustomRoutes = routes && routes.length > 0;
+    return hasOtherProperties || hasCustomRoutes;
+  }
+
+  /**
+   * Reset config to minimal (only type and template)
+   */
+  private resetToMinimalConfig(template: string) {
+    // @ts-expect-error - property `type` is not defined in the type `NavbarCardConfig`
+    this._config = { template, type: this._config.type } as NavbarCardConfig;
+    this.dispatchEvent(
+      new CustomEvent('config-changed', {
+        detail: { config: this._config },
+      }),
+    );
+  }
+
+  /**********************************************************************/
   /* Editor sections */
   /**********************************************************************/
 
   renderTemplateEditor() {
     const availableTemplates = getNavbarTemplates();
+    const currentTemplate = genericGetProperty(this._config, 'template')
+    const hasTemplate =
+      currentTemplate != null && currentTemplate.trim() !== '';
+    const hasOverrides = hasTemplate && this.hasManualOverrides(this._config);
+
     return html`
       <ha-expansion-panel outlined>
         <h4 slot="header">
@@ -835,6 +874,30 @@ export class NavbarCardEditor extends LitElement {
             })),
             label: 'Template',
           })}
+          ${
+            hasOverrides
+              ? html`
+                  <ha-alert
+                    alert-type="warning"
+                    title="Template with manual configuration">
+                    You have manual configuration that will override the template.
+                    For a minimal configuration, click "Reset to minimal config"
+                    to keep only the template reference.
+                    <div style="margin-top: 1em;">
+                      <ha-button
+                        @click=${() => {
+                          if (currentTemplate) {
+                            this.resetToMinimalConfig(currentTemplate);
+                          }
+                        }}
+                        outlined>
+                        Reset to minimal config
+                      </ha-button>
+                    </div>
+                  </ha-alert>
+                `
+              : html``
+          }
         </div></ha-expansion-panel
       >
     `;
@@ -1003,6 +1066,7 @@ export class NavbarCardEditor extends LitElement {
             label: 'Desktop position',
           })}
           ${this.makeTemplateEditor({
+            allowNull: true,
             configKey: 'media_player.show',
             helper: BOOLEAN_JS_TEMPLATE_HELPER,
             // TODO JLAQ maybe replace with a templateSwitchEditor
@@ -1125,6 +1189,7 @@ export class NavbarCardEditor extends LitElement {
             label: 'Show popup label backgrounds',
           })}
           ${this.makeTemplateEditor({
+            allowNull: true,
             configKey: 'desktop.hidden',
             helper: BOOLEAN_JS_TEMPLATE_HELPER,
             // TODO JLAQ maybe replace with a templateSwitchEditor
@@ -1175,6 +1240,7 @@ export class NavbarCardEditor extends LitElement {
             label: 'Show popup label backgrounds',
           })}
           ${this.makeTemplateEditor({
+            allowNull: true,
             configKey: 'mobile.hidden',
             helper: BOOLEAN_JS_TEMPLATE_HELPER,
             // TODO JLAQ maybe replace with a templateSwitchEditor
@@ -1398,6 +1464,7 @@ export class NavbarCardEditor extends LitElement {
           ${
             selected === NavbarCustomActions.customJSAction
               ? this.makeTemplateEditor({
+                  allowNull: true,
                   configKey: `${options.configKey}.code` as any,
                   helper: GENERIC_JS_TEMPLATE_HELPER,
                   label: 'Code',
