@@ -1,7 +1,6 @@
 name: Close stale issues and PRs
 
 permissions:
-  actions: write
   issues: write
   pull-requests: write
 
@@ -14,14 +13,19 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v9
+      - uses: actions/stale@v10
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          stale-issue-message: 'This issue is stale because it has been open for 30 days with no activity. It will be closed in 7 days if no further activity occurs.'
-          close-issue-message: 'Closing due to inactivity.'
-          days-before-stale: 30
-          days-before-close: 7
-          stale-pr-message: 'This PR is stale. It will be closed in 7 days if no further activity occurs.'
-          close-pr-message: 'Closing this PR due to inactivity.'
-          days-before-pr-stale: 30
-          days-before-pr-close: 7
+
+          only-labels: "more info needed"
+          stale-issue-label: stale
+          stale-issue-message: >
+            We're waiting on additional info. This issue will be closed in 7 days
+            if no further activity occurs.
+          close-issue-message: "Closing due to inactivity."
+          days-before-issue-stale: 30
+          days-before-issue-close: 7
+          remove-stale-when-updated: true
+
+          days-before-pr-stale: -1
+          days-before-pr-close: -1
