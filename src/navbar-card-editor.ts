@@ -499,22 +499,22 @@ export class NavbarCardEditor extends LitElement {
     const handlers = this._createListDragHandlers(options.dragData);
     return html`
       <div
-        class="draggable-route"
+        class="draggable-item"
         @dragover=${handlers.onDragOver}
         @dragleave=${handlers.onDragLeave}
         @drop=${options.onDrop}>
         <ha-expansion-panel outlined>
           <div
             slot="header"
-            class="route-header"
+            class="draggable-item-header"
             draggable="true"
             @dragstart=${handlers.onDragStart}
             @dragend=${handlers.onDragEnd}>
             <span class="drag-handle" title="Drag to reorder">
               <ha-icon icon="mdi:drag"></ha-icon>
             </span>
-            <div class="route-header-title">${options.headerTitle}</div>
-            <span class="route-header-summary">${options.headerSummary}</span>
+            <div class="draggable-item-header-title">${options.headerTitle}</div>
+            <span class="draggable-item-header-summary">${options.headerSummary}</span>
             <ha-icon-button
               @click=${(e: Event) => {
                 e.preventDefault();
@@ -526,7 +526,7 @@ export class NavbarCardEditor extends LitElement {
               <ha-icon icon="mdi:delete"></ha-icon>
             </ha-icon-button>
           </div>
-          <div class="route-editor route-editor-bg">${options.body}</div>
+          <div class="draggable-item-editor">${options.body}</div>
         </ha-expansion-panel>
       </div>
     `;
@@ -582,7 +582,7 @@ export class NavbarCardEditor extends LitElement {
       headerSummary: html`
         ${
           item.image != undefined
-            ? html`<img src="${item.image}" class="route-header-image" />`
+            ? html`<img src="${item.image}" class="draggable-item-header-image" />`
             : html`<ha-icon icon="${item.icon}"></ha-icon>`
         }
         ${item.label ? processTemplate(this.hass, undefined, item.label) : ''}
@@ -639,7 +639,7 @@ export class NavbarCardEditor extends LitElement {
               placeholder: 'URL of the image',
             })}
 
-            <div class="route-divider"></div>
+            <div class="editor-divider"></div>
 
             <ha-expansion-panel outlined>
               <h5 slot="header">

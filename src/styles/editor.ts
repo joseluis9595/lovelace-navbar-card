@@ -57,7 +57,7 @@ export const EDITOR_STYLES = css`
       flex-direction: column !important;
       gap: 0.5em;
     }
-    .route-grid {
+    .editor-grid {
       grid-template-columns: 1fr !important;
     }
     .editor-row-item {
@@ -94,19 +94,19 @@ export const EDITOR_STYLES = css`
     flex: 1;
   }
 
-  .route-header {
+  .draggable-item-header {
     display: flex;
     align-items: center;
     gap: 0.7em;
     padding: 0.2em 0.5em 0.2em 0;
   }
 
-  .route-header-title {
+  .draggable-item-header-title {
     font-weight: bold;
     color: var(--primary-color);
   }
 
-  .route-header-summary {
+  .draggable-item-header-summary {
     flex: 1;
     opacity: 0.7;
     font-size: 0.95em;
@@ -115,12 +115,12 @@ export const EDITOR_STYLES = css`
     gap: 0.3em;
   }
 
-  .route-header-image {
+  .draggable-item-header-image {
     height: 1.2em;
     vertical-align: middle;
   }
 
-  .route-editor {
+  .draggable-item-editor {
     display: flex;
     flex-direction: column;
     gap: 1em;
@@ -136,13 +136,13 @@ export const EDITOR_STYLES = css`
     margin-bottom: 1em;
   }
 
-  .route-grid {
+  .editor-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1em;
   }
 
-  .route-divider {
+  .editor-divider {
     margin: 1.5em 0 1em 0;
     border: none;
     border-top: 1px solid #e0e0e0;
@@ -333,9 +333,9 @@ export const EDITOR_STYLES = css`
   }
 `;
 
-// Drag-and-drop styles for routes editor
-export const ROUTES_EDITOR_DND_STYLES = css`
-  .draggable-route {
+// Drag-and-drop styles for draggable list items (routes, players, etc.)
+export const DRAGGABLE_ITEM_STYLES = css`
+  .draggable-item {
     border: 1.5px dashed transparent;
     border-radius: 8px;
     transition:
@@ -345,12 +345,12 @@ export const ROUTES_EDITOR_DND_STYLES = css`
     position: relative;
   }
 
-  .draggable-route.drag-over {
+  .draggable-item.drag-over {
     border-color: var(--primary-color, #03a9f4);
     background: rgba(3, 169, 244, 0.08);
   }
 
-  .draggable-route.dragging {
+  .draggable-item.dragging {
     opacity: 0.6;
     background: #eee;
     z-index: 2;
