@@ -75,11 +75,25 @@ export class NavbarCard extends LitElement {
     this._hass = hass;
 
     const { visible } = this._mediaPlayer.isVisible();
-    // TODO JLAQ review if this provokes re-renders
+    const prevMediaPlayerPosition = this.widgetVisibility.media_player ?? null;
+    const nextMediaPlayerPosition = visible
+      ? this._mediaPlayer.desktop_position
+      : null;
+
     if (visible) {
-      this.widgetVisibility.media_player = this._mediaPlayer.desktop_position;
+      this.widgetVisibility.media_player = nextMediaPlayerPosition;
     } else {
       this.widgetVisibility.media_player = null;
+    }
+
+    // Re-apply dashboard padding when media player visibility changes
+    if (prevMediaPlayerPosition !== nextMediaPlayerPosition) {
+      forceDashboardPadding({
+        autoPadding: this.config?.layout?.auto_padding,
+        desktop: this.config?.desktop ?? DEFAULT_NAVBAR_CONFIG.desktop,
+        mobile: this.config?.mobile ?? DEFAULT_NAVBAR_CONFIG.mobile,
+        widgetPositions: this.widgetVisibility,
+      });
     }
   }
 
@@ -193,17 +207,6 @@ export class NavbarCard extends LitElement {
    */
   protected updated(_changedProperties: PropertyValues): void {
     super.updated(_changedProperties);
-
-    // Re-apply dashboard padding if media player visibility changes
-    if (_changedProperties.has('_showMediaPlayer')) {
-      // Force dashboard padding
-      forceDashboardPadding({
-        autoPadding: this.config?.layout?.auto_padding,
-        desktop: this.config?.desktop ?? DEFAULT_NAVBAR_CONFIG.desktop,
-        mobile: this.config?.mobile ?? DEFAULT_NAVBAR_CONFIG.mobile,
-        widgetPositions: this.widgetVisibility,
-      });
-    }
   }
 
   protected render() {
