@@ -26,7 +26,7 @@ Navbar Card's configuration is structured into logical sections, making it easy 
 | `styles`       | [Styles](./styles.mdx)             | -          | Custom CSS styling options                         |
 | `template`     | [Template](./template.mdx)         | -          | Predefined template to use as base configuration   |
 | `haptic`       | [Haptic](./haptic.mdx)             | -          | Configure haptic feedback on interactions          |
-| `media_player` | [Media Player](./media-player.mdx) | -          | `[BETA]` Media player integration for mobile view  |
+| `media_player` | [Media Player](./media-player.mdx) | -          | Media player widget integration           |
 
 ## Basic Example
 
@@ -45,7 +45,8 @@ desktop:
 mobile:
   show_labels: false
 media_player:
-  entity: media_player.your_media_player
+  players:
+    - entity: media_player.your_media_player
   album_cover_background: true
 routes:
   - url: /lovelace/home

@@ -1,6 +1,6 @@
 import { type CSSResult, css } from 'lit';
 
-import { EDITOR_STYLES, ROUTES_EDITOR_DND_STYLES } from '@/styles/editor';
+import { DRAGGABLE_ITEM_STYLES, EDITOR_STYLES } from '@/styles/editor';
 
 const HOST_STYLES = css`
   :host {
@@ -239,35 +239,40 @@ const MEDIA_PLAYER_STYLES = css`
     max-width: 400px;
   }
 
-  .media-player.desktop.position-absolute {
+  /* Center media player when inside navbar (wider than max-width) */
+  :is(.media-player, .media-player-carousel).desktop:not(.position-absolute) {
+    align-self: center;
+  }
+
+  :is(.media-player, .media-player-carousel).desktop.position-absolute {
     position: fixed;
     width: 400px;
     z-index: var(--navbar-media-player-z-index);
   }
 
-  .media-player.desktop.position-absolute.top-left {
+  :is(.media-player, .media-player-carousel).desktop.position-absolute.top-left {
     left: var(--navbar-lateral-margin);
     top: calc(var(--header-height) + var(--navbar-lateral-margin));
   }
-  .media-player.desktop.position-absolute.top-center {
+  :is(.media-player, .media-player-carousel).desktop.position-absolute.top-center {
     left: 50%;
     top: calc(var(--header-height) + var(--navbar-lateral-margin));
     transform: translateX(-50%);
   }
-  .media-player.desktop.position-absolute.top-right {
+  :is(.media-player, .media-player-carousel).desktop.position-absolute.top-right {
     right: var(--navbar-lateral-margin);
     top: calc(var(--header-height) + var(--navbar-lateral-margin));
   }
-  .media-player.desktop.position-absolute.bottom-left {
-    left: var(--navbar-lateral-margin);
+  :is(.media-player, .media-player-carousel).desktop.position-absolute.bottom-left {
+    left: calc(var(--mdc-drawer-width, 0px) + var(--navbar-lateral-margin));
     bottom: var(--navbar-lateral-margin);
   }
-  .media-player.desktop.position-absolute.bottom-center {
+  :is(.media-player, .media-player-carousel).desktop.position-absolute.bottom-center {
     left: 50%;
     bottom: var(--navbar-lateral-margin);
     transform: translateX(-50%);
   }
-  .media-player.desktop.position-absolute.bottom-right {
+  :is(.media-player, .media-player-carousel).desktop.position-absolute.bottom-right {
     right: var(--navbar-lateral-margin);
     bottom: var(--navbar-lateral-margin);
   }
@@ -335,6 +340,61 @@ const MEDIA_PLAYER_STYLES = css`
   .media-player .media-player-progress-bar-fill {
     background-color: var(--navbar-primary-color);
     height: 100%;
+  }
+
+  /* Media player carousel */
+
+  .media-player-carousel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 90%;
+    border: none;
+  }
+
+  .media-player-carousel.desktop {
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .media-player-viewport {
+    width: 100%;
+    overflow: hidden;
+    touch-action: pan-y;
+    user-select: none;
+  }
+
+  .media-player-track {
+    display: flex;
+    gap: 12px;
+    will-change: transform;
+  }
+
+  .media-player-carousel .media-player {
+    flex: 0 0 100%;
+    min-width: 0;
+    width: 100%;
+    border: none;
+  }
+
+  .media-player-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding-top: 6px;
+  }
+
+  .media-player-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--disabled-color);
+    transition: background 0.2s, transform 0.2s;
+  }
+
+  .media-player-dot.active {
+    background: var(--navbar-primary-color);
+    transform: scale(1.1);
   }
 `;
 
@@ -651,6 +711,6 @@ export const getDefaultStyles = (): CSSResult => {
 export const getEditorStyles = (): CSSResult => {
   return css`
     ${EDITOR_STYLES}
-    ${ROUTES_EDITOR_DND_STYLES}
+    ${DRAGGABLE_ITEM_STYLES}
   `;
 };

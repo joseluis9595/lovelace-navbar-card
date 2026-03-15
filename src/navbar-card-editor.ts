@@ -22,6 +22,7 @@ import {
   genericGetProperty,
   genericSetProperty,
   type LabelVisibilityConfig,
+  type MediaPlayerPlayerConfig,
   type NavbarCardConfig,
   NavbarCustomActions,
   type NavbarDisplayMode,
@@ -456,6 +457,78 @@ export class NavbarCardEditor extends LitElement {
     </ha-button>`;
   }
 
+  /**
+   * Shared drag handlers for reorderable list items (routes, players, etc.).
+   */
+  private _createListDragHandlers(dragData: object) {
+    return {
+      onDragEnd: (e: DragEvent) => {
+        (e.currentTarget as HTMLElement).classList.remove('dragging');
+      },
+      onDragLeave: (e: DragEvent) => {
+        (e.currentTarget as HTMLElement).classList.remove('drag-over');
+      },
+      onDragOver: (e: DragEvent) => {
+        e.preventDefault();
+        e.dataTransfer!.dropEffect = 'move';
+        (e.currentTarget as HTMLElement).classList.add('drag-over');
+      },
+      onDragStart: (e: DragEvent) => {
+        e.dataTransfer?.setData('application/json', JSON.stringify(dragData));
+        e.dataTransfer!.effectAllowed = 'move';
+        (e.currentTarget as HTMLElement).classList.add('dragging');
+      },
+    };
+  }
+
+  /**
+   * Shared wrapper for draggable list items. Use for routes, players, etc.
+   */
+  private _renderDraggableItem(options: {
+    dragData: object;
+    onDrop: (e: DragEvent) => void;
+    headerTitle: string;
+    headerSummary: TemplateResult;
+    onDelete: () => void;
+    deleteLabel: string;
+    body: TemplateResult;
+  }) {
+    const handlers = this._createListDragHandlers(options.dragData);
+    return html`
+      <div
+        class="draggable-item"
+        @dragover=${handlers.onDragOver}
+        @dragleave=${handlers.onDragLeave}
+        @drop=${options.onDrop}>
+        <ha-expansion-panel outlined>
+          <div
+            slot="header"
+            class="draggable-item-header"
+            draggable="true"
+            @dragstart=${handlers.onDragStart}
+            @dragend=${handlers.onDragEnd}>
+            <span class="drag-handle" title="Drag to reorder">
+              <ha-icon icon="mdi:drag"></ha-icon>
+            </span>
+            <div class="draggable-item-header-title">${options.headerTitle}</div>
+            <span class="draggable-item-header-summary">${options.headerSummary}</span>
+            <ha-icon-button
+              @click=${(e: Event) => {
+                e.preventDefault();
+                e.stopPropagation();
+                options.onDelete();
+              }}
+              class="delete-btn"
+              label=${options.deleteLabel}>
+              <ha-icon icon="mdi:delete"></ha-icon>
+            </ha-icon-button>
+          </div>
+          <div class="draggable-item-editor">${options.body}</div>
+        </ha-expansion-panel>
+      </div>
+    `;
+  }
+
   makeDraggableRouteEditor(
     item: RouteItem | PopupItem,
     routeIndex: number,
@@ -468,31 +541,7 @@ export class NavbarCardEditor extends LitElement {
       ? `routes.${routeIndex}.popup.${popupIndex}`
       : `routes.${routeIndex}`;
 
-    const onDragStart = (
-      e: DragEvent,
-      routeIndex: number,
-      popupIndex?: number,
-    ) => {
-      const dragData = {
-        popupIndex,
-        routeIndex,
-      };
-      e.dataTransfer?.setData('application/json', JSON.stringify(dragData));
-      e.dataTransfer!.effectAllowed = 'move';
-      (e.currentTarget as HTMLElement).classList.add('dragging');
-    };
-    const onDragEnd = (e: DragEvent) => {
-      (e.currentTarget as HTMLElement).classList.remove('dragging');
-    };
-    const onDragOver = (e: DragEvent) => {
-      e.preventDefault();
-      e.dataTransfer!.dropEffect = 'move';
-      (e.currentTarget as HTMLElement).classList.add('drag-over');
-    };
-    const onDragLeave = (e: DragEvent) => {
-      (e.currentTarget as HTMLElement).classList.remove('drag-over');
-    };
-    const onDrop = (e: DragEvent, routeIndex: number, popupIndex?: number) => {
+    const onDrop = (e: DragEvent) => {
       e.preventDefault();
       (e.currentTarget as HTMLElement).classList.remove('drag-over');
       const dragData = JSON.parse(
@@ -509,7 +558,6 @@ export class NavbarCardEditor extends LitElement {
         routes.splice(routeIndex, 0, moved);
         this.updateConfig({ routes });
       } else if (
-        // Make sure we are dropping the popup item inside the same route it was dragged from
         typeof popupIndex === 'number' &&
         typeof dragData.popupIndex === 'number' &&
         dragData.routeIndex === routeIndex
@@ -524,54 +572,8 @@ export class NavbarCardEditor extends LitElement {
       }
     };
 
-    return html`
-      <div
-        class="draggable-route"
-        @dragover=${onDragOver}
-        @dragleave=${onDragLeave}
-        @drop=${(e: DragEvent) => onDrop(e, routeIndex, popupIndex)}>
-        <ha-expansion-panel outlined>
-          <div
-            slot="header"
-            class="route-header"
-            draggable="true"
-            @dragstart=${(e: DragEvent) =>
-              onDragStart(e, routeIndex, popupIndex)}
-            @dragend=${onDragEnd}>
-            <span class="drag-handle" title="Drag to reorder">
-              <ha-icon icon="mdi:drag"></ha-icon>
-            </span>
-
-            <div class="route-header-title">
-              ${isPopup ? 'Popup item' : 'Route'}
-            </div>
-
-            <span class="route-header-summary">
-              ${
-                item.image != undefined
-                  ? html`<img src="${item.image}" class="route-header-image" />`
-                  : html`<ha-icon icon="${item.icon}"></ha-icon>`
-              }
-              ${
-                item.label
-                  ? processTemplate(this.hass, undefined, item.label)
-                  : ''
-              }
-            </span>
-
-            <ha-icon-button
-              @click=${e => {
-                e.preventDefault();
-                e.stopPropagation();
-                this.removeRouteOrPopup(routeIndex, popupIndex);
-              }}
-              class="delete-btn"
-              label=${isPopup ? 'Delete popup' : 'Delete route'}>
-              <ha-icon icon="mdi:delete"></ha-icon
-            ></ha-icon-button>
-          </div>
-
-          <div class="route-editor route-editor-bg">
+    return this._renderDraggableItem({
+      body: html`
             <div class="editor-row">
               <div class="editor-row-item">
                 ${this.makeNavigationPicker({
@@ -621,7 +623,7 @@ export class NavbarCardEditor extends LitElement {
               placeholder: 'URL of the image',
             })}
 
-            <div class="route-divider"></div>
+            <div class="editor-divider"></div>
 
             <ha-expansion-panel outlined>
               <h5 slot="header">
@@ -799,10 +801,21 @@ export class NavbarCardEditor extends LitElement {
                 }
               `;
             })}
-          </div>
-        </ha-expansion-panel>
-      </div>
-    `;
+      `,
+      deleteLabel: isPopup ? 'Delete popup' : 'Delete route',
+      dragData: { popupIndex, routeIndex },
+      headerSummary: html`
+        ${
+          item.image != undefined
+            ? html`<img src="${item.image}" class="draggable-item-header-image" />`
+            : html`<ha-icon icon="${item.icon}"></ha-icon>`
+        }
+        ${item.label ? processTemplate(this.hass, undefined, item.label) : ''}
+      `,
+      headerTitle: isPopup ? 'Popup item' : 'Route',
+      onDelete: () => this.removeRouteOrPopup(routeIndex, popupIndex),
+      onDrop,
+    });
   }
 
   /**********************************************************************/
@@ -970,6 +983,8 @@ export class NavbarCardEditor extends LitElement {
   }
 
   renderMediaPlayerEditor() {
+    const players = this._config.media_player?.players ?? [];
+
     return html`
       <ha-expansion-panel outlined>
         <h4 slot="header">
@@ -977,12 +992,6 @@ export class NavbarCardEditor extends LitElement {
           Media player
         </h4>
         <div class="editor-section">
-          ${this.makeTemplatable({
-            configKey: 'media_player.entity',
-            includeDomains: ['media_player'],
-            inputType: 'entity',
-            label: 'Media player entity',
-          })}
           ${this.makeSwitch({
             configKey: 'media_player.album_cover_background',
             defaultValue:
@@ -1005,30 +1014,90 @@ export class NavbarCardEditor extends LitElement {
           ${this.makeTemplateEditor({
             configKey: 'media_player.show',
             helper: BOOLEAN_JS_TEMPLATE_HELPER,
-            // TODO JLAQ maybe replace with a templateSwitchEditor
-            label: 'Show media player',
+            label: 'Show media player widget',
+          })}
+        </div>
+        <div class="editor-section">
+          <label class="editor-label">Players</label>
+          <div class="routes-container">
+            ${players.map((player, i) =>
+              this.makeDraggablePlayerEditor(player, i),
+            )}
+          </div>
+          ${this.makeButton({
+            icon: 'mdi:plus',
+            onClick: () => this.addMediaPlayer(),
+            text: 'Add player',
+          })}
+        </div>
+      </ha-expansion-panel>
+    `;
+  }
+
+  makeDraggablePlayerEditor(
+    player: MediaPlayerPlayerConfig,
+    playerIndex: number,
+  ) {
+    const baseConfigKey = `media_player.players.${playerIndex}`;
+
+    const onDrop = (e: DragEvent) => {
+      e.preventDefault();
+      (e.currentTarget as HTMLElement).classList.remove('drag-over');
+      const dragData = JSON.parse(
+        e.dataTransfer?.getData('application/json') || '{}',
+      );
+      const fromIndex = dragData.playerIndex;
+      if (typeof fromIndex !== 'number' || fromIndex === playerIndex) return;
+      const players = [...(this._config.media_player?.players ?? [])];
+      const [moved] = players.splice(fromIndex, 1);
+      players.splice(playerIndex, 0, moved);
+      this.updateConfig({
+        media_player: {
+          ...this._config.media_player,
+          players,
+        },
+      });
+    };
+
+    return this._renderDraggableItem({
+      body: html`
+          ${this.makeTemplatable({
+            configKey:
+              `${baseConfigKey}.entity` as DotNotationKeys<NavbarCardConfig>,
+            includeDomains: ['media_player'],
+            inputType: 'entity',
+            label: 'Media player entity',
+          })}
+          ${this.makeTemplateEditor({
+            configKey:
+              `${baseConfigKey}.show` as DotNotationKeys<NavbarCardConfig>,
+            helper: BOOLEAN_JS_TEMPLATE_HELPER,
+            label: 'Show',
           })}
           ${this.makeTemplatable({
-            configKey: 'media_player.icon',
+            configKey:
+              `${baseConfigKey}.icon` as DotNotationKeys<NavbarCardConfig>,
             inputType: 'icon',
             label: 'Icon',
             templateHelper: STRING_JS_TEMPLATE_HELPER,
           })}
           ${this.makeTemplatable({
-            configKey: 'media_player.title',
+            configKey:
+              `${baseConfigKey}.title` as DotNotationKeys<NavbarCardConfig>,
             inputType: 'string',
             label: 'Title',
             templateHelper: STRING_JS_TEMPLATE_HELPER,
           })}
           ${this.makeTemplatable({
-            configKey: 'media_player.subtitle',
+            configKey:
+              `${baseConfigKey}.subtitle` as DotNotationKeys<NavbarCardConfig>,
             inputType: 'string',
             label: 'Subtitle',
             templateHelper: STRING_JS_TEMPLATE_HELPER,
           })}
           ${Object.values(HAActions).map(type => {
             const key =
-              `media_player.${type}` as DotNotationKeys<NavbarCardConfig>;
+              `${baseConfigKey}.${type}` as DotNotationKeys<NavbarCardConfig>;
             const actionValue = genericGetProperty(this._config, key);
             const label = this._chooseLabelForAction(type as HAActions);
 
@@ -1038,7 +1107,6 @@ export class NavbarCardEditor extends LitElement {
                   ? this.makeActionSelector({
                       actionType: type as HAActions,
                       configKey: key,
-                      disabledActions: [NavbarCustomActions.openPopup],
                     })
                   : html`
                     <ha-button
@@ -1056,10 +1124,39 @@ export class NavbarCardEditor extends LitElement {
               }
             `;
           })}
-        </div>
-      </ha-expansion-panel>
-    `;
+      `,
+      deleteLabel: 'Delete player',
+      dragData: { playerIndex },
+      headerSummary: html`
+        ${processTemplate(this.hass, undefined, player.entity) || 'No entity'}
+      `,
+      headerTitle: `Player`,
+      onDelete: () => this.removeMediaPlayer(playerIndex),
+      onDrop,
+    });
   }
+
+  private addMediaPlayer = () => {
+    const players = this._config.media_player?.players ?? [];
+    const newPlayer: MediaPlayerPlayerConfig = { entity: '' };
+    this.updateConfig({
+      media_player: {
+        ...this._config.media_player,
+        players: [...players, newPlayer],
+      },
+    });
+  };
+
+  private removeMediaPlayer = (playerIndex: number) => {
+    const players = [...(this._config.media_player?.players ?? [])];
+    players.splice(playerIndex, 1);
+    this.updateConfig({
+      media_player: {
+        ...this._config.media_player,
+        players: players.length === 0 ? undefined : players,
+      },
+    });
+  };
 
   renderDesktopEditor() {
     const labelVisibility =

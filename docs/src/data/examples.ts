@@ -451,7 +451,8 @@ routes:
     label: More
     url: /config/info
 media_player:
-  entity: media_player.test_media_player
+  players:
+    - entity: media_player.test_media_player
   album_cover_background: true
   show: "[[[return !navbar.isDesktop]]]"
   desktop_position: bottom-right`
@@ -484,22 +485,23 @@ routes:
     label: More
     url: /config/info
 media_player:
-  entity: media_player.test_media_player
-  album_cover_background: true
-  show: |-
-    [[[
-      const mediaPlayerState = states['media_player.test_media_player'];
-      const lastChanged = new Date(mediaPlayerState.last_changed);
-      const now = Date.now();
-      const fiveMinutes = 5 * 60 * 1000;
+  players:
+    - entity: media_player.test_media_player
+      show: |-
+        [[[
+          const mediaPlayerState = states['media_player.test_media_player'];
+          const lastChanged = new Date(mediaPlayerState.last_changed);
+          const now = Date.now();
+          const fiveMinutes = 5 * 60 * 1000;
 
-      // Display media player if it's playing OR paused in the last 5 minutes
-      return (
-        mediaPlayerState.state == 'playing' ||
-        (mediaPlayerState.state == 'paused' &&
-          (now - lastChanged) <= fiveMinutes)
-      );
-    ]]]
+          // Display media player if it's playing OR paused in the last 5 minutes
+          return (
+            mediaPlayerState.state == 'playing' ||
+            (mediaPlayerState.state == 'paused' &&
+              (now - lastChanged) <= fiveMinutes)
+          );
+        ]]]
+  album_cover_background: true
   desktop_position: bottom-right
 `
   }

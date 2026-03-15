@@ -5,67 +5,107 @@ title: Media player
 
 import { AlignedImage } from '@site/src/components';
 
-:::info
-This feature is still in **BETA**. Some features might not work as expected
-:::
-
-When enabled, this configuration displays a `media_player` widget above the `navbar-card`. Currently, it is shown only in mobile mode. By default, it is shown only when the `media_player` state is `paused` or `playing`, but you can manually configure when it should be displayed using the `show` option.
+When enabled, this configuration displays a media player widget above or alongside the navbar. You can configure one or multiple players; with multiple players, a carousel appears with dot indicators and swipe/drag to switch between them. The widget is shown when any configured player is `playing` or `paused` (or when a custom `show` template evaluates to true).
 
 <AlignedImage imageURL={'/img/configuration/navbar-card_media-player.png'} alt="Media player image" alignment="center" />
 
-| Option                   | Type                                                           | Default                                                  | Description                                                                                     |
-| ------------------------ | -------------------------------------------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `entity`                 | string \| [JSTemplate](../types/js-template)                   | -                                                        | Entity ID of the media_player                                                                   |
-| `show`                   | boolean \| [JSTemplate](../types/js-template)                  | `true` when media_player is either `playing` or `paused` | Manually configure when the media player widget should be displayed                             |
-| `album_cover_background` | boolean                                                        | `false`                                                  | Enable this option to display the album cover as blurred background of the media player widget  |
-| `desktop_position`       | `top-left` \| `top-center` \| `top-right` \| `bottom-left` \| `bottom-center` \| `bottom-right` | `bottom-center` | Position of the media player widget on desktop; also used by automatic padding to reserve space |
-| `icon`                   | string \| [JSTemplate](../types/js-template)                   | `mdi:music` (or album cover if available)                | Icon to display in the media player. If configured, overrides the album cover image.           |
-| `title`                   | string \| [JSTemplate](../types/js-template)                   | `media_title` attribute from entity                      | Title text displayed in the media player. Defaults to the media player's `media_title` attribute. |
-| `subtitle`                | string \| [JSTemplate](../types/js-template)                   | `media_artist` attribute from entity                     | Subtitle text displayed in the media player. Defaults to the media player's `media_artist` attribute. |
-| `tap_action`             | [HA Action](https://www.home-assistant.io/dashboards/actions/) | -                                                        | Home Assistant tap action configuration.                                                        |
-| `hold_action`            | [HA Action](https://www.home-assistant.io/dashboards/actions/) | -                                                        | Home Assistant hold action configuration.                                                       |
-| `double_tap_action`      | [HA Action](https://www.home-assistant.io/dashboards/actions/) | -                                                        | Home Assistant double_tap action configuration.                                                 |
+## Widget-level options
+
+| Option                   | Type                                                           | Default       | Description                                                                                     |
+| ------------------------ | -------------------------------------------------------------- | ------------- | ----------------------------------------------------------------------------------------------- |
+| `players`                | array                                                          | -             | List of media player configurations. Each player has its own `entity` and optional overrides.    |
+| `show`                   | boolean \| [JSTemplate](../types/js-template)                   | -             | Widget-level visibility. When set, overrides per-player visibility for the whole widget.        |
+| `album_cover_background` | boolean                                                        | `false`       | Display the album cover as blurred background for all players                                   |
+| `desktop_position`       | `top-left` \| `top-center` \| `top-right` \| `bottom-left` \| `bottom-center` \| `bottom-right` | `bottom-center` | Position of the media player widget on desktop. On mobile, the widget is always displayed at the bottom of the view. |
+
+## Per-player options
+
+Each item in `players` supports:
+
+| Option              | Type                                                           | Default                          | Description                                                                                     |
+| ------------------- | -------------------------------------------------------------- | -------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `entity`            | string \| [JSTemplate](../types/js-template)                   | -                                | Entity ID of the media_player (required)                                                        |
+| `show`              | boolean \| [JSTemplate](../types/js-template)                   | `true` when `playing` or `paused`| Per-player visibility. When configured, this player is shown when the template evaluates to true. |
+| `icon`              | string \| [JSTemplate](../types/js-template)                   | `mdi:music` (or album cover)     | Icon to display. If configured, overrides the album cover image.                               |
+| `title`             | string \| [JSTemplate](../types/js-template)                   | `media_title` attribute          | Title text displayed in the media player.                                                       |
+| `subtitle`          | string \| [JSTemplate](../types/js-template)                   | `media_artist` attribute         | Subtitle text displayed in the media player.                                                    |
+| `tap_action`        | [HA Action](https://www.home-assistant.io/dashboards/actions/) | `more-info` for entity           | Tap action for this player.                                                                     |
+| `hold_action`       | [HA Action](https://www.home-assistant.io/dashboards/actions/) | -                                | Hold action for this player.                                                                    |
+| `double_tap_action` | [HA Action](https://www.home-assistant.io/dashboards/actions/) | -                                | Double tap action for this player.                                                              |
 
 <br/>
 
 ---
 
-#### Example
+## Examples
+
+### Single player
 
 ```yaml
 type: custom:navbar-card
-  ...
+# ...
 media_player:
-  show: true
   album_cover_background: true
-  entity: |
-    [[[
-      const state = states['sensor.area_select'].state;
-      let entity;
+  players:
+    - entity: media_player.living_room
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace/media
+```
 
-      switch (state) {
-        case 'Office':
-          entity = 'media_player.office';
-          break;
-        case 'Kitchen':
-          entity = 'media_player.kitchen';
-          break;
-        case 'Main bedroom':
-          entity = 'media_player.main_bedroom';
-          break;
-        case 'Living room':
-          entity = 'media_player.living_room';
-          break;
-        default:
-          // fallback if not in a room with a defined player
-          entity = 'media_player.whole_home';
-      }
+### Multiple players (carousel)
 
-      return entity;
-    ]]]
-  tap_action:
-    action: navigate
-    navigation_path: /lovelace/media
-  hold_action:
-    action: more-info
+```yaml
+media_player:
+  album_cover_background: true
+  players:
+    - entity: media_player.spotify
+    - entity: media_player.sonos
+      icon: mdi:speaker
+    - entity: media_player.kitchen
+```
+
+### Dynamic entity with template
+
+```yaml
+media_player:
+  album_cover_background: true
+  players:
+    - entity: |
+        [[[
+          const state = states['sensor.area_select'].state;
+          switch (state) {
+            case 'Office': return 'media_player.office';
+            case 'Kitchen': return 'media_player.kitchen';
+            case 'Main bedroom': return 'media_player.main_bedroom';
+            case 'Living room': return 'media_player.living_room';
+            default: return 'media_player.whole_home';
+          }
+        ]]]
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace/media
+      hold_action:
+        action: more-info
+```
+
+### Widget-level show (hide entire widget)
+
+```yaml
+media_player:
+  players:
+    - entity: media_player.test_media_player
+  show: "[[[ return !navbar.isDesktop ]]]"  # Only on mobile
+  desktop_position: bottom-right
+```
+
+### Per-player show (filter which players appear)
+
+```yaml
+media_player:
+  players:
+    - entity: media_player.spotify
+      show: "[[[ return states['media_player.spotify'].state == 'playing' ]]]"
+    - entity: media_player.sonos
+      show: "[[[ return states['media_player.sonos'].state == 'playing' ]]]"
 ```
