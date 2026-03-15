@@ -1,6 +1,6 @@
 import { type CSSResult, css } from 'lit';
 
-import { EDITOR_STYLES, ROUTES_EDITOR_DND_STYLES } from '@/styles/editor';
+import { EDITOR_STYLES, DRAGGABLE_ITEM_STYLES } from '@/styles/editor';
 
 const HOST_STYLES = css`
   :host {
@@ -706,6 +706,6 @@ export const getDefaultStyles = (): CSSResult => {
 export const getEditorStyles = (): CSSResult => {
   return css`
     ${EDITOR_STYLES}
-    ${ROUTES_EDITOR_DND_STYLES}
+    ${DRAGGABLE_ITEM_STYLES}
   `;
 };
