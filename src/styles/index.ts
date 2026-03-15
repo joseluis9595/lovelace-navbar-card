@@ -1,6 +1,6 @@
 import { type CSSResult, css } from 'lit';
 
-import { EDITOR_STYLES, DRAGGABLE_ITEM_STYLES } from '@/styles/editor';
+import { DRAGGABLE_ITEM_STYLES, EDITOR_STYLES } from '@/styles/editor';
 
 const HOST_STYLES = css`
   :host {

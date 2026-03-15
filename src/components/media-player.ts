@@ -1,3 +1,4 @@
+import type { HassEntity } from 'home-assistant-js-websocket';
 import { html } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 
@@ -9,7 +10,6 @@ import {
   type WidgetPosition,
 } from '@/types';
 import { preventEventDefault, processTemplate } from '@/utils';
-import { HassEntity } from 'home-assistant-js-websocket';
 
 const CAROUSEL_GAP = 12;
 
@@ -60,8 +60,7 @@ export class MediaPlayer {
     const { visible } = this.isVisible();
     if (!visible) return html``;
 
-    const allPlayers =
-      this._navbarCard.config?.media_player?.players ?? [];
+    const allPlayers = this._navbarCard.config?.media_player?.players ?? [];
     const visiblePlayers = allPlayers.filter(
       p => this._isPlayerVisible(p).visible,
     );
@@ -104,7 +103,6 @@ export class MediaPlayer {
     return { visible: ['playing', 'paused'].includes(state.state) };
   }
 
-
   /**
    * Resolve the entity ID for a player.
    */
@@ -139,7 +137,7 @@ export class MediaPlayer {
           this._navbarCard,
           player.title,
         )
-      : state.attributes.media_title ?? '';
+      : (state.attributes.media_title ?? '');
   }
 
   /**
@@ -155,10 +153,8 @@ export class MediaPlayer {
           this._navbarCard,
           player.subtitle,
         )
-      : state.attributes.media_artist ?? '';
+      : (state.attributes.media_artist ?? '');
   }
-
-
 
   private _handlePlayPause = (e: MouseEvent, entity: string) => {
     e.preventDefault();
@@ -178,7 +174,6 @@ export class MediaPlayer {
       entity_id: entity,
     });
   };
-
 
   private _onPointerDown = (e: PointerEvent) => {
     if (e.button !== 0) return;
@@ -238,7 +233,6 @@ export class MediaPlayer {
     this._navbarCard.requestUpdate();
   };
 
-
   /**
    * Render a single media-player card.
    */
@@ -279,7 +273,6 @@ export class MediaPlayer {
     `;
   }
 
-  
   /**
    * Render the multi-player carousel.
    */
@@ -357,7 +350,6 @@ export class MediaPlayer {
     `;
   }
 
-  
   /**
    * Render the content of a media-player card.
    */
@@ -369,8 +361,7 @@ export class MediaPlayer {
     const image = state.attributes.entity_picture;
     const pos = state.attributes.media_position;
     const dur = state.attributes.media_duration;
-    const progress =
-      pos != null && dur != null && dur > 0 ? pos / dur : null;
+    const progress = pos != null && dur != null && dur > 0 ? pos / dur : null;
     const icon = this._resolveIcon(player);
     const title = this._resolveTitle(player, state);
     const subtitle = this._resolveSubtitle(player, state);

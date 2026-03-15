@@ -462,24 +462,21 @@ export class NavbarCardEditor extends LitElement {
    */
   private _createListDragHandlers(dragData: object) {
     return {
-      onDragStart: (e: DragEvent) => {
-        e.dataTransfer?.setData(
-          'application/json',
-          JSON.stringify(dragData),
-        );
-        e.dataTransfer!.effectAllowed = 'move';
-        (e.currentTarget as HTMLElement).classList.add('dragging');
-      },
       onDragEnd: (e: DragEvent) => {
         (e.currentTarget as HTMLElement).classList.remove('dragging');
+      },
+      onDragLeave: (e: DragEvent) => {
+        (e.currentTarget as HTMLElement).classList.remove('drag-over');
       },
       onDragOver: (e: DragEvent) => {
         e.preventDefault();
         e.dataTransfer!.dropEffect = 'move';
         (e.currentTarget as HTMLElement).classList.add('drag-over');
       },
-      onDragLeave: (e: DragEvent) => {
-        (e.currentTarget as HTMLElement).classList.remove('drag-over');
+      onDragStart: (e: DragEvent) => {
+        e.dataTransfer?.setData('application/json', JSON.stringify(dragData));
+        e.dataTransfer!.effectAllowed = 'move';
+        (e.currentTarget as HTMLElement).classList.add('dragging');
       },
     };
   }
@@ -576,19 +573,6 @@ export class NavbarCardEditor extends LitElement {
     };
 
     return this._renderDraggableItem({
-      dragData: { popupIndex, routeIndex },
-      onDrop,
-      headerTitle: isPopup ? 'Popup item' : 'Route',
-      headerSummary: html`
-        ${
-          item.image != undefined
-            ? html`<img src="${item.image}" class="draggable-item-header-image" />`
-            : html`<ha-icon icon="${item.icon}"></ha-icon>`
-        }
-        ${item.label ? processTemplate(this.hass, undefined, item.label) : ''}
-      `,
-      onDelete: () => this.removeRouteOrPopup(routeIndex, popupIndex),
-      deleteLabel: isPopup ? 'Delete popup' : 'Delete route',
       body: html`
             <div class="editor-row">
               <div class="editor-row-item">
@@ -818,6 +802,19 @@ export class NavbarCardEditor extends LitElement {
               `;
             })}
       `,
+      deleteLabel: isPopup ? 'Delete popup' : 'Delete route',
+      dragData: { popupIndex, routeIndex },
+      headerSummary: html`
+        ${
+          item.image != undefined
+            ? html`<img src="${item.image}" class="draggable-item-header-image" />`
+            : html`<ha-icon icon="${item.icon}"></ha-icon>`
+        }
+        ${item.label ? processTemplate(this.hass, undefined, item.label) : ''}
+      `,
+      headerTitle: isPopup ? 'Popup item' : 'Route',
+      onDelete: () => this.removeRouteOrPopup(routeIndex, popupIndex),
+      onDrop,
     });
   }
 
@@ -1063,40 +1060,37 @@ export class NavbarCardEditor extends LitElement {
     };
 
     return this._renderDraggableItem({
-      dragData: { playerIndex },
-      onDrop,
-      headerTitle: `Player`,
-      headerSummary: html`
-        ${processTemplate(this.hass, undefined, player.entity) || 'No entity'}
-      `,
-      onDelete: () => this.removeMediaPlayer(playerIndex),
-      deleteLabel: 'Delete player',
       body: html`
           ${this.makeTemplatable({
-            configKey: `${baseConfigKey}.entity` as DotNotationKeys<NavbarCardConfig>,
+            configKey:
+              `${baseConfigKey}.entity` as DotNotationKeys<NavbarCardConfig>,
             includeDomains: ['media_player'],
             inputType: 'entity',
             label: 'Media player entity',
           })}
           ${this.makeTemplateEditor({
-            configKey: `${baseConfigKey}.show` as DotNotationKeys<NavbarCardConfig>,
+            configKey:
+              `${baseConfigKey}.show` as DotNotationKeys<NavbarCardConfig>,
             helper: BOOLEAN_JS_TEMPLATE_HELPER,
             label: 'Show',
           })}
           ${this.makeTemplatable({
-            configKey: `${baseConfigKey}.icon` as DotNotationKeys<NavbarCardConfig>,
+            configKey:
+              `${baseConfigKey}.icon` as DotNotationKeys<NavbarCardConfig>,
             inputType: 'icon',
             label: 'Icon',
             templateHelper: STRING_JS_TEMPLATE_HELPER,
           })}
           ${this.makeTemplatable({
-            configKey: `${baseConfigKey}.title` as DotNotationKeys<NavbarCardConfig>,
+            configKey:
+              `${baseConfigKey}.title` as DotNotationKeys<NavbarCardConfig>,
             inputType: 'string',
             label: 'Title',
             templateHelper: STRING_JS_TEMPLATE_HELPER,
           })}
           ${this.makeTemplatable({
-            configKey: `${baseConfigKey}.subtitle` as DotNotationKeys<NavbarCardConfig>,
+            configKey:
+              `${baseConfigKey}.subtitle` as DotNotationKeys<NavbarCardConfig>,
             inputType: 'string',
             label: 'Subtitle',
             templateHelper: STRING_JS_TEMPLATE_HELPER,
@@ -1131,6 +1125,14 @@ export class NavbarCardEditor extends LitElement {
             `;
           })}
       `,
+      deleteLabel: 'Delete player',
+      dragData: { playerIndex },
+      headerSummary: html`
+        ${processTemplate(this.hass, undefined, player.entity) || 'No entity'}
+      `,
+      headerTitle: `Player`,
+      onDelete: () => this.removeMediaPlayer(playerIndex),
+      onDrop,
     });
   }
 
