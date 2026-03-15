@@ -239,6 +239,11 @@ const MEDIA_PLAYER_STYLES = css`
     max-width: 400px;
   }
 
+  /* Center media player when inside navbar (wider than max-width) */
+  :is(.media-player, .media-player-carousel).desktop:not(.position-absolute) {
+    align-self: center;
+  }
+
   :is(.media-player, .media-player-carousel).desktop.position-absolute {
     position: fixed;
     width: 400px;
