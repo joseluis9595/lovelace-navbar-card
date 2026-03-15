@@ -230,8 +230,9 @@ const MEDIA_PLAYER_STYLES = css`
     flex-direction: row;
   }
 
-  .media-player.mobile {
+  :is(.media-player, .media-player-carousel).mobile {
     border: none;
+    align-self: center;
   }
 
   .media-player.desktop {
