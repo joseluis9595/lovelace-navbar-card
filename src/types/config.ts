@@ -123,18 +123,25 @@ export type AutoPaddingConfig = {
   media_player_px?: number;
 };
 
-// Media player configuration
-type MediaPlayerConfig = {
-  entity?: JSTemplatable<string>;
+// Per-player media player configuration
+export type MediaPlayerPlayerConfig = {
+  entity: JSTemplatable<string>;
   show?: JSTemplatable<boolean>;
-  album_cover_background?: boolean;
-  desktop_position?: WidgetPosition;
-  tap_action?: ExtendedActionConfig;
-  hold_action?: ExtendedActionConfig;
-  double_tap_action?: ExtendedActionConfig;
   icon?: JSTemplatable<string>;
   title?: JSTemplatable<string>;
   subtitle?: JSTemplatable<string>;
+  tap_action?: ExtendedActionConfig;
+  hold_action?: ExtendedActionConfig;
+  double_tap_action?: ExtendedActionConfig;
+};
+
+// Media player widget configuration
+type MediaPlayerConfig = {
+  players?: MediaPlayerPlayerConfig[];
+  show?: JSTemplatable<boolean>;
+  album_cover_background?: boolean;
+  desktop_position?: WidgetPosition;
+  // TODO JLAQ: add support for global actions?
 };
 
 // Display mode configuration
