@@ -80,6 +80,7 @@ export class NavbarCardEditor extends LitElement {
   @property({ attribute: false }) public hass: any;
   @state() private _config: NavbarCardConfig = { routes: [] };
   @state() private _loadingComponents: boolean = false;
+  @state() private _templateModeByField: Record<string, boolean> = {};
   @state() private _lazyLoadedSections: Record<
     LazyLoadedEditorSections,
     boolean
@@ -89,6 +90,7 @@ export class NavbarCardEditor extends LitElement {
 
   protected firstUpdated(_changedProperties: PropertyValues): void {
     super.firstUpdated(_changedProperties);
+    this._templateModeByField = {};
     this._loadingComponents = true;
     loadHaComponents([
       'ha-form',
@@ -127,33 +129,57 @@ export class NavbarCardEditor extends LitElement {
   /* Config mutation functions */
   /**********************************************************************/
 
+  private _dispatchConfigChangedEvent() {
+    this.dispatchEvent(
+      new CustomEvent('config-changed', {
+        detail: {
+          config: this._config,
+        },
+      }),
+    );
+  }
+
   setConfig(config: NavbarCardConfig) {
     this._config = config;
   }
 
   updateConfig(newConfig: DeepPartial<NavbarCardConfig>) {
     this._config = deepMergeKeepArrays(this._config, newConfig);
-    this.dispatchEvent(
-      new CustomEvent('config-changed', {
-        detail: { config: this._config },
-      }),
-    );
+    this._dispatchConfigChangedEvent();
   }
 
   // TODO change the type of "value"
   updateConfigByKey(
     key: DotNotationKeys<NavbarCardConfig>,
-    value: NestedType<
-      NavbarCardConfig,
-      DotNotationKeys<NavbarCardConfig>
-    > | null,
+    value:
+      | NestedType<NavbarCardConfig, DotNotationKeys<NavbarCardConfig>>
+      | null
+      | undefined,
   ) {
-    this._config = genericSetProperty(this._config, key, value);
-    this.dispatchEvent(
-      new CustomEvent('config-changed', {
-        detail: { config: this._config },
-      }),
-    );
+    this._config = genericSetProperty(this._config, key, value, {
+      allowDeletion: true,
+    });
+    this._dispatchConfigChangedEvent();
+  }
+
+  /**********************************************************************/
+  /* Template detection functions */
+  /**********************************************************************/
+  private _isTemplateMode(configKey: DotNotationKeys<NavbarCardConfig>) {
+    const modeByField = this._templateModeByField[String(configKey)];
+    if (modeByField !== undefined) return modeByField;
+
+    return isTemplate(genericGetProperty(this._config, configKey));
+  }
+
+  private _setTemplateMode(
+    configKey: DotNotationKeys<NavbarCardConfig>,
+    isTemplate: boolean,
+  ) {
+    this._templateModeByField = {
+      ...this._templateModeByField,
+      [String(configKey)]: isTemplate,
+    };
   }
 
   /**********************************************************************/
@@ -291,23 +317,29 @@ export class NavbarCardEditor extends LitElement {
 
     const value = genericGetProperty(this._config, options.configKey) as
       | string
+      | null
       | undefined;
-    const isTemplate =
-      typeof value === 'string' &&
-      value.trim().startsWith('[[[') &&
-      value.trim().endsWith(']]]');
+    const isTemplate = this._isTemplateMode(options.configKey);
 
     // Handler to toggle between template and text
     const toggleMode = () => {
-      let newValue: string | null = value ? value.toString() : '';
       if (isTemplate) {
-        // Remove template delimiters
-        newValue = cleanTemplate(newValue);
+        this._setTemplateMode(options.configKey, false);
+        const uiValue =
+          typeof value === 'string' ? (cleanTemplate(value) ?? '').trim() : '';
+        this.updateConfigByKey(
+          options.configKey,
+          uiValue === '' ? null : uiValue,
+        );
       } else {
-        // Add template delimiters
-        newValue = wrapTemplate(newValue);
+        this._setTemplateMode(options.configKey, true);
+        const templateSource =
+          typeof value === 'string' ? (cleanTemplate(value) ?? '').trim() : '';
+        this.updateConfigByKey(
+          options.configKey,
+          templateSource === '' ? null : wrapTemplate(templateSource),
+        );
       }
-      this.updateConfigByKey(options.configKey, newValue);
     };
 
     // Button label and icon
@@ -335,7 +367,7 @@ export class NavbarCardEditor extends LitElement {
         ${
           isTemplate
             ? this.makeTemplateEditor({
-                allowNull: false,
+                allowNull: true,
                 configKey: options.configKey,
                 helper: options.templateHelper,
                 label: '',
@@ -400,11 +432,10 @@ export class NavbarCardEditor extends LitElement {
               '',
           )}
           @value-changed=${e => {
+            this._setTemplateMode(options.configKey, true);
             const templateValue =
               e.target.value?.trim() == ''
-                ? options.allowNull
-                  ? null
-                  : '[[[]]]'
+                ? null
                 : wrapTemplate(e.target.value);
             this.updateConfigByKey(options.configKey, templateValue);
           }}></ha-code-editor>
@@ -1011,10 +1042,11 @@ export class NavbarCardEditor extends LitElement {
             ],
             label: 'Desktop position',
           })}
-          ${this.makeTemplateEditor({
+          ${this.makeTemplatable({
             configKey: 'media_player.show',
-            helper: BOOLEAN_JS_TEMPLATE_HELPER,
+            inputType: 'switch',
             label: 'Show media player widget',
+            templateHelper: BOOLEAN_JS_TEMPLATE_HELPER,
           })}
         </div>
         <div class="editor-section">
