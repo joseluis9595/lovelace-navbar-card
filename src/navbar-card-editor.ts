@@ -784,18 +784,18 @@ export class NavbarCardEditor extends LitElement {
                 Advanced features
               </h5>
               <div class="editor-section">
-                ${this.makeTemplateEditor({
+                ${this.makeTemplatable({
                   configKey: `${baseConfigKey}.hidden` as any,
-                  helper: BOOLEAN_JS_TEMPLATE_HELPER,
-                  // TODO JLAQ maybe replace with a templateSwitchEditor
+                  inputType: 'switch',
+                  templateHelper: BOOLEAN_JS_TEMPLATE_HELPER,
                   label: 'Hidden',
                 })}
                 ${
                   !isPopup
-                    ? this.makeTemplateEditor({
+                    ? this.makeTemplatable({
                         configKey: `${baseConfigKey}.selected` as any,
-                        helper: BOOLEAN_JS_TEMPLATE_HELPER,
-                        // TODO JLAQ maybe replace with a templateSwitchEditor
+                        inputType: 'switch',
+                        templateHelper: BOOLEAN_JS_TEMPLATE_HELPER,
                         label: 'Selected',
                       })
                     : html``
