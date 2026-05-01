@@ -127,17 +127,23 @@ export class NavbarCardEditor extends LitElement {
   /* Config mutation functions */
   /**********************************************************************/
 
+  private _dispatchConfigChangedEvent() {
+    this.dispatchEvent(
+      new CustomEvent('config-changed', {
+        detail: {
+          config: this._config,
+        },
+      }),
+    );
+  }
+
   setConfig(config: NavbarCardConfig) {
     this._config = config;
   }
 
   updateConfig(newConfig: DeepPartial<NavbarCardConfig>) {
     this._config = deepMergeKeepArrays(this._config, newConfig);
-    this.dispatchEvent(
-      new CustomEvent('config-changed', {
-        detail: { config: this._config },
-      }),
-    );
+    this._dispatchConfigChangedEvent();
   }
 
   // TODO change the type of "value"
@@ -149,11 +155,7 @@ export class NavbarCardEditor extends LitElement {
     > | null,
   ) {
     this._config = genericSetProperty(this._config, key, value);
-    this.dispatchEvent(
-      new CustomEvent('config-changed', {
-        detail: { config: this._config },
-      }),
-    );
+    this._dispatchConfigChangedEvent();
   }
 
   /**********************************************************************/
