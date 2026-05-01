@@ -43,6 +43,10 @@ export class Popup {
               DesktopPosition.bottom),
       );
 
+    const popupStaggerStep = this._getPopupStaggerStepSeconds(
+      this.items.length,
+    );
+
     this._navbarCard.focusedPopup = html`
       <div class="navbar-popup-backdrop"></div>
       <div
@@ -54,7 +58,7 @@ export class Popup {
           mobile: !this._navbarCard.isDesktop,
           popuplabelbackground: this._shouldShowLabelBackground(),
         })}
-        style="${style}">
+        style="${style}; --popup-item-stagger-step: ${popupStaggerStep}s;">
         ${this.items
           .map(popupItem =>
             popupItem.render(popupDirectionClassName, labelPositionClassName),
@@ -124,6 +128,16 @@ export class Popup {
       : this._navbarCard.config?.mobile?.show_popup_label_backgrounds;
     return !!enabled;
   };
+
+  private _getPopupStaggerStepSeconds(itemsCount: number): number {
+    const maxTotalStaggerDelaySeconds = 0.25;
+    const minStepSeconds = 0.01;
+    const maxStepSeconds = 0.05;
+    const staggeredTransitions = Math.max(itemsCount - 1, 1);
+    const dynamicStep = maxTotalStaggerDelaySeconds / staggeredTransitions;
+
+    return Math.max(minStepSeconds, Math.min(maxStepSeconds, dynamicStep));
+  }
 
   /**
    * Get the styles for the popup based on its position relative to the anchor element.
