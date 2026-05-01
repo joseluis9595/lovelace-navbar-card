@@ -162,6 +162,86 @@ export class NavbarCardEditor extends LitElement {
     this._dispatchConfigChangedEvent();
   }
 
+  private addMediaPlayer = () => {
+    const players = this._config.media_player?.players ?? [];
+    const newPlayer: MediaPlayerPlayerConfig = { entity: '' };
+    this.updateConfig({
+      media_player: {
+        ...this._config.media_player,
+        players: [...players, newPlayer],
+      },
+    });
+  };
+
+  private removeMediaPlayer = (playerIndex: number) => {
+    const players = [...(this._config.media_player?.players ?? [])];
+    players.splice(playerIndex, 1);
+    this.updateConfig({
+      media_player: {
+        ...this._config.media_player,
+        players: players.length === 0 ? undefined : players,
+      },
+    });
+  };
+
+  private addRouteOrPopup = (routeIndex?: number) => {
+    let routes = [...(this._config.routes ?? [])];
+    const newItemData = {
+      icon: 'mdi:alert-circle-outline',
+      label: '',
+      url: '',
+    };
+    if (routeIndex == null) {
+      routes = [...routes, newItemData];
+    } else {
+      const popup = [...(routes[routeIndex].popup || []), newItemData];
+      routes[routeIndex] = { ...routes[routeIndex], popup };
+    }
+
+    this.updateConfig({ routes });
+  };
+
+  private removeRouteOrPopup = (routeIndex: number, popupIndex?: number) => {
+    if (!this._config.routes || this._config.routes.length == 0) return;
+    const routes = [...this._config.routes];
+
+    if (popupIndex == null) {
+      routes.splice(routeIndex, 1);
+    } else {
+      const popup = [...(routes[routeIndex].popup || [])];
+      popup.splice(popupIndex, 1);
+      routes[routeIndex] = {
+        ...routes[routeIndex],
+        popup: popup.length === 0 ? undefined : popup,
+      };
+    }
+
+    this.updateConfig({ routes: routes.length === 0 ? undefined : routes });
+  };
+
+  /**********************************************************************/
+  /* Template overrides functions */
+  /**********************************************************************/
+
+  private _hasTemplateOverrides(): boolean {
+    const { template: _template, routes, ...rest } = this._config as any;
+    const hasExtraFields = Object.keys(rest).some(
+      k => k !== 'type' && rest[k] != null,
+    );
+    const hasRoutes = Array.isArray(routes) && routes.length > 0;
+    return hasExtraFields || hasRoutes;
+  }
+
+  private _resetToTemplateOnly = () => {
+    const type = (this._config as any).type;
+    // @ts-expect-error: intentionally omitting routes to clear all overrides
+    this._config = {
+      ...(type != null ? { type } : {}),
+      template: this._config.template,
+    };
+    this._dispatchConfigChangedEvent();
+  };
+
   /**********************************************************************/
   /* Template detection functions */
   /**********************************************************************/
@@ -849,6 +929,36 @@ export class NavbarCardEditor extends LitElement {
     });
   }
 
+  private _chooseIconForAction(actionType: HAActions) {
+    switch (actionType) {
+      case HAActions.hold_action:
+        return 'mdi:gesture-tap-hold';
+      case HAActions.double_tap_action:
+        return 'mdi:gesture-double-tap';
+      case HAActions.tap_action:
+      default:
+        return 'mdi:gesture-tap';
+    }
+  }
+
+  private _chooseLabelForAction(actionType: HAActions) {
+    switch (actionType) {
+      case HAActions.tap_action:
+        return 'Tap action';
+      case HAActions.hold_action:
+        return 'Hold action';
+      case HAActions.double_tap_action:
+        return 'Double tap action';
+      default:
+        return '';
+    }
+  }
+
+  private isCustomAction(value: string) {
+    if (value === 'none') return false;
+    return Object.values(NavbarCustomActions).includes(value as any);
+  }
+
   /**********************************************************************/
   /* Editor sections */
   /**********************************************************************/
@@ -1168,28 +1278,6 @@ export class NavbarCardEditor extends LitElement {
     });
   }
 
-  private addMediaPlayer = () => {
-    const players = this._config.media_player?.players ?? [];
-    const newPlayer: MediaPlayerPlayerConfig = { entity: '' };
-    this.updateConfig({
-      media_player: {
-        ...this._config.media_player,
-        players: [...players, newPlayer],
-      },
-    });
-  };
-
-  private removeMediaPlayer = (playerIndex: number) => {
-    const players = [...(this._config.media_player?.players ?? [])];
-    players.splice(playerIndex, 1);
-    this.updateConfig({
-      media_player: {
-        ...this._config.media_player,
-        players: players.length === 0 ? undefined : players,
-      },
-    });
-  };
-
   renderDesktopEditor() {
     const labelVisibility =
       genericGetProperty(this._config, 'desktop.show_labels') ??
@@ -1346,36 +1434,6 @@ export class NavbarCardEditor extends LitElement {
         </div>
       </ha-expansion-panel>
     `;
-  }
-
-  _chooseIconForAction(actionType: HAActions) {
-    switch (actionType) {
-      case HAActions.hold_action:
-        return 'mdi:gesture-tap-hold';
-      case HAActions.double_tap_action:
-        return 'mdi:gesture-double-tap';
-      case HAActions.tap_action:
-      default:
-        return 'mdi:gesture-tap';
-    }
-  }
-
-  _chooseLabelForAction(actionType: HAActions) {
-    switch (actionType) {
-      case HAActions.tap_action:
-        return 'Tap action';
-      case HAActions.hold_action:
-        return 'Hold action';
-      case HAActions.double_tap_action:
-        return 'Double tap action';
-      default:
-        return '';
-    }
-  }
-
-  isCustomAction(value: string) {
-    if (value === 'none') return false;
-    return Object.values(NavbarCustomActions).includes(value as any);
   }
 
   makeActionSelector(options: {
@@ -1596,20 +1654,29 @@ export class NavbarCardEditor extends LitElement {
         ${
           this._config.template != undefined &&
           this._config.template?.trim() != ''
-            ? html`<ha-alert alert-type="warning"
-              >You have the <code>template</code> field configured for
-              navbar-card. Using the editor will override the props for
-              <strong>this card only</strong>, but will not update the template
-              defined in your dashboard.
-              <br />
-              <a
-                href="${DOCS_LINKS.template}"
-                target="_blank"
-                rel="noopener"
-                >Check the documentation</a
-              >
-              to know how to configure your navbar-card templates.</ha-alert
-            >`
+            ? html`
+              <ha-alert alert-type="warning">
+                You have the <code>template</code> field configured for
+                navbar-card. Using the editor will override the props for
+                <strong>this card only</strong>, but will not update the
+                template defined in your dashboard.
+                <br />
+                <a
+                  href="${DOCS_LINKS.template}"
+                  target="_blank"
+                  rel="noopener"
+                  >Check the documentation</a
+                >
+                to know how to configure your navbar-card templates.
+                <ha-button
+                  class="reset-overrides-button"
+                  slot="action"
+                  .disabled=${!this._hasTemplateOverrides()}
+                  @click=${this._resetToTemplateOnly}>
+                  Reset overrides
+                </ha-button>
+              </ha-alert>
+            `
             : html``
         }
         ${this.renderTemplateEditor()} ${this.renderRoutesEditor()}
@@ -1622,39 +1689,4 @@ export class NavbarCardEditor extends LitElement {
   }
 
   static styles = getEditorStyles();
-
-  private addRouteOrPopup = (routeIndex?: number) => {
-    let routes = [...(this._config.routes ?? [])];
-    const newItemData = {
-      icon: 'mdi:alert-circle-outline',
-      label: '',
-      url: '',
-    };
-    if (routeIndex == null) {
-      routes = [...routes, newItemData];
-    } else {
-      const popup = [...(routes[routeIndex].popup || []), newItemData];
-      routes[routeIndex] = { ...routes[routeIndex], popup };
-    }
-
-    this.updateConfig({ routes });
-  };
-
-  private removeRouteOrPopup = (routeIndex: number, popupIndex?: number) => {
-    if (!this._config.routes || this._config.routes.length == 0) return;
-    const routes = [...this._config.routes];
-
-    if (popupIndex == null) {
-      routes.splice(routeIndex, 1);
-    } else {
-      const popup = [...(routes[routeIndex].popup || [])];
-      popup.splice(popupIndex, 1);
-      routes[routeIndex] = {
-        ...routes[routeIndex],
-        popup: popup.length === 0 ? undefined : popup,
-      };
-    }
-
-    this.updateConfig({ routes: routes.length === 0 ? undefined : routes });
-  };
 }

@@ -31,6 +31,10 @@ export const EDITOR_STYLES = css`
     cursor: pointer;
   }
 
+  .reset-overrides-button {
+    white-space: nowrap;
+  }
+
   .editor-section {
     display: flex;
     flex-direction: column;
