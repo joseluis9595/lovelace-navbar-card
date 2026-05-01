@@ -375,7 +375,7 @@ export class MediaPlayer {
         class="media-player-bg"
         style=${
           albumBg
-            ? `background-image: url(${state.attributes.entity_picture});`
+            ? `background-image: url(${image});`
             : ''
         }></div>
       ${
