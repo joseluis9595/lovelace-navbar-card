@@ -1040,10 +1040,11 @@ export class NavbarCardEditor extends LitElement {
             ],
             label: 'Desktop position',
           })}
-          ${this.makeTemplateEditor({
+          ${this.makeTemplatable({
             configKey: 'media_player.show',
-            helper: BOOLEAN_JS_TEMPLATE_HELPER,
+            inputType: 'switch',
             label: 'Show media player widget',
+            templateHelper: BOOLEAN_JS_TEMPLATE_HELPER,
           })}
         </div>
         <div class="editor-section">
