@@ -156,7 +156,9 @@ export class NavbarCardEditor extends LitElement {
       | null
       | undefined,
   ) {
-    this._config = genericSetProperty(this._config, key, value);
+    this._config = genericSetProperty(this._config, key, value, {
+      allowDeletion: true,
+    });
     this._dispatchConfigChangedEvent();
   }
 

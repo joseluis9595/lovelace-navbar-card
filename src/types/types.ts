@@ -69,6 +69,7 @@ export function genericSetProperty<T, K extends DotNotationKeys<T>>(
   obj: T,
   key: K,
   value: NestedType<T, K> | null,
+  options: { allowDeletion?: boolean } = { allowDeletion: false },
 ): T {
   const paths = key.split('.');
   const finalKey = paths.pop() as string;
@@ -105,7 +106,11 @@ export function genericSetProperty<T, K extends DotNotationKeys<T>>(
   }
 
   // Return the modified copy
-  currentObj[finalKey] = value;
+  if ((value === null || value === undefined) && options.allowDeletion) {
+    delete currentObj[finalKey];
+  } else {
+    currentObj[finalKey] = value;
+  }
   return copy as T;
 }
 
