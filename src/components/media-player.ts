@@ -358,7 +358,8 @@ export class MediaPlayer {
     entity: string,
     state: HassEntity,
   ) {
-    const image = state.attributes.entity_picture;
+    const image =
+      state.attributes.entity_picture_local ?? state.attributes.entity_picture;
     const pos = state.attributes.media_position;
     const dur = state.attributes.media_duration;
     const progress = pos != null && dur != null && dur > 0 ? pos / dur : null;
