@@ -615,7 +615,7 @@ const POPUP_STYLES = css`
   .navbar-popup.visible .popup-item {
     opacity: 1;
     transform: translateY(0);
-    transition-delay: calc(var(--index) * 0.05s);
+    transition-delay: calc(var(--index) * var(--popup-item-stagger-step, 0.05s));
   }
 
   .popup-item.label-bottom {
