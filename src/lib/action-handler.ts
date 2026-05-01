@@ -11,7 +11,9 @@ import {
   fireDOMEvent,
   forceOpenEditMode,
   forceResetRipple,
+  matchesCurrentNavigationPath,
   processTemplate,
+  scrollToTop,
   triggerHaptic,
 } from '@/utils';
 
@@ -164,6 +166,14 @@ export const executeAction = (params: {
       if (action != null) {
         triggerHaptic(context, actionType);
 
+        if (
+          action.action === 'navigate' &&
+          matchesCurrentNavigationPath(action.navigation_path)
+        ) {
+          scrollToTop();
+          return;
+        }
+
         // For `more-info` and `toggle` actions, extract the entity id manually configured
         const extractedEntity = ACTIONS_WITH_CUSTOM_ENTITY.includes(
           action.action,
@@ -187,7 +197,12 @@ export const executeAction = (params: {
       } else if (actionType === 'tap' && (route?.url || popupItem?.url)) {
         // Handle default navigation for tap action if no specific action is defined
         triggerHaptic(context, actionType, true);
-        navigate(context, route?.url ?? popupItem?.url ?? '');
+        const destinationUrl = route?.url ?? popupItem?.url ?? '';
+        if (matchesCurrentNavigationPath(destinationUrl)) {
+          scrollToTop();
+          return;
+        }
+        navigate(context, destinationUrl);
       }
       break;
   }
