@@ -346,6 +346,39 @@ export const preventEventDefault = (e: Event) => {
 };
 
 /**
+ * Scroll window to the top-left corner.
+ */
+export const scrollToTop = () => {
+  window.scrollTo({
+    behavior: 'smooth',
+    left: 0,
+    top: 0,
+  });
+};
+
+/**
+ * Checks if the current pathname matches the configured URL.
+ * Supports both absolute URLs (starting with "/") and relative URLs.
+ */
+export const matchesCurrentNavigationPath = (
+  url: string | undefined,
+): boolean => {
+  const pathname = window.location.pathname;
+  if (!url) return false;
+
+  if (url.startsWith('/')) {
+    return pathname === url;
+  }
+
+  const normalizedPathname = pathname.endsWith('/')
+    ? pathname.slice(0, -1)
+    : pathname;
+  const normalizedUrl = url.endsWith('/') ? url.slice(0, -1) : url;
+
+  return normalizedPathname.endsWith(`/${normalizedUrl}`);
+};
+
+/**
  * Conditionally render a content based on a condition.
  *
  * @param condition - The condition to render the content based on.
