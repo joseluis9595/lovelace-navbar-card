@@ -4,18 +4,27 @@ import { DRAGGABLE_ITEM_STYLES, EDITOR_STYLES } from '@/styles/editor';
 
 const HOST_STYLES = css`
   :host {
+    /* Sizes */
     --navbar-border-radius: var(--ha-card-border-radius, 12px);
-    --navbar-background-color: var(--card-background-color);
     --navbar-route-icon-size: 24px;
     --navbar-route-image-size: 32px;
+
+    /* Colors */
+    --navbar-background-color: var(--card-background-color);
     --navbar-primary-color: var(--primary-color);
+
+    /* Box shadow configuration */
     --navbar-box-shadow: 0px -1px 4px 0px rgba(0, 0, 0, 0.14);
     --navbar-box-shadow-desktop: var(--material-shadow-elevation-2dp);
     --navbar-box-shadow-mobile-floating: var(--material-shadow-elevation-2dp);
+    
+    /* Controls the left margin of the navbar when in desktop mode (the width of HA sidebar) */
+    --navbar-left-margin: var(--ha-sidebar-width, var(--mdc-drawer-width, 0px));
+    
+    /* Controls the edge inset of the navbar when in desktop mode (the width of HA sidebar) */
+    --navbar-edge-inset: 16px;
 
-    /* TODO rename this CSS variable */
-    --navbar-lateral-margin: 16px;
-
+    /* Z index configuration */
     --navbar-z-index: 3;
     --navbar-media-player-z-index: 4;
     --navbar-popup-backdrop-z-index: 900;
@@ -100,8 +109,8 @@ const NAVBAR_CONTAINER_STYLES = css`
     flex-direction: column;
     top: unset;
     right: unset;
-    bottom: var(--navbar-lateral-margin);
-    left: calc(50% + var(--mdc-drawer-width, 0px) / 2);
+    bottom: var(--navbar-edge-inset);
+    left: calc(50% + var(--navbar-left-margin, 0px) / 2);
     transform: translate(-50%, 0);
   }
 
@@ -113,8 +122,8 @@ const NAVBAR_CONTAINER_STYLES = css`
     flex-direction: column;
     bottom: unset;
     right: unset;
-    top: var(--navbar-lateral-margin);
-    left: calc(50% + var(--mdc-drawer-width, 0px) / 2);
+    top: var(--navbar-edge-inset);
+    left: calc(50% + var(--navbar-left-margin, 0px) / 2);
     transform: translate(-50%, 0);
   }
 
@@ -124,7 +133,7 @@ const NAVBAR_CONTAINER_STYLES = css`
 
   .navbar.desktop.left {
     flex-direction: row-reverse;
-    left: calc(var(--mdc-drawer-width, 0px) + var(--navbar-lateral-margin));
+    left: calc(var(--navbar-left-margin, 0px) + var(--navbar-edge-inset));
     right: unset;
     bottom: unset;
     top: 50%;
@@ -138,7 +147,7 @@ const NAVBAR_CONTAINER_STYLES = css`
 
   .navbar.desktop.right {
     flex-direction: row;
-    right: var(--navbar-lateral-margin);
+    right: var(--navbar-edge-inset);
     left: unset;
     bottom: unset;
     top: 50%;
@@ -157,7 +166,7 @@ const NAVBAR_CONTAINER_STYLES = css`
 
   .navbar.desktop.docked.bottom {
     bottom: 0px;
-    left: var(--mdc-drawer-width, 0px);
+    left: var(--navbar-left-margin, 0px);
     right: 0px;
     width: auto;
     transform: none;
@@ -170,7 +179,7 @@ const NAVBAR_CONTAINER_STYLES = css`
 
   .navbar.desktop.docked.top {
     top: 0px;
-    left: var(--mdc-drawer-width, 0px);
+    left: var(--navbar-left-margin, 0px);
     right: 0px;
     width: auto;
     transform: none;
@@ -182,7 +191,7 @@ const NAVBAR_CONTAINER_STYLES = css`
   }
 
   .navbar.desktop.docked.left {
-    left: var(--mdc-drawer-width, 0px);
+    left: var(--navbar-left-margin, 0px);
     top: 0px;
     bottom: 0px;
     height: 100%;
@@ -252,30 +261,30 @@ const MEDIA_PLAYER_STYLES = css`
   }
 
   :is(.media-player, .media-player-carousel).desktop.position-absolute.top-left {
-    left: var(--navbar-lateral-margin);
-    top: calc(var(--header-height) + var(--navbar-lateral-margin));
+    left: var(--navbar-edge-inset);
+    top: calc(var(--header-height) + var(--navbar-edge-inset));
   }
   :is(.media-player, .media-player-carousel).desktop.position-absolute.top-center {
     left: 50%;
-    top: calc(var(--header-height) + var(--navbar-lateral-margin));
+    top: calc(var(--header-height) + var(--navbar-edge-inset));
     transform: translateX(-50%);
   }
   :is(.media-player, .media-player-carousel).desktop.position-absolute.top-right {
-    right: var(--navbar-lateral-margin);
-    top: calc(var(--header-height) + var(--navbar-lateral-margin));
+    right: var(--navbar-edge-inset);
+    top: calc(var(--header-height) + var(--navbar-edge-inset));
   }
   :is(.media-player, .media-player-carousel).desktop.position-absolute.bottom-left {
-    left: calc(var(--mdc-drawer-width, 0px) + var(--navbar-lateral-margin));
-    bottom: var(--navbar-lateral-margin);
+    left: calc(var(--navbar-left-margin, 0px) + var(--navbar-edge-inset));
+    bottom: var(--navbar-edge-inset);
   }
   :is(.media-player, .media-player-carousel).desktop.position-absolute.bottom-center {
     left: 50%;
-    bottom: var(--navbar-lateral-margin);
+    bottom: var(--navbar-edge-inset);
     transform: translateX(-50%);
   }
   :is(.media-player, .media-player-carousel).desktop.position-absolute.bottom-right {
-    right: var(--navbar-lateral-margin);
-    bottom: var(--navbar-lateral-margin);
+    right: var(--navbar-edge-inset);
+    bottom: var(--navbar-edge-inset);
   }
 
   .media-player .media-player-bg {
