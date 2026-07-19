@@ -9,7 +9,7 @@ Custom CSS styles can be applied to the Navbar Card to personalize its appearanc
 You can check out some examples [**here**](/docs/examples) for inspiration.
 :::
 
-#### Targetable Classes
+## Targetable Classes
 
 Here is a breakdown of the CSS classes available for customization:
 
@@ -41,6 +41,9 @@ Here is a breakdown of the CSS classes available for customization:
 
 - `.badge`: Small indicator or badge that appears over the icon (if configured).
   - `.badge.active`: Applies when a route is selected.
+  - `.badge.with-counter`: Applies when the badge displays text or a number.
+  - `.badge.with-icon`: Applies when the badge displays an icon.
+  - `.badge-icon`: Refers to the `ha-icon` displayed inside an icon badge.
 
 - `.navbar-popup`: Main container for the popup.
 
@@ -62,7 +65,7 @@ Here is a breakdown of the CSS classes available for customization:
 - `.media-player-progress-bar`: Container for the progress bar of the current playing media
 - `.media-player-progress-bar-fill`: Filled section of the progress bar
 
-#### CSS variables
+## CSS variables
 
 The `.navbar` component relies on a set of CSS variables to manage its styling. You can customize its appearance by overriding the following variables:
 
@@ -71,6 +74,8 @@ The `.navbar` component relies on a set of CSS variables to manage its styling. 
 | `--navbar-primary-color`              | var(--primary-color)                 | Accent color used for navbar-card                                 |
 | `--navbar-border-radius`              | var(--ha-card-border-radius, 12px)   | Border radius applied to all `ha-card` elements inside `.navbar`  |
 | `--navbar-background-color`           | var(--card-background-color)         | Background color used for all `ha-card` elements inside `.navbar` |
+| `--navbar-badge-size`                 | 16px                                 | Size of badges that contain a count, text, or icon                |
+| `--navbar-badge-icon-size`            | 12px                                 | Size of the icon displayed inside an icon badge                   |
 | `--navbar-route-icon-size`            | 24px                                 | Size in pixels for each `.icon` element                           |
 | `--navbar-route-image-size`           | 32px                                 | Size in pixels for each `.image` element                          |
 | `--navbar-box-shadow`                 | 0px -1px 4px 0px rgba(0, 0, 0, 0.14) | Box shadow used in mobile docked layout                           |
@@ -79,3 +84,15 @@ The `.navbar` component relies on a set of CSS variables to manage its styling. 
 | `--navbar-z-index`                    | 3                                    | Default z-index for navbar-card                                   |
 | `--navbar-popup-backdrop-z-index`     | 900                                  | z-index used for the `.navbar-popup-backdrop` element             |
 | `--navbar-popup-z-index`              | 901                                  | z-index used for the `.navbar-popup` element                      |
+
+## Badge sizing example
+
+You can increase an icon badge while keeping the same icon-to-badge proportions:
+
+```yaml
+styles: |
+  .navbar {
+    --navbar-badge-size: 18px;
+    --navbar-badge-icon-size: 13.5px;
+  }
+```
