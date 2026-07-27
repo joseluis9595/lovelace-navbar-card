@@ -373,11 +373,7 @@ export class MediaPlayer {
     return html`
       <div
         class="media-player-bg"
-        style=${
-          albumBg
-            ? `background-image: url(${image});`
-            : ''
-        }></div>
+        style=${albumBg ? `background-image: url(${image});` : ''}></div>
       ${
         progress != null
           ? html`<div class="media-player-progress-bar">
