@@ -1,4 +1,6 @@
-import { html } from 'lit';
+import { html, nothing } from 'lit';
+import { classMap } from 'lit/directives/class-map.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import { Color } from '@/components';
 import type { BaseRoute } from '@/components/navbar';
@@ -33,14 +35,24 @@ export class Badge {
     return false;
   }
 
-  get count(): number | null {
+  get count(): string | number | null {
     return (
-      processTemplate<number>(
+      processTemplate<string | number>(
         this._navbarCard._hass,
         this._navbarCard,
         this._route.data.badge?.count,
       ) ?? null
     );
+  }
+
+  get icon(): string | null {
+    const icon = processTemplate<string>(
+      this._navbarCard._hass,
+      this._navbarCard,
+      this._route.data.badge?.icon,
+    );
+
+    return typeof icon === 'string' && icon.trim() !== '' ? icon.trim() : null;
   }
 
   get backgroundColor(): string {
@@ -63,28 +75,48 @@ export class Badge {
     );
   }
 
-  /** Computed contrasting text color (used if no explicit textColor) */
-  get contrastingColor(): string {
+  get iconColor(): string | null {
     return (
-      this.textColor ??
-      Color.from(this.backgroundColor).contrastingColor().hex()
+      processTemplate<string>(
+        this._navbarCard._hass,
+        this._navbarCard,
+        this._route.data.badge?.icon_color,
+      ) ?? null
     );
   }
 
   public render() {
-    if (!(this._route.badge && this.show)) return html``;
+    if (!this.show) return nothing;
 
-    const hasCounter = this.count != null;
+    const icon = this.icon;
+    const count = this.count;
+    const backgroundColor = this.backgroundColor;
+    const hasIcon = icon != null;
+    const hasCounter = !hasIcon && count != null;
+    const configuredForegroundColor = hasIcon
+      ? (this.iconColor ?? this.textColor)
+      : this.textColor;
+    const foregroundColor =
+      configuredForegroundColor ??
+      Color.from(backgroundColor).contrastingColor().hex();
 
     return html`
       <div
-        class="badge ${this._route.selected ? 'active' : ''} ${
-          hasCounter ? 'with-counter' : ''
-        }"
-        style="background-color:${this.backgroundColor}; color:${
-          this.contrastingColor
-        }">
-        ${this.count ?? ''}
+        class=${classMap({
+          active: this._route.selected,
+          badge: true,
+          'with-counter': hasCounter,
+          'with-icon': hasIcon,
+        })}
+        style=${styleMap({
+          backgroundColor,
+          color: foregroundColor,
+        })}>
+        ${
+          hasIcon
+            ? html`<ha-icon class="badge-icon" .icon=${icon}></ha-icon>`
+            : (count ?? nothing)
+        }
       </div>
     `;
   }

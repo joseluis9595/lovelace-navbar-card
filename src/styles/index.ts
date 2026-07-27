@@ -6,6 +6,8 @@ const HOST_STYLES = css`
   :host {
     /* Sizes */
     --navbar-border-radius: var(--ha-card-border-radius, 12px);
+    --navbar-badge-icon-size: 12px;
+    --navbar-badge-size: 16px;
     --navbar-route-icon-size: 24px;
     --navbar-route-image-size: 32px;
 
@@ -487,13 +489,25 @@ const ROUTE_STYLES = css`
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 16px;
+    height: var(--navbar-badge-size);
     width: auto !important;
-    min-width: 16px;
+    min-width: var(--navbar-badge-size);
     padding: 0px 2px;
     font-weight: bold;
     font-size: 11px;
     line-height: 11px;
+  }
+  .badge.with-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: var(--navbar-badge-size);
+    height: var(--navbar-badge-size);
+    line-height: 0;
+  }
+  .badge-icon {
+    --icon-primary-color: currentColor;
+    --mdc-icon-size: var(--navbar-badge-icon-size);
   }
 
   /* Desktop mode styles */

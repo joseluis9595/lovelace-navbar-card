@@ -757,6 +757,18 @@ export class NavbarCardEditor extends LitElement {
                   templateHelper: BOOLEAN_JS_TEMPLATE_HELPER,
                 })}
                 ${this.makeTemplatable({
+                  configKey: `${baseConfigKey}.badge.icon` as any,
+                  inputType: 'icon',
+                  label: 'Icon',
+                  templateHelper: STRING_JS_TEMPLATE_HELPER,
+                })}
+                ${this.makeTemplatable({
+                  configKey: `${baseConfigKey}.badge.icon_color` as any,
+                  inputType: 'color',
+                  label: 'Icon color',
+                  templateHelper: STRING_JS_TEMPLATE_HELPER,
+                })}
+                ${this.makeTemplatable({
                   configKey: `${baseConfigKey}.badge.count` as any,
                   inputType: 'string',
                   label: 'Count',

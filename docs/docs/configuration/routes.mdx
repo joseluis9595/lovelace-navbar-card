@@ -5,7 +5,9 @@ title: Routes
 
 import { AlignedImage } from '@site/src/components';
 
-Routes represents an array of clickable icons that redirects to a given path. Each item in the array should contain the following configuration:
+Routes are clickable navigation items that send you to another view or run an action. Each route supports the following configuration.
+
+## Configuration options
 
 | Name                | Type                                                             | Default     | Description                                                                                                                                                |
 | ------------------- | ---------------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -39,26 +41,50 @@ Some suggestions when using the `image` property:
 1. Place your custom images in the `<ha-config-folder>/www` directory
 2. Use images with a transparent background for best results
 3. Keep image dimensions squared for best results
-   :::
 
-### Badge
+:::
 
-Configuration to display a small badge on any of the navbar items.
+## Badge
+
+A badge displays a small status indicator, count, text value, or icon over a navbar item. The badge remains hidden unless `show` is `true` or resolves to `true`.
 
 <AlignedImage
   imageURL={'/img/configuration/navbar-card_badges.png'}
-  alt="navbar-card_badges"
+  alt="Navbar with dot, count, and icon badges"
   alignment="center"
 />
 
-| Name        | Type                                          | Default | Description                                                     |
-| ----------- | --------------------------------------------- | ------- | --------------------------------------------------------------- |
-| `show`      | boolean \| [JSTemplate](../types/js-template) | false   | Boolean template indicating whether to display the badge or not |
-| `color`     | string \| [JSTemplate](../types/js-template)  | red     | Background color of the badge                                   |
-| `count`     | string \| [JSTemplate](../types/js-template)  | -       | Text to be displayed inside the badge                           |
-| `textColor` | string \| [JSTemplate](../types/js-template)  | -       | Color for the text displayed inside the badge                   |
+| Name         | Type                                                   | Default   | Description                                                     |
+| ------------ | ------------------------------------------------------ | --------- | --------------------------------------------------------------- |
+| `show`       | boolean \| [JSTemplate](../types/js-template)          | false     | Controls whether to display the badge                           |
+| `color`      | string \| [JSTemplate](../types/js-template)           | red       | Background color of the badge                                   |
+| `count`      | string \| number \| [JSTemplate](../types/js-template) | -         | Text or number displayed inside the badge                       |
+| `text_color` | string \| [JSTemplate](../types/js-template)           | Automatic | Text color, calculated for contrast when omitted                |
+| `icon`       | string \| [JSTemplate](../types/js-template)           | -         | Home Assistant icon displayed inside the badge                  |
+| `icon_color` | string \| [JSTemplate](../types/js-template)           | Automatic | Icon color, falling back to `text_color` and automatic contrast |
 
-### Popup Items
+If both `icon` and `count` are configured, a non-empty icon takes priority. If an icon template returns an empty value, the badge falls back to `count` or to the standard dot.
+
+### Icon badge example
+
+This example displays a red badge with an unlocked icon while the front door is unlocked:
+
+```yaml
+routes:
+  - icon: mdi:door
+    label: Front door
+    url: /dashboard/security
+    badge:
+      show: |
+        [[[ return states['lock.front_door'].state === 'unlocked'; ]]]
+      icon: mdi:lock-open-variant
+      color: red
+      icon_color: white
+```
+
+The legacy `textColor` option remains supported for existing configurations, but new configurations should use `text_color`.
+
+## Popup Items
 
 For each route, a popup menu can be configured, to display a popup when clicked. This is activated using the `open-popup` action in either `tap_action` or `hold_action`.
 
