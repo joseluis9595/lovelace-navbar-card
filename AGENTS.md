@@ -24,16 +24,17 @@ Lovelace Navbar Card is a custom card for Home Assistant's Lovelace UI, built wi
 ### Branch Strategy
 
 - `main` - Stable branch containing production-ready code
-- `develop` - Main development branch where features are integrated
+- `develop` - Main development branch where features are integrated; changes merged here are considered release-ready
 - `feature/*` - Feature branches for new development
-- `release/*` - Release preparation branches
+- `release/*` - Release branches created from `develop` when preparing a release
 
 ### Pull Request Process
 
 1. All Pull Requests must target the `develop` branch
 2. PRs are merged into `develop` after review and testing
-3. For releases, a new `release/*` branch is created from `develop`
-4. After final testing, the release branch is merged into `main`
+3. Assume all changes merged into `develop` are ready to be included in the next release
+4. For releases, create a `release/<version>` branch from `develop` (e.g. `release/1.6.0`, matching `package.json`) and open a PR into `main`
+5. When that PR is merged, CI creates a draft GitHub release and merges `main` back into `develop`
 
 ### Commit Messages
 
@@ -65,27 +66,30 @@ Breaking changes will be marked with `!` after the type (e.g., `feat!: drop supp
 
 Before committing code, ensure:
 
-1. **Tests Pass**:
-
-   ```bash
-   bun run test
-   ```
-
-2. **Code is Linted**:
+1. **Code is formatted and linted with Biome** (required — CI runs `lint:check` without auto-fix):
 
    ```bash
    bun run lint
    ```
 
-3. **Code is Formatted**:
+   This runs `biome check --write`, which applies formatting, import organization, and other safe fixes. Commit the resulting changes before pushing.
+
+2. **Tests Pass**:
 
    ```bash
-   bun run format
+   bun run test
    ```
 
-4. **Build Succeeds**:
+3. **Build Succeeds**:
+
    ```bash
    bun run build
+   ```
+
+4. **Docs build** (if you changed documentation):
+
+   ```bash
+   cd docs && bun run docs:build
    ```
 
 ### Testing Requirements
@@ -101,8 +105,9 @@ Before committing code, ensure:
 - Include JSDoc comments for public APIs
 - Update configuration examples if needed
 - Keep the documentation website up-to-date:
+
   ```bash
-  bun run docs:build
+  cd docs && bun run docs:build
   ```
 
 ### Code Quality Standards
@@ -117,11 +122,28 @@ Before committing code, ensure:
 
 - `bun run build` - Build the production bundle
 - `bun run test` - Run unit tests
+- `bun run test:watch` - Run unit tests in watch mode
 - `bun run test:coverage` - Run tests with coverage report
-- `bun run lint` - Lint and auto-fix code
-- `bun run format` - Format code with Prettier
-- `bun run docs:start` - Start documentation development server
-- `bun run docs:build` - Build documentation site
+- `bun run lint` - Run Biome check with auto-fix (use before committing)
+- `bun run lint:check` - Run Biome check without auto-fix (same as CI)
+- `bun run format` - Format `src/**/*.ts` with Biome
+
+Documentation scripts live in the `docs/` package:
+
+- `cd docs && bun run docs:start` - Start documentation development server
+- `cd docs && bun run docs:build` - Build documentation site
+
+## Continuous Integration
+
+GitHub Actions workflows in `.github/workflows/`:
+
+- **`ci.yml`** — Runs on PRs to `develop`/`main` and on pushes to `develop`. For PRs to `main`, validates the source branch is `release/<version>` matching `package.json` before running lint, tests, build, and docs.
+- **`release.yml`** — On merge of a release PR into `main`, runs CI, creates a draft release, and merges `main` into `develop`.
+- **`deploy-docs.yaml`** — Deploys the docs site to GitHub Pages on pushes to `main`.
+- **`hacs-action.yml`** — Validates HACS compatibility.
+- **`stale.yml`** — Manages stale issues.
+
+Shared CI steps are defined in `.github/actions/`.
 
 ## Getting Help
 
@@ -137,4 +159,5 @@ Remember that this is a Home Assistant custom card, so all changes should mainta
 - Follow TypeScript strictness and Lit best practices.
 - Ensure changes integrate seamlessly with Home Assistant’s Lovelace UI.
 - Always update or add tests when modifying features.
-- Update documentation (docs/) if behavior changes.
+- Update documentation (`docs/`) if behavior changes.
+- Run `bun run lint` before committing so Biome formatting and lint fixes are applied; CI will fail if `lint:check` does not pass.
