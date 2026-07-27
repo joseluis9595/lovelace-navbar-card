@@ -70,7 +70,7 @@ export class Badge {
       processTemplate<string>(
         this._navbarCard._hass,
         this._navbarCard,
-        this._route.data.badge?.text_color ?? this._route.data.badge?.textColor,
+        this._route.data.badge?.text_color,
       ) ?? null
     );
   }

@@ -89,7 +89,6 @@ export type RouteItemBase = {
     count?: JSTemplatable<string | number>;
     icon?: JSTemplatable<string>;
     icon_color?: JSTemplatable<string>;
-    textColor?: JSTemplatable<string>; // TODO deprecate
     text_color?: JSTemplatable<string>;
   };
   hidden?: JSTemplatable<boolean>;
