@@ -1,0 +1,15 @@
+name: Build Docs
+description: Build the Docusaurus documentation site
+
+runs:
+  using: composite
+  steps:
+    - uses: oven-sh/setup-bun@v2
+
+    - shell: bash
+      working-directory: ./docs
+      run: bun install
+
+    - shell: bash
+      working-directory: ./docs
+      run: bun run docs:build

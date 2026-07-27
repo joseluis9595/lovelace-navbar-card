@@ -1,0 +1,42 @@
+name: CI
+description: Lint, test, and build the project
+
+inputs:
+  check-version-tag:
+    description: Fail if the package.json version tag already exists on the remote
+    required: false
+    default: 'false'
+
+outputs:
+  version:
+    description: Package version with v prefix
+    value: ${{ steps.get_version.outputs.version }}
+
+runs:
+  using: composite
+  steps:
+    - id: get_version
+      shell: bash
+      run: echo "version=v$(jq -r .version package.json)" >> $GITHUB_OUTPUT
+
+    - if: inputs.check-version-tag == 'true'
+      shell: bash
+      run: |
+        if git ls-remote --tags origin | grep -q "refs/tags/${{ steps.get_version.outputs.version }}$"; then
+          echo "Version ${{ steps.get_version.outputs.version }} already exists in this repo, please change package.json version before releasing"
+          exit 1
+        fi
+
+    - uses: oven-sh/setup-bun@v2
+
+    - shell: bash
+      run: bun install
+
+    - shell: bash
+      run: bun lint:check
+
+    - shell: bash
+      run: bun run test
+
+    - shell: bash
+      run: bun run build
