@@ -165,8 +165,7 @@ export const forceDashboardPadding = (options?: {
     options?.autoPadding?.media_player_px ??
     DEFAULT_NAVBAR_CONFIG.layout?.auto_padding?.media_player_px ??
     0;
-  const mediaPlayerPosition =
-    options?.widgetPositions?.media_player ?? null;
+  const mediaPlayerPosition = options?.widgetPositions?.media_player ?? null;
 
   if (mediaPlayerPosition) {
     switch (mediaPlayerPosition) {
