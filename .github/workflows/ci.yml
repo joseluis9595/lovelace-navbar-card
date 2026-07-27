@@ -7,7 +7,19 @@ on:
     branches: [develop]
 
 jobs:
+  validate-release:
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/validate-release
+        with:
+          branch: ${{ github.head_ref }}
+
   build:
+    needs: validate-release
+    if: always() && (needs.validate-release.result == 'success' || needs.validate-release.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,6 +29,8 @@ jobs:
           check-version-tag: ${{ github.event_name == 'pull_request' && github.base_ref == 'main' }}
 
   build-docs:
+    needs: validate-release
+    if: always() && (needs.validate-release.result == 'success' || needs.validate-release.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
