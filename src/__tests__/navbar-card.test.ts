@@ -2,7 +2,11 @@ import { fixture, html } from '@open-wc/testing';
 import type { HomeAssistant } from 'custom-card-helpers';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { NavbarCardConfig } from '@/types';
+import {
+  DesktopPosition,
+  MobilePosition,
+  type NavbarCardConfig,
+} from '@/types';
 
 import { NavbarCard } from '../navbar-card';
 
@@ -157,6 +161,54 @@ describe('NavbarCard', () => {
       await element.updateComplete;
 
       expect(element.isDesktop).toBe(false);
+    });
+  });
+
+  describe('Mobile position', () => {
+    beforeEach(async () => {
+      Object.defineProperty(window, 'innerWidth', {
+        configurable: true,
+        value: 375,
+        writable: true,
+      });
+      window.dispatchEvent(new Event('resize'));
+      await element.updateComplete;
+    });
+
+    it('defaults to bottom position class', () => {
+      expect(element.mobilePosition).toBe(MobilePosition.bottom);
+
+      const navbar = element.shadowRoot?.querySelector('.navbar');
+      expect(navbar?.classList.contains('mobile')).toBe(true);
+      expect(navbar?.classList.contains('bottom')).toBe(true);
+      expect(navbar?.classList.contains('right')).toBe(false);
+    });
+
+    it('applies right position class when configured', async () => {
+      element.setConfig({
+        ...DEFAULT_CONFIG,
+        mobile: { position: MobilePosition.right },
+      });
+      await element.updateComplete;
+
+      expect(element.mobilePosition).toBe(MobilePosition.right);
+
+      const navbar = element.shadowRoot?.querySelector('.navbar');
+      const navbarCard = element.shadowRoot?.querySelector('.navbar-card');
+      expect(navbar?.classList.contains('right')).toBe(true);
+      expect(navbarCard?.classList.contains('right')).toBe(true);
+    });
+
+    it('does not leak desktop position class onto a mobile navbar', async () => {
+      element.setConfig({
+        ...DEFAULT_CONFIG,
+        desktop: { position: DesktopPosition.left },
+      });
+      await element.updateComplete;
+
+      const navbar = element.shadowRoot?.querySelector('.navbar');
+      expect(navbar?.classList.contains('left')).toBe(false);
+      expect(navbar?.classList.contains('bottom')).toBe(true);
     });
   });
 
