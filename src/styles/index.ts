@@ -219,6 +219,76 @@ const NAVBAR_CONTAINER_STYLES = css`
     height: 100%;
     border-radius: 0px;
   }
+
+  /*
+   * Mobile landscape right-side docking.
+   * Only takes effect in landscape orientation - in portrait the navbar
+   * always stays docked to the bottom, regardless of the "right" class.
+   */
+  @media (orientation: landscape) {
+    .navbar.mobile.right {
+      flex-direction: row;
+      width: auto;
+      height: 100%;
+      top: 0;
+      bottom: 0;
+      left: unset;
+      right: 0;
+      --navbar-route-icon-size: 28px;
+    }
+
+    .navbar-card.mobile.right {
+      flex-direction: column;
+      width: auto;
+      height: 100%;
+      border-radius: 0px;
+      justify-content: center;
+      align-items: center;
+      padding: 12px 8px;
+      gap: 10px;
+    }
+
+    /* Match desktop's fixed touch-target sizing - route/button now sit in a
+       vertical column instead of a full-width row, so the "width: 100%"
+       mobile default no longer resolves to a sane size. */
+    .mobile.right .route .label {
+      flex: unset;
+    }
+
+    .mobile.right .route {
+      height: 60px;
+      width: 70px;
+    }
+
+    .mobile.right .button {
+      flex: unset;
+      height: 100%;
+    }
+
+    .mobile.right .route:has(.label) .button {
+      height: 40px;
+    }
+
+    .navbar.mobile.right.floating {
+      height: auto;
+      top: 50%;
+      bottom: unset;
+      right: var(--navbar-edge-inset);
+      transform: translate(0, -50%);
+    }
+
+    .navbar-card.mobile.right.floating {
+      height: auto;
+      width: auto;
+      margin-bottom: 0;
+    }
+
+    .navbar.mobile.right :is(.media-player, .media-player-carousel) {
+      align-self: center;
+      width: auto;
+      max-width: calc(100vw - 100px);
+    }
+  }
 `;
 
 const MEDIA_PLAYER_STYLES = css`

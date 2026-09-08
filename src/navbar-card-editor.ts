@@ -23,6 +23,7 @@ import {
   genericSetProperty,
   type LabelVisibilityConfig,
   type MediaPlayerPlayerConfig,
+  MobilePosition,
   type NavbarCardConfig,
   NavbarCustomActions,
   type NavbarDisplayMode,
@@ -1384,6 +1385,17 @@ export class NavbarCardEditor extends LitElement {
               { label: 'Docked', value: 'docked' },
             ],
             label: 'Mode',
+          })}
+          ${this.makeComboBox<MobilePosition>({
+            configKey: 'mobile.position',
+            defaultValue: DEFAULT_NAVBAR_CONFIG.mobile?.position,
+            helper:
+              'Right only takes effect while the device is in landscape orientation. Portrait always docks to the bottom.',
+            items: [
+              { label: 'Bottom', value: MobilePosition.bottom },
+              { label: 'Right (landscape only)', value: MobilePosition.right },
+            ],
+            label: 'Position',
           })}
           ${this.makeComboBox<LabelVisibilityConfig>({
             configKey: 'mobile.show_labels',
