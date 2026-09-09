@@ -7,6 +7,11 @@ export enum DesktopPosition {
   right = 'right',
 }
 
+export enum MobilePosition {
+  bottom = 'bottom',
+  right = 'right',
+}
+
 export enum WidgetPosition {
   topLeft = 'top-left',
   topCenter = 'top-center',
@@ -170,6 +175,12 @@ export type NavbarCardConfig = {
     show_labels?: LabelVisibilityConfig;
     show_popup_label_backgrounds?: boolean;
     hidden?: JSTemplatable<boolean>;
+    /**
+     * Where to dock the navbar on mobile devices. `right` only takes effect
+     * while the device is in landscape orientation - portrait always docks
+     * to the `bottom`, regardless of this setting.
+     */
+    position?: MobilePosition;
   };
   styles?: string;
   haptic?: boolean | HapticConfig;
@@ -204,6 +215,7 @@ export const DEFAULT_NAVBAR_CONFIG = {
   },
   mobile: {
     mode: 'docked',
+    position: MobilePosition.bottom,
     show_labels: false,
     show_popup_label_backgrounds: false,
   },
