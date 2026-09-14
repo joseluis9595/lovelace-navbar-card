@@ -16,6 +16,7 @@ import {
   forceResetRipple,
   getNavbarTemplates,
   injectStyles,
+  measureNavbarEdgeReserve,
   preventEventDefault,
   removeDashboardPadding,
 } from '../../utils/dom';
@@ -412,6 +413,291 @@ describe('DOM utilities', () => {
         '#navbar-card-forced-padding-styles',
       ) as HTMLStyleElement;
       expect(styleEl.textContent).not.toContain('orientation');
+    });
+
+    describe('measured navbar reserve', () => {
+      /** Stub a fixed bounding rect on an element */
+      const stubRect = (
+        el: HTMLElement,
+        rect: { left: number; right: number; width: number; height: number },
+      ) => {
+        vi.spyOn(el, 'getBoundingClientRect').mockReturnValue({
+          ...rect,
+          bottom: rect.height,
+          toJSON: () => ({}),
+          top: 0,
+          x: rect.left,
+          y: 0,
+        } as DOMRect);
+      };
+
+      /** Add the `#view` container that receives the forced padding */
+      const addView = (left: number, right: number) => {
+        const view = document.createElement('hui-view-container');
+        view.id = 'view';
+        mockHuiRoot.shadowRoot?.appendChild(view);
+        stubRect(view, { height: 600, left, right, width: right - left });
+        return view;
+      };
+
+      /** Build a detached navbar element with a stubbed rect */
+      const makeNavbar = (left: number, width: number) => {
+        const navbar = document.createElement('div');
+        navbar.className = 'navbar';
+        stubRect(navbar, {
+          height: 400,
+          left,
+          right: left + width,
+          width,
+        });
+        return navbar;
+      };
+
+      const setViewport = (width: number) => {
+        Object.defineProperty(window, 'innerWidth', {
+          configurable: true,
+          value: width,
+          writable: true,
+        });
+      };
+
+      const setOrientation = (orientation: 'landscape' | 'portrait') => {
+        vi.spyOn(window, 'matchMedia').mockImplementation(
+          query =>
+            ({
+              matches: query.includes(orientation),
+            }) as MediaQueryList,
+        );
+      };
+
+      beforeEach(() => {
+        // `forceDashboardPadding` remembers the last usable measurement across
+        // card instances, so clear that module state between tests.
+        removeDashboardPadding();
+      });
+
+      const getPaddingCss = () =>
+        (
+          mockHuiRoot.shadowRoot?.querySelector(
+            '#navbar-card-forced-padding-styles',
+          ) as HTMLStyleElement
+        ).textContent ?? '';
+
+      describe('measureNavbarEdgeReserve', () => {
+        it('measures both edges relative to the view container', () => {
+          addView(0, 762);
+          const navbar = makeNavbar(660, 102);
+
+          expect(measureNavbarEdgeReserve(navbar)).toEqual({
+            // 660 + 102 - 0
+            left: 762,
+            // 762 - 660
+            right: 102,
+          });
+        });
+
+        it('offsets the left edge by the view container, so the sidebar does not inflate the reserve', () => {
+          // Sidebar takes the first 256px, so the view starts there
+          addView(256, 1280);
+          const navbar = makeNavbar(272, 100);
+
+          // 272 + 100 - 256 - the sidebar width is excluded
+          expect(measureNavbarEdgeReserve(navbar)?.left).toBe(116);
+        });
+
+        it('falls back to the viewport when there is no view container', () => {
+          setViewport(1000);
+          const navbar = makeNavbar(900, 100);
+
+          expect(measureNavbarEdgeReserve(navbar)?.right).toBe(100);
+        });
+
+        it('returns no measurement for an unpainted navbar', () => {
+          addView(0, 762);
+          const navbar = makeNavbar(0, 0);
+
+          expect(measureNavbarEdgeReserve(navbar)).toBeNull();
+        });
+
+        it('returns no measurement when there is no navbar', () => {
+          expect(measureNavbarEdgeReserve(null)).toBeNull();
+          expect(measureNavbarEdgeReserve(undefined)).toBeNull();
+        });
+
+        it('rejects a navbar from an off-screen view', () => {
+          // Home Assistant keeps the previous view mounted while transitioning,
+          // and its `will-change: transform` wrapper becomes the containing
+          // block for the navbar's `position: fixed` - so the stale navbar
+          // reports a rect outside the view entirely.
+          addView(0, 762);
+          const staleNavbar = makeNavbar(-87, 87);
+
+          expect(measureNavbarEdgeReserve(staleNavbar)).toBeNull();
+        });
+
+        it('measures a navbar that only partially overlaps the view', () => {
+          addView(0, 762);
+          const navbar = makeNavbar(720, 87);
+
+          // 762 - 720
+          expect(measureNavbarEdgeReserve(navbar)?.right).toBe(42);
+        });
+      });
+
+      it('should reserve the measured width on a mobile landscape right dock', () => {
+        setViewport(762);
+        setOrientation('landscape');
+        addView(0, 762);
+
+        forceDashboardPadding({
+          autoPadding: { enabled: true, mobile_px: 80 },
+          desktop: { min_width: 768 },
+          measuredEdgeReserve: measureNavbarEdgeReserve(makeNavbar(660, 102)),
+          mobile: { position: MobilePosition.right },
+          widgetPositions: { media_player: null },
+        });
+
+        // The rendered navbar is 102px wide, so the configured 80px is not
+        // enough - the measured 102px wins.
+        expect(getPaddingCss()).toContain('padding-right: 102px !important');
+      });
+
+      it('should keep the configured mobile value when it exceeds the measured width', () => {
+        setViewport(762);
+        setOrientation('landscape');
+        addView(0, 762);
+
+        forceDashboardPadding({
+          autoPadding: { enabled: true, mobile_px: 200 },
+          desktop: { min_width: 768 },
+          measuredEdgeReserve: measureNavbarEdgeReserve(makeNavbar(700, 62)),
+          mobile: { position: MobilePosition.right },
+          widgetPositions: { media_player: null },
+        });
+
+        expect(getPaddingCss()).toContain('padding-right: 200px !important');
+      });
+
+      it('should not apply a landscape measurement while in portrait', () => {
+        setViewport(762);
+        setOrientation('portrait');
+        addView(0, 762);
+
+        forceDashboardPadding({
+          autoPadding: { enabled: true, mobile_px: 80 },
+          desktop: { min_width: 768 },
+          measuredEdgeReserve: { left: 999, right: 999 },
+          mobile: { position: MobilePosition.right },
+          widgetPositions: { media_player: null },
+        });
+
+        expect(getPaddingCss()).toContain('padding-right: 80px !important');
+      });
+
+      it('should reserve the measured width for a desktop right navbar', () => {
+        setViewport(1280);
+        addView(0, 1280);
+
+        forceDashboardPadding({
+          autoPadding: { desktop_px: 100, enabled: true },
+          desktop: { min_width: 768, position: DesktopPosition.right },
+          measuredEdgeReserve: measureNavbarEdgeReserve(makeNavbar(1140, 140)),
+          mobile: {},
+          widgetPositions: { media_player: null },
+        });
+
+        expect(getPaddingCss()).toContain('padding-right: 140px !important');
+      });
+
+      it('should reserve the measured width for a desktop left navbar', () => {
+        setViewport(1280);
+        addView(256, 1280);
+
+        forceDashboardPadding({
+          autoPadding: { desktop_px: 100, enabled: true },
+          desktop: { min_width: 768, position: DesktopPosition.left },
+          measuredEdgeReserve: measureNavbarEdgeReserve(makeNavbar(272, 140)),
+          mobile: {},
+          widgetPositions: { media_player: null },
+        });
+
+        expect(getPaddingCss()).toContain('padding-left: 156px !important');
+      });
+
+      it('should not apply a desktop measurement while in mobile mode', () => {
+        setViewport(762);
+        setOrientation('landscape');
+        addView(0, 762);
+
+        forceDashboardPadding({
+          autoPadding: { desktop_px: 100, enabled: true, mobile_px: 80 },
+          desktop: { min_width: 768, position: DesktopPosition.right },
+          measuredEdgeReserve: { left: 999, right: 999 },
+          mobile: {},
+          widgetPositions: { media_player: null },
+        });
+
+        expect(getPaddingCss()).toContain('padding-right: 100px !important');
+      });
+
+      it('should leave an explicitly disabled side at zero', () => {
+        setViewport(762);
+        setOrientation('landscape');
+        addView(0, 762);
+
+        forceDashboardPadding({
+          autoPadding: { enabled: true, mobile_px: 0 },
+          desktop: { min_width: 768 },
+          measuredEdgeReserve: { left: 999, right: 999 },
+          mobile: { position: MobilePosition.right },
+          widgetPositions: { media_player: null },
+        });
+
+        expect(getPaddingCss()).not.toContain('padding-right');
+      });
+
+      it("should keep a visible card's measurement when an off-screen card re-applies", () => {
+        // Home Assistant keeps previous views mounted while transitioning, so
+        // several cards write the same style element. The ones that cannot
+        // measure themselves must not undo the visible card's reserve.
+        setViewport(762);
+        setOrientation('landscape');
+        addView(0, 762);
+
+        const options = {
+          autoPadding: { enabled: true, mobile_px: 80 },
+          desktop: { min_width: 768 },
+          mobile: { position: MobilePosition.right },
+          widgetPositions: { media_player: null },
+        };
+
+        // The visible card measures and reserves the navbar's 102px.
+        forceDashboardPadding({
+          ...options,
+          measuredEdgeReserve: measureNavbarEdgeReserve(makeNavbar(660, 102)),
+        });
+        expect(getPaddingCss()).toContain('padding-right: 102px !important');
+
+        // An off-screen card re-applies with nothing to measure.
+        forceDashboardPadding({ ...options, measuredEdgeReserve: null });
+
+        expect(getPaddingCss()).toContain('padding-right: 102px !important');
+      });
+
+      it('should fall back to the configured value with no measurement', () => {
+        setViewport(762);
+        setOrientation('landscape');
+        addView(0, 762);
+
+        forceDashboardPadding({
+          autoPadding: { enabled: true, mobile_px: 80 },
+          desktop: { min_width: 768 },
+          mobile: { position: MobilePosition.right },
+          widgetPositions: { media_player: null },
+        });
+
+        expect(getPaddingCss()).toContain('padding-right: 80px !important');
+      });
     });
 
     it('should add media player padding to mobile when enabled', () => {

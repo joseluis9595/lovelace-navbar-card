@@ -28,6 +28,20 @@ const DEFAULT_CONFIG: NavbarCardConfig = {
   ],
 };
 
+// jsdom has no ResizeObserver - record what the card observes so the
+// measured-padding path can be asserted on.
+let observedElements: Element[] = [];
+
+class MockResizeObserver implements ResizeObserver {
+  disconnect(): void {}
+  observe(target: Element): void {
+    observedElements.push(target);
+  }
+  unobserve(): void {}
+}
+
+vi.stubGlobal('ResizeObserver', MockResizeObserver);
+
 // Register the custom element
 if (!customElements.get('navbar-card')) {
   customElements.define('navbar-card', NavbarCard);
@@ -70,6 +84,8 @@ describe('NavbarCard', () => {
       themes: {},
       user: {},
     } as unknown as HomeAssistant;
+
+    observedElements = [];
 
     // Create and setup the element
     element = await fixture<NavbarCard>(html`<navbar-card></navbar-card>`);
@@ -209,6 +225,126 @@ describe('NavbarCard', () => {
       const navbar = element.shadowRoot?.querySelector('.navbar');
       expect(navbar?.classList.contains('left')).toBe(false);
       expect(navbar?.classList.contains('bottom')).toBe(true);
+    });
+  });
+
+  describe('Measured dashboard padding', () => {
+    /** Mount the hui-root chain `forceDashboardPadding` writes into */
+    const mountHuiRoot = (viewLeft: number, viewRight: number) => {
+      // `findHuiRoot` resolves the first `home-assistant` in the document, so
+      // drop any mock left behind by a previous test.
+      document.querySelectorAll('home-assistant').forEach(stale => {
+        stale.remove();
+      });
+
+      const homeAssistant = document.createElement('home-assistant');
+      homeAssistant.attachShadow({ mode: 'open' });
+      const main = document.createElement('home-assistant-main');
+      main.attachShadow({ mode: 'open' });
+      homeAssistant.shadowRoot?.appendChild(main);
+      const panel = document.createElement('ha-panel-lovelace');
+      panel.attachShadow({ mode: 'open' });
+      main.shadowRoot?.appendChild(panel);
+      const huiRoot = document.createElement('hui-root');
+      huiRoot.attachShadow({ mode: 'open' });
+      panel.shadowRoot?.appendChild(huiRoot);
+
+      const view = document.createElement('hui-view-container');
+      view.id = 'view';
+      vi.spyOn(view, 'getBoundingClientRect').mockReturnValue({
+        bottom: 600,
+        height: 600,
+        left: viewLeft,
+        right: viewRight,
+        toJSON: () => ({}),
+        top: 0,
+        width: viewRight - viewLeft,
+        x: viewLeft,
+        y: 0,
+      } as DOMRect);
+      huiRoot.shadowRoot?.appendChild(view);
+
+      document.body.appendChild(homeAssistant);
+      return huiRoot;
+    };
+
+    const stubNavbarWidth = (left: number, width: number) => {
+      const navbar = element.shadowRoot?.querySelector(
+        '.navbar',
+      ) as HTMLElement;
+      vi.spyOn(navbar, 'getBoundingClientRect').mockReturnValue({
+        bottom: 400,
+        height: 400,
+        left,
+        right: left + width,
+        toJSON: () => ({}),
+        top: 0,
+        width,
+        x: left,
+        y: 0,
+      } as DOMRect);
+      return navbar;
+    };
+
+    const getPaddingCss = (huiRoot: Element) =>
+      huiRoot.shadowRoot?.querySelector('#navbar-card-forced-padding-styles')
+        ?.textContent ?? '';
+
+    beforeEach(() => {
+      Object.defineProperty(window, 'innerWidth', {
+        configurable: true,
+        value: 762,
+        writable: true,
+      });
+      vi.spyOn(window, 'matchMedia').mockImplementation(
+        query => ({ matches: query.includes('landscape') }) as MediaQueryList,
+      );
+    });
+
+    it('reserves the rendered navbar width rather than the configured constant', async () => {
+      const huiRoot = mountHuiRoot(0, 762);
+
+      element.setConfig({
+        ...DEFAULT_CONFIG,
+        layout: { auto_padding: { enabled: true, mobile_px: 80 } },
+        mobile: { position: MobilePosition.right },
+      });
+      await element.updateComplete;
+
+      stubNavbarWidth(660, 102);
+      element.requestUpdate();
+      await element.updateComplete;
+
+      // The configured 80px is narrower than the rendered navbar, so the
+      // measured 102px is reserved instead.
+      expect(getPaddingCss(huiRoot)).toContain(
+        'padding-right: 102px !important',
+      );
+    });
+
+    it('keeps the configured value when it is larger than the navbar', async () => {
+      const huiRoot = mountHuiRoot(0, 762);
+
+      element.setConfig({
+        ...DEFAULT_CONFIG,
+        layout: { auto_padding: { enabled: true, mobile_px: 200 } },
+        mobile: { position: MobilePosition.right },
+      });
+      await element.updateComplete;
+
+      stubNavbarWidth(700, 62);
+      element.requestUpdate();
+      await element.updateComplete;
+
+      expect(getPaddingCss(huiRoot)).toContain(
+        'padding-right: 200px !important',
+      );
+    });
+
+    it('observes the rendered navbar so later size changes are picked up', () => {
+      expect(observedElements.some(el => el.classList.contains('navbar'))).toBe(
+        true,
+      );
     });
   });
 

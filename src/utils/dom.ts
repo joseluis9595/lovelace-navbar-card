@@ -15,6 +15,17 @@ const DEFAULT_STYLES_ID = 'navbar-card-default-styles';
 const USER_STYLES_ID = 'navbar-card-user-styles';
 
 /**
+ * Most recent usable navbar measurement, shared across card instances.
+ *
+ * Every connected card writes the same padding style element, and a dashboard
+ * can have several at once - Home Assistant keeps previous views mounted while
+ * transitioning between them. Only the card that is actually on screen can
+ * measure itself, so the others reuse its measurement instead of falling back
+ * to the configured minimum and undoing it.
+ */
+let lastKnownEdgeReserve: NavbarEdgeReserve | null = null;
+
+/**
  * Get a list of user defined navbar-card templates
  */
 export const getNavbarTemplates = (): Record<
@@ -65,6 +76,76 @@ const findHuiRoot = () => {
 };
 
 /**
+ * Space the rendered navbar occupies along each horizontal edge of the
+ * dashboard view.
+ *
+ * Only the side matching the configured navbar position is ever used - the
+ * other side is measured from the same rect and is meaningless on its own.
+ */
+export type NavbarEdgeReserve = {
+  left?: number;
+  right?: number;
+};
+
+/**
+ * Find the dashboard view container that receives the forced padding.
+ */
+const findDashboardView = () =>
+  findHuiRoot()?.shadowRoot?.querySelector<HTMLElement>('#view') ?? null;
+
+/**
+ * Measure how much horizontal space the rendered navbar actually takes up,
+ * relative to the dashboard view container.
+ *
+ * Measuring beats a hand-maintained constant: the navbar's width depends on
+ * icon size, labels, padding and user styles, none of which the configured
+ * `auto_padding.*_px` values know about. Distances are taken from the view
+ * container rather than the viewport so the sidebar offset and the floating
+ * edge inset are both accounted for automatically.
+ *
+ * Exactly the navbar's footprint is reserved, with no gap added on top. The
+ * view already spaces its cards away from its own content box, so shrinking
+ * that box by the navbar's width leaves the same gap beside the navbar that
+ * the dashboard uses between cards and at its other edges - adding a gap here
+ * would double it.
+ *
+ * Only a navbar that is actually on screen is measured. Home Assistant keeps
+ * previous views in the DOM while transitioning between them, and those
+ * wrappers carry `will-change: transform` - which makes them the containing
+ * block for the navbar's `position: fixed`, so a stale view's navbar reports a
+ * rect far outside the viewport. Measuring one of those would reserve a wildly
+ * wrong amount of space.
+ *
+ * @param navbar - The rendered `.navbar` container element.
+ * @returns The reserve for each horizontal edge, or `null` when there is
+ * nothing dependable to measure: no navbar rendered, no layout yet, or a
+ * navbar belonging to a view that is not on screen.
+ */
+export const measureNavbarEdgeReserve = (
+  navbar?: HTMLElement | null,
+): NavbarEdgeReserve | null => {
+  if (!navbar) return null;
+
+  const navbarRect = navbar.getBoundingClientRect();
+  // No layout yet - fall back to the configured values.
+  if (navbarRect.width <= 0 || navbarRect.height <= 0) return null;
+
+  const viewRect = findDashboardView()?.getBoundingClientRect();
+  const viewLeft = viewRect?.left ?? 0;
+  const viewRight = viewRect?.right ?? window.innerWidth;
+
+  // Reject a navbar that does not overlap the view it would be padding.
+  const overlap =
+    Math.min(navbarRect.right, viewRight) - Math.max(navbarRect.left, viewLeft);
+  if (overlap <= 0) return null;
+
+  return {
+    left: Math.max(0, Math.ceil(navbarRect.right - viewLeft)),
+    right: Math.max(0, Math.ceil(viewRight - navbarRect.left)),
+  };
+};
+
+/**
  * Forcefully open the edit mode of the Lovelace panel.
  */
 export const forceOpenEditMode = () => {
@@ -86,16 +167,30 @@ export const removeDashboardPadding = () => {
   if (styleEl) {
     styleEl.remove();
   }
+  lastKnownEdgeReserve = null;
 };
 
 /**
  * Manually inject styles into the hui-root element to force dashboard padding.
  * This prevents overlaps with other cards in the dashboard.
+ *
+ * For the side-docked layouts (desktop `left`/`right` and the mobile landscape
+ * `right` dock) the reserved space is driven by `measuredEdgeReserve` when it
+ * is available, treating the configured `auto_padding.*_px` value as a minimum
+ * rather than the source of truth. A navbar that renders wider than the
+ * configured constant would otherwise have dashboard cards sitting underneath
+ * its edge.
  */
 export const forceDashboardPadding = (options?: {
   desktop: NavbarCardConfig['desktop'];
   mobile: NavbarCardConfig['mobile'];
   autoPadding?: AutoPaddingConfig;
+  /**
+   * Measured size of the rendered navbar, as returned by
+   * {@link measureNavbarEdgeReserve}. Reflects the currently active layout
+   * only, so it is applied exclusively to the mode the viewport is in.
+   */
+  measuredEdgeReserve?: NavbarEdgeReserve | null;
   widgetPositions: Record<string, WidgetPosition | null>;
 }) => {
   const autoPaddingEnabled =
@@ -194,6 +289,48 @@ export const forceDashboardPadding = (options?: {
     if (mobilePosition === MobilePosition.right) {
       totalPaddings.mobile.right += mediaPlayerPaddingPx;
     }
+  }
+
+  // Raise the side-docked reserves to the navbar's real size. The measurement
+  // only describes the layout currently on screen, so it is applied to the
+  // matching mode only - a landscape mobile measurement must not leak into the
+  // desktop media query, and vice versa. Sides explicitly zeroed by the user
+  // are left alone so `*_px: 0` remains a way to opt out.
+  const isDesktopViewport = window.innerWidth >= desktopMinWidth;
+  if (options?.measuredEdgeReserve) {
+    lastKnownEdgeReserve = options.measuredEdgeReserve;
+  }
+  const measuredEdgeReserve =
+    options?.measuredEdgeReserve ?? lastKnownEdgeReserve;
+
+  if (isDesktopViewport) {
+    if (
+      desktopPosition === DesktopPosition.left &&
+      totalPaddings.desktop[DesktopPosition.left] > 0
+    ) {
+      totalPaddings.desktop[DesktopPosition.left] = Math.max(
+        totalPaddings.desktop[DesktopPosition.left],
+        measuredEdgeReserve?.left ?? 0,
+      );
+    }
+    if (
+      desktopPosition === DesktopPosition.right &&
+      totalPaddings.desktop[DesktopPosition.right] > 0
+    ) {
+      totalPaddings.desktop[DesktopPosition.right] = Math.max(
+        totalPaddings.desktop[DesktopPosition.right],
+        measuredEdgeReserve?.right ?? 0,
+      );
+    }
+  } else if (
+    mobilePosition === MobilePosition.right &&
+    totalPaddings.mobile.right > 0 &&
+    window.matchMedia?.('(orientation: landscape)').matches
+  ) {
+    totalPaddings.mobile.right = Math.max(
+      totalPaddings.mobile.right,
+      measuredEdgeReserve?.right ?? 0,
+    );
   }
 
   // Build CSS text

@@ -12,7 +12,8 @@ If you're using the Navbar Card, you might notice it could collide with other ca
 The navbar-card automatically adds appropriate padding to prevent overlaps:
 
 - **Desktop**: Adds padding based on your navbar position (`desktop.position`), including top/bottom padding when the navbar is docked to the top or bottom, or left/right padding when it is docked to the sides.
-- **Mobile**: Adds bottom padding to prevent cards from overlapping the bottom navbar.
+- **Mobile**: Adds bottom padding to prevent cards from overlapping the bottom navbar, or right padding in landscape when `mobile.position` is set to `right`.
+- **Side-docked navbars**: The reserved space is measured from the rendered navbar, with `desktop_px` / `mobile_px` acting as a minimum, so cards never end up flush against the navbar's edge and the gap beside it matches the gaps between your cards.
 - **Media player widget**: When the media player widget is visible, extra padding is added using `layout.auto_padding.media_player_px` so that both the navbar and media player stay clear of your dashboard cards on desktop and mobile.
 
 This feature is enabled by default, but you can customize it using the `layout.auto_padding` configuration. [More info here](/docs/configuration/layout#auto-padding)

@@ -27,6 +27,8 @@ import {
   getNavbarTemplates,
   injectStyles,
   mapStringToEnum,
+  measureNavbarEdgeReserve,
+  type NavbarEdgeReserve,
   processTemplate,
   removeDashboardPadding,
 } from '@/utils';
@@ -71,6 +73,12 @@ export class NavbarCard extends LitElement {
 
   @state() private widgetVisibility: Record<string, WidgetPosition | null> = {};
 
+  /** Watches the rendered navbar so the reserved padding tracks its real size */
+  private _navbarResizeObserver?: ResizeObserver;
+  private _observedNavbar?: HTMLElement;
+  /** Last reserve pushed to the dashboard, to skip redundant style writes */
+  private _appliedEdgeReserve?: NavbarEdgeReserve | null;
+
   /** Set HA instance (called by HA runtime) */
   set hass(hass: HomeAssistant) {
     this._hass = hass;
@@ -89,12 +97,7 @@ export class NavbarCard extends LitElement {
 
     // Re-apply dashboard padding when media player visibility changes
     if (prevMediaPlayerPosition !== nextMediaPlayerPosition) {
-      forceDashboardPadding({
-        autoPadding: this.config?.layout?.auto_padding,
-        desktop: this.config?.desktop ?? DEFAULT_NAVBAR_CONFIG.desktop,
-        mobile: this.config?.mobile ?? DEFAULT_NAVBAR_CONFIG.mobile,
-        widgetPositions: this.widgetVisibility,
-      });
+      this._applyDashboardPadding();
     }
   }
 
@@ -159,19 +162,20 @@ export class NavbarCard extends LitElement {
       this.config?.styles ? unsafeCSS(this.config.styles) : css``,
     );
 
-    // Force dashboard padding
-    forceDashboardPadding({
-      autoPadding: this.config?.layout?.auto_padding,
-      desktop: this.config?.desktop ?? DEFAULT_NAVBAR_CONFIG.desktop,
-      mobile: this.config?.mobile ?? DEFAULT_NAVBAR_CONFIG.mobile,
-      widgetPositions: this.widgetVisibility,
-    });
+    // Force dashboard padding. The navbar is not rendered yet at this point,
+    // so this first pass uses the configured values; `updated` re-applies it
+    // with the measured size once there is something to measure.
+    this._applyDashboardPadding();
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
 
     window.removeEventListener('resize', this._checkDesktop);
+    this._navbarResizeObserver?.disconnect();
+    this._navbarResizeObserver = undefined;
+    this._observedNavbar = undefined;
+    this._appliedEdgeReserve = undefined;
     removeDashboardPadding();
 
     // Force popup closure without animation to prevent memory leaks
@@ -222,6 +226,81 @@ export class NavbarCard extends LitElement {
    */
   protected updated(_changedProperties: PropertyValues): void {
     super.updated(_changedProperties);
+
+    this._observeNavbarSize();
+    this._syncDashboardPadding();
+  }
+
+  /**
+   * Push the dashboard padding styles, reserving the navbar's measured size
+   * where it is bigger than the configured `auto_padding` values.
+   *
+   * A `null` measurement (first render, a hidden navbar, or a view that is off
+   * screen) leaves the reserve to whatever a card that could measure itself
+   * last reported - see `lastKnownEdgeReserve` in `forceDashboardPadding`.
+   */
+  private _applyDashboardPadding(
+    measured: NavbarEdgeReserve | null = measureNavbarEdgeReserve(
+      this._navbarElement,
+    ),
+  ): void {
+    this._appliedEdgeReserve = measured;
+
+    forceDashboardPadding({
+      autoPadding: this.config?.layout?.auto_padding,
+      desktop: this.config?.desktop ?? DEFAULT_NAVBAR_CONFIG.desktop,
+      measuredEdgeReserve: measured,
+      mobile: this.config?.mobile ?? DEFAULT_NAVBAR_CONFIG.mobile,
+      widgetPositions: this.widgetVisibility,
+    });
+  }
+
+  /**
+   * Re-apply the dashboard padding only when the measured navbar size actually
+   * changed, so resize/render churn does not rewrite the style element.
+   *
+   * Several cards can be connected at once - Home Assistant keeps previous
+   * views mounted while transitioning between them - and they all write the
+   * same style element. An instance with nothing measurable stays quiet rather
+   * than overwriting the reserve a visible instance computed.
+   */
+  private _syncDashboardPadding(): void {
+    const measured = measureNavbarEdgeReserve(this._navbarElement);
+    if (!measured) return;
+
+    if (
+      measured.left === this._appliedEdgeReserve?.left &&
+      measured.right === this._appliedEdgeReserve?.right
+    ) {
+      return;
+    }
+
+    this._applyDashboardPadding(measured);
+  }
+
+  /** The rendered navbar container, or undefined before the first render */
+  private get _navbarElement(): HTMLElement | undefined {
+    return this.shadowRoot?.querySelector<HTMLElement>('.navbar') ?? undefined;
+  }
+
+  /**
+   * Keep a ResizeObserver attached to the rendered navbar. Its size changes for
+   * reasons no render pass tells us about - font loading, label visibility
+   * templates, user styles - and each of those changes the space the dashboard
+   * needs to reserve.
+   */
+  private _observeNavbarSize(): void {
+    if (typeof ResizeObserver === 'undefined') return;
+
+    const navbar = this._navbarElement;
+    if (!navbar || navbar === this._observedNavbar) return;
+
+    this._navbarResizeObserver?.disconnect();
+    this._navbarResizeObserver ??= new ResizeObserver(() => {
+      this._syncDashboardPadding();
+    });
+    this._navbarResizeObserver.observe(navbar);
+    this._observedNavbar = navbar;
   }
 
   protected render() {
