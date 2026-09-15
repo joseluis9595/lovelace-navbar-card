@@ -1,6 +1,6 @@
 import { fixture, html } from '@open-wc/testing';
 import type { HomeAssistant } from 'custom-card-helpers';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { NavbarCardConfig } from '@/types';
 
@@ -157,6 +157,86 @@ describe('NavbarCard', () => {
       await element.updateComplete;
 
       expect(element.isDesktop).toBe(false);
+    });
+
+    // Where a subscribable MediaQueryList exists, the breakpoint is tracked
+    // through it rather than through `resize`. The resize handler has to read
+    // `window.innerWidth`, which forces a synchronous layout of the whole
+    // dashboard, and Home Assistant emits a great many resizes while booting.
+    describe('with a media-query capable browser', () => {
+      let listeners: Array<(e: MediaQueryListEvent) => void>;
+      let matches: boolean;
+      let originalMatchMedia: typeof window.matchMedia;
+
+      afterEach(() => {
+        window.matchMedia = originalMatchMedia;
+      });
+
+      beforeEach(async () => {
+        listeners = [];
+        matches = true;
+        originalMatchMedia = window.matchMedia;
+
+        vi.stubGlobal(
+          'matchMedia',
+          vi.fn((media: string) => ({
+            addEventListener: (
+              _: string,
+              cb: (e: MediaQueryListEvent) => void,
+            ) => listeners.push(cb),
+            addListener: undefined,
+            get matches() {
+              return matches;
+            },
+            media,
+            removeEventListener: () => {},
+            removeListener: undefined,
+          })),
+        );
+
+        element = await fixture<NavbarCard>(
+          html`<navbar-card .hass=${hass}></navbar-card>`,
+        );
+        element.setConfig(DEFAULT_CONFIG);
+        await element.updateComplete;
+      });
+
+      it('takes the initial state from the query, not the window width', () => {
+        expect(element.isDesktop).toBe(true);
+        expect(window.matchMedia).toHaveBeenCalledWith('(min-width: 768px)');
+      });
+
+      it('follows the query when the breakpoint is crossed', async () => {
+        matches = false;
+        for (const cb of listeners) {
+          cb({ matches: false } as MediaQueryListEvent);
+        }
+        await element.updateComplete;
+
+        expect(element.isDesktop).toBe(false);
+      });
+
+      it('does not react to resize events', async () => {
+        Object.defineProperty(window, 'innerWidth', {
+          configurable: true,
+          value: 320,
+          writable: true,
+        });
+        window.dispatchEvent(new Event('resize'));
+        await element.updateComplete;
+
+        expect(element.isDesktop).toBe(true);
+      });
+
+      it('re-points the query when min_width changes', async () => {
+        element.setConfig({
+          ...DEFAULT_CONFIG,
+          desktop: { ...DEFAULT_CONFIG.desktop, min_width: 1024 },
+        });
+        await element.updateComplete;
+
+        expect(window.matchMedia).toHaveBeenCalledWith('(min-width: 1024px)');
+      });
     });
   });
 
