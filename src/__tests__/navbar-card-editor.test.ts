@@ -70,23 +70,22 @@ describe('NavbarCardEditor badge fields', () => {
   it.each([
     { field: 'icon', inputType: 'icon' as const },
     { field: 'icon_color', inputType: 'color' as const },
-  ])('preserves badge $field template mode', async ({
-    field: configField,
-    inputType,
-  }) => {
-    const editor = await createEditor({
-      routes: [
-        {
-          badge: { [configField]: '[[[ return "white"; ]]]' },
-          icon: 'mdi:home',
-          url: '/',
-        },
-      ],
-    });
-    const configChanged = vi.fn();
-    editor.addEventListener('config-changed', configChanged);
+  ])(
+    'preserves badge $field template mode',
+    async ({ field: configField, inputType }) => {
+      const editor = await createEditor({
+        routes: [
+          {
+            badge: { [configField]: '[[[ return "white"; ]]]' },
+            icon: 'mdi:home',
+            url: '/',
+          },
+        ],
+      });
+      const configChanged = vi.fn();
+      editor.addEventListener('config-changed', configChanged);
 
-    const fieldFixture = await fixture<HTMLElement>(html`
+      const fieldFixture = await fixture<HTMLElement>(html`
       <div>
         ${editor.makeTemplatable({
           configKey:
@@ -96,17 +95,18 @@ describe('NavbarCardEditor badge fields', () => {
         })}
       </div>
     `);
-    const codeEditor = fieldFixture.querySelector<
-      HTMLElement & { value?: string }
-    >('ha-code-editor');
-    if (codeEditor) codeEditor.value = 'return "black";';
+      const codeEditor = fieldFixture.querySelector<
+        HTMLElement & { value?: string }
+      >('ha-code-editor');
+      if (codeEditor) codeEditor.value = 'return "black";';
 
-    codeEditor?.dispatchEvent(new CustomEvent('value-changed'));
+      codeEditor?.dispatchEvent(new CustomEvent('value-changed'));
 
-    const changedConfig = configChanged.mock.calls[0][0].detail
-      .config as NavbarCardConfig;
-    expect(changedConfig.routes[0].badge?.[configField]).toBe(
-      '[[[return "black";]]]',
-    );
-  });
+      const changedConfig = configChanged.mock.calls[0][0].detail
+        .config as NavbarCardConfig;
+      expect(changedConfig.routes[0].badge?.[configField]).toBe(
+        '[[[return "black";]]]',
+      );
+    },
+  );
 });
