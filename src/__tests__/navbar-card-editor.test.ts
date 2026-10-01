@@ -26,8 +26,10 @@ const listenConfigChanged = (editor: NavbarCardEditor) => {
   return configChanged;
 };
 
-const lastConfig = (configChanged: ReturnType<typeof vi.fn>) =>
-  configChanged.mock.calls.at(-1)?.[0].detail.config as NavbarCardConfig;
+const lastConfig = (configChanged: ReturnType<typeof vi.fn>) => {
+  const calls = configChanged.mock.calls;
+  return calls[calls.length - 1]?.[0].detail.config as NavbarCardConfig;
+};
 
 describe('NavbarCardEditor bootstrapping', () => {
   it('loads HA selector components used by the editor', async () => {
