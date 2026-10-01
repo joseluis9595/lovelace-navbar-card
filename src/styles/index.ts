@@ -92,6 +92,11 @@ const NAVBAR_CONTAINER_STYLES = css`
     width: 90%;
   }
 
+  /* Lift mobile navbar above Android system gesture/nav bars (HA Companion edge-to-edge). */
+  .navbar.mobile {
+    bottom: var(--safe-area-inset-bottom, 0px);
+  }
+
   /* Desktop mode styles */
   .navbar.desktop {
     width: auto;
