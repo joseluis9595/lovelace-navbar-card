@@ -17,12 +17,16 @@ Automatically adds padding to your Home Assistant dashboard to prevent cards fro
 | Name              | Type    | Default | Description                                                                                                     |
 | ----------------- | ------- | ------- | --------------------------------------------------------------------------------------------------------------- |
 | `enabled`         | boolean | `true`  | Whether to automatically add padding to prevent overlaps                                                        |
-| `desktop_px`      | number  | `100`   | Base padding in pixels for desktop mode (applied to the side or edge defined by your `desktop.position`)       |
-| `mobile_px`       | number  | `80`    | Base padding in pixels for mobile mode (applied to the bottom of the view)                                     |
+| `desktop_px`      | number  | `100`   | Minimum padding in pixels for desktop mode (applied to the side or edge defined by your `desktop.position`)     |
+| `mobile_px`       | number  | `80`    | Minimum padding in pixels for mobile mode (applied to the bottom of the view, or the right side in landscape when `mobile.position` is `right`) |
 | `media_player_px` | number  | `100`   | Extra padding reserved when the media player widget is visible (added to desktop top/bottom and mobile bottom) |
 
 :::note
 The `desktop_px` padding is automatically applied to the appropriate side of the screen based on your navbar's `desktop.position` setting.
+:::
+
+:::note
+When the navbar is docked to a side (`desktop.position` of `left`/`right`, or `mobile.position: right` in landscape), the reserved space is measured from the rendered navbar, so a navbar made wider by large icons, labels or custom styles still clears your cards. The gap beside the navbar then matches the gap your dashboard already uses between cards. The configured `desktop_px` / `mobile_px` values act as a **minimum** in that case - raise them to add extra breathing room, or set one to `0` to opt out of padding for that mode entirely.
 :::
 
 <br/>
