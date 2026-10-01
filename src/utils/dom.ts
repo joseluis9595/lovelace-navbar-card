@@ -4,6 +4,7 @@ import {
   type AutoPaddingConfig,
   DEFAULT_NAVBAR_CONFIG,
   DesktopPosition,
+  MobilePosition,
   type NavbarCardConfig,
   WidgetPosition,
 } from '@/types/config';
@@ -120,6 +121,7 @@ export const forceDashboardPadding = (options?: {
     },
     mobile: {
       bottom: 0,
+      right: 0,
     },
   };
 
@@ -140,6 +142,8 @@ export const forceDashboardPadding = (options?: {
   const desktopMinWidth = options?.desktop?.min_width ?? 768;
   const desktopPosition =
     options?.desktop?.position ?? DEFAULT_NAVBAR_CONFIG.desktop.position;
+  const mobilePosition =
+    options?.mobile?.position ?? DEFAULT_NAVBAR_CONFIG.mobile.position;
   const mobileMaxWidth = desktopMinWidth - 1;
   let cssText = '';
 
@@ -158,7 +162,13 @@ export const forceDashboardPadding = (options?: {
     DEFAULT_NAVBAR_CONFIG.layout?.auto_padding?.mobile_px ??
     0;
 
+  // The bottom padding always accounts for the portrait fallback layout;
+  // the right padding additionally reserves space for the landscape layout
+  // when the navbar is configured to dock to the right.
   totalPaddings.mobile.bottom += mobilePaddingPx;
+  if (mobilePosition === MobilePosition.right) {
+    totalPaddings.mobile.right += mobilePaddingPx;
+  }
 
   // Media player padding
   const mediaPlayerPaddingPx =
@@ -181,6 +191,9 @@ export const forceDashboardPadding = (options?: {
         break;
     }
     totalPaddings.mobile.bottom += mediaPlayerPaddingPx;
+    if (mobilePosition === MobilePosition.right) {
+      totalPaddings.mobile.right += mediaPlayerPaddingPx;
+    }
   }
 
   // Build CSS text
@@ -229,8 +242,14 @@ export const forceDashboardPadding = (options?: {
     `;
   }
   if (totalPaddings.mobile.bottom > 0) {
+    // When docked to the right, the bottom bar (and its padding) only
+    // applies while the device is in portrait orientation.
+    const orientationQuery =
+      mobilePosition === MobilePosition.right
+        ? ' and (orientation: portrait)'
+        : '';
     cssText += `
-        @media (max-width: ${mobileMaxWidth}px) {
+        @media (max-width: ${mobileMaxWidth}px)${orientationQuery} {
           :not(.edit-mode) > hui-view:after {
             content: "";
             display: block;
@@ -240,6 +259,18 @@ export const forceDashboardPadding = (options?: {
             }
           }
         `;
+  }
+  if (
+    mobilePosition === MobilePosition.right &&
+    totalPaddings.mobile.right > 0
+  ) {
+    cssText += `
+        @media (max-width: ${mobileMaxWidth}px) and (orientation: landscape) {
+          :not(.edit-mode) > #view {
+            padding-right: ${totalPaddings.mobile.right}px !important;
+          }
+        }
+      `;
   }
 
   // Append styles to hui-root

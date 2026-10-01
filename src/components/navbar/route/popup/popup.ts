@@ -3,7 +3,11 @@ import { classMap } from 'lit/directives/class-map.js';
 
 import { PopupItem } from '@/components/navbar';
 import type { NavbarCard } from '@/navbar-card';
-import { DesktopPosition, type PopupItem as PopupItemDef } from '@/types';
+import {
+  DesktopPosition,
+  MobilePosition,
+  type PopupItem as PopupItemDef,
+} from '@/types';
 
 export class Popup {
   private _popupItems: PopupItem[] = [];
@@ -34,13 +38,23 @@ export class Popup {
   public open(target: HTMLElement): void {
     const anchorRect = target.getBoundingClientRect();
 
+    // Mobile navbars docked to the right only render that way in landscape
+    // orientation (see the CSS media query in styles/index.ts) - popups
+    // should follow the same rule and open to the left in that case.
+    const isMobileDockedRight =
+      !this._navbarCard.isDesktop &&
+      this._navbarCard.mobilePosition === MobilePosition.right &&
+      window.matchMedia('(orientation: landscape)').matches;
+
     const { style, labelPositionClassName, popupDirectionClassName } =
       this._getPopupStyles(
         anchorRect,
-        !this._navbarCard.isDesktop
-          ? 'mobile'
-          : (this._navbarCard.config?.desktop?.position ??
-              DesktopPosition.bottom),
+        this._navbarCard.isDesktop
+          ? (this._navbarCard.config?.desktop?.position ??
+              DesktopPosition.bottom)
+          : isMobileDockedRight
+            ? DesktopPosition.right
+            : 'mobile',
       );
 
     const popupStaggerStep = this._getPopupStaggerStepSeconds(
