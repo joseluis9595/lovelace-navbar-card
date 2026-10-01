@@ -205,6 +205,14 @@ describe('NavbarCard', () => {
 
   describe('Selected state styles', () => {
     it('applies selected class and selected_color', async () => {
+      // Ensure desktop mode so desktop.show_labels takes effect
+      Object.defineProperty(window, 'innerWidth', {
+        configurable: true,
+        value: 1024,
+        writable: true,
+      });
+      window.dispatchEvent(new Event('resize'));
+
       const config: NavbarCardConfig = {
         desktop: { show_labels: true },
         routes: [
@@ -223,12 +231,22 @@ describe('NavbarCard', () => {
 
       const route = element.shadowRoot?.querySelector('.route');
       const button = element.shadowRoot?.querySelector('.button');
+      const label = element.shadowRoot?.querySelector('.label');
 
       expect(route?.classList.contains('active')).toBe(true);
-      // selected_color is applied as --navbar-primary-color on the button
+      expect(label?.classList.contains('active')).toBe(true);
+      // selected_color is applied as --navbar-primary-color (inherited by active labels)
+      expect(route?.getAttribute('style') || '').toContain(
+        '--navbar-primary-color: #00ff00',
+      );
       expect(button?.getAttribute('style') || '').toContain(
         '--navbar-primary-color: #00ff00',
       );
+      expect(
+        getComputedStyle(label as Element).getPropertyValue(
+          '--navbar-primary-color',
+        ),
+      ).toBe('#00ff00');
     });
   });
 });

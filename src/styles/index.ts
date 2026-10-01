@@ -480,6 +480,9 @@ const ROUTE_STYLES = css`
     overflow: hidden;
     text-overflow: ellipsis;
   }
+  .label.active {
+    color: var(--navbar-primary-color);
+  }
 
   /* Badge styling */
   .badge {
