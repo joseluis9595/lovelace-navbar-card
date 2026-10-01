@@ -68,6 +68,21 @@ export class NavbarCard extends LitElement {
   @state() focusedPopup: TemplateResult<1> | null = null;
   @state() isDesktop?: boolean;
 
+  /**
+   * Breakpoint watcher for [isDesktop]. A media query rather than a `resize`
+   * listener: the listener has to read `window.innerWidth` to decide
+   * anything, and that read forces a synchronous layout of the whole
+   * dashboard. Home Assistant emits a great many resize events while it
+   * boots, and every navbar mounted at the time pays separately - HA keeps
+   * the previous view mounted while it transitions between them.
+   *
+   * The query reads nothing and fires only when the breakpoint is actually
+   * crossed, which on a wall-mounted panel is never.
+   */
+  private _desktopQuery?: MediaQueryList;
+  /** True while the `resize` fallback is the active mechanism */
+  private _usingResizeFallback = false;
+
   @state() private widgetVisibility: Record<string, WidgetPosition | null> = {};
 
   /** Set HA instance (called by HA runtime) */
@@ -131,11 +146,9 @@ export class NavbarCard extends LitElement {
 
     // Quick fix for ripple effects
     forceResetRipple(this);
-    window.removeEventListener('resize', this._checkDesktop);
-    window.addEventListener('resize', this._checkDesktop);
 
     this._detectModes();
-    this._checkDesktop();
+    this._watchDesktop();
 
     // Inject styles into the card to prevent unnecessary style re-rendering
     injectStyles(
@@ -156,7 +169,7 @@ export class NavbarCard extends LitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
 
-    window.removeEventListener('resize', this._checkDesktop);
+    this._unwatchDesktop();
     removeDashboardPadding();
 
     // Force popup closure without animation to prevent memory leaks
@@ -200,6 +213,10 @@ export class NavbarCard extends LitElement {
 
     this._routes = mergedConfig.routes.map(route => new Route(this, route));
     this.config = mergedConfig;
+
+    // The breakpoint comes from the config, so re-point the watcher when it
+    // moves. No-ops while disconnected, and when `min_width` is unchanged.
+    if (this.isConnected) this._watchDesktop();
   }
 
   /**
@@ -284,10 +301,84 @@ export class NavbarCard extends LitElement {
     );
   }
 
-  /** Update desktop/mobile state based on window width */
+  /**
+   * Update desktop/mobile state based on window width.
+   *
+   * Only the fallback path calls this; it reads layout, so the media query in
+   * [_watchDesktop] is the mechanism wherever a subscribable MediaQueryList
+   * exists.
+   */
   private _checkDesktop = (): void => {
     this.isDesktop =
       (window.innerWidth || 0) >= (this.config?.desktop?.min_width ?? 768);
+  };
+
+  /** The breakpoint [isDesktop] is tracking, from config or the default */
+  private get _desktopMedia(): string {
+    return `(min-width: ${this.config?.desktop?.min_width ?? 768}px)`;
+  }
+
+  /**
+   * Start (or re-point) the breakpoint watcher and set [isDesktop] now.
+   *
+   * Safe to call repeatedly: an unchanged breakpoint keeps the existing query
+   * rather than tearing it down, so a config update that leaves `min_width`
+   * alone costs nothing.
+   */
+  private _watchDesktop = (): void => {
+    const media = this._desktopMedia;
+
+    if (this._desktopQuery?.media === media) {
+      this.isDesktop = this._desktopQuery.matches;
+      return;
+    }
+
+    this._unwatchDesktop();
+
+    // `matchMedia` is checked through to its listener API rather than by
+    // existence alone: jsdom answers the call with a stub that never matches
+    // and carries no way to subscribe, and Safari before 14 predates
+    // `addEventListener` on MediaQueryList. Anything that cannot be
+    // subscribed to keeps the resize listener, which is correct, just more
+    // expensive.
+    const query =
+      typeof window.matchMedia === 'function'
+        ? window.matchMedia(media)
+        : undefined;
+
+    if (query && typeof query.addEventListener === 'function') {
+      query.addEventListener('change', this._onDesktopChange);
+    } else if (query && typeof query.addListener === 'function') {
+      query.addListener(this._onDesktopChange);
+    } else {
+      window.addEventListener('resize', this._checkDesktop);
+      this._usingResizeFallback = true;
+      this._checkDesktop();
+      return;
+    }
+
+    this._desktopQuery = query;
+    this.isDesktop = query.matches;
+  };
+
+  /** Tear down whichever mechanism [_watchDesktop] chose */
+  private _unwatchDesktop(): void {
+    if (this._desktopQuery) {
+      if (typeof this._desktopQuery.removeEventListener === 'function') {
+        this._desktopQuery.removeEventListener('change', this._onDesktopChange);
+      } else if (typeof this._desktopQuery.removeListener === 'function') {
+        this._desktopQuery.removeListener(this._onDesktopChange);
+      }
+      this._desktopQuery = undefined;
+    }
+    if (this._usingResizeFallback) {
+      window.removeEventListener('resize', this._checkDesktop);
+      this._usingResizeFallback = false;
+    }
+  }
+
+  private _onDesktopChange = (event: MediaQueryListEvent): void => {
+    this.isDesktop = event.matches;
   };
 
   /** Determine if navbar should be hidden */
