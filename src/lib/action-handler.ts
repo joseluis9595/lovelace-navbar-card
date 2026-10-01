@@ -33,8 +33,8 @@ type HaRootWithQuickBar = HTMLElement & {
   _showQuickBar?: (e: Event, mode?: string) => void;
 };
 
-/** 
- * Fallback for HA < 2026.6: simulate the Ctrl/Cmd+K (or mode) shortcut. 
+/**
+ * Fallback for HA < 2026.6: simulate the Ctrl/Cmd+K (or mode) shortcut.
  */
 const openQuickbarViaKeyboard = (action: QuickbarActionConfig) => {
   const isMac = navigator.platform.toUpperCase().includes('MAC');
