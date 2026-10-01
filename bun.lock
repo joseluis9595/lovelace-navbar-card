@@ -6,7 +6,7 @@
       "name": "navbar-card",
       "dependencies": {
         "@biomejs/biome": "^2.5.15",
-        "@kipk/load-ha-components": "^1.0.3",
+        "@kipk/load-ha-components": "^2.1.0",
         "@open-wc/scoped-elements": "^3.0.10",
         "@open-wc/testing-helpers": "^3.0.1",
         "custom-card-helpers": "^2.0.0",
@@ -155,7 +155,7 @@
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.31", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw=="],
 
-    "@kipk/load-ha-components": ["@kipk/load-ha-components@1.0.3", "", {}, "sha512-hlF9tHTq7o+6NcISYDCoCtL2Xq6UhjUNYozZD9scOo4pqlunQWcb9Mpd3jqxQ3NFVAvctSq/5Ows3ZqZiGvbAg=="],
+    "@kipk/load-ha-components": ["@kipk/load-ha-components@2.1.0", "", {}, "sha512-uYUIfkXYRQCtdz1Lp6T6Q1pemC1KqhpWmOv5C5zv6qpSr0UbmBZOO4pKShmLQrPRDZxa+8WTizhruwyiEmPAbA=="],
 
     "@lit-labs/ssr-dom-shim": ["@lit-labs/ssr-dom-shim@1.4.0", "", {}, "sha512-ficsEARKnmmW5njugNYKipTm4SFnbik7CXtoencDZzmzo/dQ+2Q0bgkzJuoJP20Aj0F+izzJjOqsnkd6F/o1bw=="],
 
