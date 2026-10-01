@@ -7,7 +7,7 @@ export const EDITOR_STYLES = css`
     gap: 6px;
   }
 
-  .navbar-editor ha-textfield {
+  .navbar-editor ha-input {
     width: 100%;
   }
 
@@ -52,7 +52,7 @@ export const EDITOR_STYLES = css`
     flex: 1;
   }
 
-  .editor-row-item ha-textfield {
+  .editor-row-item ha-input {
     width: 100%;
   }
 
@@ -184,6 +184,7 @@ export const EDITOR_STYLES = css`
     display: flex;
     flex-direction: row;
     align-items: center;
+    justify-content: flex-end;
     gap: 0.5em;
   }
 

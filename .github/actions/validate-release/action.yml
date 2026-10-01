@@ -1,0 +1,28 @@
+name: Validate Release Branch
+description: Ensure PRs to main come from a release/* branch matching package.json
+
+inputs:
+  branch:
+    description: Source branch name of the pull request
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        BRANCH="${{ inputs.branch }}"
+        VERSION=$(jq -r .version package.json)
+
+        if [[ ! "$BRANCH" =~ ^release/ ]]; then
+          echo "::error::PRs to main must come from a release/* branch (e.g. release/${VERSION}), got: ${BRANCH}"
+          exit 1
+        fi
+
+        BRANCH_VERSION="${BRANCH#release/}"
+        BRANCH_VERSION="${BRANCH_VERSION#v}"
+
+        if [[ "$BRANCH_VERSION" != "$VERSION" ]]; then
+          echo "::error::Release branch version (${BRANCH_VERSION}) does not match package.json version (${VERSION})"
+          exit 1
+        fi

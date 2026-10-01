@@ -22,12 +22,22 @@ import {
  */
 export const ACTIONS_WITH_CUSTOM_ENTITY = ['more-info', 'toggle'];
 
+/** Maps navbar-card `mode` values to HA quickbar section names. */
+const QUICKBAR_MODES = {
+  commands: 'command',
+  devices: 'device',
+  entities: 'entity',
+} as const;
+
+type HaRootWithQuickBar = HTMLElement & {
+  _showQuickBar?: (e: Event, mode?: string) => void;
+};
+
 /**
- * Opens Home Assistant's quickbar by simulating the keyboard shortcut.
- * Uses Ctrl/Cmd + K for the standard quickbar, or mode-specific keys if specified.
+ * Fallback for HA < 2026.6: simulate the Ctrl/Cmd+K (or mode) shortcut.
  */
-const openQuickbar = (action: QuickbarActionConfig) => {
-  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+const openQuickbarViaKeyboard = (action: QuickbarActionConfig) => {
+  const isMac = navigator.platform.toUpperCase().includes('MAC');
   let key: string;
 
   if (action.mode) {
@@ -44,28 +54,43 @@ const openQuickbar = (action: QuickbarActionConfig) => {
         break;
     }
   } else {
-    // Standard quickbar shortcut: Ctrl/Cmd + K
     key = 'k';
   }
 
-  const eventInit: KeyboardEventInit = {
-    bubbles: true,
-    cancelable: true,
-    key,
-  };
+  document.dispatchEvent(
+    new KeyboardEvent('keydown', {
+      bubbles: true,
+      cancelable: true,
+      key,
+      ...(action.mode ? {} : isMac ? { metaKey: true } : { ctrlKey: true }),
+    }),
+  );
+};
 
-  // Set platform-specific modifier key, only for the standard quickbar
-  if (!action.mode) {
-    if (isMac) {
-      eventInit.metaKey = true;
-    } else {
-      eventInit.ctrlKey = true;
-    }
+/**
+ * Open HA's quickbar via `_showQuickBar` (HA 2026.6+), with keyboard fallback.
+ */
+const openQuickbar = (action: QuickbarActionConfig) => {
+  const haRoot = document.querySelector(
+    'home-assistant',
+  ) as HaRootWithQuickBar | null;
+
+  // Backward compatibility for HA < 2026.6
+  if (typeof haRoot?._showQuickBar !== 'function') {
+    openQuickbarViaKeyboard(action);
+    return;
   }
 
-  const event = new KeyboardEvent('keydown', eventInit);
+  const syntheticEvent = {
+    composedPath: () => [document.body],
+    defaultPrevented: false,
+    preventDefault: () => undefined,
+  } as unknown as Event;
 
-  document.dispatchEvent(event);
+  haRoot._showQuickBar(
+    syntheticEvent,
+    action.mode ? QUICKBAR_MODES[action.mode] : undefined,
+  );
 };
 
 /**
