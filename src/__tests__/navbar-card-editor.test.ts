@@ -44,24 +44,25 @@ describe('NavbarCardEditor badge fields', () => {
         })}
       </div>
     `);
-    const picker = field.querySelector('ha-icon-picker');
-    const colorInput = field.querySelector<HTMLElement & { value: string }>(
-      'ha-textfield',
-    );
+    const selectors = field.querySelectorAll('ha-selector');
+    expect(selectors.length).toBe(2);
 
-    picker?.dispatchEvent(
+    selectors[0]?.dispatchEvent(
       new CustomEvent('value-changed', {
         detail: { value: 'mdi:sleep' },
       }),
     );
-    if (colorInput) colorInput.value = '#123456';
-    colorInput?.dispatchEvent(new Event('input'));
+    selectors[1]?.dispatchEvent(
+      new CustomEvent('value-changed', {
+        detail: { value: '#123456' },
+      }),
+    );
 
     const configChangedCalls = configChanged.mock.calls;
     const changedConfig = configChangedCalls[configChangedCalls.length - 1]?.[0]
       .detail.config as NavbarCardConfig;
     expect(loadHaComponents).toHaveBeenCalledWith(
-      expect.arrayContaining(['ha-code-editor', 'ha-icon-picker']),
+      expect.arrayContaining(['ha-code-editor', 'ha-selector']),
     );
     expect(changedConfig.routes[0].badge?.icon).toBe('mdi:sleep');
     expect(changedConfig.routes[0].badge?.icon_color).toBe('#123456');
@@ -109,4 +110,36 @@ describe('NavbarCardEditor badge fields', () => {
       );
     },
   );
+});
+
+describe('NavbarCardEditor media player list', () => {
+  const createEditor = async (config: NavbarCardConfig) => {
+    const editor = await fixture<NavbarCardEditor>(
+      html`<navbar-card-editor></navbar-card-editor>`,
+    );
+    editor.setConfig(config);
+    await editor.updateComplete;
+    return editor;
+  };
+
+  it('removes the last player from config (#332)', async () => {
+    const editor = await createEditor({
+      media_player: {
+        players: [{ entity: 'media_player.test' }],
+      },
+      routes: [{ icon: 'mdi:home', url: '/' }],
+    });
+    const configChanged = vi.fn();
+    editor.addEventListener('config-changed', configChanged);
+
+    // Access private remover through the public update path used by the UI
+    (
+      editor as unknown as { removeMediaPlayer: (i: number) => void }
+    ).removeMediaPlayer(0);
+
+    expect(configChanged).toHaveBeenCalled();
+    const changedConfig = configChanged.mock.calls[0][0].detail
+      .config as NavbarCardConfig;
+    expect(changedConfig.media_player?.players).toBeUndefined();
+  });
 });

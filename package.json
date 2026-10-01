@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@biomejs/biome": "^2.5.15",
-    "@kipk/load-ha-components": "^1.0.3",
+    "@kipk/load-ha-components": "^2.1.0",
     "@open-wc/scoped-elements": "^3.0.10",
     "@open-wc/testing-helpers": "^3.0.1",
     "custom-card-helpers": "^2.0.0",
