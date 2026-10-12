@@ -4,8 +4,17 @@
  * work well for content-heavy websites.
  */
 
+@import url('https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400..800;1,400..700&family=Roboto+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap');
+
 /* You can override the default Infima variables here. */
 :root {
+  --ifm-font-family-base: 'Figtree', system-ui, -apple-system, sans-serif;
+  --ifm-font-family-monospace: 'Roboto Mono', ui-monospace, monospace;
+  --ifm-font-weight-bold: 650;
+  --ifm-heading-font-weight: 700;
+  --ifm-heading-letter-spacing: -0.01em;
+  --ifm-line-height-base: 1.65;
+
   --ifm-color-primary-lightest: #aacdfb;
   --ifm-color-primary-lighter: #8ab7fb;
   --ifm-color-primary-light: #6aa1fa;
@@ -55,4 +64,182 @@
 
 [data-theme='dark'] .navbar-version-chip {
   background-color: var(--ifm-color-primary-darker);
+}
+
+/* Sidebar */
+.theme-doc-sidebar-container {
+  border-right: 1px solid var(--ifm-toc-border-color);
+}
+
+.menu {
+  font-weight: 500;
+}
+
+.menu__link {
+  border-radius: 8px;
+  font-size: 0.925rem;
+  line-height: 1.35;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.menu__link:hover {
+  background: color-mix(in srgb, var(--ifm-color-primary) 8%, transparent);
+}
+
+.menu__link--active:not(.menu__link--sublist) {
+  background: color-mix(in srgb, var(--ifm-color-primary) 14%, transparent);
+  color: var(--ifm-color-primary-darker);
+  font-weight: 650;
+}
+
+.menu__list-item-collapsible .menu__link {
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+[data-theme='dark'] .menu__link--active:not(.menu__link--sublist) {
+  background: color-mix(in srgb, var(--ifm-color-primary) 22%, transparent);
+  color: var(--ifm-color-primary-lighter);
+}
+
+/* Home / introduction */
+.nc-home-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.nc-home-badges a,
+.nc-home-badges img {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.nc-home-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.nc-home-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  border: none;
+  border-radius: 16px;
+  padding: 0.9rem 1rem 1rem;
+  background: color-mix(in srgb, var(--ifm-color-primary) 5%, var(--ifm-background-surface-color));
+  transition: background-color 0.15s ease;
+}
+
+.nc-home-card:hover {
+  background: color-mix(in srgb, var(--ifm-color-primary) 9%, var(--ifm-background-surface-color));
+}
+
+.nc-home-card__head {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.95rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--ifm-font-color-base);
+}
+
+.nc-home-card p {
+  margin: 0;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.nc-home-card__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: auto !important;
+  padding-top: 0.2rem;
+  font-weight: 600;
+}
+
+.nc-home-card__links a {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ifm-color-primary) 10%, transparent);
+  color: var(--ifm-color-primary-darker);
+  font-size: 0.75rem;
+  text-decoration: none !important;
+}
+
+.nc-home-card__links a:hover {
+  background: color-mix(in srgb, var(--ifm-color-primary) 18%, transparent);
+  color: var(--ifm-color-primary-darkest);
+}
+
+.nc-home-card__disc {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.nc-home-card__disc svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.nc-home-card__disc--1 {
+  background: color-mix(in srgb, #4a8cf9 16%, transparent);
+  color: #2a6fe0;
+}
+
+.nc-home-card__disc--2 {
+  background: color-mix(in srgb, #5c6bc0 16%, transparent);
+  color: #3f51b5;
+}
+
+.nc-home-card__disc--3 {
+  background: color-mix(in srgb, #26a69a 16%, transparent);
+  color: #00897b;
+}
+
+.nc-home-card__disc--4 {
+  background: color-mix(in srgb, #7e57c2 16%, transparent);
+  color: #5e35b1;
+}
+
+[data-theme='dark'] .nc-home-card {
+  background: color-mix(in srgb, var(--ifm-color-primary) 10%, var(--ifm-background-surface-color));
+}
+
+[data-theme='dark'] .nc-home-card:hover {
+  background: color-mix(in srgb, var(--ifm-color-primary) 15%, var(--ifm-background-surface-color));
+}
+
+[data-theme='dark'] .nc-home-card__links a {
+  color: var(--ifm-color-primary-lighter);
+}
+
+[data-theme='dark'] .nc-home-card__disc--1 {
+  color: #8ab4ff;
+}
+
+[data-theme='dark'] .nc-home-card__disc--2 {
+  color: #9fa8da;
+}
+
+[data-theme='dark'] .nc-home-card__disc--3 {
+  color: #80cbc4;
+}
+
+[data-theme='dark'] .nc-home-card__disc--4 {
+  color: #b39ddb;
 }
