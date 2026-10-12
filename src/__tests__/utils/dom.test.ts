@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   DesktopPosition,
+  MobilePosition,
   type NavbarCardConfig,
   WidgetPosition,
 } from '@/types/config';
@@ -349,6 +350,68 @@ describe('DOM utilities', () => {
       expect(styleEl).toBeTruthy();
       expect(styleEl.textContent).toContain('@media (max-width: 767px)');
       expect(styleEl.textContent).toContain('height: 80px');
+    });
+
+    it('should add mobile bottom padding gated to portrait when position is right', () => {
+      const options = {
+        autoPadding: { enabled: true, mobile_px: 80 },
+        desktop: { min_width: 768 },
+        mobile: { position: MobilePosition.right },
+        widgetPositions: {
+          media_player: null,
+        },
+      };
+
+      forceDashboardPadding(options);
+
+      const styleEl = mockHuiRoot.shadowRoot?.querySelector(
+        '#navbar-card-forced-padding-styles',
+      ) as HTMLStyleElement;
+      expect(styleEl).toBeTruthy();
+      expect(styleEl.textContent).toContain(
+        '@media (max-width: 767px) and (orientation: portrait)',
+      );
+      expect(styleEl.textContent).toContain('height: 80px');
+    });
+
+    it('should add mobile right padding gated to landscape when position is right', () => {
+      const options = {
+        autoPadding: { enabled: true, mobile_px: 80 },
+        desktop: { min_width: 768 },
+        mobile: { position: MobilePosition.right },
+        widgetPositions: {
+          media_player: null,
+        },
+      };
+
+      forceDashboardPadding(options);
+
+      const styleEl = mockHuiRoot.shadowRoot?.querySelector(
+        '#navbar-card-forced-padding-styles',
+      ) as HTMLStyleElement;
+      expect(styleEl).toBeTruthy();
+      expect(styleEl.textContent).toContain(
+        '@media (max-width: 767px) and (orientation: landscape)',
+      );
+      expect(styleEl.textContent).toContain('padding-right: 80px !important');
+    });
+
+    it('should not add orientation-gated queries for the default bottom mobile position', () => {
+      const options = {
+        autoPadding: { enabled: true, mobile_px: 80 },
+        desktop: { min_width: 768 },
+        mobile: {},
+        widgetPositions: {
+          media_player: null,
+        },
+      };
+
+      forceDashboardPadding(options);
+
+      const styleEl = mockHuiRoot.shadowRoot?.querySelector(
+        '#navbar-card-forced-padding-styles',
+      ) as HTMLStyleElement;
+      expect(styleEl.textContent).not.toContain('orientation');
     });
 
     it('should add media player padding to mobile when enabled', () => {

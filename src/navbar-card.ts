@@ -15,6 +15,7 @@ import { getDefaultStyles } from '@/styles';
 import {
   DEFAULT_NAVBAR_CONFIG,
   DesktopPosition,
+  MobilePosition,
   type NavbarCardConfig,
   STUB_CONFIG,
   WidgetPosition,
@@ -118,6 +119,20 @@ export class NavbarCard extends LitElement {
     );
   }
 
+  /**
+   * Where the navbar docks on mobile devices. Note that `right` only takes
+   * visual effect while the device is in landscape orientation (handled via
+   * CSS media query) - portrait always renders docked to the bottom.
+   */
+  get mobilePosition(): MobilePosition {
+    return (
+      mapStringToEnum(
+        MobilePosition,
+        this.config?.mobile?.position as string,
+      ) ?? MobilePosition.bottom
+    );
+  }
+
   /** Stub config shown in HA card picker */
   static getStubConfig(): NavbarCardConfig {
     return STUB_CONFIG;
@@ -218,6 +233,9 @@ export class NavbarCard extends LitElement {
 
     const deviceClass = this.isDesktop ? 'desktop' : 'mobile';
     const editClass = this.isInEditMode ? 'edit-mode' : '';
+    const positionClass = this.isDesktop
+      ? this.desktopPosition
+      : this.mobilePosition;
     const mobileModeClass =
       this.config.mobile?.mode === 'floating' ? 'floating' : '';
     const desktopModeClass =
@@ -235,9 +253,7 @@ export class NavbarCard extends LitElement {
           : html``
       }
       <div
-        class="navbar ${editClass} ${deviceClass} ${
-          this.desktopPosition
-        } ${mobileModeClass} ${desktopModeClass}">
+        class="navbar ${editClass} ${deviceClass} ${positionClass} ${mobileModeClass} ${desktopModeClass}">
         ${
           shouldRenderMediaPlayerInsideNavbar
             ? this._mediaPlayer.render({
@@ -246,9 +262,7 @@ export class NavbarCard extends LitElement {
             : html``
         }
         <ha-card
-          class="navbar-card ${deviceClass} ${
-            this.desktopPosition
-          } ${mobileModeClass} ${desktopModeClass}">
+          class="navbar-card ${deviceClass} ${positionClass} ${mobileModeClass} ${desktopModeClass}">
           ${this._routes.map(route => route.render()).filter(Boolean)}
         </ha-card>
       </div>
