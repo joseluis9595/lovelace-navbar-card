@@ -31,23 +31,23 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Types',
+      label: 'Templates & Actions',
       items: ['types/js-template', 'types/custom-actions'],
     },
     {
       type: 'doc',
       id: 'dashboard-adjustements',
-      label: 'Dashboard Adjustements',
-    },
-    {
-      type: 'category',
-      label: 'Need Help?',
-      items: ['getting-help/faq', 'getting-help/contact'],
+      label: 'Dashboard Adjustments',
     },
     {
       type: 'doc',
       label: 'Examples',
       id: 'examples',
+    },
+    {
+      type: 'category',
+      label: 'Need Help?',
+      items: ['getting-help/faq', 'getting-help/contact'],
     },
     {
       type: 'doc',

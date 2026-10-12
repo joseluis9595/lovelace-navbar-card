@@ -1,0 +1,126 @@
+.banner {
+  --bg: #f4f1ea;
+  --fg: #3d3426;
+  --muted: #6b5f4e;
+  --accent: #c7922b;
+  --accent-hover: #b07f20;
+
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.75rem 0 0.5rem;
+  padding: 1rem 1.15rem;
+  border-radius: 16px;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+:global([data-theme='dark']) .banner {
+  --bg: #2a2721;
+  --fg: #f0e6d4;
+  --muted: #c4b8a4;
+  --accent: #d4a84b;
+  --accent-hover: #e0b85c;
+}
+
+.icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: var(--accent);
+}
+
+.icon svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.copy p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.copy code {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border-radius: 4px;
+  padding: 0.05em 0.35em;
+  color: var(--fg);
+}
+
+.title {
+  margin-bottom: 0.2rem !important;
+  color: var(--fg) !important;
+  font-size: 0.98rem !important;
+  font-weight: 700;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+/* Color overrides only — sizing/padding come from Infima `.button` */
+.cta {
+  --ifm-button-background-color: var(--accent);
+  --ifm-button-border-color: var(--accent);
+  --ifm-button-color: #fff;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.cta:hover {
+  --ifm-button-background-color: var(--accent-hover);
+  --ifm-button-border-color: var(--accent-hover);
+  color: #fff;
+  text-decoration: none;
+}
+
+.link {
+  font-size: 0.8rem;
+  font-weight: 550;
+  color: var(--muted) !important;
+  text-decoration: none !important;
+}
+
+.link:hover {
+  color: var(--fg) !important;
+  text-decoration: underline !important;
+}
+
+@media (max-width: 720px) {
+  .banner {
+    flex-wrap: wrap;
+  }
+
+  .actions {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .cta {
+    flex: 1;
+    text-align: center;
+  }
+
+  .link {
+    flex-shrink: 0;
+  }
+}
