@@ -98,20 +98,25 @@ export class NavbarCardEditor extends LitElement {
       'ha-icon',
       'ha-button',
       'ha-combo-box',
-      'ha-textfield',
+      'ha-input',
       'ha-switch',
       'ha-expansion-panel',
       'ha-code-editor',
       'ha-radio',
       'ha-alert',
       'ha-formfield',
-      'ha-icon-picker',
-      'ha-entity-picker',
-      'ha-textarea',
       'ha-selector',
-    ]).finally(() => {
-      this._loadingComponents = false;
-    });
+      'ha-icon-button',
+    ])
+      .catch(error => {
+        console.warn(
+          '[navbar-card] Failed to load some HA editor components',
+          error,
+        );
+      })
+      .finally(() => {
+        this._loadingComponents = false;
+      });
   }
 
   /**********************************************************************/
@@ -176,12 +181,10 @@ export class NavbarCardEditor extends LitElement {
   private removeMediaPlayer = (playerIndex: number) => {
     const players = [...(this._config.media_player?.players ?? [])];
     players.splice(playerIndex, 1);
-    this.updateConfig({
-      media_player: {
-        ...this._config.media_player,
-        players: players.length === 0 ? undefined : players,
-      },
-    });
+    this.updateConfigByKey(
+      'media_player.players' as DotNotationKeys<NavbarCardConfig>,
+      (players.length === 0 ? null : players) as never,
+    );
   };
 
   private addRouteOrPopup = (routeIndex?: number) => {
@@ -207,16 +210,29 @@ export class NavbarCardEditor extends LitElement {
 
     if (popupIndex == null) {
       routes.splice(routeIndex, 1);
-    } else {
-      const popup = [...(routes[routeIndex].popup || [])];
-      popup.splice(popupIndex, 1);
-      routes[routeIndex] = {
-        ...routes[routeIndex],
-        popup: popup.length === 0 ? undefined : popup,
-      };
+      if (routes.length === 0) {
+        this.updateConfigByKey(
+          'routes' as DotNotationKeys<NavbarCardConfig>,
+          null,
+        );
+        return;
+      }
+      this.updateConfig({ routes });
+      return;
     }
 
-    this.updateConfig({ routes: routes.length === 0 ? undefined : routes });
+    const popup = [...(routes[routeIndex].popup || [])];
+    popup.splice(popupIndex, 1);
+    if (popup.length === 0) {
+      this.updateConfigByKey(
+        `routes.${routeIndex}.popup` as DotNotationKeys<NavbarCardConfig>,
+        null,
+      );
+      return;
+    }
+
+    routes[routeIndex] = { ...routes[routeIndex], popup };
+    this.updateConfig({ routes });
   };
 
   /**********************************************************************/
@@ -290,15 +306,58 @@ export class NavbarCardEditor extends LitElement {
     configKey: DotNotationKeys<NavbarCardConfig>;
     disabled?: boolean;
   }) {
+    return this.makeSelector({
+      configKey: options.configKey,
+      disabled: options.disabled,
+      label: options.label,
+      selector: { navigation: {} },
+    });
+  }
+
+  /**
+   * Native HA control via `ha-selector` (preferred over raw ha-input / pickers).
+   */
+  makeSelector(options: {
+    label: string;
+    configKey: DotNotationKeys<NavbarCardConfig>;
+    selector: Record<string, unknown>;
+    disabled?: boolean;
+    helper?: string | TemplateResult;
+    tooltip?: string | TemplateResult;
+    mapValue?: (value: unknown) => unknown;
+    /** Override displayed value (e.g. boolean default when config key is unset). */
+    value?: unknown;
+  }) {
+    const value =
+      options.value !== undefined
+        ? options.value
+        : (genericGetProperty(this._config, options.configKey) ?? '');
     return html`
-    <ha-selector
-      .label=${options.label}
-      .selector=${{ navigation: {} }}
-      .value=${genericGetProperty(this._config, options.configKey) ?? ''}
-      .hass=${this.hass}
-      @value-changed=${e =>
-        this.updateConfigByKey(options.configKey, e.detail.value)}
-    ></ha-selector>
+      <div style="display: flex; align-items: center; width: 100%;">
+        ${
+          options.tooltip
+            ? this.makeHelpTooltipIcon({ tooltip: options.tooltip })
+            : ''
+        }
+        <ha-selector
+          style="flex: 1; width: 100%;"
+          .hass=${this.hass}
+          .label=${options.label}
+          .helper=${options.helper}
+          .selector=${options.selector}
+          .value=${value}
+          .disabled=${options.disabled ?? false}
+          @value-changed=${(e: CustomEvent) => {
+            let next = e.detail.value;
+            if (options.mapValue) {
+              next = options.mapValue(next);
+            }
+            this.updateConfigByKey(
+              options.configKey,
+              next === '' || next == null ? null : (next as never),
+            );
+          }}></ha-selector>
+      </div>
     `;
   }
 
@@ -315,35 +374,32 @@ export class NavbarCardEditor extends LitElement {
     helperPersistent?: boolean;
     placeholder?: string;
   }) {
-    return html`
-      <div style="display: flex; align-items: center;">
-        ${
-          options.tooltip
-            ? this.makeHelpTooltipIcon({ tooltip: options.tooltip })
-            : ''
-        }
-        <ha-textfield
-          helper=${options.helper}
-          helperPersistent=${options.helperPersistent}
-          suffix=${options.suffix}
-          label=${options.label}
-          type=${options.type}
-          placeholder=${options.placeholder}
-          .value=${genericGetProperty(this._config, options.configKey) ?? ''}
-          .disabled=${options.disabled}
-          .autocomplete=${options.autocomplete}
-          @input="${e => {
-            this.updateConfigByKey(
-              options.configKey,
-              e.target.value?.trim() == ''
-                ? null
-                : options.type == 'number'
-                  ? parseInt(e.target.value, 10)
-                  : e.target.value,
-            );
-          }}"></ha-textfield>
-      </div>
-    `;
+    return this.makeSelector({
+      configKey: options.configKey,
+      disabled: options.disabled,
+      helper: options.helper,
+      label: options.label,
+      mapValue:
+        options.type === 'number'
+          ? (value: unknown) => {
+              if (value === '' || value == null) return null;
+              const parsed = parseInt(String(value), 10);
+              return Number.isNaN(parsed) ? null : parsed;
+            }
+          : undefined,
+      selector: {
+        text: {
+          autocomplete: options.autocomplete,
+          placeholder: options.placeholder,
+          suffix: options.suffix,
+          type:
+            options.type === 'textarea' || options.type == null
+              ? 'text'
+              : options.type,
+        },
+      },
+      tooltip: options.tooltip,
+    });
   }
 
   makeEntityPicker(options: {
@@ -353,18 +409,18 @@ export class NavbarCardEditor extends LitElement {
     includeDomains?: string[];
     excludeDomains?: string[];
   }) {
-    return html`<ha-entity-picker
-      label="${options.label}"
-      .hass="${this.hass}"
-      .value=${genericGetProperty(this._config, options.configKey) ?? ''}
-      .configValue="${options.configKey}"
-      .includeDomains="${options.includeDomains}"
-      .excludeDomains="${options.excludeDomains}"
-      .disabled="${options.disabled}"
-      allow-custom-entity
-      @value-changed="${e => {
-        this.updateConfigByKey(options.configKey, e.detail.value);
-      }}"></ha-entity-picker>`;
+    return this.makeSelector({
+      configKey: options.configKey,
+      disabled: options.disabled,
+      label: options.label,
+      selector: {
+        entity: {
+          filter: options.includeDomains?.length
+            ? { domain: options.includeDomains }
+            : undefined,
+        },
+      },
+    });
   }
 
   makeIconPicker(options: {
@@ -372,29 +428,29 @@ export class NavbarCardEditor extends LitElement {
     configKey: DotNotationKeys<NavbarCardConfig>;
     disabled?: boolean;
   }) {
-    return html`
-      <ha-icon-picker
-        label=${options.label}
-        .value=${genericGetProperty(this._config, options.configKey) ?? ''}
-        .disabled=${options.disabled}
-        @value-changed="${e => {
-          this.updateConfigByKey(options.configKey, e.detail.value);
-        }}" />
-    `;
+    return this.makeSelector({
+      configKey: options.configKey,
+      disabled: options.disabled,
+      label: options.label,
+      selector: { icon: {} },
+    });
   }
 
   makeColorPicker(options: Omit<ColorInputOptions, 'inputType'>) {
-    // TODO: for now, the color picker is not supported in the editor,
-    // we need a way to handle empty color values
-    return this.makeTextInput({
-      ...options,
-      type: 'text',
+    return this.makeSelector({
+      configKey: options.configKey,
+      disabled: options.disabled,
+      label: options.label,
+      selector: {
+        ui_color: {
+          include_none: true,
+        },
+      },
+      tooltip: options.tooltip,
     });
   }
 
   makeTemplatable(options: TemplatableInputOptions) {
-    const { label, inputType, ...rest } = options;
-
     const value = genericGetProperty(this._config, options.configKey) as
       | string
       | null
@@ -431,9 +487,6 @@ export class NavbarCardEditor extends LitElement {
     return html`
       <div class="templatable-field">
         <div class="templatable-field-header">
-          <label class="templatable-field-header-label editor-label"
-            >${options.label}
-          </label>
           <ha-button
             @click=${toggleMode}
             outlined
@@ -450,43 +503,64 @@ export class NavbarCardEditor extends LitElement {
                 allowNull: true,
                 configKey: options.configKey,
                 helper: options.templateHelper,
-                label: '',
+                label: options.label,
                 tooltip: options.tooltip,
               })
             : options.inputType === 'string'
               ? this.makeTextInput({
-                  label: '',
-                  ...rest,
+                  configKey: options.configKey,
+                  disabled: options.disabled,
+                  helper:
+                    'textHelper' in options ? options.textHelper : undefined,
+                  label: options.label,
+                  placeholder:
+                    'placeholder' in options ? options.placeholder : undefined,
+                  tooltip: options.tooltip,
                 })
               : options.inputType === 'number'
                 ? this.makeEntityPicker({
-                    label: '',
-                    ...rest,
+                    configKey: options.configKey,
+                    disabled: options.disabled,
+                    label: options.label,
                   })
                 : options.inputType === 'icon'
                   ? this.makeIconPicker({
-                      label: '',
-                      ...rest,
+                      configKey: options.configKey,
+                      disabled: options.disabled,
+                      label: options.label,
                     })
                   : options.inputType === 'switch'
                     ? this.makeSwitch({
-                        label: '',
-                        ...rest,
+                        configKey: options.configKey,
+                        defaultValue:
+                          'defaultValue' in options
+                            ? options.defaultValue
+                            : undefined,
+                        disabled: options.disabled,
+                        label: options.label,
                       })
                     : options.inputType === 'entity'
                       ? this.makeEntityPicker({
-                          label: '',
-                          ...rest,
+                          configKey: options.configKey,
+                          disabled: options.disabled,
+                          excludeDomains:
+                            'excludeDomains' in options
+                              ? options.excludeDomains
+                              : undefined,
+                          includeDomains:
+                            'includeDomains' in options
+                              ? options.includeDomains
+                              : undefined,
+                          label: options.label,
                         })
                       : options.inputType === 'color'
                         ? this.makeColorPicker({
-                            label: '',
-                            ...rest,
+                            configKey: options.configKey,
+                            disabled: options.disabled,
+                            label: options.label,
+                            tooltip: options.tooltip,
                           })
-                        : this.makeTextInput({
-                            label: '',
-                            ...rest,
-                          })
+                        : html``
         }
       </div>
     `;
@@ -535,26 +609,16 @@ export class NavbarCardEditor extends LitElement {
     tooltip?: string | TemplateResult;
     defaultValue?: boolean;
   }) {
-    return html`
-      <div style="display: flex; align-items: center; gap: 1em;">
-        <ha-switch
-          .checked=${
-            genericGetProperty(this._config, options.configKey) ??
-            options.defaultValue
-          }
-          .disabled=${options.disabled}
-          @change=${(e: Event) => {
-            const checked = (e.target as HTMLInputElement).checked;
-            this.updateConfigByKey(options.configKey, checked);
-          }}></ha-switch>
-        ${
-          options.tooltip
-            ? this.makeHelpTooltipIcon({ tooltip: options.tooltip })
-            : ''
-        }
-        <label>${options.label}</label>
-      </div>
-    `;
+    const raw = genericGetProperty(this._config, options.configKey);
+    return this.makeSelector({
+      configKey: options.configKey,
+      disabled: options.disabled,
+      label: options.label,
+      mapValue: (next: unknown) => Boolean(next),
+      selector: { boolean: {} },
+      tooltip: options.tooltip,
+      value: raw ?? options.defaultValue ?? false,
+    });
   }
 
   makeButton(options: {
@@ -755,6 +819,18 @@ export class NavbarCardEditor extends LitElement {
                   inputType: 'switch',
                   label: 'Show',
                   templateHelper: BOOLEAN_JS_TEMPLATE_HELPER,
+                })}
+                ${this.makeTemplatable({
+                  configKey: `${baseConfigKey}.badge.icon` as any,
+                  inputType: 'icon',
+                  label: 'Icon',
+                  templateHelper: STRING_JS_TEMPLATE_HELPER,
+                })}
+                ${this.makeTemplatable({
+                  configKey: `${baseConfigKey}.badge.icon_color` as any,
+                  inputType: 'color',
+                  label: 'Icon color',
+                  templateHelper: STRING_JS_TEMPLATE_HELPER,
                 })}
                 ${this.makeTemplatable({
                   configKey: `${baseConfigKey}.badge.count` as any,

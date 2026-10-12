@@ -130,14 +130,11 @@ describe('NavbarCard', () => {
 
   describe('Desktop/Mobile Mode', () => {
     it('detects desktop mode correctly', async () => {
-      // Mock window.innerWidth
       Object.defineProperty(window, 'innerWidth', {
         configurable: true,
         value: 1024,
         writable: true,
       });
-
-      // Trigger resize event
       window.dispatchEvent(new Event('resize'));
       await element.updateComplete;
 
@@ -145,15 +142,31 @@ describe('NavbarCard', () => {
     });
 
     it('detects mobile mode correctly', async () => {
-      // Mock window.innerWidth
       Object.defineProperty(window, 'innerWidth', {
         configurable: true,
         value: 375,
         writable: true,
       });
-
-      // Trigger resize event
       window.dispatchEvent(new Event('resize'));
+      await element.updateComplete;
+
+      expect(element.isDesktop).toBe(false);
+    });
+
+    it('re-points the media query when min_width changes', async () => {
+      Object.defineProperty(window, 'innerWidth', {
+        configurable: true,
+        value: 900,
+        writable: true,
+      });
+      window.dispatchEvent(new Event('resize'));
+      await element.updateComplete;
+      expect(element.isDesktop).toBe(true);
+
+      element.setConfig({
+        ...DEFAULT_CONFIG,
+        desktop: { ...DEFAULT_CONFIG.desktop, min_width: 1024 },
+      });
       await element.updateComplete;
 
       expect(element.isDesktop).toBe(false);
@@ -205,6 +218,14 @@ describe('NavbarCard', () => {
 
   describe('Selected state styles', () => {
     it('applies selected class and selected_color', async () => {
+      // Ensure desktop mode so desktop.show_labels takes effect
+      Object.defineProperty(window, 'innerWidth', {
+        configurable: true,
+        value: 1024,
+        writable: true,
+      });
+      window.dispatchEvent(new Event('resize'));
+
       const config: NavbarCardConfig = {
         desktop: { show_labels: true },
         routes: [
@@ -223,12 +244,22 @@ describe('NavbarCard', () => {
 
       const route = element.shadowRoot?.querySelector('.route');
       const button = element.shadowRoot?.querySelector('.button');
+      const label = element.shadowRoot?.querySelector('.label');
 
       expect(route?.classList.contains('active')).toBe(true);
-      // selected_color is applied as --navbar-primary-color on the button
+      expect(label?.classList.contains('active')).toBe(true);
+      // selected_color is applied as --navbar-primary-color (inherited by active labels)
+      expect(route?.getAttribute('style') || '').toContain(
+        '--navbar-primary-color: #00ff00',
+      );
       expect(button?.getAttribute('style') || '').toContain(
         '--navbar-primary-color: #00ff00',
       );
+      expect(
+        getComputedStyle(label as Element).getPropertyValue(
+          '--navbar-primary-color',
+        ),
+      ).toBe('#00ff00');
     });
   });
 });

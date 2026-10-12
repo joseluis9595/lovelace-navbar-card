@@ -68,6 +68,9 @@ export class NavbarCard extends LitElement {
   @state() focusedPopup: TemplateResult<1> | null = null;
   @state() isDesktop?: boolean;
 
+  /** Tracks desktop/mobile via matchMedia (avoids layout thrash from resize + innerWidth). */
+  private _desktopQuery?: MediaQueryList;
+
   @state() private widgetVisibility: Record<string, WidgetPosition | null> = {};
 
   /** Set HA instance (called by HA runtime) */
@@ -131,11 +134,9 @@ export class NavbarCard extends LitElement {
 
     // Quick fix for ripple effects
     forceResetRipple(this);
-    window.removeEventListener('resize', this._checkDesktop);
-    window.addEventListener('resize', this._checkDesktop);
 
     this._detectModes();
-    this._checkDesktop();
+    this._watchDesktop();
 
     // Inject styles into the card to prevent unnecessary style re-rendering
     injectStyles(
@@ -156,7 +157,7 @@ export class NavbarCard extends LitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
 
-    window.removeEventListener('resize', this._checkDesktop);
+    this._unwatchDesktop();
     removeDashboardPadding();
 
     // Force popup closure without animation to prevent memory leaks
@@ -200,6 +201,9 @@ export class NavbarCard extends LitElement {
 
     this._routes = mergedConfig.routes.map(route => new Route(this, route));
     this.config = mergedConfig;
+
+    // Re-point breakpoint watcher if min_width changed
+    if (this.isConnected) this._watchDesktop();
   }
 
   /**
@@ -284,10 +288,28 @@ export class NavbarCard extends LitElement {
     );
   }
 
-  /** Update desktop/mobile state based on window width */
-  private _checkDesktop = (): void => {
-    this.isDesktop =
-      (window.innerWidth || 0) >= (this.config?.desktop?.min_width ?? 768);
+  /** Start or re-point the desktop breakpoint watcher and sync isDesktop. */
+  private _watchDesktop(): void {
+    const media = `(min-width: ${this.config?.desktop?.min_width ?? 768}px)`;
+
+    if (this._desktopQuery?.media === media) {
+      this.isDesktop = this._desktopQuery.matches;
+      return;
+    }
+
+    this._unwatchDesktop();
+    this._desktopQuery = window.matchMedia(media);
+    this._desktopQuery.addEventListener('change', this._onDesktopChange);
+    this.isDesktop = this._desktopQuery.matches;
+  }
+
+  private _unwatchDesktop(): void {
+    this._desktopQuery?.removeEventListener('change', this._onDesktopChange);
+    this._desktopQuery = undefined;
+  }
+
+  private _onDesktopChange = (event: MediaQueryListEvent): void => {
+    this.isDesktop = event.matches;
   };
 
   /** Determine if navbar should be hidden */
