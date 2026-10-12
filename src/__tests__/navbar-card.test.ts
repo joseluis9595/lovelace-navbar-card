@@ -130,14 +130,11 @@ describe('NavbarCard', () => {
 
   describe('Desktop/Mobile Mode', () => {
     it('detects desktop mode correctly', async () => {
-      // Mock window.innerWidth
       Object.defineProperty(window, 'innerWidth', {
         configurable: true,
         value: 1024,
         writable: true,
       });
-
-      // Trigger resize event
       window.dispatchEvent(new Event('resize'));
       await element.updateComplete;
 
@@ -145,15 +142,31 @@ describe('NavbarCard', () => {
     });
 
     it('detects mobile mode correctly', async () => {
-      // Mock window.innerWidth
       Object.defineProperty(window, 'innerWidth', {
         configurable: true,
         value: 375,
         writable: true,
       });
-
-      // Trigger resize event
       window.dispatchEvent(new Event('resize'));
+      await element.updateComplete;
+
+      expect(element.isDesktop).toBe(false);
+    });
+
+    it('re-points the media query when min_width changes', async () => {
+      Object.defineProperty(window, 'innerWidth', {
+        configurable: true,
+        value: 900,
+        writable: true,
+      });
+      window.dispatchEvent(new Event('resize'));
+      await element.updateComplete;
+      expect(element.isDesktop).toBe(true);
+
+      element.setConfig({
+        ...DEFAULT_CONFIG,
+        desktop: { ...DEFAULT_CONFIG.desktop, min_width: 1024 },
+      });
       await element.updateComplete;
 
       expect(element.isDesktop).toBe(false);
