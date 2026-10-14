@@ -92,9 +92,13 @@ const NAVBAR_CONTAINER_STYLES = css`
     width: 90%;
   }
 
-  /* Lift mobile navbar above Android system gesture/nav bars (HA Companion edge-to-edge). */
-  .navbar.mobile {
-    bottom: var(--safe-area-inset-bottom, 0px);
+  /* Safe area: padding for "docked", margin for "floating" */
+  .navbar.mobile.safe-area:not(.floating) .navbar-card {
+    padding-bottom: calc(12px + var(--safe-area-inset-bottom, 0px));
+  }
+
+  .navbar.mobile.safe-area.floating .navbar-card {
+    margin-bottom: calc(10px + var(--safe-area-inset-bottom, 0px));
   }
 
   /* Desktop mode styles */

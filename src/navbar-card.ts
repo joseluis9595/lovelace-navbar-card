@@ -222,6 +222,8 @@ export class NavbarCard extends LitElement {
       this.config.mobile?.mode === 'floating' ? 'floating' : '';
     const desktopModeClass =
       this.isDesktop && this.config.desktop?.mode === 'docked' ? 'docked' : '';
+    const safeAreaClass =
+      !this.isDesktop && this.config.mobile?.safe_area ? 'safe-area' : '';
 
     const shouldRenderMediaPlayerInsideNavbar =
       this._shouldRenderMediaPlayerInsideNavbar();
@@ -237,7 +239,7 @@ export class NavbarCard extends LitElement {
       <div
         class="navbar ${editClass} ${deviceClass} ${
           this.desktopPosition
-        } ${mobileModeClass} ${desktopModeClass}">
+        } ${mobileModeClass} ${desktopModeClass} ${safeAreaClass}">
         ${
           shouldRenderMediaPlayerInsideNavbar
             ? this._mediaPlayer.render({

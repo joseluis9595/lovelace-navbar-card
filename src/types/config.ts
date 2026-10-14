@@ -169,6 +169,7 @@ export type NavbarCardConfig = {
     mode?: NavbarDisplayMode;
     show_labels?: LabelVisibilityConfig;
     show_popup_label_backgrounds?: boolean;
+    safe_area?: boolean;
     hidden?: JSTemplatable<boolean>;
   };
   styles?: string;
@@ -204,6 +205,7 @@ export const DEFAULT_NAVBAR_CONFIG = {
   },
   mobile: {
     mode: 'docked',
+    safe_area: false,
     show_labels: false,
     show_popup_label_backgrounds: false,
   },

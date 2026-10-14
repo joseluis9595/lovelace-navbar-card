@@ -1467,6 +1467,11 @@ export class NavbarCardEditor extends LitElement {
             disabled: ![true, 'popup_only'].includes(labelVisibility),
             label: 'Show popup label backgrounds',
           })}
+          ${this.makeSwitch({
+            configKey: 'mobile.safe_area',
+            defaultValue: DEFAULT_NAVBAR_CONFIG.mobile?.safe_area,
+            label: 'Respect safe area insets',
+          })}
           ${this.makeTemplateEditor({
             configKey: 'mobile.hidden',
             helper: BOOLEAN_JS_TEMPLATE_HELPER,
