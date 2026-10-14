@@ -171,6 +171,35 @@ describe('NavbarCard', () => {
 
       expect(element.isDesktop).toBe(false);
     });
+
+    it('adds safe-area class only when mobile.safe_area is enabled', async () => {
+      Object.defineProperty(window, 'innerWidth', {
+        configurable: true,
+        value: 375,
+        writable: true,
+      });
+      window.dispatchEvent(new Event('resize'));
+      await element.updateComplete;
+      expect(element.isDesktop).toBe(false);
+
+      expect(
+        element.shadowRoot
+          ?.querySelector('.navbar')
+          ?.classList.contains('safe-area'),
+      ).toBe(false);
+
+      element.setConfig({
+        ...DEFAULT_CONFIG,
+        mobile: { safe_area: true },
+      });
+      await element.updateComplete;
+
+      expect(
+        element.shadowRoot
+          ?.querySelector('.navbar')
+          ?.classList.contains('safe-area'),
+      ).toBe(true);
+    });
   });
 
   describe('Icon rendering', () => {
