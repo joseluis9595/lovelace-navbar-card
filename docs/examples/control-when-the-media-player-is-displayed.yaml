@@ -1,0 +1,41 @@
+type: custom:navbar-card
+desktop:
+  position: left
+  show_labels: false
+routes:
+  - icon: mdi:home-outline
+    icon_selected: mdi:home-assistant
+    url: /lovelace/home
+    label: Home
+  - icon: mdi:devices
+    url: /lovelace/devices
+    label: Devices
+  - icon: mdi:thermometer
+    url: /lovelace/weather
+    label: Weather
+  - icon: mdi:creation-outline
+    icon_selected: mdi:creation
+    url: /lovelace/control
+    label: Control
+  - icon: mdi:information
+    label: More
+    url: /config/info
+media_player:
+  players:
+    - entity: media_player.test_media_player
+      show: |-
+        [[[
+          const mediaPlayerState = states['media_player.test_media_player'];
+          const lastChanged = new Date(mediaPlayerState.last_changed);
+          const now = Date.now();
+          const fiveMinutes = 5 * 60 * 1000;
+
+          // Display media player if it's playing OR paused in the last 5 minutes
+          return (
+            mediaPlayerState.state == 'playing' ||
+            (mediaPlayerState.state == 'paused' &&
+              (now - lastChanged) <= fiveMinutes)
+          );
+        ]]]
+  album_cover_background: true
+  desktop_position: bottom-right

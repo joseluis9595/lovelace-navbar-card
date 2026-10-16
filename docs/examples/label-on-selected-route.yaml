@@ -1,0 +1,43 @@
+type: custom:navbar-card
+mobile:
+  show_labels: true
+  safe_area: true
+routes:
+  - icon: mdi:home-outline
+    icon_selected: mdi:home
+    url: /lovelace/home
+    label: Home
+  - icon: mdi:devices
+    url: /lovelace/devices
+    label: Devices
+  - icon: mdi:creation-outline
+    icon_selected: mdi:creation
+    url: /config/automation/dashboard
+    label: Automations
+  - icon: mdi:cog
+    url: /config/dashboard
+    label: Settings
+styles: |
+  .mobile .route:not(.active) .label {
+    display: none;
+  }
+  .mobile .route.active {
+    flex: none;
+    flex-direction: row;
+    gap: 4px;
+    width: auto;
+    height: 40px;
+    margin: auto 4px;
+    padding: 0 16px 0 8px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--navbar-primary-color) 20%, transparent);
+  }
+  .mobile .route.active .button {
+    width: 32px;
+    background: none;
+  }
+  .mobile .route.active .label {
+    flex: none;
+    width: auto;
+    font-size: 14px;
+  }

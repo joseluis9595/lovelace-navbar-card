@@ -14,7 +14,7 @@ Lovelace Navbar Card is a custom card for Home Assistant's Lovelace UI, built wi
 - **Testing**:
   - [Vitest](https://vitest.dev/) - Unit testing framework
   - [@testing-library/dom](https://testing-library.com/) - DOM testing utilities
-- **Documentation**: [Docusaurus](https://docusaurus.io/) - Documentation website framework
+- **Documentation**: [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) - Documentation website (Python, config in `docs/mkdocs.yml`, pages in `docs/content/`). Stick to built-in Material features (no third-party MkDocs plugins or theme overrides) so the site stays buildable with [Zensical](https://zensical.org/)
 - **Code Quality**:
   - Biome - Linting & formatting with TypeScript support
   - TypeScript compiler - Static type checking
@@ -86,10 +86,10 @@ Before committing code, ensure:
    bun run build
    ```
 
-4. **Docs build** (if you changed documentation):
+4. **Docs build** (if you changed documentation; `--strict` fails on broken links, same as CI):
 
    ```bash
-   cd docs && bun run docs:build
+   bun run docs:build
    ```
 
 ### Testing Requirements
@@ -107,7 +107,7 @@ Before committing code, ensure:
 - Keep the documentation website up-to-date:
 
   ```bash
-  cd docs && bun run docs:build
+  bun run docs:build
   ```
 
 ### Code Quality Standards
@@ -128,10 +128,20 @@ Before committing code, ensure:
 - `bun run lint:check` - Run Biome check without auto-fix (same as CI)
 - `bun run format` - Format `src/**/*.ts` with Biome
 
-Documentation scripts live in the `docs/` package:
+Documentation is a Python project in `docs/` (dependencies pinned in `docs/requirements.txt`):
 
-- `cd docs && bun run docs:start` - Start documentation development server
-- `cd docs && bun run docs:build` - Build documentation site
+- `bun run docs:setup` - One-time setup (creates `docs/.venv` and installs MkDocs Material)
+- `bun run docs` - Start documentation development server at http://127.0.0.1:8000/lovelace-navbar-card/ (also reachable from other devices on your network at `http://<your-ip>:8000/lovelace-navbar-card/`)
+- `bun run docs:build` - Build documentation site into `docs/build/` (strict: fails on broken links)
+- `bun run docs:screenshots` - Build the card and render docs screenshots as transparent 2x PNGs in headless Chrome (no Home Assistant needed):
+  - `bun run docs:screenshots [shot names...]` - Shots defined in `scripts/docs-screenshots/shots.ts`
+  - `bun run docs:screenshots shot config.yaml -o out.png` - One navbar-card configuration
+  - `bun run docs:screenshots compare a.yaml b.yaml -o out.png` - Configurations side by side
+  - Options: `--phone` renders each config in mobile mode inside the bottom of a mocked phone, `--theme light|dark|both` (dark is saved as `<out>_dark.png`), `--force` overwrites images tracked by git (skipped otherwise), `--serve` prints the page URLs to inspect them in a browser instead of capturing
+  - Uses the macOS Chrome by default, set `CHROME_PATH` to override. Theme colors live in `scripts/docs-screenshots/themes.ts`. MDI icons and the Roboto font are fetched from pinned `@mdi/svg` / `@fontsource/roboto` versions and cached in `scripts/docs-screenshots/.cache/`
+  - Docs pages show light/dark pairs with `![...](img.png#only-light)` and `![...](img_dark.png#only-dark)`
+
+Adding a page means creating it under `docs/content/docs/<nav section>/` (so its URL follows its place in the nav) and listing it in `nav` in `docs/mkdocs.yml`. When a page moves, leave an `index.html` redirect at the old URL (see `docs/content/docs/types/js-template/index.html`), since released card versions and external sites link to it. Examples are listed in `docs/content/docs/examples.md`: a card link (`{ .nc-card }`) in a group's gallery plus a hidden `nc-example` block with the same id holding the screenshot, which `docs/content/javascripts/examples.js` opens in a panel. Each example's YAML lives in `docs/examples/<id>.yaml`, included in the page with `--8<--` (pymdownx.snippets) and also used by `docs:screenshots`.
 
 ## Continuous Integration
 

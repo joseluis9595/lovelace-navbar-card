@@ -1,0 +1,146 @@
+/* Navbar Card docs theme on top of Material for MkDocs: tokens and type.
+   Material scales the root font to 125%, so sizes in these files are in px.
+   Loaded in order (see mkdocs.yml): base, layout, components, home, examples. */
+
+/* ---------- Tokens ---------- */
+
+:root {
+  --nc-blue: #4a8cf9;
+  --nc-primary: #2a76f8;
+  --nc-primary-deep: #1a5fd6;
+  --nc-radius: 24px;
+  --nc-radius-sm: 12px;
+  --nc-code-bg: #1d2129;
+  /* Frame behind the example screenshots in the gallery */
+  --nc-shot-bg: #f8f9f9;
+
+  --md-primary-fg-color: var(--nc-primary);
+  --md-primary-fg-color--light: #6aa1fa;
+  --md-primary-fg-color--dark: var(--nc-primary-deep);
+  --md-accent-fg-color: var(--nc-primary-deep);
+  --md-accent-fg-color--transparent: rgb(42 118 248 / 10%);
+}
+
+[data-md-color-scheme='default'] {
+  --nc-bg: #f4f6f9;
+  --nc-surface: #ffffff;
+  --nc-surface-2: #e9edf3;
+  --nc-surface-high: #eef1f6;
+  --nc-border: #e1e6ee;
+  --nc-text: #1d2129;
+  --nc-muted: #5a616d;
+  --nc-primary-soft: #e3edfe;
+  --nc-on-primary-soft: #0f3a82;
+  --nc-link: var(--nc-primary);
+
+  --md-default-bg-color: var(--nc-bg);
+  --md-default-fg-color: var(--nc-text);
+  --md-default-fg-color--light: var(--nc-muted);
+  --md-default-fg-color--lighter: #8a919c;
+  --md-default-fg-color--lightest: var(--nc-border);
+  --md-code-bg-color: var(--nc-surface-high);
+  --md-code-fg-color: var(--nc-text);
+  --md-typeset-a-color: var(--nc-link);
+  --md-typeset-table-color: var(--nc-border);
+  --md-footer-bg-color: #1d2129;
+  --md-footer-bg-color--dark: #16191f;
+}
+
+[data-md-color-scheme='slate'] {
+  --nc-shot-bg: #1a1d23;
+  --nc-bg: #15171c;
+  --nc-surface: #252932;
+  --nc-surface-2: #323743;
+  --nc-surface-high: #2d313b;
+  --nc-border: #363b46;
+  --nc-text: #e6e9ee;
+  --nc-muted: #aab1bc;
+  --nc-primary-soft: #1e3150;
+  --nc-on-primary-soft: #cfe0ff;
+  --nc-link: #8ab7fb;
+  --nc-code-bg: #111318;
+
+  --md-primary-fg-color: #1d2027;
+  --md-primary-fg-color--light: #2a2e37;
+  --md-primary-fg-color--dark: #15171c;
+  --md-accent-fg-color: #8ab7fb;
+  --md-accent-fg-color--transparent: rgb(138 183 251 / 12%);
+  --md-default-bg-color: var(--nc-bg);
+  --md-default-fg-color: var(--nc-text);
+  --md-default-fg-color--light: var(--nc-muted);
+  --md-default-fg-color--lightest: var(--nc-border);
+  --md-code-bg-color: var(--nc-surface-high);
+  --md-code-fg-color: var(--nc-text);
+  --md-typeset-a-color: var(--nc-link);
+  --md-typeset-table-color: var(--nc-border);
+}
+
+/* ---------- Type ---------- */
+
+/* Material's inline-block anchor can wrap onto its own line; inline keeps it
+   glued to the last word, and the word joiner also after punctuation (?) */
+.md-typeset .headerlink {
+  display: inline;
+}
+
+.md-typeset .headerlink::before {
+  content: "\2060";
+}
+
+.md-typeset {
+  color: var(--nc-text);
+  font-size: 16.5px;
+  line-height: 1.65;
+}
+
+.md-typeset h1 {
+  margin: 0 0 18px;
+  color: var(--nc-text);
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+
+.md-typeset h2 {
+  margin: 40px 0 12px;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.md-typeset h3 {
+  margin: 30px 0 8px;
+  font-size: 19px;
+  font-weight: 650;
+}
+
+.md-typeset h4 {
+  margin: 24px 0 6px;
+  font-size: 16.5px;
+  font-weight: 650;
+}
+
+.md-typeset strong {
+  font-weight: 650;
+}
+
+.md-typeset a:not(.md-button, .headerlink) {
+  font-weight: 550;
+  text-decoration: none;
+}
+
+.md-typeset a:not(.md-button, .headerlink):hover {
+  color: var(--nc-link);
+  text-decoration: underline;
+}
+
+.md-typeset .headerlink {
+  color: var(--nc-border);
+}
+
+.md-typeset hr {
+  margin: 32px 0;
+  border-bottom-color: var(--nc-border);
+}

@@ -1,0 +1,21 @@
+type: custom:navbar-card
+routes:
+  - url: /lovelace/home
+    icon: mdi:home
+    label: Home
+  - url: /lovelace/home/devices
+    icon: mdi:devices
+    label: Devices
+  - icon: mdi:creation
+    label: Automations
+    tap_action:
+      action: navigate
+      url: /lovelace/home/control
+    selected: |
+        [[[ return window.location.pathname == "/lovelace/home/control" ]]]
+  - url: /config/dashboard
+    icon: mdi:cog
+    label: Settings
+  - icon: mdi:information
+    label: More
+    url: /config/info

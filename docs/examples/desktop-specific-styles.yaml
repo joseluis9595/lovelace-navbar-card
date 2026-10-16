@@ -1,0 +1,21 @@
+type: custom:navbar-card
+routes:
+  - url: /lovelace/home
+    icon: mdi:home
+    label: Home
+  - url: /lovelace/home/devices
+    icon: mdi:devices
+    label: Devices
+  - url: /config/automation/dashboard
+    icon: mdi:creation
+    label: Automations
+  - url: /config/dashboard
+    icon: mdi:cog
+    label: Settings
+  - icon: mdi:information
+    label: More
+    url: /config/info
+styles: |
+  .navbar-card.desktop {
+    border-radius: 0px;
+  }

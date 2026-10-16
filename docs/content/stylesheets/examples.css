@@ -1,0 +1,153 @@
+/* ---------- Examples: gallery + panel (see javascripts/examples.js) ---------- */
+
+.md-typeset .nc-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 16px;
+  margin: 12px 0 8px;
+}
+
+.md-typeset .nc-gallery > p {
+  display: contents;
+}
+
+.md-typeset a.nc-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--nc-border);
+  border-radius: 16px;
+  background: var(--nc-surface);
+  color: var(--nc-text);
+  font-weight: 400;
+  text-decoration: none;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.md-typeset a.nc-card:hover {
+  border-color: color-mix(in srgb, var(--nc-blue) 45%, var(--nc-border));
+  color: var(--nc-text);
+  text-decoration: none;
+  transform: translateY(-2px);
+}
+
+.md-typeset a.nc-card img {
+  box-sizing: border-box;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  padding: 12px;
+  object-fit: contain;
+  background: var(--nc-shot-bg);
+}
+
+.md-typeset .nc-card__title {
+  padding: 12px 14px 2px;
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.md-typeset .nc-card__desc {
+  display: -webkit-box;
+  margin: 0 14px 14px;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  color: var(--nc-muted);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+/* Example details stay hidden until moved into the panel */
+.md-content .nc-example {
+  display: none;
+}
+
+.nc-overlay-open {
+  overflow: hidden;
+}
+
+.nc-overlay {
+  position: fixed;
+  z-index: 5;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 48px 16px;
+  background: rgb(10 14 22 / 55%);
+  backdrop-filter: blur(2px);
+}
+
+.nc-overlay[hidden] {
+  display: none;
+}
+
+.nc-panel {
+  position: relative;
+  width: min(880px, 100%);
+  padding: 32px 36px 28px;
+  border: 1px solid var(--nc-border);
+  border-radius: var(--nc-radius);
+  background: var(--nc-surface);
+  outline: none;
+  box-shadow: 0 24px 64px rgb(0 0 0 / 25%);
+}
+
+.nc-panel__close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  color: var(--nc-muted);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.nc-panel__close:hover {
+  background: var(--nc-surface-2);
+  color: var(--nc-text);
+}
+
+.nc-panel .nc-example__title {
+  margin: 0 40px 6px 0;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.nc-panel .nc-example__title + p {
+  color: var(--nc-muted);
+}
+
+.nc-panel .nc-example__image {
+  display: block;
+  margin: 8px auto 4px;
+  border-radius: var(--nc-radius-sm);
+}
+
+.md-typeset .nc-author {
+  color: var(--nc-muted);
+  font-size: 0.9em;
+}
+
+/* Keep the "Copied to clipboard" toast above the panel */
+.md-dialog {
+  z-index: 6;
+}
+
+@media screen and (max-width: 44.9375em) {
+  .nc-overlay {
+    padding: 0;
+  }
+
+  .nc-panel {
+    min-height: 100%;
+    padding: 24px 18px;
+    border-radius: 0;
+  }
+}
