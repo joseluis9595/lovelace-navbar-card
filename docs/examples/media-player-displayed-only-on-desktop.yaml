@@ -1,0 +1,28 @@
+type: custom:navbar-card
+desktop:
+  position: left
+  show_labels: false
+routes:
+  - icon: mdi:home-outline
+    icon_selected: mdi:home-assistant
+    url: /lovelace/home
+    label: Home
+  - icon: mdi:devices
+    url: /lovelace/devices
+    label: Devices
+  - icon: mdi:thermometer
+    url: /lovelace/weather
+    label: Weather
+  - icon: mdi:creation-outline
+    icon_selected: mdi:creation
+    url: /lovelace/control
+    label: Control
+  - icon: mdi:information
+    label: More
+    url: /config/info
+media_player:
+  players:
+    - entity: media_player.test_media_player
+  album_cover_background: true
+  show: "[[[return navbar.isDesktop]]]"
+  desktop_position: bottom-right

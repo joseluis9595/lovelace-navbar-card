@@ -1,0 +1,37 @@
+type: custom:navbar-card
+routes:
+  - url: /lovelace/home
+    icon: mdi:home
+    label: Home
+  - url: /lovelace/home/devices
+    icon: mdi:devices
+    label: Devices
+  - url: /config/automation/dashboard
+    icon: mdi:creation
+    label: Automations
+  - url: /config/dashboard
+    icon: mdi:cog
+    label: Settings
+  - image: |
+      [[[ 
+        return hass.states["person.jose"].attributes.entity_picture
+      ]]]
+    label: More
+    tap_action:
+      action: open-popup
+    popup:
+      - icon: mdi:cog
+        url: /config/dashboard
+      - icon: mdi:hammer
+        url: /developer-tools/yaml
+      - icon: mdi:power
+        tap_action:
+          action: call-service
+          service: homeassistant.restart
+          service_data: {}
+          confirmation:
+            text: Are you sure you want to restart Home Assistant?
+styles: |
+  .image {
+    border-radius: 16px !important;
+  }

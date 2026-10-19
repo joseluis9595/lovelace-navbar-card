@@ -16,6 +16,6 @@ TODO.md
 .DS_Store
 
 # Docs
-docs/.docusaurus/
+docs/.venv/
 docs/build/
-docs/node_modules/
+scripts/docs-screenshots/.cache/

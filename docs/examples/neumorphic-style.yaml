@@ -1,0 +1,62 @@
+type: custom:navbar-card
+routes:
+  - url: /lovelace/home
+    icon: mdi:home
+    label: Home
+  - url: /lovelace/home/devices
+    icon: mdi:devices
+    label: Devices
+  - url: /config/automation/dashboard
+    icon: mdi:creation
+    label: Automations
+  - url: /config/dashboard
+    icon: mdi:cog
+    label: Settings
+  - icon: mdi:information
+    label: More
+    url: /config/info
+styles: |-
+  :host {
+    --shadow-dark: color-mix(in srgb, var(--primary-text-color) 20%, transparent);
+    --shadow-light: color-mix(in srgb, var(--card-background-color) 85%, white 15%);
+    --background-color: color-mix(
+      in srgb,
+      var(--card-background-color) 92%,
+      var(--primary-text-color) 8%
+    );
+  }
+
+
+  ha-card {
+    background: var(--background-color) !important;
+    backdrop-filter: blur(16px);
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  ha-ripple {
+    display: none !important;
+  }
+
+  .route {
+    padding: 5px;
+  }
+
+  .button {
+    background: var(--background-color);
+    border-radius: 12px;
+    box-shadow:
+      3px 3px 6px var(--shadow-dark),
+      -3px -3px 6px var(--shadow-light);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+
+  .button:hover,
+  .button:active,
+  .button.active {
+    background: unset;
+    box-shadow:
+      inset 2px 2px 4px var(--shadow-dark),
+      inset -2px -2px 4px var(--shadow-light);
+    transform: translateY(1px);
+  }

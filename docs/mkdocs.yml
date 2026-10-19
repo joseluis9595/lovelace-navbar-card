@@ -1,0 +1,145 @@
+# Material for MkDocs configuration.
+# Only built-in Material features and template block overrides (overrides/)
+# are used so the site can also be built with Zensical (https://zensical.org),
+# which reads this file as-is.
+
+site_name: Navbar Card
+site_description: A customizable navigation bar card for Home Assistant
+site_url: https://joseluis9595.github.io/lovelace-navbar-card/
+repo_url: https://github.com/joseluis9595/lovelace-navbar-card
+repo_name: navbar-card
+edit_uri: edit/main/docs/content/
+copyright: Copyright &copy; 2024 Jose Álvarez Quiroga · MIT License
+
+docs_dir: content
+site_dir: build
+
+theme:
+  name: material
+  custom_dir: overrides
+  language: en
+  logo: img/logo.svg
+  favicon: img/favicon.ico
+  font:
+    text: Figtree
+    code: Roboto Mono
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+  features:
+    - content.action.edit
+    - content.code.copy
+    - navigation.indexes
+    - navigation.instant
+    - navigation.sections
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - search.highlight
+    - search.suggest
+    - toc.follow
+
+extra_css:
+  - stylesheets/base.css
+  - stylesheets/layout.css
+  - stylesheets/components.css
+  - stylesheets/home.css
+  - stylesheets/examples.css
+
+extra_javascript:
+  - javascripts/examples.js
+  - javascripts/tables.js
+
+extra:
+  generator: false
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/joseluis9595/lovelace-navbar-card
+    - icon: simple/homeassistant
+      link: https://community.home-assistant.io/t/navbar-card-easily-navigate-through-dashboards/832917
+    - icon: simple/buymeacoffee
+      link: https://www.buymeacoffee.com/joseluis9595
+
+plugins:
+  - search
+
+validation:
+  nav:
+    omitted_files: warn
+    not_found: warn
+    absolute_links: warn
+  links:
+    not_found: warn
+    anchors: warn
+    absolute_links: warn
+    unrecognized_links: warn
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  # Example configs live in docs/examples/*.yaml, also used by the screenshot
+  # script. Paths work from docs/ (CI) and from the repository root.
+  - pymdownx.snippets:
+      base_path: [".", "docs"]
+      check_paths: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Home: index.md
+  - Get started:
+      - Installation: docs/getting-started/installation.md
+      - Quickstart: docs/getting-started/quickstart.md
+  - Configuration:
+      - Overview: docs/configuration/overview.md
+      - Routes: docs/configuration/routes.md
+      - Desktop: docs/configuration/desktop.md
+      - Mobile: docs/configuration/mobile.md
+      - Media player: docs/configuration/media-player.md
+      - Layout: docs/configuration/layout.md
+      - Haptic: docs/configuration/haptic.md
+      - Styles: docs/configuration/styles.md
+  - Advanced:
+      - Navbar templates: docs/advanced/navbar-templates.md
+      - JavaScript templates: docs/advanced/js-templates.md
+      - Custom actions: docs/advanced/custom-actions.md
+      - Dashboard tweaks: docs/advanced/dashboard-tweaks.md
+  - Examples: docs/examples.md
+  - Help:
+      - FAQ: docs/help/faq.md
+      - Contact: docs/help/contact.md
+      - Support the project: docs/help/support.md

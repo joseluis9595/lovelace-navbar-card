@@ -7,7 +7,7 @@
 [![HA Community forum](https://img.shields.io/badge/Home%20Assistant-Community%20Forum-319fee?logo=home-assistant)](https://community.home-assistant.io/t/navbar-card-easily-navigate-through-dashboards/832917)
 
 <img
-  src="/docs/static/img/navbar-card-hero-rounded.png"
+  src="/docs/content/img/navbar-card-hero-rounded.png"
   alt="Navbar Card image"
 />
 
@@ -36,7 +36,7 @@ Ready to give it a try? Start with the [**installation guide**](https://joseluis
 
 ### ⚙️ Configuration
 
-You can find all configuration options [**in the wiki**](https://joseluis9595.github.io/lovelace-navbar-card/docs/configuration/all-options).
+You can find all configuration options [**in the wiki**](https://joseluis9595.github.io/lovelace-navbar-card/docs/configuration/overview).
 
 ### 📚 Showcase
 
@@ -44,4 +44,4 @@ Want inspiration? Visit our [**examples showcase**](https://joseluis9595.github.
 
 ### 🍻 Support
 
-If you enjoy using `navbar-card`, you can find ways to support the project [**here**](https://joseluis9595.github.io/lovelace-navbar-card/docs/support).
+If you enjoy using `navbar-card`, you can find ways to support the project [**here**](https://joseluis9595.github.io/lovelace-navbar-card/docs/help/support).
