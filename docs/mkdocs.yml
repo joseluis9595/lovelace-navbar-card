@@ -1,6 +1,7 @@
 # Material for MkDocs configuration.
-# Only built-in Material features are used so the site can also be built
-# with Zensical (https://zensical.org), which reads this file as-is.
+# Only built-in Material features and template block overrides (overrides/)
+# are used so the site can also be built with Zensical (https://zensical.org),
+# which reads this file as-is.
 
 site_name: Navbar Card
 site_description: A customizable navigation bar card for Home Assistant
@@ -15,6 +16,7 @@ site_dir: build
 
 theme:
   name: material
+  custom_dir: overrides
   language: en
   logo: img/logo.svg
   favicon: img/favicon.ico

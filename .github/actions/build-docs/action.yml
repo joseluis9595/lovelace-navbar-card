@@ -1,6 +1,16 @@
 name: Build Docs
 description: Build the Material for MkDocs documentation site
 
+inputs:
+  path:
+    description: Repository checkout to build, relative to the workspace
+    default: '.'
+  channel:
+    description: >-
+      Builds a preview channel (e.g. "beta"): served under <site_url>/<channel>/
+      and with extra.channel set, read by overrides/main.html
+    default: ''
+
 runs:
   using: composite
   steps:
@@ -8,12 +18,28 @@ runs:
       with:
         python-version: '3.13'
         cache: pip
-        cache-dependency-path: docs/requirements.txt
+        cache-dependency-path: ${{ inputs.path }}/docs/requirements.txt
 
     - shell: bash
-      working-directory: ./docs
+      working-directory: ${{ inputs.path }}/docs
       run: pip install -r requirements.txt
 
     - shell: bash
-      working-directory: ./docs
-      run: mkdocs build --strict
+      working-directory: ${{ inputs.path }}/docs
+      env:
+        CHANNEL: ${{ inputs.channel }}
+      run: |
+        if [ -z "$CHANNEL" ]; then
+          mkdocs build --strict
+          exit
+        fi
+        BASE_URL=$(sed -n 's/^site_url: *//p' mkdocs.yml)
+        if [ -z "$BASE_URL" ]; then
+          echo "::error::No site_url found in mkdocs.yml"
+          exit 1
+        fi
+        # Inherit everything from mkdocs.yml (nested keys like extra are
+        # merged), so the file itself stays as is
+        printf 'INHERIT: mkdocs.yml\nsite_url: %s/%s/\nextra:\n  channel: %s\n' \
+          "${BASE_URL%/}" "$CHANNEL" "$CHANNEL" > mkdocs.ci.yml
+        mkdocs build --strict -f mkdocs.ci.yml

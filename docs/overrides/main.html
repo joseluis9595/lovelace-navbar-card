@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{# Preview docs (develop under /beta/): extra.channel is set by the deploy
+   workflow. Keep them out of search results and link to the stable docs. #}
+
+{% block extrahead %}
+  {% if config.extra.channel == "beta" %}
+    <meta name="robots" content="noindex">
+  {% endif %}
+{% endblock %}
+
+{#- Material shows the bar whenever this block isn't empty, hence the "-" #}
+{% block announce -%}
+  {%- if config.extra.channel == "beta" -%}
+    You are viewing the docs for the upcoming release.
+    <a href="{{ config.site_url }}../">Go to the stable docs</a>
+  {%- endif -%}
+{%- endblock %}

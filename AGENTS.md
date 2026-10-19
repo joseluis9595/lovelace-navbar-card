@@ -14,7 +14,7 @@ Lovelace Navbar Card is a custom card for Home Assistant's Lovelace UI, built wi
 - **Testing**:
   - [Vitest](https://vitest.dev/) - Unit testing framework
   - [@testing-library/dom](https://testing-library.com/) - DOM testing utilities
-- **Documentation**: [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) - Documentation website (Python, config in `docs/mkdocs.yml`, pages in `docs/content/`). Stick to built-in Material features (no third-party MkDocs plugins or theme overrides) so the site stays buildable with [Zensical](https://zensical.org/)
+- **Documentation**: [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) - Documentation website (Python, config in `docs/mkdocs.yml`, pages in `docs/content/`). Stick to built-in Material features (no third-party MkDocs plugins; template changes only as block overrides in `docs/overrides/main.html`, e.g. `extrahead`) so the site stays buildable with [Zensical](https://zensical.org/)
 - **Code Quality**:
   - Biome - Linting & formatting with TypeScript support
   - TypeScript compiler - Static type checking
@@ -149,7 +149,7 @@ GitHub Actions workflows in `.github/workflows/`:
 
 - **`ci.yml`** — Runs on PRs to `develop`/`main` and on pushes to `develop`. For PRs to `main`, validates the source branch is `release/<version>` matching `package.json` before running lint, tests, build, and docs.
 - **`release.yml`** — On merge of a release PR into `main`, runs CI, creates a draft release, and merges `main` into `develop`.
-- **`deploy-docs.yaml`** — Deploys the docs site to GitHub Pages on pushes to `main`.
+- **`deploy-docs.yaml`** — Deploys the docs site to GitHub Pages on pushes to `main` or `develop`: `main` at the site root and `develop` under `/beta/`, built with `extra.channel: beta` so `docs/overrides/main.html` marks its pages `noindex` and shows a banner linking to the stable docs.
 - **`hacs-action.yml`** — Validates HACS compatibility.
 - **`stale.yml`** — Manages stale issues.
 

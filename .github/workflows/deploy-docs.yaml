@@ -1,35 +1,79 @@
 name: Deploy to GitHub Pages
 
+# Publishes main at the site root and develop under /beta/. GitHub Pages holds
+# a single deployment, so every run rebuilds and deploys both branches.
 on:
   push:
     branches:
       - main
+      - develop
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 jobs:
   build:
-    defaults:
-      run:
-        working-directory: ./docs
     name: Build Docs
     runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
     steps:
+      # The triggering branch, for the build-docs action
+      - uses: actions/checkout@v4
+
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          ref: main
+          path: _pages/main
 
-      - uses: ./.github/actions/build-docs
+      - uses: actions/checkout@v4
+        with:
+          ref: develop
+          path: _pages/develop
+
+      # Until both branches use MkDocs, skip the deploy rather than replace the
+      # live site with only one of them
+      - name: Check both branches use MkDocs
+        id: check
+        run: |
+          if [ -f _pages/main/docs/mkdocs.yml ] && [ -f _pages/develop/docs/mkdocs.yml ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::main or develop has no docs/mkdocs.yml yet, skipping deploy"
+          fi
+
+      - name: Build stable docs (main)
+        if: steps.check.outputs.ready
+        uses: ./.github/actions/build-docs
+        with:
+          path: _pages/main
+
+      - name: Build preview docs (develop)
+        if: steps.check.outputs.ready
+        uses: ./.github/actions/build-docs
+        with:
+          path: _pages/develop
+          # Served under /beta/, with noindex and the banner marker
+          # (docs/overrides/main.html)
+          channel: beta
+
+      - name: Combine builds
+        if: steps.check.outputs.ready
+        run: |
+          rm -rf _pages/main/docs/build/beta
+          cp -r _pages/develop/docs/build _pages/main/docs/build/beta
 
       - name: Upload Build Artifact
+        if: steps.check.outputs.ready
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/build
+          path: _pages/main/docs/build
 
   deploy:
-    defaults:
-      run:
-        working-directory: ./docs
     name: Deploy to GitHub Pages
     needs: build
+    if: needs.build.outputs.ready == 'true'
 
     permissions:
       pages: write

@@ -39,6 +39,22 @@
   color: var(--md-default-bg-color);
 }
 
+/* Announcement bar (preview docs, see overrides/main.html) */
+.md-banner {
+  background-color: var(--nc-primary-deep);
+  text-align: center;
+}
+
+.md-banner .md-typeset,
+.md-banner .md-typeset a {
+  color: #fff;
+}
+
+.md-banner .md-typeset a {
+  font-weight: 700;
+  text-decoration: underline;
+}
+
 .md-search__form {
   height: 40px;
   border-radius: 999px;
