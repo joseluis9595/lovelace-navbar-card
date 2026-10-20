@@ -8,6 +8,7 @@ Options for how Navbar Card fits into your dashboard.
 | --------------------- | ----------------------------- | ------- | ------------------------------------------------------------------------------------------------------ |
 | `auto_padding`        | [Auto Padding](#auto-padding) | -       | Add padding to your Home Assistant dashboard to prevent overlaps                                      |
 | `reflect_child_state` | `boolean`                     | `false` | Determines if each route item should be displayed as selected when any of its popup items is selected |
+| `popup_style`         | `bubbles` \| `panel`          | `bubbles` | How popups look. `bubbles` shows each item as a floating button; `panel` shows all items as rows of icon and label in a single panel. See [Popup style](#popup-style) |
 
 ## Auto padding
 
@@ -23,6 +24,23 @@ Automatically adds padding to your Home Assistant dashboard to prevent cards fro
 !!! note
 
     The `desktop_px` padding is automatically applied to the appropriate side of the screen based on your navbar's `desktop.position` setting.
+
+---
+
+## Popup style
+
+`popup_style: panel` shows a popup as one panel with a row for each item (icon, then label), similar to a context menu. Labels are always shown in this style, whatever `show_labels` is set to. The page behind is dimmed slightly, and the navbar itself stays visible and usable while the popup is open.
+
+```yaml
+type: custom:navbar-card
+layout:
+  popup_style: panel
+```
+
+<figure markdown="span">
+    ![Popup with popup_style bubbles (left) and panel (right)](../../img/configuration/navbar-card_popup-style.png#only-light){ width="916" }
+    ![Popup with popup_style bubbles (left) and panel (right)](../../img/configuration/navbar-card_popup-style_dark.png#only-dark){ width="916" }
+</figure>
 
 ---
 
