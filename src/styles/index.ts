@@ -5,7 +5,7 @@ import { DRAGGABLE_ITEM_STYLES, EDITOR_STYLES } from '@/styles/editor';
 const HOST_STYLES = css`
   :host {
     /* Sizes */
-    --navbar-border-radius: var(--ha-card-border-radius, 12px);
+    --navbar-border-radius: var(--ha-card-border-radius, var(--ha-border-radius-lg, 12px));
     --navbar-badge-icon-size: 12px;
     --navbar-badge-size: 16px;
     --navbar-route-icon-size: 24px;
@@ -17,12 +17,22 @@ const HOST_STYLES = css`
 
     /* Box shadow configuration */
     --navbar-box-shadow: 0px -1px 4px 0px rgba(0, 0, 0, 0.14);
-    --navbar-box-shadow-desktop: var(--material-shadow-elevation-2dp);
-    --navbar-box-shadow-mobile-floating: var(--material-shadow-elevation-2dp);
+    --navbar-box-shadow-desktop: var(--ha-box-shadow-s, var(--material-shadow-elevation-2dp));
+    --navbar-box-shadow-mobile-floating: var(--ha-box-shadow-s, var(--material-shadow-elevation-2dp));
     
     /* Controls the left margin of the navbar when in desktop mode (the width of HA sidebar) */
     --navbar-left-margin: var(--ha-sidebar-width, var(--mdc-drawer-width, 0px));
-    
+
+    /* Horizontal center of the dashboard view, after the sidebar and auto padding */
+    --navbar-view-center: calc(
+      50% +
+        (
+          var(--navbar-left-margin, 0px) +
+            var(--navbar-view-padding-left, 0px) -
+            var(--navbar-view-padding-right, 0px)
+        ) / 2
+    );
+
     /* Controls the edge inset of the navbar when in desktop mode (the width of HA sidebar) */
     --navbar-edge-inset: 16px;
 
@@ -276,7 +286,7 @@ const MEDIA_PLAYER_STYLES = css`
     top: calc(var(--header-height) + var(--navbar-edge-inset));
   }
   :is(.media-player, .media-player-carousel).desktop.position-absolute.top-center {
-    left: 50%;
+    left: var(--navbar-view-center);
     top: calc(var(--header-height) + var(--navbar-edge-inset));
     transform: translateX(-50%);
   }
@@ -289,7 +299,7 @@ const MEDIA_PLAYER_STYLES = css`
     bottom: var(--navbar-edge-inset);
   }
   :is(.media-player, .media-player-carousel).desktop.position-absolute.bottom-center {
-    left: 50%;
+    left: var(--navbar-view-center);
     bottom: var(--navbar-edge-inset);
     transform: translateX(-50%);
   }
@@ -478,7 +488,7 @@ const ROUTE_STYLES = css`
     flex: 1;
     width: 100%;
     text-align: center;
-    font-size: var(--paper-font-caption_-_font-size, 12px);
+    font-size: var(--ha-font-size-s, var(--paper-font-caption_-_font-size, 12px));
     font-weight: 500;
     white-space: nowrap;
     overflow: hidden;
