@@ -135,7 +135,9 @@ const updateStyles = (): boolean => {
     writeStyle(
       sectionsView,
       [
-        stickyFooterCss(desktop, largest('bottom')),
+        // Mobile padding already leaves room above the docked navbar, so HA's
+        // footer gap is only kept on desktop
+        stickyFooterCss(desktop, largest('bottom'), true),
         stickyFooterCss(mobile, largest('mobile')),
       ].join(''),
     );
@@ -181,11 +183,11 @@ const spacerCss = (media: string, pseudo: 'before' | 'after', px: number) =>
     : '';
 
 /** Raise the sticky sections view footer above the navbar */
-const stickyFooterCss = (media: string, px: number) =>
+const stickyFooterCss = (media: string, px: number, keepGap = false) =>
   px > 0
     ? `@media ${media} {
   hui-view-footer[sticky] {
-    bottom: calc(var(--row-gap) + ${px}px);
+    bottom: ${keepGap ? `calc(var(--row-gap) + ${px}px)` : `${px}px`};
   }
 }
 `

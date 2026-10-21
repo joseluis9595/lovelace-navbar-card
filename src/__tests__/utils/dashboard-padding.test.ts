@@ -202,7 +202,7 @@ describe('Dashboard padding', () => {
         /min-width: 768px[^}]*hui-view-footer\[sticky\] {[^}]*bottom: calc\(var\(--row-gap\) \+ 100px\)/,
       );
       expect(footerCss).toMatch(
-        /max-width: 767px[^}]*hui-view-footer\[sticky\] {[^}]*bottom: calc\(var\(--row-gap\) \+ 80px\)/,
+        /max-width: 767px[^}]*hui-view-footer\[sticky\] {[^}]*bottom: 80px/,
       );
 
       removeDashboardPadding(card);
