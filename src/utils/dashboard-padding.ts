@@ -193,12 +193,16 @@ const stickyFooterCss = (media: string, px: number, keepGap = false) =>
 `
     : '';
 
-/** View padding, used for left and right padding */
+/**
+ * View padding, used for left and right padding. Also exposed as a variable so
+ * centered widgets can follow the shifted view.
+ */
 const sidePaddingCss = (media: string, side: 'left' | 'right', px: number) =>
   px > 0
     ? `@media ${media} {
   :not(.edit-mode) > #view {
     padding-${side}: ${px}px !important;
+    --navbar-view-padding-${side}: ${px}px;
   }
 }
 `

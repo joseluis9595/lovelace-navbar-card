@@ -129,7 +129,7 @@ styles: |
 
 | Name                        | Default value                      | Description                                                             |
 | --------------------------- | ---------------------------------- | ---------------------------------------------------------------- |
-| `--navbar-border-radius`    | var(--ha-card-border-radius, 12px) | Border radius applied to all `ha-card` elements inside `.navbar` |
+| `--navbar-border-radius`    | var(--ha-card-border-radius, var(--ha-border-radius-lg, 12px)) | Border radius applied to all `ha-card` elements inside `.navbar` |
 | `--navbar-route-icon-size`  | 24px (28px on desktop)             | Size in pixels for each `.icon` element (set it on `.navbar-card` to also change it on desktop) |
 | `--navbar-route-image-size` | 32px                               | Size in pixels for each `.image` element                         |
 | `--navbar-badge-size`       | 16px                               | Size of badges that contain a count, text, or icon               |
@@ -137,11 +137,11 @@ styles: |
 
 ### Shadows
 
-| Name                                  | Default value                        | Description                                    |
-| ------------------------------------- | ------------------------------------ | --------------------------------------- |
-| `--navbar-box-shadow`                 | 0px -1px 4px 0px rgba(0, 0, 0, 0.14) | Box shadow used in mobile docked layout |
-| `--navbar-box-shadow-mobile-floating` | var(--material-shadow-elevation-2dp) | Box shadow used in mobile floating mode |
-| `--navbar-box-shadow-desktop`         | var(--material-shadow-elevation-2dp) | Box shadow used in desktop mode         |
+| Name                                  | Default value                                                  | Description                             |
+| ------------------------------------- | -------------------------------------------------------------- | --------------------------------------- |
+| `--navbar-box-shadow`                 | 0px -1px 4px 0px rgba(0, 0, 0, 0.14)                           | Box shadow used in mobile docked layout |
+| `--navbar-box-shadow-mobile-floating` | var(--ha-box-shadow-s, var(--material-shadow-elevation-2dp)) | Box shadow used in mobile floating mode |
+| `--navbar-box-shadow-desktop`         | var(--ha-box-shadow-s, var(--material-shadow-elevation-2dp)) | Box shadow used in desktop mode         |
 
 ### Position
 
