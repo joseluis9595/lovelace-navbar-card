@@ -346,6 +346,16 @@ describe('NavbarCard', () => {
       expect(getPaddingStyle()).toBeNull();
     });
 
+    it('removes padding in edit mode', async () => {
+      const editModeWrapper = document.createElement('hui-card-edit-mode');
+      document.body.appendChild(editModeWrapper);
+      editModeWrapper.appendChild(element);
+      await element.updateComplete;
+
+      expect(getPaddingStyle()).toBeNull();
+      editModeWrapper.remove();
+    });
+
     it('removes padding when disconnected', () => {
       element.remove();
 

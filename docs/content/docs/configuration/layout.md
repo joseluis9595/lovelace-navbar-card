@@ -11,7 +11,7 @@ Options for how Navbar Card fits into your dashboard.
 
 ## Auto padding
 
-Automatically adds padding to your Home Assistant dashboard to prevent cards from overlapping with Navbar Card. This eliminates the need for manual CSS padding adjustments in your Home Assistant theme. No padding is added while the navbar is hidden (`desktop.hidden` / `mobile.hidden`).
+Automatically adds padding to your Home Assistant dashboard to prevent cards and the [view footer](https://www.home-assistant.io/dashboards/sections/#editing-the-footer) from overlapping with Navbar Card. This eliminates the need for manual CSS padding adjustments in your Home Assistant theme. No padding is added while the navbar is hidden (`desktop.hidden` / `mobile.hidden`).
 
 | Name              | Type    | Default | Description                                                                                                     |
 | ----------------- | ------- | ------- | --------------------------------------------------------------------------------------------------------------- |

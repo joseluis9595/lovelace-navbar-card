@@ -101,36 +101,61 @@ const getCardPadding = (
 };
 
 /**
- * Rebuild the padding style element in hui-root from all registered cards.
+ * Rebuild the padding style elements from all registered cards: one in hui-root
+ * for the view padding, and one in the sections view for its sticky footer.
  * Returns false if hui-root could not be found.
  */
 const updateStyles = (): boolean => {
   const root = findHuiRoot()?.shadowRoot;
   if (!root) return false;
 
+  const paddings = [...sharedCardPaddings.values()];
+  const largest = (side: keyof CardPadding) =>
+    Math.max(0, ...paddings.map(padding => padding[side]));
+
+  // Breakpoint taken from the first card
+  const minWidth = paddings[0]?.minWidth ?? 768;
+  const desktop = `(min-width: ${minWidth}px)`;
+  const mobile = `(max-width: ${minWidth - 1}px)`;
+
+  writeStyle(
+    root,
+    [
+      spacerCss(desktop, 'before', largest('top')),
+      spacerCss(desktop, 'after', largest('bottom')),
+      sidePaddingCss(desktop, 'left', largest('left')),
+      sidePaddingCss(desktop, 'right', largest('right')),
+      spacerCss(mobile, 'after', largest('mobile')),
+    ].join(''),
+  );
+
+  // Sections view footer sticks to the bottom of the screen, behind the navbar
+  const sectionsView = root.querySelector('hui-sections-view')?.shadowRoot;
+  if (sectionsView) {
+    writeStyle(
+      sectionsView,
+      [
+        // Mobile padding already leaves room above the docked navbar, so HA's
+        // footer gap is only kept on desktop
+        stickyFooterCss(desktop, largest('bottom'), true),
+        stickyFooterCss(mobile, largest('mobile')),
+      ].join(''),
+    );
+  }
+  return true;
+};
+
+/**
+ * Write the padding style element of a root, removing it when there is no CSS.
+ */
+const writeStyle = (root: ShadowRoot, cssText: string) => {
   let styleEl = root.querySelector<HTMLStyleElement>(
     `#${DASHBOARD_PADDING_STYLE_ID}`,
   );
-  const paddings = [...sharedCardPaddings.values()];
-  if (paddings.length === 0) {
+  if (!cssText) {
     styleEl?.remove();
-    return true;
+    return;
   }
-
-  const largest = (side: keyof CardPadding) =>
-    Math.max(...paddings.map(padding => padding[side]));
-
-  // Breakpoint taken from the first card
-  const desktop = `(min-width: ${paddings[0].minWidth}px)`;
-  const mobile = `(max-width: ${paddings[0].minWidth - 1}px)`;
-
-  const cssText = [
-    spacerCss(desktop, 'before', largest('top')),
-    spacerCss(desktop, 'after', largest('bottom')),
-    sidePaddingCss(desktop, 'left', largest('left')),
-    sidePaddingCss(desktop, 'right', largest('right')),
-    spacerCss(mobile, 'after', largest('mobile')),
-  ].join('');
 
   if (!styleEl) {
     styleEl = document.createElement('style');
@@ -141,7 +166,6 @@ const updateStyles = (): boolean => {
   if (styleEl.textContent !== cssText) {
     styleEl.textContent = cssText;
   }
-  return true;
 };
 
 /** Empty block before/after the view, used for top and bottom padding */
@@ -153,6 +177,17 @@ const spacerCss = (media: string, pseudo: 'before' | 'after', px: number) =>
     display: block;
     height: ${px}px;
     width: 100%;
+  }
+}
+`
+    : '';
+
+/** Raise the sticky sections view footer above the navbar */
+const stickyFooterCss = (media: string, px: number, keepGap = false) =>
+  px > 0
+    ? `@media ${media} {
+  hui-view-footer[sticky] {
+    bottom: ${keepGap ? `calc(var(--row-gap) + ${px}px)` : `${px}px`};
   }
 }
 `
