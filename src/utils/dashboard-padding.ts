@@ -119,7 +119,7 @@ const updateStyles = (): boolean => {
 
   const largest = (side: keyof CardPadding) =>
     Math.max(...paddings.map(padding => padding[side]));
-  
+
   // Breakpoint taken from the first card
   const desktop = `(min-width: ${paddings[0].minWidth}px)`;
   const mobile = `(max-width: ${paddings[0].minWidth - 1}px)`;
