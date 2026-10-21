@@ -19,3 +19,6 @@ TODO.md
 docs/.venv/
 docs/build/
 scripts/docs-screenshots/.cache/
+
+# Local MCP servers (might contain tokens)
+.mcp.json
