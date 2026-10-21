@@ -13,7 +13,6 @@ import { MediaPlayer } from '@/components/media-player';
 import { Route } from '@/components/navbar';
 import { getDefaultStyles } from '@/styles';
 import {
-  DEFAULT_NAVBAR_CONFIG,
   DesktopPosition,
   type NavbarCardConfig,
   STUB_CONFIG,
@@ -21,13 +20,13 @@ import {
 } from '@/types';
 import {
   deepMergeKeepArrays,
-  forceDashboardPadding,
   forceResetRipple,
   getNavbarTemplates,
   injectStyles,
   mapStringToEnum,
   processTemplate,
   removeDashboardPadding,
+  setDashboardPadding,
 } from '@/utils';
 import { DOCS_LINKS } from '@/utils/docs-links';
 
@@ -71,33 +70,20 @@ export class NavbarCard extends LitElement {
   /** Tracks desktop/mobile via matchMedia (avoids layout thrash from resize + innerWidth). */
   private _desktopQuery?: MediaQueryList;
 
-  @state() private widgetVisibility: Record<string, WidgetPosition | null> = {};
+  /** Desktop position of the media player while visible, used for dashboard padding */
+  private _mediaPlayerPosition: WidgetPosition | null = null;
+
+  /** Whether the navbar is hidden for the current mode (computed on each update) */
+  private _isHidden = false;
 
   /** Set HA instance (called by HA runtime) */
   set hass(hass: HomeAssistant) {
     this._hass = hass;
 
     const { visible } = this._mediaPlayer.isVisible();
-    const prevMediaPlayerPosition = this.widgetVisibility.media_player ?? null;
-    const nextMediaPlayerPosition = visible
+    this._mediaPlayerPosition = visible
       ? this._mediaPlayer.desktop_position
       : null;
-
-    if (visible) {
-      this.widgetVisibility.media_player = nextMediaPlayerPosition;
-    } else {
-      this.widgetVisibility.media_player = null;
-    }
-
-    // Re-apply dashboard padding when media player visibility changes
-    if (prevMediaPlayerPosition !== nextMediaPlayerPosition) {
-      forceDashboardPadding({
-        autoPadding: this.config?.layout?.auto_padding,
-        desktop: this.config?.desktop ?? DEFAULT_NAVBAR_CONFIG.desktop,
-        mobile: this.config?.mobile ?? DEFAULT_NAVBAR_CONFIG.mobile,
-        widgetPositions: this.widgetVisibility,
-      });
-    }
   }
 
   /** Returns true if card is in *any* edit or preview mode */
@@ -109,6 +95,7 @@ export class NavbarCard extends LitElement {
     );
   }
 
+  /** Get the desktop position of the navbar */
   get desktopPosition(): DesktopPosition {
     return (
       mapStringToEnum(
@@ -145,20 +132,14 @@ export class NavbarCard extends LitElement {
       this.config?.styles ? unsafeCSS(this.config.styles) : css``,
     );
 
-    // Force dashboard padding
-    forceDashboardPadding({
-      autoPadding: this.config?.layout?.auto_padding,
-      desktop: this.config?.desktop ?? DEFAULT_NAVBAR_CONFIG.desktop,
-      mobile: this.config?.mobile ?? DEFAULT_NAVBAR_CONFIG.mobile,
-      widgetPositions: this.widgetVisibility,
-    });
+    this._applyDashboardPadding();
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
 
     this._unwatchDesktop();
-    removeDashboardPadding();
+    removeDashboardPadding(this);
 
     // Force popup closure without animation to prevent memory leaks
     this.focusedPopup = null;
@@ -206,15 +187,18 @@ export class NavbarCard extends LitElement {
     if (this.isConnected) this._watchDesktop();
   }
 
-  /**
-   * Native `updated` lit callback
-   */
-  protected updated(_changedProperties: PropertyValues): void {
-    super.updated(_changedProperties);
+  protected willUpdate(changedProperties: PropertyValues): void {
+    super.willUpdate(changedProperties);
+    this._isHidden = this._shouldHide();
+  }
+
+  protected updated(changedProperties: PropertyValues): void {
+    super.updated(changedProperties);
+    this._applyDashboardPadding();
   }
 
   protected render() {
-    if (!this.config || this._shouldHide()) return html``;
+    if (!this.config || this._isHidden) return html``;
 
     const deviceClass = this.isDesktop ? 'desktop' : 'mobile';
     const editClass = this.isInEditMode ? 'edit-mode' : '';
@@ -313,6 +297,17 @@ export class NavbarCard extends LitElement {
   private _onDesktopChange = (event: MediaQueryListEvent): void => {
     this.isDesktop = event.matches;
   };
+
+  /** Reserve dashboard padding for this card, unless it is hidden */
+  private _applyDashboardPadding(): void {
+    if (!this.isConnected) return;
+
+    if (this._isHidden) {
+      removeDashboardPadding(this);
+    } else {
+      setDashboardPadding(this, this.config, this._mediaPlayerPosition);
+    }
+  }
 
   /** Determine if navbar should be hidden */
   private _shouldHide(): boolean {
