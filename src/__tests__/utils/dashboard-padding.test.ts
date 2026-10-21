@@ -184,6 +184,36 @@ describe('Dashboard padding', () => {
       expect(getStyle()?.textContent).not.toContain('height: 120px');
     });
 
+    it('should raise the sticky sections view footer above the navbar', () => {
+      const sectionsView = document.createElement('hui-sections-view');
+      sectionsView.attachShadow({ mode: 'open' });
+      mockHuiRoot.shadowRoot?.appendChild(sectionsView);
+
+      setDashboardPadding(
+        card,
+        config({ desktop_px: 100, mobile_px: 80 }, { min_width: 768 }),
+        null,
+      );
+
+      const footerCss = sectionsView.shadowRoot?.querySelector(
+        '#navbar-card-forced-padding-styles',
+      )?.textContent;
+      expect(footerCss).toMatch(
+        /min-width: 768px[^}]*hui-view-footer\[sticky\] {[^}]*bottom: calc\(var\(--row-gap\) \+ 100px\)/,
+      );
+      expect(footerCss).toMatch(
+        /max-width: 767px[^}]*hui-view-footer\[sticky\] {[^}]*bottom: calc\(var\(--row-gap\) \+ 80px\)/,
+      );
+
+      removeDashboardPadding(card);
+
+      expect(
+        sectionsView.shadowRoot?.querySelector(
+          '#navbar-card-forced-padding-styles',
+        ),
+      ).toBeNull();
+    });
+
     it('should not rewrite styles when padding is unchanged', () => {
       setDashboardPadding(card, config({}), null);
       const setter = vi.spyOn(

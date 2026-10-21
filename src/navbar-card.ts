@@ -298,11 +298,12 @@ export class NavbarCard extends LitElement {
     this.isDesktop = event.matches;
   };
 
-  /** Reserve dashboard padding for this card, unless it is hidden */
+  /** Reserve dashboard padding for this card, unless it is hidden or in edit mode */
   private _applyDashboardPadding(): void {
     if (!this.isConnected) return;
 
-    if (this._isHidden) {
+    // Disable auto padding when navbar is hidden or in edit mode
+    if (this._isHidden || this.isInEditMode) {
       removeDashboardPadding(this);
     } else {
       setDashboardPadding(this, this.config, this._mediaPlayerPosition);
