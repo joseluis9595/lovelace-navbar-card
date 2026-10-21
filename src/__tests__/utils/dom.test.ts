@@ -1,22 +1,16 @@
 import { css, html } from 'lit';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import {
-  DesktopPosition,
-  type NavbarCardConfig,
-  WidgetPosition,
-} from '@/types/config';
+import type { NavbarCardConfig } from '@/types/config';
 
 import {
   conditionallyRender,
   fireDOMEvent,
-  forceDashboardPadding,
   forceOpenEditMode,
   forceResetRipple,
   getNavbarTemplates,
   injectStyles,
   preventEventDefault,
-  removeDashboardPadding,
 } from '../../utils/dom';
 
 // Type definitions for test mocks
@@ -205,193 +199,6 @@ describe('DOM utilities', () => {
       mockLovelacePanel.shadowRoot?.removeChild(mockHuiRoot);
 
       expect(() => forceOpenEditMode()).not.toThrow();
-    });
-  });
-
-  describe('removeDashboardPadding', () => {
-    it('should remove existing dashboard padding style', () => {
-      const mockStyle = document.createElement('style');
-      mockStyle.id = 'navbar-card-forced-padding-styles';
-      mockHuiRoot.shadowRoot?.appendChild(mockStyle);
-
-      removeDashboardPadding();
-
-      expect(
-        mockHuiRoot.shadowRoot?.querySelector(
-          '#navbar-card-forced-padding-styles',
-        ),
-      ).toBeNull();
-    });
-
-    it('should not throw when hui-root does not exist', () => {
-      mockLovelacePanel.shadowRoot?.removeChild(mockHuiRoot);
-
-      expect(() => removeDashboardPadding()).not.toThrow();
-    });
-
-    it('should not throw when style element does not exist', () => {
-      expect(() => removeDashboardPadding()).not.toThrow();
-    });
-  });
-
-  describe('forceDashboardPadding', () => {
-    it('should warn when hui-root is not found', () => {
-      // Remove hui-root element
-      mockLovelacePanel.shadowRoot?.removeChild(mockHuiRoot);
-
-      forceDashboardPadding();
-
-      expect(console.warn).toHaveBeenCalledWith(
-        '[navbar-card] Could not find hui-root. Custom padding styles will not be applied.',
-      );
-    });
-
-    it('should remove styles when auto padding is disabled', () => {
-      const mockStyle = document.createElement('style');
-      mockStyle.id = 'navbar-card-forced-padding-styles';
-      mockHuiRoot.shadowRoot?.appendChild(mockStyle);
-
-      const options = {
-        autoPadding: { enabled: false },
-        desktop: {},
-        mobile: {},
-        widgetPositions: {
-          media_player: null,
-        },
-      };
-
-      forceDashboardPadding(options);
-
-      expect(
-        mockHuiRoot.shadowRoot?.querySelector(
-          '#navbar-card-forced-padding-styles',
-        ),
-      ).toBeNull();
-    });
-
-    it('should add desktop left/right padding styles', () => {
-      const options = {
-        autoPadding: { desktop_px: 100, enabled: true },
-        desktop: { min_width: 768, position: DesktopPosition.left },
-        mobile: {},
-        widgetPositions: {
-          media_player: null,
-        },
-      };
-
-      forceDashboardPadding(options);
-
-      const styleEl = mockHuiRoot.shadowRoot?.querySelector(
-        '#navbar-card-forced-padding-styles',
-      ) as HTMLStyleElement;
-      expect(styleEl).toBeTruthy();
-      expect(styleEl.textContent).toContain('@media (min-width: 768px)');
-      expect(styleEl.textContent).toContain('padding-left: 100px !important');
-    });
-
-    it('should add desktop top padding styles', () => {
-      const options = {
-        autoPadding: { desktop_px: 100, enabled: true },
-        desktop: { min_width: 768, position: DesktopPosition.top },
-        mobile: {},
-        widgetPositions: {
-          media_player: null,
-        },
-      };
-
-      forceDashboardPadding(options);
-
-      const styleEl = mockHuiRoot.shadowRoot?.querySelector(
-        '#navbar-card-forced-padding-styles',
-      ) as HTMLStyleElement;
-      expect(styleEl).toBeTruthy();
-      expect(styleEl.textContent).toContain('@media (min-width: 768px)');
-      expect(styleEl.textContent).toContain('hui-view:before');
-      expect(styleEl.textContent).toContain('height: 100px');
-    });
-
-    it('should add desktop bottom padding styles', () => {
-      const options = {
-        autoPadding: { desktop_px: 100, enabled: true },
-        desktop: { min_width: 768, position: DesktopPosition.bottom },
-        mobile: {},
-        widgetPositions: {
-          media_player: null,
-        },
-      };
-
-      forceDashboardPadding(options);
-
-      const styleEl = mockHuiRoot.shadowRoot?.querySelector(
-        '#navbar-card-forced-padding-styles',
-      ) as HTMLStyleElement;
-      expect(styleEl).toBeTruthy();
-      expect(styleEl.textContent).toContain('@media (min-width: 768px)');
-      expect(styleEl.textContent).toContain('hui-view:after');
-      expect(styleEl.textContent).toContain('height: 100px');
-    });
-
-    it('should add mobile padding styles', () => {
-      const options = {
-        autoPadding: { enabled: true, mobile_px: 80 },
-        desktop: { min_width: 768 },
-        mobile: {},
-        widgetPositions: {
-          media_player: null,
-        },
-      };
-
-      forceDashboardPadding(options);
-
-      const styleEl = mockHuiRoot.shadowRoot?.querySelector(
-        '#navbar-card-forced-padding-styles',
-      ) as HTMLStyleElement;
-      expect(styleEl).toBeTruthy();
-      expect(styleEl.textContent).toContain('@media (max-width: 767px)');
-      expect(styleEl.textContent).toContain('height: 80px');
-    });
-
-    it('should add media player padding to mobile when enabled', () => {
-      const options = {
-        autoPadding: { enabled: true, media_player_px: 20, mobile_px: 80 },
-        desktop: { min_width: 768 },
-        mobile: {},
-        widgetPositions: {
-          media_player: WidgetPosition.bottomRight,
-        },
-      };
-
-      forceDashboardPadding(options);
-
-      const styleEl = mockHuiRoot.shadowRoot?.querySelector(
-        '#navbar-card-forced-padding-styles',
-      ) as HTMLStyleElement;
-      expect(styleEl).toBeTruthy();
-      expect(styleEl.textContent).toContain('height: 100px'); // 80 + 20
-    });
-
-    it('should update existing style element', () => {
-      const existingStyle = document.createElement('style');
-      existingStyle.id = 'navbar-card-forced-padding-styles';
-      existingStyle.textContent = 'old styles';
-      mockHuiRoot.shadowRoot?.appendChild(existingStyle);
-
-      const options = {
-        autoPadding: { enabled: true, mobile_px: 80 },
-        desktop: {},
-        mobile: {},
-        widgetPositions: {
-          media_player: null,
-        },
-      };
-
-      forceDashboardPadding(options);
-
-      const styleEl = mockHuiRoot.shadowRoot?.querySelector(
-        '#navbar-card-forced-padding-styles',
-      ) as HTMLStyleElement;
-      expect(styleEl.textContent).not.toContain('old styles');
-      expect(styleEl.textContent).toContain('height: 80px');
     });
   });
 

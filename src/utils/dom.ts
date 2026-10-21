@@ -1,15 +1,8 @@
 import { type CSSResult, html, type TemplateResult } from 'lit';
 
-import {
-  type AutoPaddingConfig,
-  DEFAULT_NAVBAR_CONFIG,
-  DesktopPosition,
-  type NavbarCardConfig,
-  WidgetPosition,
-} from '@/types/config';
+import type { NavbarCardConfig } from '@/types/config';
 import type { RippleElement } from '@/types/types';
 
-const DASHBOARD_PADDING_STYLE_ID = 'navbar-card-forced-padding-styles';
 const DEFAULT_STYLES_ID = 'navbar-card-default-styles';
 const USER_STYLES_ID = 'navbar-card-user-styles';
 
@@ -55,7 +48,7 @@ export const forceResetRipple = (target: HTMLElement) => {
  *
  * @returns The hui-root element or null if not found.
  */
-const findHuiRoot = () => {
+export const findHuiRoot = () => {
   return window.document
     .querySelector('home-assistant')
     ?.shadowRoot?.querySelector('home-assistant-main')
@@ -71,186 +64,6 @@ export const forceOpenEditMode = () => {
   if (!huiRoot?.shadowRoot) return;
   // @ts-expect-error lovelace does not have "lovelace" property type
   huiRoot.lovelace.setEditMode(true);
-};
-
-/**
- * Remove the dashboard padding styles from the hui-root element.
- */
-export const removeDashboardPadding = () => {
-  const huiRoot = findHuiRoot();
-  if (!huiRoot?.shadowRoot) return;
-  const styleEl = huiRoot.shadowRoot.querySelector<HTMLStyleElement>(
-    `#${DASHBOARD_PADDING_STYLE_ID}`,
-  );
-  if (styleEl) {
-    styleEl.remove();
-  }
-};
-
-/**
- * Manually inject styles into the hui-root element to force dashboard padding.
- * This prevents overlaps with other cards in the dashboard.
- */
-export const forceDashboardPadding = (options?: {
-  desktop: NavbarCardConfig['desktop'];
-  mobile: NavbarCardConfig['mobile'];
-  autoPadding?: AutoPaddingConfig;
-  widgetPositions: Record<string, WidgetPosition | null>;
-}) => {
-  const autoPaddingEnabled =
-    options?.autoPadding?.enabled ??
-    DEFAULT_NAVBAR_CONFIG.layout?.auto_padding?.enabled;
-
-  // Find hui-root element
-  const huiRoot = findHuiRoot();
-  if (!huiRoot?.shadowRoot) {
-    console.warn(
-      '[navbar-card] Could not find hui-root. Custom padding styles will not be applied.',
-    );
-    return;
-  }
-
-  // Store padding values for each side
-  const totalPaddings = {
-    desktop: {
-      [DesktopPosition.top]: 0,
-      [DesktopPosition.bottom]: 0,
-      [DesktopPosition.left]: 0,
-      [DesktopPosition.right]: 0,
-    },
-    mobile: {
-      bottom: 0,
-    },
-  };
-
-  // Find existing style element
-  let styleEl = huiRoot.shadowRoot.querySelector<HTMLStyleElement>(
-    `#${DASHBOARD_PADDING_STYLE_ID}`,
-  );
-
-  // Remove styles if auto padding is disabled
-  if (!autoPaddingEnabled) {
-    if (styleEl) {
-      styleEl.remove();
-    }
-    return;
-  }
-
-  // Initialize variables
-  const desktopMinWidth = options?.desktop?.min_width ?? 768;
-  const desktopPosition =
-    options?.desktop?.position ?? DEFAULT_NAVBAR_CONFIG.desktop.position;
-  const mobileMaxWidth = desktopMinWidth - 1;
-  let cssText = '';
-
-  // Desktop padding
-  const desktopPaddingPx =
-    options?.autoPadding?.desktop_px ??
-    DEFAULT_NAVBAR_CONFIG.layout?.auto_padding?.desktop_px ??
-    0;
-
-  // Store desktop padding
-  totalPaddings.desktop[desktopPosition] += desktopPaddingPx;
-
-  // Mobile padding
-  const mobilePaddingPx =
-    options?.autoPadding?.mobile_px ??
-    DEFAULT_NAVBAR_CONFIG.layout?.auto_padding?.mobile_px ??
-    0;
-
-  totalPaddings.mobile.bottom += mobilePaddingPx;
-
-  // Media player padding
-  const mediaPlayerPaddingPx =
-    options?.autoPadding?.media_player_px ??
-    DEFAULT_NAVBAR_CONFIG.layout?.auto_padding?.media_player_px ??
-    0;
-  const mediaPlayerPosition = options?.widgetPositions?.media_player ?? null;
-
-  if (mediaPlayerPosition) {
-    switch (mediaPlayerPosition) {
-      case WidgetPosition.topLeft:
-      case WidgetPosition.topCenter:
-      case WidgetPosition.topRight:
-        totalPaddings.desktop[DesktopPosition.top] += mediaPlayerPaddingPx;
-        break;
-      case WidgetPosition.bottomCenter:
-      case WidgetPosition.bottomRight:
-      case WidgetPosition.bottomLeft:
-        totalPaddings.desktop[DesktopPosition.bottom] += mediaPlayerPaddingPx;
-        break;
-    }
-    totalPaddings.mobile.bottom += mediaPlayerPaddingPx;
-  }
-
-  // Build CSS text
-  if (totalPaddings.desktop[DesktopPosition.top] > 0) {
-    cssText += `
-      @media (min-width: ${desktopMinWidth}px) {
-        :not(.edit-mode) > hui-view:before {
-          content: "";
-          display: block;
-          height: ${totalPaddings.desktop[DesktopPosition.top]}px;
-          width: 100%;
-          background-color: transparent;
-        }
-      }
-    `;
-  }
-  if (totalPaddings.desktop[DesktopPosition.bottom] > 0) {
-    cssText += `
-      @media (min-width: ${desktopMinWidth}px) {
-        :not(.edit-mode) > hui-view:after {
-          content: "";
-          display: block;
-          height: ${totalPaddings.desktop[DesktopPosition.bottom]}px;
-          width: 100%;
-          background-color: transparent;
-        }
-      }
-    `;
-  }
-  if (totalPaddings.desktop[DesktopPosition.left] > 0) {
-    cssText += `
-      @media (min-width: ${desktopMinWidth}px) {
-       :not(.edit-mode) > #view {
-            padding-left: ${totalPaddings.desktop[DesktopPosition.left]}px !important;
-          }
-      }
-    `;
-  }
-  if (totalPaddings.desktop[DesktopPosition.right] > 0) {
-    cssText += `
-      @media (min-width: ${desktopMinWidth}px) {
-       :not(.edit-mode) > #view {
-            padding-right: ${totalPaddings.desktop[DesktopPosition.right]}px !important;
-          }
-      }
-    `;
-  }
-  if (totalPaddings.mobile.bottom > 0) {
-    cssText += `
-        @media (max-width: ${mobileMaxWidth}px) {
-          :not(.edit-mode) > hui-view:after {
-            content: "";
-            display: block;
-            height: ${totalPaddings.mobile.bottom}px;
-            width: 100%;
-            background-color: transparent;
-            }
-          }
-        `;
-  }
-
-  // Append styles to hui-root
-  if (!styleEl) {
-    styleEl = document.createElement('style');
-    styleEl.id = DASHBOARD_PADDING_STYLE_ID;
-    styleEl.textContent = cssText;
-    huiRoot.shadowRoot.appendChild(styleEl);
-  } else {
-    styleEl.textContent = cssText;
-  }
 };
 
 type EventConstructorMap = {

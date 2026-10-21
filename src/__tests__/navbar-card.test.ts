@@ -1,6 +1,6 @@
 import { fixture, html } from '@open-wc/testing';
 import type { HomeAssistant } from 'custom-card-helpers';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { NavbarCardConfig } from '@/types';
 
@@ -289,6 +289,67 @@ describe('NavbarCard', () => {
           '--navbar-primary-color',
         ),
       ).toBe('#00ff00');
+    });
+  });
+
+  describe('Dashboard padding', () => {
+    let huiRoot: HTMLElement;
+
+    const getPaddingStyle = () =>
+      huiRoot.shadowRoot?.querySelector('#navbar-card-forced-padding-styles');
+
+    beforeEach(async () => {
+      // Mock the DOM path used to find hui-root
+      const homeAssistant = document.createElement('home-assistant');
+      const main = document.createElement('home-assistant-main');
+      const panel = document.createElement('ha-panel-lovelace');
+      huiRoot = document.createElement('hui-root');
+      homeAssistant.attachShadow({ mode: 'open' }).appendChild(main);
+      main.attachShadow({ mode: 'open' }).appendChild(panel);
+      panel.attachShadow({ mode: 'open' }).appendChild(huiRoot);
+      huiRoot.attachShadow({ mode: 'open' });
+      document.body.appendChild(homeAssistant);
+
+      // Reconnect so the card registers its padding against the mocked hui-root
+      element.remove();
+      document.body.appendChild(element);
+      await element.updateComplete;
+    });
+
+    afterEach(() => {
+      element.remove();
+      document.querySelector('home-assistant')?.remove();
+    });
+
+    it('applies padding when connected', () => {
+      expect(getPaddingStyle()?.textContent).toContain('height: 80px');
+    });
+
+    it('re-applies padding when config changes', async () => {
+      element.setConfig({
+        ...DEFAULT_CONFIG,
+        layout: { auto_padding: { enabled: true, mobile_px: 50 } },
+      });
+      await element.updateComplete;
+
+      expect(getPaddingStyle()?.textContent).toContain('height: 50px');
+    });
+
+    it('removes padding when the navbar is hidden', async () => {
+      element.setConfig({
+        ...DEFAULT_CONFIG,
+        desktop: { ...DEFAULT_CONFIG.desktop, hidden: true },
+        mobile: { hidden: true },
+      });
+      await element.updateComplete;
+
+      expect(getPaddingStyle()).toBeNull();
+    });
+
+    it('removes padding when disconnected', () => {
+      element.remove();
+
+      expect(getPaddingStyle()).toBeNull();
     });
   });
 });
