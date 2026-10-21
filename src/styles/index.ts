@@ -131,7 +131,7 @@ const NAVBAR_CONTAINER_STYLES = css`
     top: unset;
     right: unset;
     bottom: var(--navbar-edge-inset);
-    left: calc(50% + var(--navbar-left-margin, 0px) / 2);
+    left: var(--navbar-view-center);
     transform: translate(-50%, 0);
   }
 
@@ -144,7 +144,7 @@ const NAVBAR_CONTAINER_STYLES = css`
     bottom: unset;
     right: unset;
     top: var(--navbar-edge-inset);
-    left: calc(50% + var(--navbar-left-margin, 0px) / 2);
+    left: var(--navbar-view-center);
     transform: translate(-50%, 0);
   }
 
