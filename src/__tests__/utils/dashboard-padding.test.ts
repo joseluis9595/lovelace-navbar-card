@@ -101,6 +101,9 @@ describe('Dashboard padding', () => {
       expect(getStyle()?.textContent).toContain(
         'padding-left: 100px !important',
       );
+      expect(getStyle()?.textContent).toContain(
+        '--navbar-view-padding-left: 100px',
+      );
     });
 
     it('should add desktop top padding styles', () => {
