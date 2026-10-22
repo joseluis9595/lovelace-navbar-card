@@ -1,0 +1,363 @@
+<!doctype html>
+<!--
+  Lays out one frame.html per configuration (side by side or stacked) and
+  crops each one to the card, or to the bottom of a mocked phone.
+  Query: ?job=<id>. Sets window.__ready once #stage can be captured.
+-->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: transparent;
+      }
+      #stage {
+        --pad: 24px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: inline-flex;
+        align-items: center;
+      }
+      #stage.column {
+        flex-direction: column;
+      }
+      iframe {
+        display: block;
+        border: 0;
+        background: transparent;
+      }
+
+      /* Card mode: each cell is the card plus --pad, overlapping neighbours by
+         --pad so the space between cards matches the outer margin */
+      .card-cell {
+        position: relative;
+        overflow: hidden;
+      }
+      .card-cell iframe {
+        position: absolute;
+      }
+      #stage.row .card-cell + .card-cell {
+        margin-left: calc(-1 * var(--pad));
+      }
+      #stage.column .card-cell + .card-cell {
+        margin-top: calc(-1 * var(--pad));
+      }
+      /* Cards with a background behind them are cropped as a rounded screen */
+      .card-cell.screen {
+        border-radius: 16px;
+      }
+      #stage.row .card-cell.screen + .card-cell.screen {
+        margin-left: var(--pad);
+      }
+      #stage.column .card-cell.screen + .card-cell.screen {
+        margin-top: var(--pad);
+      }
+
+      /* Callouts naming parts of the card */
+      #stage.annotated {
+        padding: 56px 24px;
+      }
+      .annotations {
+        position: absolute;
+        inset: 0;
+        --note-line: #8a919c;
+        --note-bg: #1d2129;
+        --note-fg: #ffffff;
+      }
+      .dark .annotations {
+        --note-bg: #e6e9ee;
+        --note-fg: #15171c;
+      }
+      .note-box {
+        position: absolute;
+        border: 1.5px dashed var(--note-line);
+        border-radius: 8px;
+      }
+      .note-line {
+        position: absolute;
+        width: 1.5px;
+        background: var(--note-line);
+      }
+      .note {
+        position: absolute;
+        padding: 5px 10px;
+        border-radius: 999px;
+        background: var(--note-bg);
+        color: var(--note-fg);
+        font: 600 13px/1 ui-monospace, 'SF Mono', Menlo, monospace;
+        white-space: nowrap;
+        transform: translate(-50%, -50%);
+      }
+
+      /* Full screen: the dashboard inside a browser-like window */
+      .window {
+        margin: var(--pad);
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      }
+      .window-bar {
+        display: flex;
+        gap: 7px;
+        align-items: center;
+        height: 30px;
+        padding: 0 14px;
+        background: #eceff3;
+      }
+      .window-bar span {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: #ff5f57;
+      }
+      .window-bar span:nth-child(2) {
+        background: #febc2e;
+      }
+      .window-bar span:nth-child(3) {
+        background: #28c840;
+      }
+      .dark .window {
+        border-color: rgba(255, 255, 255, 0.12);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      }
+      .dark .window-bar {
+        background: #2a2d33;
+      }
+
+      /* Phone mode: bottom of a phone, cut at --crop from the bottom edge */
+      #stage.mode-phone {
+        --rim: 4px;
+        --bezel: 12px;
+        --radius: 60px;
+        align-items: flex-end;
+        gap: var(--pad);
+        padding: 0 var(--pad) var(--pad);
+      }
+      .phone-cell {
+        position: relative;
+        overflow: hidden;
+        height: var(--crop);
+      }
+      .phone {
+        position: relative;
+        bottom: 0;
+        padding: var(--rim);
+        border-radius: var(--radius);
+        background: linear-gradient(160deg, #6d93b8, #3a5f84 45%, #2c4a69);
+        box-shadow: inset 0 0 1px 1px rgba(255, 255, 255, 0.25);
+      }
+      .bezel {
+        padding: var(--bezel);
+        border-radius: calc(var(--radius) - var(--rim));
+        background: #000;
+      }
+      .screen {
+        position: relative;
+        overflow: hidden;
+        border-radius: calc(var(--radius) - var(--rim) - var(--bezel));
+      }
+      .home-indicator {
+        position: absolute;
+        bottom: 8px;
+        left: 50%;
+        width: 134px;
+        height: 5px;
+        border-radius: 3px;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.85);
+      }
+      .dark .home-indicator {
+        background: rgba(255, 255, 255, 0.85);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="stage"></div>
+    <script type="module">
+      const sleep = ms => new Promise(r => setTimeout(r, ms));
+      const id = new URLSearchParams(location.search).get('job');
+      const job = await (await fetch(`/job.json?id=${id}`)).json();
+      const stage = document.getElementById('stage');
+      stage.classList.add(`mode-${job.mode}`, job.stack ? 'column' : 'row');
+      stage.classList.toggle('dark', job.dark);
+      stage.style.setProperty('--pad', `${job.padding}px`);
+      stage.style.setProperty('--crop', `${job.phoneCrop}px`);
+
+      /** Draws each callout: a dashed box around the element, a line and a label */
+      function annotate(iframe) {
+        const ROW = 36;
+        const notes = job.annotations;
+        const rows = side =>
+          Math.max(0, ...notes.filter(n => n.side === side).map(n => n.row ?? 0));
+        const used = side => notes.some(n => n.side === side);
+        // Room for labels only on the sides that have them
+        stage.classList.add('annotated');
+        stage.style.paddingTop = used('top') ? `${56 + rows('top') * ROW}px` : '24px';
+        stage.style.paddingBottom = used('bottom')
+          ? `${56 + rows('bottom') * ROW}px`
+          : '24px';
+        // Side margins fit the widest label on that side, plus room for the line
+        const labelWidth = text => {
+          const probe = document.createElement('div');
+          probe.className = 'note';
+          probe.textContent = text;
+          document.body.append(probe);
+          const width = probe.offsetWidth;
+          probe.remove();
+          return width;
+        };
+        const margin = side =>
+          used(side)
+            ? `${Math.max(...notes.filter(n => n.side === side).map(n => labelWidth(n.label))) + 64}px`
+            : '24px';
+        stage.style.paddingLeft = margin('left');
+        stage.style.paddingRight = margin('right');
+        const layer = document.createElement('div');
+        layer.className = 'annotations';
+        stage.append(layer);
+        const stageBox = stage.getBoundingClientRect();
+        const frameBox = iframe.getBoundingClientRect();
+        const add = (className, style) => {
+          const element = document.createElement('div');
+          element.className = className;
+          Object.assign(element.style, style);
+          layer.append(element);
+          return element;
+        };
+        for (const note of notes) {
+          const r = iframe.contentWindow.__elementRect(note.selector, note.index);
+          if (!r) {
+            window.__error = `annotation: nothing matches ${note.selector}`;
+            return;
+          }
+          const x = frameBox.x - stageBox.x + r.x;
+          const y = frameBox.y - stageBox.y + r.y;
+          add('note-box', {
+            height: `${r.height}px`,
+            left: `${x}px`,
+            top: `${y}px`,
+            width: `${r.width}px`,
+          });
+          const label = add('note', {});
+          label.textContent = note.label;
+          const half = label.offsetWidth / 2;
+
+          if (note.side === 'left' || note.side === 'right') {
+            // Label in the side margin, horizontal line to the element's edge
+            const left = note.side === 'left';
+            const labelX = left ? 24 + half : stageBox.width - 24 - half;
+            const lineY = y + r.height / 2;
+            const from = left ? labelX + half : x + r.width;
+            const to = left ? x : labelX - half;
+            add('note-line', {
+              height: '1.5px',
+              left: `${from}px`,
+              top: `${lineY}px`,
+              width: `${to - from}px`,
+            });
+            Object.assign(label.style, { left: `${labelX}px`, top: `${lineY}px` });
+            layer.append(label);
+            continue;
+          }
+
+          const offset = 26 + (note.row ?? 0) * ROW;
+          const labelY = note.side === 'top' ? offset : stageBox.height - offset;
+          const lineX = note.alignLeft ? x + 16 : x + r.width / 2;
+          const from = note.side === 'top' ? labelY : y + r.height;
+          const to = note.side === 'top' ? y : labelY;
+          add('note-line', {
+            height: `${to - from}px`,
+            left: `${lineX}px`,
+            top: `${from}px`,
+          });
+          // Keep the label inside the image; its line still points at the element
+          const labelX = Math.min(
+            Math.max(lineX, half + 8),
+            stageBox.width - half - 8,
+          );
+          Object.assign(label.style, { left: `${labelX}px`, top: `${labelY}px` });
+          layer.append(label);
+        }
+      }
+
+      const frames = job.panels.map((_, i) => {
+        const iframe = document.createElement('iframe');
+        iframe.src = `/frame.html?job=${id}&panel=${i}`;
+        iframe.width = job.viewport.width;
+        iframe.height = job.viewport.height;
+
+        if (job.mode === 'phone') {
+          const cell = document.createElement('div');
+          cell.className = 'phone-cell';
+          cell.innerHTML =
+            '<div class="phone"><div class="bezel"><div class="screen"></div></div></div>';
+          const screen = cell.querySelector('.screen');
+          screen.append(iframe);
+          screen.insertAdjacentHTML(
+            'beforeend',
+            '<div class="home-indicator"></div>',
+          );
+          stage.append(cell);
+          // Shift the phone up so only its bottom stays inside the cell
+          const phone = cell.querySelector('.phone');
+          phone.style.top = `${job.phoneCrop - phone.offsetHeight}px`;
+          cell.style.width = `${phone.offsetWidth}px`;
+        } else {
+          const cell = document.createElement('div');
+          cell.className = 'card-cell';
+          cell.classList.toggle('screen', !!job.background && !job.fullscreen);
+          cell.style.width = `${job.viewport.width}px`;
+          cell.style.height = `${job.viewport.height}px`;
+          cell.append(iframe);
+          if (job.fullscreen) {
+            const win = document.createElement('div');
+            win.className = 'window';
+            win.innerHTML =
+              '<div class="window-bar"><span></span><span></span><span></span></div>';
+            win.append(cell);
+            stage.append(win);
+          } else {
+            stage.append(cell);
+          }
+        }
+        return iframe;
+      });
+
+      for (let i = 0; i < 100; i++) {
+        if (frames.every(f => f.contentWindow?.__ready === true)) break;
+        await sleep(100);
+      }
+      if (!frames.every(f => f.contentWindow?.__ready === true)) {
+        window.__error = 'card did not render';
+      } else {
+        await sleep(job.settleMs); // let entry animations finish
+
+        if (job.mode === 'card' && !job.fullscreen) {
+          for (const iframe of frames) {
+            const r = iframe.contentWindow.__rect();
+            if (!r) {
+              window.__error = '.navbar-card not found in the shadow root';
+              break;
+            }
+            // Card plus padding, clamped to the viewport (nothing renders outside)
+            const left = Math.max(0, r.x - job.padding);
+            const top = Math.max(0, r.y - job.padding);
+            const right = Math.min(job.viewport.width, r.x + r.width + job.padding);
+            const bottom = Math.min(job.viewport.height, r.y + r.height + job.padding);
+            const cell = iframe.parentElement;
+            cell.style.width = `${right - left}px`;
+            cell.style.height = `${bottom - top}px`;
+            iframe.style.left = `${-left}px`;
+            iframe.style.top = `${-top}px`;
+          }
+        }
+        if (job.annotations.length) annotate(frames[0]);
+        window.__ready = true;
+      }
+    </script>
+  </body>
+</html>

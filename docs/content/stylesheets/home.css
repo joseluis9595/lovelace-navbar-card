@@ -1,0 +1,163 @@
+/* Figtree 800 for the title, Material only loads up to 700 */
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@800&display=swap');
+
+/* ---------- Home page ---------- */
+
+.md-content:has(.nc-hero) .md-content__button {
+  display: none;
+}
+
+.nc-hero {
+  --nc-glow: rgb(42 118 248 / 16%);
+  --nc-glow-2: rgb(56 189 248 / 10%);
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 32px;
+  margin: 0 0 24px;
+  padding: 40px 40px 0;
+  border: 1px solid var(--nc-border);
+  border-radius: var(--nc-radius);
+  background:
+    radial-gradient(circle at 78% 55%, var(--nc-glow), transparent 45%),
+    radial-gradient(circle at 0% 0%, var(--nc-glow-2), transparent 40%),
+    var(--nc-bg);
+}
+
+[data-md-color-scheme='slate'] .nc-hero {
+  --nc-glow: rgb(138 183 251 / 14%);
+  --nc-glow-2: rgb(125 211 252 / 8%);
+}
+
+.nc-hero__text {
+  padding-bottom: 40px;
+}
+
+/* Title with a subtle gradient */
+.md-typeset .nc-hero h1 {
+  --nc-title-from: var(--nc-text);
+  --nc-title-to: var(--nc-primary);
+  margin-bottom: 16px;
+  font-size: 48px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  background: linear-gradient(90deg, var(--nc-title-from) 20%, var(--nc-title-to));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+[data-md-color-scheme='slate'] .md-typeset .nc-hero h1 {
+  --nc-title-to: var(--nc-link);
+}
+
+.md-typeset .nc-hero h1 .headerlink {
+  display: none;
+}
+
+.md-typeset .nc-hero__lead {
+  font-size: 20px;
+  line-height: 1.5;
+}
+
+.md-typeset .nc-hero__text p:not(.nc-hero__lead) {
+  color: var(--nc-muted);
+}
+
+.md-typeset .nc-hero .md-button {
+  margin: 8px 8px 0 0;
+}
+
+/* The phone rises from the bottom edge of the panel */
+.nc-hero__image {
+  align-self: end;
+}
+
+.md-typeset .nc-hero__image p {
+  margin: 0;
+}
+
+/* The phone is cut at the top, fade it out */
+.nc-hero__image img {
+  display: block;
+  width: 100%;
+  margin: 0 auto;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 20%);
+  mask-image: linear-gradient(to bottom, transparent, #000 20%);
+}
+
+.md-typeset .nc-features > ul > li {
+  border-color: var(--nc-border);
+  border-radius: var(--nc-radius-sm);
+  background: var(--nc-surface);
+}
+
+.md-typeset .nc-features > ul > li:hover {
+  border-color: transparent;
+}
+
+/* Icon in a tinted tile */
+.md-typeset .nc-features .lg {
+  display: inline-flex;
+  box-sizing: border-box;
+  width: 34px;
+  height: 34px;
+  margin-right: 8px;
+  padding: 7px;
+  border-radius: 10px;
+  background: var(--nc-primary-soft);
+  color: var(--md-primary-fg-color);
+  vertical-align: middle;
+}
+
+[data-md-color-scheme='slate'] .md-typeset .nc-features .lg {
+  color: var(--nc-link);
+}
+
+.md-typeset .nc-features .lg svg {
+  width: 100%;
+  height: 100%;
+}
+
+.md-typeset .nc-features p:first-child {
+  font-size: 17px;
+}
+
+.nc-quickstart {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 32px;
+}
+
+.md-typeset .nc-quickstart ol li {
+  margin-bottom: 10px;
+}
+
+@media screen and (max-width: 59.9375em) {
+  .nc-hero,
+  .nc-quickstart {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .md-typeset .nc-hero h1 {
+    font-size: 38px;
+  }
+}
+
+@media screen and (max-width: 44.9375em) {
+  .nc-hero {
+    gap: 0;
+    padding: 28px 20px 0;
+  }
+
+  .nc-hero__text {
+    padding-bottom: 16px;
+  }
+
+  .md-typeset .nc-hero .md-button {
+    display: block;
+    margin: 12px 0 0;
+    text-align: center;
+  }
+}

@@ -1,0 +1,164 @@
+<!doctype html>
+<!--
+  Renders one navbar-card outside Home Assistant. Loaded by stage.html in an
+  iframe, so the iframe size acts as the device viewport.
+  Query: ?job=<id>&panel=<index>
+-->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: transparent;
+      }
+      /* Full height, so background gradients cover the page (the card is fixed) */
+      html {
+        height: 100%;
+      }
+      /* Served from the cache by index.ts */
+      @font-face {
+        font-family: Roboto;
+        font-weight: 400;
+        font-display: block;
+        src: url(/fonts/roboto-400.woff2) format('woff2');
+      }
+      @font-face {
+        font-family: Roboto;
+        font-weight: 500;
+        font-display: block;
+        src: url(/fonts/roboto-500.woff2) format('woff2');
+      }
+      @font-face {
+        font-family: Roboto;
+        font-weight: 700;
+        font-display: block;
+        src: url(/fonts/roboto-700.woff2) format('woff2');
+      }
+      :root {
+        font-family: Roboto, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+    </style>
+    <script>
+      window.MDI_PATHS = {};
+
+      // Minimal stand-ins for Home Assistant's own elements
+      customElements.define(
+        'ha-card',
+        class extends HTMLElement {
+          constructor() {
+            super();
+            this.attachShadow({ mode: 'open' }).innerHTML = `
+              <style>:host{display:block;position:relative;box-sizing:border-box;
+              background:var(--ha-card-background,var(--card-background-color,#fff));
+              border-radius:var(--ha-card-border-radius,12px);box-shadow:var(--ha-card-box-shadow,none);
+              border:var(--ha-card-border-width,1px) solid var(--ha-card-border-color,var(--divider-color,#e0e0e0));
+              color:var(--primary-text-color)}</style><slot></slot>`;
+          }
+        },
+      );
+      customElements.define(
+        'ha-icon',
+        class extends HTMLElement {
+          static observedAttributes = ['icon'];
+          set icon(v) {
+            this._icon = v;
+            this._render();
+          }
+          get icon() {
+            return this._icon;
+          }
+          attributeChangedCallback(_n, _o, v) {
+            this.icon = v;
+          }
+          connectedCallback() {
+            this._render();
+          }
+          _render() {
+            const d = window.MDI_PATHS[this._icon] ?? '';
+            if (!d && this._icon) console.warn('missing icon', this._icon);
+            this.style.display = 'inline-flex';
+            this.innerHTML = `<svg viewBox="0 0 24 24" style="width:var(--mdc-icon-size,24px);height:var(--mdc-icon-size,24px);fill:var(--icon-primary-color,currentColor);display:block"><path d="${d}"/></svg>`;
+          }
+        },
+      );
+    </script>
+  </head>
+  <body>
+    <script type="module">
+      const params = new URLSearchParams(location.search);
+      const job = await (await fetch(`/job.json?id=${params.get('job')}`)).json();
+      const panel = job.panels[Number(params.get('panel'))];
+
+      window.MDI_PATHS = job.icons;
+      const root = document.documentElement;
+      if (job.background) root.style.background = job.background;
+      // Routes are selected by matching the page path: select the first one
+      const url = panel.path ?? panel.config.routes?.find(route => route.url)?.url;
+      if (url) history.replaceState(null, '', url);
+
+      await import('/navbar-card.js');
+      await customElements.whenDefined('navbar-card');
+      const card = document.createElement('navbar-card');
+      // Theme variables go on the card too, its :host defaults (e.g.
+      // --navbar-edge-inset) would win over values inherited from the page
+      for (const el of [root, card]) {
+        for (const [key, value] of Object.entries(job.theme)) {
+          el.style.setProperty(key, value);
+        }
+      }
+      card.setConfig(panel.config);
+      card.hass = {
+        callService() {},
+        language: 'en',
+        locale: { language: 'en' },
+        panels: {},
+        states: {},
+        themes: { darkMode: job.dark },
+        user: { is_admin: true, name: 'Demo' },
+        ...panel.hass,
+      };
+      document.body.appendChild(card);
+      await card.updateComplete;
+
+      if (panel.openPopup != null) {
+        const route = card._routes[panel.openPopup];
+        const anchor = card.shadowRoot.querySelectorAll('.route')[panel.openPopup];
+        if (!route || !anchor) {
+          throw new Error(`openPopup: no route at index ${panel.openPopup}`);
+        }
+        route.popup.open(anchor);
+        await card.updateComplete;
+      }
+
+      await document.fonts.ready;
+
+      /** Box of an element inside the card, in viewport px (for callouts). */
+      window.__elementRect = (selector, index = 0) => {
+        const element = card.shadowRoot.querySelectorAll(selector)[index];
+        if (!element) return null;
+        const r = element.getBoundingClientRect();
+        return { height: r.height, width: r.width, x: r.x, y: r.y };
+      };
+
+      /** Bounding box of the card plus any open popup, in viewport px. */
+      window.__rect = () => {
+        const shadow = card.shadowRoot;
+        if (!shadow.querySelector('.navbar-card')) return null;
+        const rects = [
+          ...shadow.querySelectorAll('.navbar-card, .navbar-card *, .navbar-popup *, .media-player'),
+        ]
+          .map(el => el.getBoundingClientRect())
+          .filter(r => r.width && r.height);
+        const left = Math.min(...rects.map(r => r.left));
+        const top = Math.min(...rects.map(r => r.top));
+        const right = Math.max(...rects.map(r => r.right));
+        const bottom = Math.max(...rects.map(r => r.bottom));
+        return { height: bottom - top, width: right - left, x: left, y: top };
+      };
+      window.__ready = true;
+    </script>
+  </body>
+</html>

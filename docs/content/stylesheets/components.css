@@ -1,0 +1,314 @@
+/* Code, tables, admonitions, images and buttons */
+
+/* ---------- Code ---------- */
+
+.md-typeset code {
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-size: 0.88em;
+}
+
+.md-typeset pre > code {
+  padding: 16px 20px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Dark code blocks in light mode too; token colors tuned for that */
+[data-md-color-scheme='default'] .md-typeset .highlight {
+  --md-code-bg-color: var(--nc-code-bg);
+  --md-code-fg-color: #e6e9ee;
+  --md-code-hl-comment-color: #8a919c;
+  --md-code-hl-keyword-color: #8ab7fb;
+  --md-code-hl-name-color: #e6e9ee;
+  --md-code-hl-string-color: #a8d8a8;
+  --md-code-hl-number-color: #f0b77a;
+  --md-code-hl-constant-color: #f0b77a;
+  --md-code-hl-function-color: #c3a6ff;
+  --md-code-hl-operator-color: #aab1bc;
+  --md-code-hl-punctuation-color: #aab1bc;
+  --md-code-hl-variable-color: #ffcf8a;
+  --md-code-hl-special-color: #ff9ea8;
+  --md-code-hl-generic-color: #aab1bc;
+}
+
+[data-md-color-scheme='slate'] .md-typeset .highlight {
+  --md-code-bg-color: var(--nc-code-bg);
+}
+
+.md-typeset .highlight .md-clipboard {
+  color: #8a919c;
+}
+
+.md-typeset .highlight .md-clipboard:hover {
+  color: #fff;
+}
+
+/* ---------- Tables ---------- */
+
+.md-typeset table:not([class]) {
+  overflow: hidden;
+  border: 1px solid var(--nc-border);
+  border-radius: 16px;
+  font-size: 14.5px;
+}
+
+.md-typeset table:not([class]) th {
+  padding: 12px 16px;
+  background: var(--nc-surface-high);
+  color: var(--nc-text);
+  font-weight: 650;
+}
+
+.md-typeset table:not([class]) td {
+  padding: 11px 16px;
+  border-top-color: var(--nc-border);
+  vertical-align: top;
+}
+
+/* Names, types and defaults read as one token, never broken mid-word */
+.md-typeset table:not([class]) td:not(:last-child) code {
+  white-space: nowrap;
+}
+
+/* Keep descriptions readable when the other columns are wide */
+.md-typeset table:not([class]) td:last-child {
+  min-width: 14em;
+}
+
+/* "Required" pill next to the option name (added by javascripts/tables.js) */
+.md-typeset .nc-required {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--nc-primary-soft);
+  color: var(--nc-on-primary-soft);
+  font-size: 11.5px;
+  font-weight: 650;
+  line-height: 1.6;
+  vertical-align: middle;
+}
+
+.md-typeset table:not([class]) tr:hover {
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Linkable option rows: the option name links to its row (javascripts/tables.js) */
+.md-typeset table:not([class]) tr[id] {
+  scroll-margin-top: 140px;
+}
+
+.md-typeset table:not([class]) tr.nc-target {
+  background: var(--nc-primary-soft);
+}
+
+.md-typeset a.nc-option-link {
+  color: inherit;
+  font-weight: inherit;
+}
+
+.md-typeset a.nc-option-link:hover {
+  text-decoration: none;
+}
+
+.md-typeset a.nc-option-link code {
+  color: var(--md-code-fg-color);
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+}
+
+.md-typeset a.nc-option-link:hover code,
+.md-typeset tr.nc-target a.nc-option-link code {
+  background: var(--nc-primary-soft);
+  color: var(--nc-on-primary-soft);
+}
+
+/* Narrow content (phones, or desktop with both sidebars): one block per row,
+   cells labelled by javascripts/tables.js. Based on the content width, not
+   the screen, so four columns are never squeezed into a narrow column. */
+@container nc-content (max-width: 720px) {
+  /* Material's scroll wrapper and inline table are for wide tables */
+  .md-typeset .md-typeset__scrollwrap {
+    margin: 1em 0;
+    overflow: visible;
+  }
+
+  .md-typeset .md-typeset__table {
+    display: block;
+    padding: 0;
+  }
+
+  .md-typeset table:not([class]) td:last-child {
+    min-width: 0;
+  }
+
+  /* Long names may wrap, only at the _ . - hints added by tables.js */
+  .md-typeset table:not([class]) td:first-child code {
+    white-space: normal;
+  }
+
+  .md-typeset table:not([class]),
+  .md-typeset table:not([class]) tbody,
+  .md-typeset table:not([class]) tr,
+  .md-typeset table:not([class]) td {
+    display: block;
+  }
+
+  .md-typeset table:not([class]) thead {
+    display: none;
+  }
+
+  .md-typeset table:not([class]) tr + tr {
+    border-top: 1px solid var(--nc-border);
+  }
+
+  .md-typeset table:not([class]) td {
+    padding: 2px 16px;
+    border: 0;
+  }
+
+  .md-typeset table:not([class]) td:first-child {
+    padding-top: 14px;
+    font-weight: 650;
+  }
+
+  .md-typeset table:not([class]) td:last-child {
+    padding-top: 6px;
+    padding-bottom: 14px;
+  }
+
+  .md-typeset table:not([class]) td:not(:first-child, :last-child) {
+    color: var(--nc-muted);
+    font-size: 13.5px;
+  }
+
+  .md-typeset table:not([class]) td:not(:first-child, :last-child)::before {
+    content: attr(data-label) ': ';
+    font-weight: 600;
+  }
+
+  .md-typeset table:not([class]) td[data-empty]:not(:first-child, :last-child) {
+    display: none;
+  }
+}
+
+/* Medium content: two columns per row, the name, type and default on the left
+   and the description on the right. Phones keep the single column above. */
+@container nc-content (min-width: 480px) and (max-width: 720px) {
+  .md-typeset table:not([class]) tr {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    column-gap: 24px;
+    align-content: start;
+    padding-bottom: 12px;
+  }
+
+  .md-typeset table:not([class]) td:not(:last-child) {
+    grid-column: 1;
+  }
+
+  .md-typeset table:not([class]) td:last-child {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    padding-top: 14px;
+    padding-bottom: 0;
+  }
+}
+
+/* ---------- Admonitions and collapsibles ---------- */
+
+.md-typeset .admonition,
+.md-typeset details {
+  margin: 20px 0;
+  border: 1px solid var(--nc-border);
+  border-radius: var(--nc-radius-sm);
+  background: var(--nc-surface-high);
+  box-shadow: none;
+  font-size: 15px;
+}
+
+.md-typeset .admonition-title,
+.md-typeset summary {
+  background: transparent !important;
+  font-weight: 650;
+}
+
+.md-typeset .admonition.info,
+.md-typeset .admonition.note,
+.md-typeset details.note,
+.md-typeset details.question {
+  border-color: color-mix(in srgb, var(--nc-blue) 30%, var(--nc-border));
+  background: color-mix(in srgb, var(--nc-blue) 7%, var(--nc-surface));
+}
+
+/* FAQ questions: blue icon and chevron instead of Material's green */
+.md-typeset details.question > summary::before,
+.md-typeset details.question > summary::after {
+  background-color: var(--nc-blue);
+}
+
+.md-typeset .admonition.tip {
+  border-color: color-mix(in srgb, #00bfa5 30%, var(--nc-border));
+  background: color-mix(in srgb, #00bfa5 7%, var(--nc-surface));
+}
+
+.md-typeset details.example {
+  border-color: var(--nc-border);
+  background: var(--nc-surface);
+}
+
+/* Title-only admonitions (e.g. the "Not to be confused with" notes) */
+.md-typeset .admonition > .admonition-title:only-child {
+  margin-bottom: 0;
+}
+
+/* ---------- Images and embeds ---------- */
+
+.md-typeset figure img {
+  border-radius: var(--nc-radius-sm);
+}
+
+/* Styles page anatomy diagrams, stacked and centered (each light/dark pair
+   is one paragraph; the images keep Material's display, which hides the other
+   color scheme) */
+.md-typeset .nc-anatomy p {
+  display: flex;
+  justify-content: center;
+  margin: 28px 0;
+}
+
+/* Video embeds keep their aspect ratio at any width */
+.md-typeset iframe {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--nc-radius-sm);
+}
+
+/* ---------- Buttons ---------- */
+
+.md-typeset .md-button {
+  margin: 4px 8px 4px 0;
+  border-radius: 999px;
+}
+
+/* In dark mode the primary color is the header surface, use the link blue */
+[data-md-color-scheme='slate'] .md-typeset .md-button {
+  border-color: var(--nc-link);
+  color: var(--nc-link);
+}
+
+[data-md-color-scheme='slate'] .md-typeset .md-button--primary {
+  background-color: var(--nc-link);
+  color: var(--nc-bg);
+}
+
+[data-md-color-scheme='slate'] .md-typeset .md-button:hover {
+  border-color: var(--nc-link);
+  background-color: var(--nc-link);
+  color: var(--nc-bg);
+}

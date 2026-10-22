@@ -1,0 +1,34 @@
+type: custom:navbar-card
+routes:
+  - url: /lovelace/home
+    icon: mdi:home
+    label: Home
+  - url: /lovelace/home/devices
+    icon: mdi:devices
+    label: Devices
+    badge:
+      show: >-
+        [[[
+          // Store the light entities in a variable to avoid recomputing them on each render
+          if (!this._lightEntities) {
+            this._lightEntities = Object.keys(hass.states).filter(id => id.startsWith('light.'));
+          }
+          return this._lightEntities.filter(id => hass.states[id].state === 'on').length > 0;
+        ]]]
+      count: >-
+        [[[
+          // Store the light entities in a variable to avoid recomputing them on each render
+          if (!this._lightEntities) {
+            this._lightEntities = Object.keys(hass.states).filter(id => id.startsWith('light.'));
+          }
+          return this._lightEntities.filter(id => hass.states[id].state === 'on').length;
+        ]]]
+  - url: /lovelace/home/control
+    icon: mdi:creation
+    label: Automations
+  - url: /config/dashboard
+    icon: mdi:cog
+    label: Settings
+  - icon: mdi:information
+    label: More
+    url: /config/info

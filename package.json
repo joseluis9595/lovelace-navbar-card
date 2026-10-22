@@ -1,6 +1,6 @@
 {
   "name": "navbar-card",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "author": "Jose Álvarez Quiroga <joseluisalvquiroga@gmail.com>",
   "repository": "git@github.com:joseluis9595/lovelace-navbar-card.git",
   "license": "MIT",
@@ -12,7 +12,11 @@
     "format": "biome format --write src/**/*.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "docs": "cd docs && .venv/bin/mkdocs serve -a 0.0.0.0:8000",
+    "docs:build": "cd docs && .venv/bin/mkdocs build --strict",
+    "docs:setup": "cd docs && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt",
+    "docs:screenshots": "bun run build && bun scripts/docs-screenshots/index.ts"
   },
   "devDependencies": {
     "@open-wc/testing": "^5.0.0",

@@ -1,0 +1,98 @@
+---
+title: Custom actions
+description: Learn about the custom actions available in Navbar Card, including popups, navigation, and advanced JavaScript interactions
+---
+
+# Custom actions
+
+Navbar Card extends Home Assistant's standard actions with additional functionality designed specifically for navigation and user interaction. These custom actions provide powerful ways to enhance your dashboard's usability.
+
+## Available actions
+
+In addition to [Home Assistant's standard actions](https://www.home-assistant.io/dashboards/actions/), the following custom actions are available:
+
+| Action               | Parameters                                    | Description                             |
+| -------------------- | --------------------------------------------- | --------------------------------------- |
+| `open-popup`         | -                                             | Opens a popup menu defined in the route |
+| `toggle-menu`        | -                                             | Opens Home Assistant's side menu        |
+| `show-notifications` | -                                             | Opens the notifications drawer          |
+| `quickbar`           | `mode` (optional): `entities`, `commands` or `devices` | Opens [Home Assistant's *Quick Search*](https://www.home-assistant.io/docs/tools/quick-search)         |
+| `navigate-back`      | -                                             | Goes back in browser history            |
+| `open-edit-mode`     | -                                             | Opens dashboard edit mode               |
+| `logout`             | -                                             | Logs out current user                   |
+| `custom-js-action`   | `code`: JS code                               | Executes custom JavaScript              |
+
+## Basic examples
+
+### Popup menu
+
+Create a route with a popup menu for quick access to common actions:
+
+```yaml
+type: custom:navbar-card
+routes:
+  - icon: mdi:dots-horizontal
+    label: More
+    tap_action:
+      action: open-popup
+    popup:
+      - icon: mdi:cog
+        url: /config/dashboard
+      - icon: mdi:bell
+        tap_action:
+          action: show-notifications
+      - icon: mdi:logout
+        tap_action:
+          action: logout
+```
+
+### Hold action / double tap action
+
+Use different gestures for different actions:
+
+```yaml
+type: custom:navbar-card
+routes:
+  - icon: mdi:lightbulb-outline
+    label: Lights
+    tap_action:
+      action: navigate
+      navigation_path: /lovelace/lights
+    hold_action:
+      action: quickbar
+      mode: entities
+    double_tap_action:
+      action: open-edit-mode
+```
+
+### Custom JavaScript actions
+
+Execute custom JavaScript code for advanced functionality:
+
+```yaml
+type: custom:navbar-card
+routes:
+  - icon: mdi:code-braces
+    label: Custom Action
+    tap_action:
+      action: custom-js-action
+      code: |
+        [[[
+          // Get all lights
+          const lights = Object.entries(hass.states)
+            .filter(([id]) => id.startsWith('light.'));
+          
+          // Turn off all lights
+          lights.forEach(([id]) => {
+            hass.callService('light', 'turn_off', {
+              entity_id: id
+            });
+          });
+          
+          // Show notification
+          hass.callService('persistent_notification', 'create', {
+            message: 'All lights turned off',
+            title: 'Lights Control'
+          });
+        ]]]
+```

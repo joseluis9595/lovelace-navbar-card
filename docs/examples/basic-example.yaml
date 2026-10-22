@@ -1,0 +1,37 @@
+type: custom:navbar-card
+desktop:
+  position: left
+  show_labels: true
+mobile:
+  show_labels: false
+routes:
+  - icon: mdi:home-outline
+    icon_selected: mdi:home
+    url: /lovelace/home
+    label: Home
+  - icon: mdi:devices
+    url: /lovelace/devices
+    label: Devices
+  - icon: mdi:creation-outline
+    icon_selected: mdi:creation
+    url: /config/automation/dashboard
+    label: Automations
+  - icon: mdi:cog
+    url: /config/dashboard
+    label: Settings
+  - icon: mdi:dots-horizontal
+    label: More
+    tap_action:
+      action: open-popup
+    popup:
+      - icon: mdi:hammer
+        label: DevTools
+        url: /developer-tools/yaml
+      - icon: mdi:power
+        label: Restart
+        tap_action:
+          action: call-service
+          service: homeassistant.restart
+          service_data: {}
+          confirmation:
+            text: Are you sure you want to restart Home Assistant?
