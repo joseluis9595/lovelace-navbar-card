@@ -23,11 +23,13 @@ import {
   genericSetProperty,
   type LabelVisibilityConfig,
   type MediaPlayerPlayerConfig,
+  type NavbarAutohideMode,
   type NavbarCardConfig,
   NavbarCustomActions,
   type NavbarDisplayMode,
   type NestedType,
   type PopupItem,
+  type PopupStyle,
   type QuickbarActionConfig,
   type RouteItem,
   WidgetPosition,
@@ -1130,6 +1132,17 @@ export class NavbarCardEditor extends LitElement {
           })}
         </div>
         <div class="editor-section">
+          ${this.makeComboBox<PopupStyle>({
+            configKey: 'layout.popup_style',
+            defaultValue: DEFAULT_NAVBAR_CONFIG.layout?.popup_style,
+            items: [
+              { label: 'Bubbles', value: 'bubbles' },
+              { label: 'Panel', value: 'panel' },
+            ],
+            label: 'Popup style',
+          })}
+        </div>
+        <div class="editor-section">
           <label class="editor-label">Auto padding</label>
           ${this.makeSwitch({
             configKey: 'layout.auto_padding.enabled',
@@ -1471,6 +1484,22 @@ export class NavbarCardEditor extends LitElement {
             configKey: 'mobile.safe_area',
             defaultValue: DEFAULT_NAVBAR_CONFIG.mobile?.safe_area,
             label: 'Respect safe area insets',
+          })}
+          ${this.makeSwitch({
+            configKey: 'mobile.scrollable',
+            defaultValue: DEFAULT_NAVBAR_CONFIG.mobile?.scrollable,
+            label: 'Scroll sideways, keeping the selected route centred',
+          })}
+          ${this.makeComboBox<NavbarAutohideMode | false>({
+            configKey: 'mobile.autohide',
+            defaultValue: DEFAULT_NAVBAR_CONFIG.mobile?.autohide,
+            items: [
+              { label: 'Off', value: false },
+              { label: 'Slide away on scroll', value: 'slide' },
+              { label: 'Minimize on scroll', value: 'minimize' },
+              { label: 'Arrow toggle', value: 'toggle' },
+            ],
+            label: 'Auto-hide',
           })}
           ${this.makeTemplateEditor({
             configKey: 'mobile.hidden',

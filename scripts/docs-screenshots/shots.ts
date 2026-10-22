@@ -112,6 +112,18 @@ const routes = [
   },
 ];
 
+/** More routes than fit on a phone, for `mobile.scrollable` */
+const manyRoutes = [
+  home,
+  devices,
+  { icon: 'mdi:lightbulb', label: 'Lights', url: '/lights' },
+  { icon: 'mdi:thermometer', label: 'Climate', url: '/climate' },
+  { icon: 'mdi:cctv', label: 'Cameras', url: '/cameras' },
+  { icon: 'mdi:lightning-bolt', label: 'Energy', url: '/energy' },
+  automations,
+  settings,
+];
+
 /** Mobile popup with labels, with or without label backgrounds */
 const popupLabels = (backgrounds: boolean): Panel => ({
   config: {
@@ -582,6 +594,52 @@ export const shots: Shot[] = [
       { config: { layout: noPadding, mobile: { safe_area: true }, routes } },
     ],
     phone: true,
+    themes: BOTH,
+  },
+  {
+    name: 'scrollable',
+    out: `${IMG}/configuration/navbar-card_scrollable.png`,
+    panels: [false, true].map(scrollable => ({
+      config: {
+        layout: noPadding,
+        mobile: { safe_area: true, scrollable },
+        routes: manyRoutes,
+      },
+      path: '/climate',
+    })),
+    phone: true,
+    phoneCrop: 120,
+    themes: BOTH,
+  },
+  {
+    name: 'autohide-toggle',
+    out: `${IMG}/configuration/navbar-card_autohide-toggle.png`,
+    panels: [
+      {
+        config: {
+          layout: noPadding,
+          mobile: { autohide: 'toggle', safe_area: true },
+          routes,
+        },
+      },
+    ],
+    phone: true,
+    phoneCrop: 150,
+    themes: BOTH,
+  },
+  {
+    name: 'popup-style',
+    out: `${IMG}/configuration/navbar-card_popup-style.png`,
+    panels: (['bubbles', 'panel'] as const).map(popup_style => ({
+      config: {
+        layout: { ...noPadding, popup_style },
+        mobile: { safe_area: true, show_labels: 'popup_only' },
+        routes,
+      },
+      openPopup: MORE,
+    })),
+    phone: true,
+    phoneCrop: 300,
     themes: BOTH,
   },
   {

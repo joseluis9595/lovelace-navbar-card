@@ -35,8 +35,14 @@ const CARD_JS = join(ROOT, 'dist/navbar-card.js');
 const MDI_VERSION = '7.4.47';
 const CACHE_DIR = join(import.meta.dir, '.cache');
 const ICON_CACHE = join(CACHE_DIR, `mdi-${MDI_VERSION}.json`);
-/** Icons the card renders itself (media player controls) */
-const CARD_ICONS = ['mdi:music', 'mdi:pause', 'mdi:play', 'mdi:skip-next'];
+/** Icons the card renders itself (media player controls, auto-hide tab) */
+const CARD_ICONS = [
+  'mdi:chevron-down',
+  'mdi:music',
+  'mdi:pause',
+  'mdi:play',
+  'mdi:skip-next',
+];
 /** Home Assistant's font; fallback fonts change text metrics (e.g. badges) */
 const ROBOTO_VERSION = '5.3.0';
 const ROBOTO_WEIGHTS = [400, 500, 700];

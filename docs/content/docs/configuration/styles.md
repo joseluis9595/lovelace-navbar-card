@@ -53,6 +53,11 @@ Selectors to copy into `styles`, from the general ones to the specific cases.
 | `.navbar-card.desktop.docked`  | The card on desktop with `mode: docked`                                     |
 | `.navbar-card.mobile.floating` | The card on mobile with `mode: floating`                                    |
 | `.navbar.mobile.safe-area`     | The wrapper on mobile with `safe_area: true`                                |
+| `.navbar-card.mobile.scrollable` | The card on mobile with `scrollable: true` (`[data-fade-start]` / `[data-fade-end]` while routes are hidden at that end) |
+| `.navbar.mobile.autohide-slide` | The wrapper on mobile with `autohide: slide` (also `.autohide-minimize` and `.autohide-toggle`) |
+| `.navbar.mobile.away`          | The wrapper while auto-hide has hidden, minimized or folded the navbar      |
+| `.autohide-tab`                | The arrow tab added by `autohide: toggle`                                   |
+| `.navbar.popup-panel`          | The wrapper with `layout.popup_style: panel` (`.popup-open` while a popup is open) |
 
 ### Routes
 
@@ -149,6 +154,23 @@ styles: |
 | ---------------------- | ----------------------------------------------------- | -------------------------------------------------------- |
 | `--navbar-left-margin` | var(--ha-sidebar-width, var(--mdc-drawer-width, 0px)) | Left margin of the navbar on desktop (the HA sidebar width) |
 | `--navbar-edge-inset`  | 16px                                                  | Distance between the navbar and the screen edge on desktop  |
+
+### Scrollable navbar
+
+| Name                               | Default value | Description                                                                 |
+| ---------------------------------- | ------------- | --------------------------------------------------------------------------- |
+| `--navbar-scrollable-route-width`  | 25%           | Width of each route when `mobile.scrollable` is on (`25%` shows four routes) |
+| `--navbar-scrollable-fade-size`    | 24px          | Size of the fade at an edge with routes scrolled out of view                 |
+
+### Auto-hide
+
+| Name                                | Default value                | Description                                          |
+| ----------------------------------- | ---------------------------- | ---------------------------------------------------- |
+| `--navbar-autohide-duration`        | 0.25s                        | Duration of the hide and show animations             |
+| `--navbar-autohide-easing`          | cubic-bezier(0.2, 0, 0, 1)   | Easing of the hide and show animations               |
+| `--navbar-autohide-tab-width`       | 96px                         | Width of the `toggle` mode arrow tab                 |
+| `--navbar-autohide-tab-height`      | 36px                         | Height of the arrow tab, and how much of it stays visible when folded |
+| `--navbar-autohide-tab-icon-size`   | 33px                         | Size of the arrow icon                               |
 
 ### Z-index
 

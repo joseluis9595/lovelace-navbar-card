@@ -8,9 +8,12 @@ import {
   unsafeCSS,
 } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import { MediaPlayer } from '@/components/media-player';
 import { Route } from '@/components/navbar';
+import { AutohideController } from '@/lib/autohide';
+import { ScrollableController } from '@/lib/scrollable';
 import { getDefaultStyles } from '@/styles';
 import {
   DesktopPosition,
@@ -63,6 +66,8 @@ export class NavbarCard extends LitElement {
 
   /** Runtime state */
   private readonly _mediaPlayer: MediaPlayer = new MediaPlayer(this);
+  private readonly _scrollable = new ScrollableController(this);
+  private readonly _autohide = new AutohideController(this);
   @state() private _routes: Route[] = [];
   @state() focusedPopup: TemplateResult<1> | null = null;
   @state() isDesktop?: boolean;
@@ -208,6 +213,15 @@ export class NavbarCard extends LitElement {
       this.isDesktop && this.config.desktop?.mode === 'docked' ? 'docked' : '';
     const safeAreaClass =
       !this.isDesktop && this.config.mobile?.safe_area ? 'safe-area' : '';
+    const scrollableClass = this._scrollable.enabled ? 'scrollable' : '';
+    const popupOpenClass = this.focusedPopup ? 'popup-open' : '';
+    const popupStyleClass =
+      this.config.layout?.popup_style === 'panel' ? 'popup-panel' : '';
+
+    const autohideMode = this._autohide.mode;
+    const autohideClass = autohideMode ? `autohide-${autohideMode}` : '';
+    const awayClass = this._autohide.isAway ? 'away' : '';
+    const pill = autohideMode === 'minimize' ? this._autohide.pill : null;
 
     const shouldRenderMediaPlayerInsideNavbar =
       this._shouldRenderMediaPlayerInsideNavbar();
@@ -223,7 +237,17 @@ export class NavbarCard extends LitElement {
       <div
         class="navbar ${editClass} ${deviceClass} ${
           this.desktopPosition
-        } ${mobileModeClass} ${desktopModeClass} ${safeAreaClass}">
+        } ${mobileModeClass} ${desktopModeClass} ${safeAreaClass} ${
+          autohideClass
+        } ${awayClass} ${popupOpenClass} ${popupStyleClass}"
+        style=${styleMap({
+          '--navbar-pill-clip': pill?.clip ?? null,
+          '--navbar-pill-shift': pill?.shift ?? null,
+        })}
+        @pointerdown=${this._autohide.interceptTap}
+        @pointerup=${this._autohide.interceptTap}
+        @click=${this._autohide.interceptTap}>
+        ${autohideMode === 'toggle' ? this._renderAutohideToggle() : html``}
         ${
           shouldRenderMediaPlayerInsideNavbar
             ? this._mediaPlayer.render({
@@ -234,11 +258,27 @@ export class NavbarCard extends LitElement {
         <ha-card
           class="navbar-card ${deviceClass} ${
             this.desktopPosition
-          } ${mobileModeClass} ${desktopModeClass}">
+          } ${mobileModeClass} ${desktopModeClass} ${scrollableClass}"
+          @scroll=${this._scrollable.onScroll}>
           ${this._routes.map(route => route.render()).filter(Boolean)}
         </ha-card>
       </div>
       ${this.focusedPopup ?? html``}
+    `;
+  }
+
+  /** Arrow tab on top of the bar that folds it away (`autohide: toggle`). */
+  private _renderAutohideToggle(): TemplateResult {
+    const collapsed = this._autohide.collapsed;
+    return html`
+      <button
+        type="button"
+        class="autohide-tab"
+        aria-expanded=${!collapsed}
+        aria-label=${collapsed ? 'Show navigation' : 'Hide navigation'}
+        @click=${this._autohide.toggleCollapsed}>
+        <ha-icon icon="mdi:chevron-down"></ha-icon>
+      </button>
     `;
   }
 
