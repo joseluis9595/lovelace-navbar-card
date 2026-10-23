@@ -458,6 +458,98 @@ describe('NavbarCardEditor shared templates', () => {
   });
 });
 
+describe('NavbarCardEditor template code editor', () => {
+  const routes = [{ icon: 'mdi:home', label: 'Home', url: '/' }];
+
+  it('edits the shared template as YAML, and back in the visual editor', async () => {
+    vi.mocked(getSharedTemplates).mockReturnValue({ main: { routes } });
+    const editor = await createEditor({ template: 'main' } as NavbarCardConfig);
+    const internals = editor as unknown as {
+      _templateDialog: { draft: NavbarCardConfig; yaml?: boolean } | null;
+      _startEditingTemplate: () => void;
+      _saveTemplateDialog: () => Promise<void>;
+    };
+    const query = <T extends Element>(selector: string) =>
+      editor.shadowRoot?.querySelector<T>(`.template-dialog ${selector}`);
+    const buttons = () => [
+      ...(editor.shadowRoot?.querySelectorAll<
+        HTMLElement & { disabled: boolean }
+      >('.template-dialog-actions ha-button') ?? []),
+    ];
+    const edit = async (value: unknown, isValid: boolean) => {
+      query('ha-yaml-editor')?.dispatchEvent(
+        new CustomEvent('value-changed', { detail: { isValid, value } }),
+      );
+      await editor.updateComplete;
+    };
+
+    internals._startEditingTemplate();
+    await editor.updateComplete;
+    buttons()[0].click();
+    await editor.updateComplete;
+    const yamlEditor = query<HTMLElement & { defaultValue: unknown }>(
+      'ha-yaml-editor',
+    );
+    expect(yamlEditor?.defaultValue).toEqual({ routes });
+    expect(query('navbar-card-editor')).toBeNull();
+
+    // Invalid YAML can't be saved, nor shown in the visual editor
+    await edit(undefined, false);
+    expect(buttons().map(button => button.disabled)).toEqual([
+      true,
+      false,
+      true,
+    ]);
+
+    const edited = { routes: [{ ...routes[0], label: 'Garage' }] };
+    await edit(edited, true);
+    expect(buttons()[2].disabled).toBe(false);
+
+    buttons()[0].click();
+    await editor.updateComplete;
+    const templateEditor = query<NavbarCardEditor>('navbar-card-editor');
+    expect((templateEditor as unknown as { _config: unknown })._config).toEqual(
+      edited,
+    );
+
+    await internals._saveTemplateDialog();
+    expect(saveSharedTemplate).toHaveBeenCalledWith(undefined, 'main', edited);
+  });
+});
+
+describe('NavbarCardEditor quickbar action', () => {
+  it('picks the quickbar mode, or none for the quick search', async () => {
+    const editor = await createEditor({
+      routes: [{ icon: 'mdi:magnify', tap_action: { action: 'quickbar' } }],
+    } as unknown as NavbarCardConfig);
+    const configChanged = listenConfigChanged(editor);
+    const field = await fixture<HTMLElement>(html`
+      <div>
+        ${editor.makeActionSelector({
+          actionType: 'tap_action' as never,
+          configKey: 'routes.0.tap_action' as DotNotationKeys<NavbarCardConfig>,
+          inline: true,
+        })}
+      </div>
+    `);
+    const option = (label: string) =>
+      [...field.querySelectorAll<HTMLElement>('.segmented-option')].find(
+        button => button.textContent?.trim() === label,
+      );
+
+    expect(option('Search')?.getAttribute('aria-checked')).toBe('true');
+    option('Entities')?.click();
+    expect(lastConfig(configChanged).routes[0].tap_action).toEqual({
+      action: 'quickbar',
+      mode: 'entities',
+    });
+    option('Search')?.click();
+    expect(lastConfig(configChanged).routes[0].tap_action).toEqual({
+      action: 'quickbar',
+    });
+  });
+});
+
 describe('NavbarCardEditor template inheritance', () => {
   const templateRoutes = [{ icon: 'mdi:home', label: 'Home', url: '/' }];
   const template: NavbarCardConfig = {

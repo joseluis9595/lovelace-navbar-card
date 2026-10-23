@@ -216,6 +216,10 @@ export const EDITOR_STYLES = css`
     border-top: 1px solid var(--divider-color);
   }
 
+  .template-dialog-mode {
+    margin-right: auto;
+  }
+
   @media (max-width: 600px) {
     .template-dialog-header {
       padding-top: calc(16px + env(safe-area-inset-top));
@@ -587,11 +591,6 @@ export const EDITOR_STYLES = css`
   .template-editor-helper {
     font-size: 0.93em;
     color: var(--secondary-text-color, #888);
-  }
-
-  .quickbar-mode-container {
-    display: flex;
-    flex-direction: column;
   }
 
   /* Segmented control */
