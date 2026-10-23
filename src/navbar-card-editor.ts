@@ -90,11 +90,14 @@ const ACTION_INFO: Record<HAActions, { icon: string; label: string }> = {
   },
 };
 
-const QUICKBAR_MODES = [
-  { label: 'Devices', value: 'devices' },
+// 'search' is the quickbar without a mode: Home Assistant's quick search
+type QuickbarMode = NonNullable<QuickbarActionConfig['mode']> | 'search';
+const QUICKBAR_MODES: { label: string; value: QuickbarMode }[] = [
+  { label: 'Search', value: 'search' },
   { label: 'Entities', value: 'entities' },
+  { label: 'Devices', value: 'devices' },
   { label: 'Commands', value: 'commands' },
-] as const;
+];
 
 const plural = (count: number, word: string) =>
   `${count} ${word}${count === 1 ? '' : 's'}`;
@@ -125,6 +128,9 @@ export class NavbarCardEditor extends LitElement {
     name: string;
     draft: NavbarCardConfig;
     dirty: boolean;
+    /** Edited as YAML instead of with the visual editor */
+    yaml?: boolean;
+    invalidYaml?: boolean;
   } | null = null;
   @state() private _newTemplateName = '';
   @state() private _showSaveAsTemplate = false;
@@ -191,14 +197,11 @@ export class NavbarCardEditor extends LitElement {
       'ha-form',
       'ha-icon',
       'ha-button',
-      'ha-combo-box',
       'ha-input',
       'ha-switch',
       'ha-expansion-panel',
       'ha-code-editor',
-      'ha-radio',
       'ha-alert',
-      'ha-formfield',
       'ha-selector',
       'ha-icon-button',
     ])
@@ -679,7 +682,7 @@ export class NavbarCardEditor extends LitElement {
         This card uses its own list instead of the template's.
         <ha-button
           slot="action"
-          size="small"
+          size="s"
           appearance="plain"
           @click=${() => this._resetToTemplate(options.configKey)}>
           ${options.resetLabel}
@@ -1325,7 +1328,7 @@ export class NavbarCardEditor extends LitElement {
               <span class="add-actions-label">Add action</span>
               ${missing.map(
                 type => html`<ha-button
-                  size="small"
+                  size="s"
                   appearance="plain"
                   @click=${() => {
                     this._expandedItemKey = keyFor(type);
@@ -1461,7 +1464,7 @@ export class NavbarCardEditor extends LitElement {
                   ${
                     this._usesSharedTemplate()
                       ? html`<ha-button
-                          size="small"
+                          size="s"
                           appearance="outlined"
                           @click=${this._startEditingTemplate}>
                           <ha-icon slot="start" icon="mdi:pencil"></ha-icon>
@@ -1472,7 +1475,7 @@ export class NavbarCardEditor extends LitElement {
                   ${
                     name && dashboardTemplates[name]
                       ? html`<ha-button
-                          size="small"
+                          size="s"
                           appearance="outlined"
                           .disabled=${this._savingTemplate}
                           @click=${this._moveTemplateToShared}>
@@ -1486,7 +1489,7 @@ export class NavbarCardEditor extends LitElement {
                   ${
                     overrides > 0 && this._templateConfig
                       ? html`<ha-button
-                          size="small"
+                          size="s"
                           appearance="outlined"
                           @click=${this._resetToTemplateOnly}>
                           <ha-icon slot="start" icon="mdi:undo-variant"></ha-icon>
@@ -1495,7 +1498,7 @@ export class NavbarCardEditor extends LitElement {
                       : html``
                   }
                   <ha-button
-                    size="small"
+                    size="s"
                     appearance="outlined"
                     @click=${() => {
                       this._showSaveAsTemplate = true;
@@ -1554,20 +1557,47 @@ export class NavbarCardEditor extends LitElement {
               </ha-icon-button>
             </div>
             <div class="template-dialog-body">
-              <navbar-card-editor
-                .hass=${this.hass}
-                .isTemplateEditor=${true}
-                @config-changed=${(e: CustomEvent) => {
-                  e.stopPropagation();
-                  this._templateDialog = {
-                    ...dialog,
-                    dirty: true,
-                    draft: e.detail.config,
-                  };
-                }}></navbar-card-editor>
+              ${
+                dialog.yaml
+                  ? html`<ha-yaml-editor
+                      .hass=${this.hass}
+                      .defaultValue=${dialog.draft}
+                      @value-changed=${(e: CustomEvent) => {
+                        e.stopPropagation();
+                        const { value, isValid } = e.detail;
+                        const valid =
+                          isValid && !!value && typeof value === 'object';
+                        this._templateDialog = {
+                          ...dialog,
+                          dirty: true,
+                          draft: valid ? value : dialog.draft,
+                          invalidYaml: !valid,
+                        };
+                      }}></ha-yaml-editor>`
+                  : html`<navbar-card-editor
+                      .hass=${this.hass}
+                      .isTemplateEditor=${true}
+                      @config-changed=${(e: CustomEvent) => {
+                        e.stopPropagation();
+                        this._templateDialog = {
+                          ...dialog,
+                          dirty: true,
+                          draft: e.detail.config,
+                        };
+                      }}></navbar-card-editor>`
+              }
             </div>
             ${this._renderTemplateError()}
             <div class="template-dialog-actions">
+              <ha-button
+                class="template-dialog-mode"
+                appearance="plain"
+                .disabled=${!!dialog.invalidYaml}
+                @click=${() => {
+                  this._templateDialog = { ...dialog, yaml: !dialog.yaml };
+                }}>
+                ${dialog.yaml ? 'Show visual editor' : 'Show code editor'}
+              </ha-button>
               <ha-button
                 appearance="plain"
                 .disabled=${this._savingTemplate}
@@ -1575,7 +1605,7 @@ export class NavbarCardEditor extends LitElement {
                 Cancel
               </ha-button>
               <ha-button
-                .disabled=${this._savingTemplate}
+                .disabled=${this._savingTemplate || !!dialog.invalidYaml}
                 @click=${this._saveTemplateDialog}>
                 Save template
               </ha-button>
@@ -1592,15 +1622,19 @@ export class NavbarCardEditor extends LitElement {
     const dialog =
       this.shadowRoot?.querySelector<HTMLDialogElement>('.template-dialog');
     if (!dialog) return;
-    if (this._templateDialog && !changedProperties.get('_templateDialog')) {
-      // Opening: the template editor starts from the saved template
+    const previous = changedProperties.get('_templateDialog') as
+      | NavbarCardEditor['_templateDialog']
+      | undefined;
+    const current = this._templateDialog;
+    // The visual editor starts from the draft when the dialog opens, and when
+    // coming back from the code editor
+    if (current && !current.yaml && (!previous || previous.yaml)) {
       dialog
         .querySelector<NavbarCardEditor>('navbar-card-editor')
-        ?.setConfig(this._templateDialog.draft);
-      if (!dialog.open) dialog.showModal?.();
-    } else if (!this._templateDialog && dialog.open) {
-      dialog.close();
+        ?.setConfig(current.draft);
     }
+    if (current && !dialog.open) dialog.showModal?.();
+    if (!current && dialog.open) dialog.close();
   }
 
   /** Labelled group of fields; switches go in a compact bordered list */
@@ -2720,25 +2754,16 @@ export class NavbarCardEditor extends LitElement {
           ${
             selected === NavbarCustomActions.quickbar
               ? html`
-                <div class="quickbar-mode-container">
-                  ${QUICKBAR_MODES.map(
-                    mode => html`<ha-formfield label=${mode.label}>
-                      <ha-radio
-                        name="quickbar-mode"
-                        value=${mode.value}
-                        label=${mode.label}
-                        .checked=${
-                          (raw as QuickbarActionConfig)?.mode === mode.value
-                        }
-                        @change=${() => {
-                          this.updateConfigByKey(options.configKey, {
-                            action: NavbarCustomActions.quickbar,
-                            mode: mode.value,
-                          } as never);
-                        }}></ha-radio>
-                    </ha-formfield>`,
-                  )}
-                </div>
+                ${this._renderSegmented<QuickbarMode>({
+                  onChange: mode => {
+                    this.updateConfigByKey(options.configKey, {
+                      action: NavbarCustomActions.quickbar,
+                      ...(mode === 'search' ? {} : { mode }),
+                    } as never);
+                  },
+                  options: QUICKBAR_MODES,
+                  value: (raw as QuickbarActionConfig)?.mode ?? 'search',
+                })}
               `
               : html``
           }
