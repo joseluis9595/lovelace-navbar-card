@@ -21,9 +21,12 @@ import {
 import {
   deepMergeKeepArrays,
   forceResetRipple,
-  getNavbarTemplates,
+  getAvailableTemplates,
+  getSharedTemplates,
   injectStyles,
+  loadSharedTemplates,
   mapStringToEnum,
+  onSharedTemplatesChange,
   processTemplate,
   removeDashboardPadding,
   setDashboardPadding,
@@ -76,9 +79,17 @@ export class NavbarCard extends LitElement {
   /** Whether the navbar is hidden for the current mode (computed on each update) */
   private _isHidden = false;
 
+  /** Configuration as given by HA, before merging its template */
+  private _rawConfig?: NavbarCardConfig;
+
+  private _unsubscribeSharedTemplates?: () => void;
+
   /** Set HA instance (called by HA runtime) */
   set hass(hass: HomeAssistant) {
     this._hass = hass;
+
+    // Shared templates are only loaded when a card uses a template
+    if (this._rawConfig?.template) loadSharedTemplates(hass);
 
     const { visible } = this._mediaPlayer.isVisible();
     this._mediaPlayerPosition = visible
@@ -133,11 +144,18 @@ export class NavbarCard extends LitElement {
     );
 
     this._applyDashboardPadding();
+
+    // Re-apply the config when shared templates load or change
+    this._unsubscribeSharedTemplates = onSharedTemplatesChange(
+      this._applyTemplate,
+    );
+    this._applyTemplate();
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
 
+    this._unsubscribeSharedTemplates?.();
     this._unwatchDesktop();
     removeDashboardPadding(this);
 
@@ -150,23 +168,22 @@ export class NavbarCard extends LitElement {
    * @param config Card configuration
    */
   setConfig(config: NavbarCardConfig): void {
+    this._rawConfig = config;
     let mergedConfig = config;
     // Check if the configuration has an template defined.
     // If so, merge the template configuration with the card configuration,
     // giving priority to the card configuration.
     if (config?.template) {
-      const templates = getNavbarTemplates();
+      const templateConfig = getAvailableTemplates()[config.template];
 
-      if (templates) {
-        // If we have templates, check if the defined template exists
-        const templateConfig = templates[config.template];
-
-        if (templateConfig) {
-          mergedConfig = deepMergeKeepArrays(templateConfig, config);
-        }
+      if (templateConfig) {
+        mergedConfig = deepMergeKeepArrays(templateConfig, config);
+      } else if (getSharedTemplates() === null) {
+        // It may be a shared template, applied once they are loaded
+        return;
       } else {
         console.warn(
-          '[navbar-card] No templates configured in this dashboard. Please refer to "templates" documentation for more information.' +
+          `[navbar-card] Template "${config.template}" not found. Please refer to "templates" documentation for more information.` +
             '\n\n' +
             `${DOCS_LINKS.template}\n`,
         );
@@ -186,6 +203,16 @@ export class NavbarCard extends LitElement {
     // Re-point breakpoint watcher if min_width changed
     if (this.isConnected) this._watchDesktop();
   }
+
+  /** Re-apply the current config, to pick up shared template changes */
+  private _applyTemplate = () => {
+    if (!this._rawConfig?.template) return;
+    try {
+      this.setConfig(this._rawConfig);
+    } catch (error) {
+      console.error('[navbar-card]', error);
+    }
+  };
 
   protected willUpdate(changedProperties: PropertyValues): void {
     super.willUpdate(changedProperties);

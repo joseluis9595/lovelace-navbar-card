@@ -1,6 +1,9 @@
 // Enhances option tables (see the "Tables" section in components.css):
 // - labels each cell with its column header, so rows can stack on phones
-// - gives each option row an anchor (e.g. #mode), linked from the option name
+// - gives each row an anchor, linked from its name: options are named like
+//   their config key, after their section below the first table (#icon,
+//   #badge-icon, under the #badge-options heading), so the card editor can
+//   link to them
 // - shows a "Required" default as a pill next to the option name
 // document$ fires on every page load, including instant navigation.
 document$.subscribe(() => {
@@ -16,7 +19,7 @@ document$.subscribe(() => {
     document.getElementById(id)?.classList.add('nc-target');
   };
 
-  /** Id of the heading above a table, to tell apart rows with the same name */
+  /** Id of the heading above a table */
   const sectionOf = table => {
     let element = table.closest('.md-typeset__scrollwrap') ?? table;
     while ((element = element.previousElementSibling)) {
@@ -25,11 +28,16 @@ document$.subscribe(() => {
     return '';
   };
 
+  let optionTables = 0;
   for (const table of document.querySelectorAll('.md-typeset table:not([class])')) {
     const headers = [...table.querySelectorAll('thead th')].map(th =>
       th.textContent.trim(),
     );
     const defaultColumn = headers.indexOf('Default');
+    const prefix =
+      headers.includes('Type') && optionTables++ > 0
+        ? `${sectionOf(table).replace(/-options$/, '')}-`
+        : '';
     for (const row of table.querySelectorAll('tbody tr')) {
       [...row.children].forEach((cell, i) => {
         cell.dataset.label = headers[i] ?? '';
@@ -67,7 +75,7 @@ document$.subscribe(() => {
         .toLowerCase()
         .replace(/[^a-z0-9_-]+/g, '-')
         .replace(/^-+|-+$/g, '');
-      const id = ids.has(slug) ? `${sectionOf(table)}-${slug}` : slug;
+      const id = prefix + slug;
       if (!slug || ids.has(id)) continue;
       ids.add(id);
       row.id = id;
