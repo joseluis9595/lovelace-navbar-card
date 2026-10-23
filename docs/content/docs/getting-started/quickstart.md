@@ -22,6 +22,18 @@ Once you've [installed Navbar Card](installation.md), adding it to your dashboar
 
     The card comes with a default configuration that includes common routes (Home, Devices, Automations, Settings and More), so you can start using it right away!
 
+## Using the visual editor
+
+The editor groups the options in sections, with a live preview of the navbar. **Show code editor** switches to YAML.
+
+![Sections of the visual editor](../../img/quickstart/visual-editor.png){ width="400" }
+
+The menu (⋮) next to a field can include:
+
+- **Documentation**: the docs for that option.
+- **Use a JavaScript template**: compute the value with code, see [JavaScript templates](../advanced/js-templates.md#template-syntax).
+- **Reset to template value**: undo a change to a value that comes from a [navbar template](../advanced/navbar-templates.md#customize-a-single-navbar).
+
 ---
 
 ## Video tutorials

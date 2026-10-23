@@ -13,18 +13,29 @@ export const getNavbarTemplates = (): Record<
   string,
   NavbarCardConfig
 > | null => {
+  const lovelace = getLovelace();
+  return lovelace?.config['navbar-templates'] ?? null;
+};
+
+/**
+ * Lovelace object of the current dashboard: its config, and how to save it.
+ */
+export const getLovelace = ():
+  | {
+      config: Record<string, unknown> & {
+        'navbar-templates'?: Record<string, NavbarCardConfig>;
+      };
+      saveConfig: (config: Record<string, unknown>) => Promise<void>;
+    }
+  | undefined => {
   const lovelacePanel = document
     ?.querySelector('home-assistant')
     ?.shadowRoot?.querySelector('home-assistant-main')
     ?.shadowRoot?.querySelector(
       'ha-drawer partial-panel-resolver ha-panel-lovelace',
     );
-  if (lovelacePanel) {
-    // TODO add proper typing
-    // @ts-expect-error lovelacePanel does not have "lovelace" property type
-    return lovelacePanel.lovelace.config['navbar-templates'];
-  }
-  return null;
+  // @ts-expect-error lovelacePanel does not have "lovelace" property type
+  return lovelacePanel?.lovelace;
 };
 
 /**

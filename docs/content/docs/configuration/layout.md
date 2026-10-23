@@ -6,10 +6,10 @@ Options for how Navbar Card fits into your dashboard.
 
 | Name                  | Type                          | Default | Description                                                                                            |
 | --------------------- | ----------------------------- | ------- | ------------------------------------------------------------------------------------------------------ |
-| `auto_padding`        | [Auto Padding](#auto-padding) | -       | Add padding to your Home Assistant dashboard to prevent overlaps                                      |
+| `auto_padding`        | [Auto Padding](#auto-padding-options) | -       | Add padding to your Home Assistant dashboard to prevent overlaps                                      |
 | `reflect_child_state` | `boolean`                     | `false` | Determines if each route item should be displayed as selected when any of its popup items is selected |
 
-## Auto padding
+## Auto padding { #auto-padding-options }
 
 Automatically adds padding to your Home Assistant dashboard to prevent cards and the [view footer](https://www.home-assistant.io/dashboards/sections/#editing-the-footer) from overlapping with Navbar Card. This eliminates the need for manual CSS padding adjustments in your Home Assistant theme. No padding is added while the navbar is hidden (`desktop.hidden` / `mobile.hidden`).
 

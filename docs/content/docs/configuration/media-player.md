@@ -13,12 +13,12 @@ When enabled, this configuration displays a media player widget above or alongsi
 
 | Option                   | Type                                                           | Default       | Description                                                                                     |
 | ------------------------ | -------------------------------------------------------------- | ------------- | ----------------------------------------------------------------------------------------------- |
-| `players`                | array of [players](#player-options)                            | -             | List of media player configurations. Each player has its own `entity` and optional overrides.    |
+| `players`                | array of [players](#players-options)                            | -             | List of media player configurations. Each player has its own `entity` and optional overrides.    |
 | `show`                   | boolean \| [JSTemplate](../advanced/js-templates.md)                   | -             | Widget-level visibility. When set, overrides each player's visibility for the whole widget.        |
 | `album_cover_background` | boolean                                                        | `false`       | Display the album cover as blurred background for all players                                   |
 | `desktop_position`       | string                                                         | `bottom-center` | Position of the media player widget on desktop: `top-left`, `top-center`, `top-right`, `bottom-left`, `bottom-center` or `bottom-right`. On mobile, the widget is always displayed at the bottom of the view. |
 
-## Player options
+## Player options { #players-options }
 
 Each item in `players` supports:
 
