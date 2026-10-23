@@ -371,6 +371,18 @@ const MEDIA_PLAYER_STYLES = css`
   .media-player .media-player-progress-bar-fill {
     background-color: var(--navbar-primary-color);
     height: 100%;
+    transform: scaleX(var(--progress));
+    transform-origin: left;
+  }
+
+  .media-player .media-player-progress-bar-fill.playing {
+    animation: navbar-media-player-progress linear forwards;
+  }
+
+  @keyframes navbar-media-player-progress {
+    to {
+      transform: scaleX(1);
+    }
   }
 
   /* Media player carousel */

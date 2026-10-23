@@ -1,6 +1,7 @@
 import type { HassEntity } from 'home-assistant-js-websocket';
 import { html } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
+import { keyed } from 'lit/directives/keyed.js';
 
 import { eventDetection } from '@/lib/event-detection';
 import type { NavbarCard } from '@/navbar-card';
@@ -19,6 +20,11 @@ export class MediaPlayer {
   private _dragStartX = 0;
   private _dragOffset = 0;
   private _isDragging = false;
+  /** Playback position per entity, recomputed only when HA reports a new one */
+  private _progressAnchors = new Map<
+    string,
+    { key: string; position: number }
+  >();
 
   constructor(private readonly _navbarCard: NavbarCard) {}
 
@@ -351,6 +357,38 @@ export class MediaPlayer {
   }
 
   /**
+   * Resolve the playback progress of a player, or null if unknown.
+   *
+   * HA only reports `media_position` when something changes (play, pause,
+   * seek...), so while playing the position is extrapolated from
+   * `media_position_updated_at` and the bar is animated with CSS from there.
+   * The position is only recomputed when HA reports a new one, so unrelated
+   * re-renders don't restart the animation.
+   */
+  private _getProgress(entity: string, state: HassEntity) {
+    const {
+      media_position: reported,
+      media_duration: duration,
+      media_position_updated_at: updatedAt,
+    } = state.attributes;
+    if (reported == null || !(duration > 0)) return null;
+
+    const playing = state.state === 'playing';
+    const key = `${reported}|${duration}|${updatedAt}|${state.state}`;
+    let anchor = this._progressAnchors.get(entity);
+    if (anchor?.key !== key) {
+      const elapsed =
+        playing && updatedAt
+          ? (Date.now() - new Date(updatedAt).getTime()) / 1000
+          : 0;
+      const position = Math.min(reported + Math.max(0, elapsed), duration);
+      anchor = { key, position };
+      this._progressAnchors.set(entity, anchor);
+    }
+    return { duration, key, playing, position: anchor.position };
+  }
+
+  /**
    * Render the content of a media-player card.
    */
   private _renderCardContent(
@@ -360,9 +398,7 @@ export class MediaPlayer {
   ) {
     const image =
       state.attributes.entity_picture_local ?? state.attributes.entity_picture;
-    const pos = state.attributes.media_position;
-    const dur = state.attributes.media_duration;
-    const progress = pos != null && dur != null && dur > 0 ? pos / dur : null;
+    const progress = this._getProgress(entity, state);
     const icon = this._resolveIcon(player);
     const title = this._resolveTitle(player, state);
     const subtitle = this._resolveSubtitle(player, state);
@@ -377,9 +413,15 @@ export class MediaPlayer {
       ${
         progress != null
           ? html`<div class="media-player-progress-bar">
-              <div
-                class="media-player-progress-bar-fill"
-                style="width: ${progress * 100}%"></div>
+              ${keyed(
+                progress.key,
+                html`<div
+                  class=${classMap({
+                    'media-player-progress-bar-fill': true,
+                    playing: progress.playing,
+                  })}
+                  style="--progress: ${progress.position / progress.duration}; animation-duration: ${progress.duration - progress.position}s"></div>`,
+              )}
             </div>`
           : html``
       }
