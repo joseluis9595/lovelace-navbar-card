@@ -1,0 +1,45 @@
+name: Pre-release
+
+# Publishes every push to beta as a GitHub pre-release
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches: [beta]
+  workflow_dispatch:
+
+# Two pushes close together must not pick the same beta number
+concurrency:
+  group: pre-release
+  cancel-in-progress: false
+
+jobs:
+  pre-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 1.8.0 -> v1.8.0-beta.<n>, counting from the betas of that version only
+      - id: beta
+        run: |
+          VERSION=$(jq -r .version package.json)
+          LAST=$(git tag --list "v${VERSION}-beta.*" | sed 's/.*-beta\.//' | sort -n | tail -1)
+          BETA="${VERSION}-beta.$(( ${LAST:-0} + 1 ))"
+          jq --arg v "$BETA" '.version = $v' package.json > package.tmp
+          mv package.tmp package.json
+          echo "version=v${BETA}" >> "$GITHUB_OUTPUT"
+
+      - uses: ./.github/actions/ci
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: ./dist/navbar-card.js
+          name: NavbarCard ${{ steps.beta.outputs.version }}
+          tag_name: ${{ steps.beta.outputs.version }}
+          target_commitish: ${{ github.sha }}
+          prerelease: true
+          generate_release_notes: true

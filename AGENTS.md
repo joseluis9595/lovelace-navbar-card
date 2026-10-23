@@ -149,6 +149,7 @@ GitHub Actions workflows in `.github/workflows/`:
 
 - **`ci.yml`** — Runs on PRs to `develop`/`main` and on pushes to `develop`. For PRs to `main`, validates the source branch is `release/<version>` matching `package.json` before running lint, tests, build, and docs.
 - **`release.yml`** — On merge of a release PR into `main`, runs CI, creates a draft release, and merges `main` into `develop`.
+- **`pre-release.yml`** — On pushes to `beta`, runs CI and publishes a GitHub pre-release `v<version>-beta.<n>` (numbered per `package.json` version), offered by HACS to users with beta versions enabled. `beta` is only created from `develop` for big features, with `package.json` bumped to the version they will ship in.
 - **`deploy-docs.yaml`** — Deploys the docs site to GitHub Pages on pushes to `main` or `develop`: `main` at the site root and `develop` under `/beta/`, built with `extra.channel: beta` so `docs/overrides/main.html` marks its pages `noindex` and shows a banner linking to the stable docs.
 - **`hacs-action.yml`** — Validates HACS compatibility.
 - **`stale.yml`** — Manages stale issues.
