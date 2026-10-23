@@ -136,13 +136,7 @@ export class NavbarCard extends LitElement {
     this._detectModes();
     this._watchDesktop();
 
-    // Inject styles into the card to prevent unnecessary style re-rendering
-    injectStyles(
-      this,
-      getDefaultStyles(),
-      this.config?.styles ? unsafeCSS(this.config.styles) : css``,
-    );
-
+    this._injectStyles();
     this._applyDashboardPadding();
 
     // Re-apply the config when shared templates load or change
@@ -200,8 +194,21 @@ export class NavbarCard extends LitElement {
     this._routes = mergedConfig.routes.map(route => new Route(this, route));
     this.config = mergedConfig;
 
-    // Re-point breakpoint watcher if min_width changed
-    if (this.isConnected) this._watchDesktop();
+    if (this.isConnected) {
+      // Re-point breakpoint watcher if min_width changed
+      this._watchDesktop();
+      // The config may arrive after connecting, e.g. with a shared template
+      this._injectStyles();
+    }
+  }
+
+  /** Inject styles into the card to prevent unnecessary style re-rendering */
+  private _injectStyles() {
+    injectStyles(
+      this,
+      getDefaultStyles(),
+      this.config?.styles ? unsafeCSS(this.config.styles) : css``,
+    );
   }
 
   /** Re-apply the current config, to pick up shared template changes */

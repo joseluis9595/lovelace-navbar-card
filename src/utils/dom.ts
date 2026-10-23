@@ -133,14 +133,13 @@ const createStyleElement = (
   styles: CSSResult,
 ) => {
   const rootEl = root.shadowRoot;
-  let styleEl = rootEl?.querySelector<HTMLStyleElement>(`#${id}`);
-  if (styleEl) {
-    styleEl.remove();
-  }
-  styleEl = document.createElement('style');
+  const styleEl = document.createElement('style');
   styleEl.id = id;
   styleEl.textContent = styles.cssText;
-  rootEl?.appendChild(styleEl);
+  const existing = rootEl?.querySelector<HTMLStyleElement>(`#${id}`);
+  // Replace in place: appended after Lit's content, it would be cleared on render
+  if (existing) existing.replaceWith(styleEl);
+  else rootEl?.appendChild(styleEl);
 };
 
 /**

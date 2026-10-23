@@ -135,6 +135,7 @@ describe('NavbarCard', () => {
   describe('Shared templates', () => {
     const sharedTemplate: NavbarCardConfig = {
       routes: [{ icon: 'mdi:car', url: '/car' }],
+      styles: '.navbar { --navbar-primary-color: red; }',
     };
 
     beforeEach(() => {
@@ -162,6 +163,10 @@ describe('NavbarCard', () => {
       await vi.waitFor(() =>
         expect(card.config?.routes).toEqual(sharedTemplate.routes),
       );
+      // Styles too, though the card connected before having a config
+      expect(
+        card.shadowRoot?.querySelector('#navbar-card-user-styles')?.textContent,
+      ).toContain('--navbar-primary-color: red');
     });
 
     it('throws when the template is not found once shared templates are loaded', async () => {
