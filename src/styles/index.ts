@@ -375,7 +375,6 @@ const MEDIA_PLAYER_STYLES = css`
     transform-origin: left;
   }
 
-  /* Runs on the compositor until the end of the track, no re-renders needed */
   .media-player .media-player-progress-bar-fill.playing {
     animation: navbar-media-player-progress linear forwards;
   }
