@@ -1,7 +1,7 @@
 import { fixture, html } from '@open-wc/testing';
 import type { HomeAssistant } from 'custom-card-helpers';
 import { render } from 'lit';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { NavbarCardConfig } from '@/types';
 
@@ -527,8 +527,122 @@ describe('MediaPlayer', () => {
       );
       expect(progressFill).toBeTruthy();
       expect(progressFill?.getAttribute('style')).toMatch(
-        /width: 16\.66666666666666\d+%/,
+        /--progress: 0\.16666666666666\d+/,
       );
+    });
+
+    describe('progress while playing', () => {
+      const now = new Date('2024-01-01T00:01:00.000Z');
+      const renderFill = async (container = document.createElement('div')) => {
+        await render(mediaPlayer.render({ isInsideNavbar: true }), container);
+        return container.querySelector<HTMLElement>(
+          '.media-player-progress-bar-fill',
+        );
+      };
+
+      beforeEach(() => {
+        vi.useFakeTimers({ toFake: ['Date'] });
+        vi.setSystemTime(now);
+      });
+
+      afterEach(() => {
+        vi.useRealTimers();
+      });
+
+      it('should extrapolate the position and animate until the end', async () => {
+        hass.states['media_player.test'] = createMediaPlayerState('playing', {
+          media_duration: 180,
+          media_position: 30,
+          media_position_updated_at: '2024-01-01T00:00:45.000Z',
+        });
+
+        const fill = await renderFill();
+
+        // 30s reported + 15s since the update
+        expect(fill?.style.getPropertyValue('--progress')).toBe('0.25');
+        expect(fill?.style.animationDuration).toBe('135s');
+        expect(fill?.classList.contains('playing')).toBe(true);
+      });
+
+      it('should not extrapolate nor animate while paused', async () => {
+        hass.states['media_player.test'] = createMediaPlayerState('paused', {
+          media_duration: 180,
+          media_position: 45,
+          media_position_updated_at: '2024-01-01T00:00:00.000Z',
+        });
+
+        const fill = await renderFill();
+
+        expect(fill?.style.getPropertyValue('--progress')).toBe('0.25');
+        expect(fill?.classList.contains('playing')).toBe(false);
+      });
+
+      it('should stop at the end of the track', async () => {
+        hass.states['media_player.test'] = createMediaPlayerState('playing', {
+          media_duration: 180,
+          media_position: 170,
+          media_position_updated_at: '2024-01-01T00:00:00.000Z',
+        });
+
+        const fill = await renderFill();
+
+        expect(fill?.style.getPropertyValue('--progress')).toBe('1');
+        expect(fill?.style.animationDuration).toBe('0s');
+      });
+
+      it('should keep the same animation across unrelated re-renders', async () => {
+        hass.states['media_player.test'] = createMediaPlayerState('playing', {
+          media_duration: 180,
+          media_position: 30,
+          media_position_updated_at: '2024-01-01T00:00:45.000Z',
+        });
+        const container = document.createElement('div');
+        const first = await renderFill(container);
+
+        vi.setSystemTime(new Date(now.getTime() + 10_000));
+        const second = await renderFill(container);
+
+        expect(second).toBe(first);
+        expect(second?.style.getPropertyValue('--progress')).toBe('0.25');
+      });
+
+      it('should restart from the new position when HA reports one', async () => {
+        hass.states['media_player.test'] = createMediaPlayerState('playing', {
+          media_duration: 180,
+          media_position: 30,
+          media_position_updated_at: '2024-01-01T00:00:45.000Z',
+        });
+        const container = document.createElement('div');
+        const first = await renderFill(container);
+
+        hass.states['media_player.test'] = createMediaPlayerState('playing', {
+          media_duration: 180,
+          media_position: 90,
+          media_position_updated_at: '2024-01-01T00:01:00.000Z',
+        });
+        const second = await renderFill(container);
+
+        expect(second).not.toBe(first);
+        expect(second?.style.getPropertyValue('--progress')).toBe('0.5');
+      });
+
+      it('should skip to the actual position when the animation restarts', async () => {
+        hass.states['media_player.test'] = createMediaPlayerState('playing', {
+          media_duration: 180,
+          media_position: 30,
+          media_position_updated_at: '2024-01-01T00:00:45.000Z',
+        });
+        const fill = await renderFill();
+        const animation = { currentTime: 0 };
+        // biome-ignore lint/style/noNonNullAssertion: rendered above
+        fill!.getAnimations = () => [animation as unknown as Animation];
+
+        // e.g. navigating back to the view 20s later
+        vi.setSystemTime(new Date(now.getTime() + 20_000));
+        fill?.dispatchEvent(new Event('animationstart'));
+
+        expect(animation.currentTime).toBe(20_000);
+      });
     });
 
     it('should not render progress bar when position is not available', async () => {

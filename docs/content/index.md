@@ -53,7 +53,7 @@ Inspired by [Adaptive Mushroom](https://community.home-assistant.io/t/adaptive-m
 
     ---
 
-    Predefine a configuration and reuse it in every navbar of a dashboard.
+    Set up a navbar once and reuse it on all your dashboards.
 
     [:octicons-arrow-right-24: Navbar templates](docs/advanced/navbar-templates.md)
 

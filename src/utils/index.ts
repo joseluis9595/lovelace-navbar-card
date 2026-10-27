@@ -4,4 +4,5 @@ export * from './dashboard-padding';
 export * from './docs-links';
 export * from './dom';
 export * from './haptic';
+export * from './shared-templates';
 export * from './template';

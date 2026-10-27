@@ -5,6 +5,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { NavbarCardConfig } from '@/types';
 
 import { NavbarCard } from '../navbar-card';
+import {
+  loadSharedTemplates,
+  resetSharedTemplates,
+} from '../utils/shared-templates';
 
 const DEFAULT_CONFIG: NavbarCardConfig = {
   desktop: {
@@ -125,6 +129,52 @@ describe('NavbarCard', () => {
       }).toThrow(
         'Each route must have at least one actionable property (url, popup, tap_action, hold_action, double_tap_action)',
       );
+    });
+  });
+
+  describe('Shared templates', () => {
+    const sharedTemplate: NavbarCardConfig = {
+      routes: [{ icon: 'mdi:car', url: '/car' }],
+      styles: '.navbar { --navbar-primary-color: red; }',
+    };
+
+    beforeEach(() => {
+      resetSharedTemplates();
+      hass.callWS = vi.fn().mockResolvedValue({
+        'navbar-templates': { shared: sharedTemplate },
+      });
+      hass.connection.subscribeEvents = vi.fn().mockResolvedValue(() => {});
+    });
+
+    afterEach(() => {
+      resetSharedTemplates();
+    });
+
+    it('waits for shared templates before applying a template it does not know', async () => {
+      const card = await fixture<NavbarCard>(html`<navbar-card></navbar-card>`);
+
+      expect(() =>
+        card.setConfig({ template: 'shared' } as NavbarCardConfig),
+      ).not.toThrow();
+      expect(card.config).toBeUndefined();
+
+      card.hass = hass;
+
+      await vi.waitFor(() =>
+        expect(card.config?.routes).toEqual(sharedTemplate.routes),
+      );
+      // Styles too, though the card connected before having a config
+      expect(
+        card.shadowRoot?.querySelector('#navbar-card-user-styles')?.textContent,
+      ).toContain('--navbar-primary-color: red');
+    });
+
+    it('throws when the template is not found once shared templates are loaded', async () => {
+      await loadSharedTemplates(hass);
+
+      expect(() =>
+        element.setConfig({ template: 'missing' } as NavbarCardConfig),
+      ).toThrow('"routes" param is required for navbar card');
     });
   });
 

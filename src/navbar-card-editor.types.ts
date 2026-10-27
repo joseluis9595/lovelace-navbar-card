@@ -5,7 +5,6 @@ import type { DotNotationKeys, NavbarCardConfig } from '@/types';
 type BaseInputOptions = {
   configKey: DotNotationKeys<NavbarCardConfig>;
   label: string;
-  tooltip?: string | TemplateResult;
   templateHelper?: string | TemplateResult;
   disabled?: boolean;
 };
@@ -19,22 +18,16 @@ type StringInputOptions = BaseInputOptions & {
 type EntityInputOptions = BaseInputOptions & {
   inputType: 'entity';
   includeDomains?: string[];
-  excludeDomains?: string[];
 };
 
 type IconInputOptions = BaseInputOptions & {
   inputType: 'icon';
 };
 
-type NumberInputOptions = BaseInputOptions & {
-  inputType: 'number';
-  min?: number;
-  max?: number;
-};
-
 type SwitchInputOptions = BaseInputOptions & {
   inputType: 'switch';
   defaultValue?: boolean;
+  helper?: string | TemplateResult;
 };
 
 export type ColorInputOptions = BaseInputOptions & {
@@ -45,6 +38,13 @@ export type TemplatableInputOptions =
   | StringInputOptions
   | EntityInputOptions
   | IconInputOptions
-  | NumberInputOptions
   | SwitchInputOptions
   | ColorInputOptions;
+
+export type FieldAction = {
+  label: string;
+  icon: string;
+  onClick?: () => void;
+  href?: string;
+  active?: boolean;
+};
