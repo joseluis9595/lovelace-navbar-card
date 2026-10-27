@@ -4,27 +4,39 @@ title: JavaScript templates
 
 # JavaScript templates
 
-!!! info "Want to reuse a whole configuration across cards? See [navbar templates](navbar-templates.md)."
+JavaScript templates let you replace a configuration value with JavaScript code that dynamically determines its value. This allows you to customize how navbar-card behaves based on Home Assistant states, user context, or other conditions.
 
-JavaScript templates provide powerful customization capabilities for your Navbar Card. They allow you to create dynamic content, conditional rendering, and interactive features based on your Home Assistant state and user context.
+Look for fields marked as `JSTemplate` in the [**configuration**](../configuration/overview.md) tables to see which values support JavaScript templates.
 
-Fields marked as `JSTemplate` in the [**configuration**](../configuration/overview.md) tables support JavaScript templates.
+!!! info
+    Not to be confused with [navbar templates](navbar-templates.md), which allows you toreuse the same navbar configuration on all your dashboards.
 
 ## Template syntax
 
-To use JavaScript templates in your configuration:
+=== "Visual editor (recommended)"
 
-1. In YAML editor, wrap your JavaScript code in `[[[` and `]]]`:
+    Only fields marked as `JSTemplate` support it. Open the menu of one of them and click **Use a JavaScript template**. The field becomes a code editor, where you write the code without `[[[` and `]]]`.
+
+    <div class="nc-pair" markdown>
+
+    ![Field menu with the Use a JavaScript template option](../../img/templates/js-template-menu.png)
+
+    ![Badge text field as a JavaScript template code editor](../../img/templates/js-template-editor.png)
+
+    </div>
+
+=== "YAML"
+
+    Wrap your JavaScript code in `[[[` and `]]]`:
 
     ```yaml
-    field: |
-      [[[ your_javascript_code_here ]]]
-    ```
-
-2. In the visual editor, write the code without `[[[` and `]]]`:
-
-    ```javascript
-    your_javascript_code_here;
+    badge:
+      count: |
+        [[[
+          const sensor =
+            states['sensor.updates'];
+          return sensor.state;
+        ]]]
     ```
 
 ---

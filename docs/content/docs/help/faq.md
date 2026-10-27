@@ -9,33 +9,11 @@ description: Find answers to common questions about Navbar Card, including templ
 
 ??? question "Do I need to copy and paste the configuration every time?"
 
-    No! You can use [**navbar templates**](../advanced/navbar-templates.md) to define a common configuration and reuse it in every navbar of a dashboard. Any changes to the template automatically apply to every `navbar-card` using it in the current dashboard.
+    No! Use [**navbar templates**](../advanced/navbar-templates.md) to set up a navbar once and reuse it on all your dashboards. Any changes to the template apply to every navbar using it.
 
-??? question "Where do I put the template configuration?"
+??? question "Where do I create and edit templates?"
 
-    Templates go under the `navbar-templates` key in your main Lovelace YAML configuration:
-
-    1. Open your dashboard
-    2. Click the pencil icon in the top right to edit it
-    3. Click the three dots menu (⋮) in the top right
-    4. Click "Raw configuration editor"
-    5. Add your template at the top of the file:
-
-    ```yaml
-    navbar-templates:
-      my_template:
-        desktop:
-          show_labels: true
-        mobile:
-          show_labels: false
-        routes:
-          - icon: mdi:home
-            url: /lovelace/home
-            label: Home
-    views:
-      # Your normal lovelace configuration
-      ...
-    ```
+    In the visual editor of any navbar, from its **Template** section. See [**navbar templates**](../advanced/navbar-templates.md).
 
 ??? question "How do I customize the appearance?"
 

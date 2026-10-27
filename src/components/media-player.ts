@@ -377,16 +377,43 @@ export class MediaPlayer {
     const key = `${reported}|${duration}|${updatedAt}|${state.state}`;
     let anchor = this._progressAnchors.get(entity);
     if (anchor?.key !== key) {
-      const elapsed =
-        playing && updatedAt
-          ? (Date.now() - new Date(updatedAt).getTime()) / 1000
-          : 0;
-      const position = Math.min(reported + Math.max(0, elapsed), duration);
-      anchor = { key, position };
+      anchor = { key, position: this._getPosition(state) };
       this._progressAnchors.set(entity, anchor);
     }
     return { duration, key, playing, position: anchor.position };
   }
+
+  /**
+   * Current playback position in seconds, extrapolated while playing.
+   */
+  private _getPosition(state: HassEntity): number {
+    const {
+      media_position: reported,
+      media_duration: duration,
+      media_position_updated_at: updatedAt,
+    } = state.attributes;
+    const elapsed =
+      state.state === 'playing' && updatedAt
+        ? (Date.now() - new Date(updatedAt).getTime()) / 1000
+        : 0;
+    return Math.min(reported + Math.max(0, elapsed), duration);
+  }
+
+  /**
+   * Browsers restart CSS animations whenever the element is re-attached or
+   * shown again (e.g. navigating between views), replaying from the position
+   * computed at render time. Skip ahead to the actual playback position.
+   */
+  private _onProgressAnimationStart = (
+    e: AnimationEvent,
+    state: HassEntity,
+    anchorPosition: number,
+  ) => {
+    const elapsed = this._getPosition(state) - anchorPosition;
+    for (const animation of (e.target as HTMLElement).getAnimations?.() ?? []) {
+      animation.currentTime = elapsed * 1000;
+    }
+  };
 
   /**
    * Render the content of a media-player card.
@@ -420,7 +447,13 @@ export class MediaPlayer {
                     'media-player-progress-bar-fill': true,
                     playing: progress.playing,
                   })}
-                  style="--progress: ${progress.position / progress.duration}; animation-duration: ${progress.duration - progress.position}s"></div>`,
+                  style="--progress: ${progress.position / progress.duration}; animation-duration: ${progress.duration - progress.position}s"
+                  @animationstart=${(e: AnimationEvent) =>
+                    this._onProgressAnimationStart(
+                      e,
+                      state,
+                      progress.position,
+                    )}></div>`,
               )}
             </div>`
           : html``

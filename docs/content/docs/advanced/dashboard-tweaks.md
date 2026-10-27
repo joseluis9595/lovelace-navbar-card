@@ -6,9 +6,9 @@ title: Dashboard tweaks
 
 ## Cards hidden behind the navbar
 
-If you're using Navbar Card, you might notice it could collide with other cards on your dashboard. Navbar Card now includes an [**automatic padding feature**](../configuration/layout.md#auto-padding) that handles this for you, eliminating the need for manual CSS adjustments.
+If you're using Navbar Card, you might notice it could collide with other cards on your dashboard. Navbar Card now includes an [**automatic padding feature**](../configuration/layout.md#auto-padding-options) that handles this for you, eliminating the need for manual CSS adjustments.
 
-This feature is enabled by default, but you can customize it using the `layout.auto_padding` configuration. [More info here](../configuration/layout.md#auto-padding)
+This feature is enabled by default, but you can customize it using the `layout.auto_padding` configuration. [More info here](../configuration/layout.md#auto-padding-options)
 
 ??? note "Manual padding (legacy)"
 

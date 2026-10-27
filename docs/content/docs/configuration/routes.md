@@ -14,14 +14,14 @@ Routes are clickable navigation items that send you to another view or run an ac
 | `icon_color`        | string \| [JSTemplate](../advanced/js-templates.md)                     | -           | Custom color for the icon of this route.                                                                                                                   |
 | `image`             | string \| [JSTemplate](../advanced/js-templates.md)                     | -           | URL of an image to display as this entry icon. Either `icon` or `image` is required.                                                                       |
 | `image_selected`    | string \| [JSTemplate](../advanced/js-templates.md)                     | -           | Image to be displayed when `url` matches the current browser URL                                                                                           |
-| `badge`             | [Badge](#badge)                                                  | -           | Badge configuration                                                                                                                                        |
+| `badge`             | [Badge](#badge-options)                                                  | -           | Badge configuration                                                                                                                                        |
 | `label`             | string \| [JSTemplate](../advanced/js-templates.md)                     | -           | Label to be displayed under the given route if `show_labels` is true                                                                                       |
 | `selected`          | boolean \| [JSTemplate](../advanced/js-templates.md)                    | -           | Controls whether to display this route as selected or not. If not defined, the selected status will be computed as `route.url == window.location.pathname` |
 | `selected_color`    | string \| [JSTemplate](../advanced/js-templates.md)                     | -           | Custom color for the icon and label when the route is selected                                                                                             |
 | `tap_action`        | [CustomAction](../advanced/custom-actions.md)                          | -           | Custom tap action configuration.                                                                                                                           |
 | `hold_action`       | [CustomAction](../advanced/custom-actions.md)                          | -           | Custom hold action configuration.                                                                                                                          |
 | `double_tap_action` | [CustomAction](../advanced/custom-actions.md)                          | -           | Custom double_tap action configuration.                                                                                                                    |
-| `popup`             | [Popup items](#popup-items) \| [JSTemplate](../advanced/js-templates.md) | -           | List of routes to display in a popup menu                                                                                                                  |
+| `popup`             | [Popup items](#popup-options) \| [JSTemplate](../advanced/js-templates.md) | -           | List of routes to display in a popup menu                                                                                                                  |
 | `hidden`            | boolean \| [JSTemplate](../advanced/js-templates.md)                    | -           | Controls whether to render this route or not                                                                                                               |
 
 !!! info
@@ -36,7 +36,7 @@ Routes are clickable navigation items that send you to another view or run an ac
     2. Use images with a transparent background for best results
     3. Keep image dimensions squared for best results
 
-## Badge
+## Badge { #badge-options }
 
 A badge displays a small status indicator, count, text value, or icon over a navbar item. The badge remains hidden unless `show` is `true` or resolves to `true`.
 
@@ -78,7 +78,7 @@ routes:
     ![Navbar with an icon badge on the front door route](../../img/configuration/navbar-card_icon-badge_dark.png#only-dark){ width="536" }
 </figure>
 
-## Popup items
+## Popup items { #popup-options }
 
 For each route, a popup menu can be configured, to display a popup when clicked. This is activated using the `open-popup` action in `tap_action`, `hold_action` or `double_tap_action`.
 
@@ -95,7 +95,7 @@ For each route, a popup menu can be configured, to display a popup when clicked.
 | `icon_color`        | string \| [JSTemplate](../advanced/js-templates.md)                     | -           | Custom color for the icon of this route.                                                                                                                   |
 | `image`             | string \| [JSTemplate](../advanced/js-templates.md)  | -           | URL of an image to display as this entry icon.                                                                                                           |
 | `image_selected`    | string \| [JSTemplate](../advanced/js-templates.md)  | -           | Image to be displayed when `url` matches the current browser URL                                                                                         |
-| `badge`             | [Badge](#badge)                               | -           | Badge configuration                                                                                                                                      |
+| `badge`             | [Badge](#badge-options)                               | -           | Badge configuration                                                                                                                                      |
 | `label`             | string \| [JSTemplate](../advanced/js-templates.md)  | -           | Label to be displayed under the given route if `show_labels` is true                                                                                     |
 | `selected`          | boolean \| [JSTemplate](../advanced/js-templates.md) | -           | Controls whether to display this item as selected or not. If not defined, the selected status will be computed as `item.url == window.location.pathname` |
 | `selected_color`    | string \| [JSTemplate](../advanced/js-templates.md)  | -           | Custom color for the icon and label when the item is selected                                                                                            |

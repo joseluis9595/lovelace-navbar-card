@@ -625,6 +625,24 @@ describe('MediaPlayer', () => {
         expect(second).not.toBe(first);
         expect(second?.style.getPropertyValue('--progress')).toBe('0.5');
       });
+
+      it('should skip to the actual position when the animation restarts', async () => {
+        hass.states['media_player.test'] = createMediaPlayerState('playing', {
+          media_duration: 180,
+          media_position: 30,
+          media_position_updated_at: '2024-01-01T00:00:45.000Z',
+        });
+        const fill = await renderFill();
+        const animation = { currentTime: 0 };
+        // biome-ignore lint/style/noNonNullAssertion: rendered above
+        fill!.getAnimations = () => [animation as unknown as Animation];
+
+        // e.g. navigating back to the view 20s later
+        vi.setSystemTime(new Date(now.getTime() + 20_000));
+        fill?.dispatchEvent(new Event('animationstart'));
+
+        expect(animation.currentTime).toBe(20_000);
+      });
     });
 
     it('should not render progress bar when position is not available', async () => {

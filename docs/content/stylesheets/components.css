@@ -281,6 +281,20 @@
   margin: 28px 0;
 }
 
+/* Two screenshots side by side, stacked on narrow screens */
+.md-typeset .nc-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@container nc-content (max-width: 480px) {
+  .md-typeset .nc-pair {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Video embeds keep their aspect ratio at any width */
 .md-typeset iframe {
   width: 100%;
