@@ -133,7 +133,15 @@ export const executeAction = (params: {
         console.error(
           `[navbar-card] No popup items found for route: ${route.label}`,
         );
+      } else if (context.activePopup === route.popup) {
+        // Tapping the route again closes the popup it opened. With most popup
+        // styles the backdrop covers the navbar and takes this tap, but with
+        // `popup_style: panel` the navbar stays above the backdrop.
+        triggerHaptic(context, actionType);
+        route.popup.close();
       } else {
+        // Switching straight from another route's popup
+        context.activePopup?.close();
         triggerHaptic(context, actionType);
         route.popup.open(target);
       }

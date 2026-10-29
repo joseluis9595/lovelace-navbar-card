@@ -152,11 +152,15 @@ describe('mobile.autohide', () => {
   });
 
   describe('minimize', () => {
-    it('stays minimized at the end of the page', async () => {
+    it('comes back at the end of the page', async () => {
       await setup('minimize');
-      await scrollTo(PAGE_HEIGHT - 800);
+      await scrollTo(1000);
       await element.updateComplete;
       expect(navbar().classList.contains('away')).toBe(true);
+
+      await scrollTo(PAGE_HEIGHT - 800);
+      await element.updateComplete;
+      expect(navbar().classList.contains('away')).toBe(false);
     });
 
     it('a tap on the pill only expands the bar', async () => {

@@ -43,7 +43,8 @@ const writeCollapsed = (collapsed: boolean): void => {
  * - `slide`: Material "hide on scroll". The bar slides off while scrolling
  *   down and returns on scroll up and at either end of the page.
  * - `minimize`: iOS "minimize on scroll". The bar shrinks to a pill holding
- *   only the selected route, centred; tapping the pill expands it.
+ *   only the selected route, centred; it expands again on scroll up, at
+ *   either end of the page, or when the pill is tapped.
  * - `toggle`: no scroll tracking. An arrow tab joined to the top of the bar
  *   folds it away and back; the choice is remembered on the device.
  *
@@ -193,9 +194,9 @@ export class AutohideController implements ReactiveController {
       y + window.innerHeight >=
       document.documentElement.scrollHeight - BOTTOM_ZONE_PX;
 
-    // Slide returns at the end of the page (nothing left to read); a pill
-    // stays, since it still shows where the user is.
-    if (atTop || (atBottom && mode === 'slide')) this._setAway(false);
+    // Both modes come back at either end of the page: there is nothing left
+    // to scroll out of the way of.
+    if (atTop || atBottom) this._setAway(false);
     else if (this._travel > HIDE_AFTER_PX) this._setAway(true);
     else if (this._travel < -SHOW_AFTER_PX) this._setAway(false);
   };

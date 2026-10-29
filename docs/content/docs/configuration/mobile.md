@@ -87,10 +87,10 @@ To show more or fewer routes at a time, change `--navbar-scrollable-route-width`
 | Value      | Behaviour                                                                                                                                                       |
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `slide`    | The navbar slides off the bottom while you scroll down, and comes back as soon as you scroll up or reach the end of the view                                   |
-| `minimize` | While you scroll down, the navbar shrinks to a pill showing only the selected route, in the middle of the screen. Scroll up, or tap the pill, to expand it again |
+| `minimize` | While you scroll down, the navbar shrinks to a pill showing only the selected route, in the middle of the screen. Scroll up, tap the pill, or reach the end of the view, to expand it again |
 | `toggle`   | Adds an arrow tab on top of the navbar. Tapping it folds the navbar away, leaving only the tab; tapping again brings it back. Remembered on each device         |
 
-With `slide` and `minimize`, the navbar is always shown near the top of a view, while a popup is open, and after navigating to another view, and small scroll movements are ignored so it doesn't flicker. With `toggle`, only the tab changes it.
+With `slide` and `minimize`, the navbar is always shown at either end of a view, while a popup is open, and after navigating to another view, and small scroll movements are ignored so it doesn't flicker. With `toggle`, only the tab changes it.
 
 ```yaml
 type: custom:navbar-card

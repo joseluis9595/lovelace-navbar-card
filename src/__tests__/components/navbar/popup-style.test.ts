@@ -34,12 +34,20 @@ describe('layout.popup_style', () => {
   const navbar = () =>
     element.shadowRoot?.querySelector('.navbar') as HTMLElement;
 
-  const openPopup = async () => {
+  const tapRoute = async (index = 0) => {
     element.shadowRoot
-      ?.querySelector('.route')
-      ?.dispatchEvent(
+      ?.querySelectorAll('.route')
+      [index]?.dispatchEvent(
         new MouseEvent('click', { bubbles: true, composed: true }),
       );
+    await element.updateComplete;
+  };
+
+  const openPopup = () => tapRoute();
+
+  /** Popups fade out before they are removed */
+  const afterClose = async () => {
+    await new Promise(resolve => setTimeout(resolve, 250));
     await element.updateComplete;
   };
 
@@ -87,6 +95,47 @@ describe('layout.popup_style', () => {
       ...(element.shadowRoot?.querySelectorAll('.popup-item .label') ?? []),
     ].map(label => label.textContent?.trim());
     expect(labels).toEqual(['Lounge', 'Kitchen']);
+  });
+
+  it('closes the popup when its route is tapped again', async () => {
+    element.setConfig(config('panel'));
+    await element.updateComplete;
+
+    await openPopup();
+    expect(element.activePopup).not.toBeNull();
+
+    await openPopup();
+    await afterClose();
+    expect(element.activePopup).toBeNull();
+    expect(element.shadowRoot?.querySelector('.navbar-popup')).toBeNull();
+    expect(navbar().classList.contains('popup-open')).toBe(false);
+  });
+
+  it("switches straight to another route's popup", async () => {
+    const twoPopups = config('panel');
+    twoPopups.routes = [
+      ...twoPopups.routes,
+      {
+        icon: 'mdi:cog',
+        label: 'Admin',
+        popup: [{ icon: 'mdi:tools', label: 'Tools', url: '/tools' }],
+        tap_action: { action: NavbarCustomActions.openPopup },
+      },
+    ];
+    element.setConfig(twoPopups);
+    await element.updateComplete;
+
+    await tapRoute(0);
+    const first = element.activePopup;
+    await tapRoute(1);
+    await afterClose();
+
+    expect(element.activePopup).not.toBeNull();
+    expect(element.activePopup).not.toBe(first);
+    const labels = [
+      ...(element.shadowRoot?.querySelectorAll('.popup-item .label') ?? []),
+    ].map(label => label.textContent?.trim());
+    expect(labels).toEqual(['Tools']);
   });
 
   it('follows show_labels in the bubbles style', async () => {

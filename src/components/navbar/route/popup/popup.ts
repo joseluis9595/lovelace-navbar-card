@@ -47,6 +47,7 @@ export class Popup {
       this.items.length,
     );
 
+    this._navbarCard.activePopup = this;
     this._navbarCard.focusedPopup = html`
       <div class="navbar-popup-backdrop"></div>
       <div
@@ -101,6 +102,10 @@ export class Popup {
   public close(): void {
     const popup = this._navbarCard.shadowRoot?.querySelector('.navbar-popup');
 
+    if (this._navbarCard.activePopup === this) {
+      this._navbarCard.activePopup = null;
+    }
+
     // Remove backdrop listener
     if (this._backdropClickListener && this.backdrop) {
       this.backdrop.removeEventListener('click', this._backdropClickListener);
@@ -113,9 +118,12 @@ export class Popup {
 
       // Wait for transitions to complete before removing
       setTimeout(() => {
-        this._navbarCard.focusedPopup = null;
+        // Another popup may have been opened while this one faded out
+        if (!this._navbarCard.activePopup) {
+          this._navbarCard.focusedPopup = null;
+        }
       }, 200);
-    } else {
+    } else if (!this._navbarCard.activePopup) {
       this._navbarCard.focusedPopup = null;
     }
     // Remove Escape key listener when popup is closed

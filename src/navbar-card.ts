@@ -11,7 +11,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { MediaPlayer } from '@/components/media-player';
-import { Route } from '@/components/navbar';
+import { type Popup, Route } from '@/components/navbar';
 import { AutohideController } from '@/lib/autohide';
 import { ScrollableController } from '@/lib/scrollable';
 import { getDefaultStyles } from '@/styles';
@@ -73,6 +73,8 @@ export class NavbarCard extends LitElement {
   private readonly _autohide = new AutohideController(this);
   @state() private _routes: Route[] = [];
   @state() focusedPopup: TemplateResult<1> | null = null;
+  /** The popup currently open, so tapping its route again can close it */
+  activePopup: Popup | null = null;
   @state() isDesktop?: boolean;
 
   /** Tracks desktop/mobile via matchMedia (avoids layout thrash from resize + innerWidth). */
@@ -160,6 +162,7 @@ export class NavbarCard extends LitElement {
 
     // Force popup closure without animation to prevent memory leaks
     this.focusedPopup = null;
+    this.activePopup = null;
   }
 
   /**
