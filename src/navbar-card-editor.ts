@@ -23,11 +23,13 @@ import {
   genericSetProperty,
   type LabelVisibilityConfig,
   type MediaPlayerPlayerConfig,
+  type NavbarAutohideMode,
   type NavbarCardConfig,
   NavbarCustomActions,
   type NavbarDisplayMode,
   type NestedType,
   type PopupItem,
+  type PopupStyle,
   type QuickbarActionConfig,
   type RouteItem,
   WidgetPosition,
@@ -2027,14 +2029,35 @@ export class NavbarCardEditor extends LitElement {
                       </div>
                     </div>`
                   : html`<div class="switch-list">
-                      ${this.makeSwitch({
-                        configKey: 'mobile.safe_area',
-                        defaultValue: DEFAULT_NAVBAR_CONFIG.mobile?.safe_area,
+                        ${this.makeSwitch({
+                          configKey: 'mobile.safe_area',
+                          defaultValue: DEFAULT_NAVBAR_CONFIG.mobile?.safe_area,
+                          helper:
+                            'Keeps the navbar clear of the notch and home bar.',
+                          label: 'Respect the safe area',
+                        })}
+                        ${this.makeSwitch({
+                          configKey: 'mobile.scrollable',
+                          defaultValue:
+                            DEFAULT_NAVBAR_CONFIG.mobile?.scrollable,
+                          helper:
+                            'Routes keep their width and the bar scrolls sideways.',
+                          label: 'Scroll sideways',
+                        })}
+                      </div>
+                      ${this.makeComboBox<NavbarAutohideMode | false>({
+                        configKey: 'mobile.autohide',
+                        defaultValue: DEFAULT_NAVBAR_CONFIG.mobile?.autohide,
                         helper:
-                          'Keeps the navbar clear of the notch and home bar.',
-                        label: 'Respect the safe area',
-                      })}
-                    </div>`
+                          'Gets the navbar out of the way of the content.',
+                        items: [
+                          { label: 'Off', value: false },
+                          { label: 'Slide away on scroll', value: 'slide' },
+                          { label: 'Minimize on scroll', value: 'minimize' },
+                          { label: 'Arrow toggle', value: 'toggle' },
+                        ],
+                        label: 'Auto-hide',
+                      })}`
               }
             `,
           )}
@@ -2114,7 +2137,11 @@ export class NavbarCardEditor extends LitElement {
     return html`
       <ha-expansion-panel outlined expanded>
         ${this._renderSectionHeader({
-          configKeys: ['routes', 'layout.reflect_child_state'],
+          configKeys: [
+            'routes',
+            'layout.reflect_child_state',
+            'layout.popup_style',
+          ],
           icon: 'mdi:routes',
           title: 'Routes',
         })}
@@ -2161,6 +2188,16 @@ export class NavbarCardEditor extends LitElement {
               label: 'Show routes as selected',
             })}
           </div>
+          ${this.makeComboBox<PopupStyle>({
+            configKey: 'layout.popup_style',
+            defaultValue: DEFAULT_NAVBAR_CONFIG.layout?.popup_style,
+            helper: 'How popup items are laid out when a popup opens.',
+            items: [
+              { label: 'Bubbles', value: 'bubbles' },
+              { label: 'Panel', value: 'panel' },
+            ],
+            label: 'Popup style',
+          })}
         </div>
       </ha-expansion-panel>
     `;

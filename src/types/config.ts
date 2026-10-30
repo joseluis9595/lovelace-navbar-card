@@ -148,6 +148,12 @@ type MediaPlayerConfig = {
 // Display mode configuration
 export type NavbarDisplayMode = 'floating' | 'docked';
 
+// How the mobile navbar gets out of the way of the content
+export type NavbarAutohideMode = 'slide' | 'minimize' | 'toggle';
+
+// Visual style of popup menus
+export type PopupStyle = 'bubbles' | 'panel';
+
 // Main card configuration
 export type NavbarCardConfig = {
   routes: RouteItem[];
@@ -156,6 +162,7 @@ export type NavbarCardConfig = {
   layout?: {
     auto_padding?: AutoPaddingConfig;
     reflect_child_state?: boolean;
+    popup_style?: PopupStyle;
   };
   desktop?: {
     mode?: NavbarDisplayMode;
@@ -170,6 +177,8 @@ export type NavbarCardConfig = {
     show_labels?: LabelVisibilityConfig;
     show_popup_label_backgrounds?: boolean;
     safe_area?: boolean;
+    scrollable?: boolean;
+    autohide?: NavbarAutohideMode | false;
     hidden?: JSTemplatable<boolean>;
   };
   styles?: string;
@@ -197,6 +206,7 @@ export const DEFAULT_NAVBAR_CONFIG = {
       media_player_px: 100,
       mobile_px: 80,
     },
+    popup_style: 'bubbles',
     reflect_child_state: false,
   },
   media_player: {
@@ -204,8 +214,10 @@ export const DEFAULT_NAVBAR_CONFIG = {
     desktop_position: WidgetPosition.bottomCenter,
   },
   mobile: {
+    autohide: false,
     mode: 'docked',
     safe_area: false,
+    scrollable: false,
     show_labels: false,
     show_popup_label_backgrounds: false,
   },

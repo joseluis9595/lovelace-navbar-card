@@ -76,6 +76,14 @@ export class BaseRoute implements ActionableElement {
   }
 
   protected _shouldShowLabels = (): boolean => {
+    // Panel popups are rows of icon + label, so their labels always show
+    if (
+      this instanceof PopupItem &&
+      this._navbarCard.config?.layout?.popup_style === 'panel'
+    ) {
+      return true;
+    }
+
     const config = this._navbarCard.isDesktop
       ? this._navbarCard.config?.desktop?.show_labels
       : this._navbarCard.config?.mobile?.show_labels;

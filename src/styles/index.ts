@@ -36,6 +36,17 @@ const HOST_STYLES = css`
     /* Controls the edge inset of the navbar when in desktop mode (the width of HA sidebar) */
     --navbar-edge-inset: 16px;
 
+    /* Scrollable mobile navbar (mobile.scrollable) */
+    --navbar-scrollable-route-width: 25%;
+    --navbar-scrollable-fade-size: 24px;
+
+    /* Auto-hide (mobile.autohide) */
+    --navbar-autohide-duration: 0.25s;
+    --navbar-autohide-easing: cubic-bezier(0.2, 0, 0, 1);
+    --navbar-autohide-tab-width: 96px;
+    --navbar-autohide-tab-height: 36px;
+    --navbar-autohide-tab-icon-size: 33px;
+
     /* Z index configuration */
     --navbar-z-index: 3;
     --navbar-media-player-z-index: 4;
@@ -724,6 +735,185 @@ const POPUP_STYLES = css`
     color: var(--navbar-primary-color);
     background: color-mix(in srgb, var(--navbar-primary-color) 30%, white);
   }
+
+  /****************************************/
+  /* Panel style (layout.popup_style: panel) */
+  /****************************************/
+
+  /* Light dim, no blur: the page stays readable behind the menu */
+  .navbar.popup-panel ~ .navbar-popup-backdrop {
+    background: rgba(0, 0, 0, 0.15);
+  }
+
+  /* The bar stays above the dim, bright and tappable, while a menu is open */
+  .navbar.popup-panel.popup-open {
+    z-index: calc(var(--navbar-popup-z-index) + 1);
+  }
+
+  /* One panel holding every item, instead of loose bubbles */
+  .navbar.popup-panel ~ .navbar-popup {
+    background: var(--navbar-background-color);
+    border-radius: 18px;
+    padding: 6px;
+    gap: 2px;
+    min-width: 200px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    align-items: stretch;
+  }
+
+  /* Opening upwards, lift the panel clear of the bar (margins have no effect,
+     since the popup is positioned by its top edge) */
+  .navbar.popup-panel ~ .navbar-popup.open-up {
+    margin-bottom: 0;
+    transform: translate(0, calc(-100% - 14px));
+  }
+
+  /* Each item is a full-width row: icon, then label */
+  .navbar.popup-panel ~ .navbar-popup .popup-item {
+    width: auto;
+    max-width: none;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 2px 14px 2px 2px;
+    border-radius: 12px;
+  }
+
+  .navbar.popup-panel ~ .navbar-popup .popup-item .button {
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .navbar.popup-panel ~ .navbar-popup .popup-item .label {
+    font-size: 15px;
+    text-align: start;
+    white-space: nowrap;
+  }
+
+  /* Selected row: tinted row instead of a tinted circle */
+  .navbar.popup-panel ~ .navbar-popup .popup-item.active {
+    background: color-mix(in srgb, var(--navbar-primary-color) 16%, transparent);
+  }
+  .navbar.popup-panel ~ .navbar-popup .popup-item.active .button {
+    background: transparent;
+  }
+`;
+
+const SCROLLABLE_STYLES = css`
+  /* Routes keep a fixed width and the bar scrolls sideways */
+  .navbar-card.mobile.scrollable {
+    --navbar-fade-start: 0px;
+    --navbar-fade-end: 0px;
+    overflow-x: auto;
+    justify-content: flex-start;
+    gap: 0;
+    scrollbar-width: none;
+    /* Fade out whichever ends still have routes scrolled out of view */
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 var(--navbar-fade-start),
+      #000 calc(100% - var(--navbar-fade-end)),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 var(--navbar-fade-start),
+      #000 calc(100% - var(--navbar-fade-end)),
+      transparent 100%
+    );
+  }
+  .navbar-card.mobile.scrollable::-webkit-scrollbar {
+    display: none;
+  }
+  .navbar-card.mobile.scrollable[data-fade-start] {
+    --navbar-fade-start: var(--navbar-scrollable-fade-size);
+  }
+  .navbar-card.mobile.scrollable[data-fade-end] {
+    --navbar-fade-end: var(--navbar-scrollable-fade-size);
+  }
+  .navbar-card.mobile.scrollable .route {
+    flex: 0 0 var(--navbar-scrollable-route-width);
+    min-width: var(--navbar-scrollable-route-width);
+  }
+`;
+
+const AUTOHIDE_STYLES = css`
+  .navbar.mobile:is(.autohide-slide, .autohide-minimize, .autohide-toggle) {
+    transition: transform var(--navbar-autohide-duration)
+      var(--navbar-autohide-easing);
+  }
+
+  /* slide: off the bottom edge */
+  .navbar.mobile.autohide-slide.away {
+    transform: translateY(calc(100% + 8px));
+  }
+
+  /* minimize: clip the bar to a pill around the selected route */
+  .navbar.mobile.autohide-minimize .navbar-card {
+    clip-path: inset(0 0 0 0 round 0);
+    transition:
+      clip-path 0.3s var(--navbar-autohide-easing),
+      transform 0.3s var(--navbar-autohide-easing);
+  }
+  .navbar.mobile.autohide-minimize.away {
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.25));
+  }
+  .navbar.mobile.autohide-minimize.away .navbar-card {
+    clip-path: inset(var(--navbar-pill-clip, 0) round 20px);
+    transform: translateX(var(--navbar-pill-shift, 0px));
+  }
+
+  /* toggle: arrow tab joined to the top of the bar */
+  .autohide-tab {
+    display: flex;
+    align-self: center;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+    width: var(--navbar-autohide-tab-width);
+    height: var(--navbar-autohide-tab-height);
+    /* Cancels the .navbar gap, and overlaps the card's top border, so the
+       tab joins the bar */
+    margin-bottom: -11px;
+    padding: 0;
+    border: none;
+    border-radius: calc(var(--navbar-autohide-tab-height) * 0.6)
+      calc(var(--navbar-autohide-tab-height) * 0.6) 0 0;
+    background: var(--navbar-background-color);
+    color: var(--secondary-text-color);
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    --mdc-icon-size: var(--navbar-autohide-tab-icon-size);
+  }
+  .navbar.floating .autohide-tab {
+    margin-bottom: 0;
+    border-radius: calc(var(--navbar-autohide-tab-height) * 0.6);
+  }
+  .autohide-tab ha-icon {
+    transition: transform var(--navbar-autohide-duration)
+      var(--navbar-autohide-easing);
+  }
+  .navbar.mobile.autohide-toggle.away {
+    transform: translateY(
+      calc(100% - var(--navbar-autohide-tab-height))
+    );
+  }
+  .navbar.mobile.autohide-toggle.away .autohide-tab ha-icon {
+    transform: rotate(180deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .navbar.mobile,
+    .navbar.mobile .navbar-card,
+    .autohide-tab ha-icon {
+      transition: none !important;
+    }
+  }
 `;
 
 export const COMPONENTS_STYLES = css`
@@ -762,6 +952,8 @@ export const getDefaultStyles = (): CSSResult => {
     ${MEDIA_PLAYER_STYLES}
     ${ROUTE_STYLES}
     ${POPUP_STYLES}
+    ${SCROLLABLE_STYLES}
+    ${AUTOHIDE_STYLES}
     ${COMPONENTS_STYLES}
   `;
 };
