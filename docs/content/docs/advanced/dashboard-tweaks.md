@@ -58,14 +58,17 @@ To do so, once again, using [card-mod](https://github.com/thomasloven/lovelace-c
     your_theme:
       app-header-background-color: transparent
       app-header-text-color: var(--primary-text-color)
-
+      app-header-border-bottom: none
+      app-header-selection-bar-color: transparent
+      
       card-mod-theme: your_theme
-      card-mod-root-yaml: |
-        .: |
-          .toolbar > ha-tab-group {
-            pointer-events: none;
-            opacity: 0;
-          }
+      card-mod-root: |
+        div:not(.edit-mode) > .header ha-tab-group-tab ha-icon {
+          opacity: 0 !important;
+        }
+        div:not(.edit-mode) > .header ha-tab-group-tab {
+          pointer-events: none !important;
+        }
     ```
 
 === "2025.1 – 2025.9"
